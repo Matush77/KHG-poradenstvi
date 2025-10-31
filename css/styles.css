@@ -554,12 +554,13 @@ a:hover {
     display: block;
 }
 
-.credential-card h4 {
+.credential-card .credential-label {
     font-family: var(--font-primary);
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--primary);
     margin-bottom: var(--space-sm);
+    display: block;
 }
 
 .credential-card p {
@@ -719,7 +720,7 @@ a:hover {
     text-align: left;
 }
 
-.detail-content h4 {
+.detail-content .detail-label {
     font-family: var(--font-primary);
     font-size: 0.875rem;
     font-weight: 600;
@@ -727,6 +728,7 @@ a:hover {
     margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: block;
 }
 
 .detail-content p {
@@ -741,12 +743,13 @@ a:hover {
     text-align: left;
 }
 
-.service-features-main h4 {
+.service-features-main .features-heading {
     font-family: var(--font-primary);
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--primary);
     margin-bottom: var(--space-md);
+    display: block;
 }
 
 .service-features-main ul {
@@ -816,7 +819,7 @@ a:hover {
     pointer-events: none;
 }
 
-.cta-section h3 {
+.cta-section .cta-heading {
     font-family: var(--font-heading);
     font-size: 2.25rem;
     color: var(--bg-light);
@@ -824,6 +827,7 @@ a:hover {
     line-height: 1.2;
     position: relative;
     z-index: 1;
+    display: block;
 }
 
 .cta-section p {
@@ -1200,13 +1204,14 @@ a:hover {
     font-size: 0.875rem;
 }
 
-.footer-links h4,
-.footer-contact h4 {
+.footer-links .footer-heading,
+.footer-contact .footer-heading {
     font-family: var(--font-primary);
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: var(--space-sm);
     color: var(--bg-light);
+    display: block;
 }
 
 .footer-links ul {
