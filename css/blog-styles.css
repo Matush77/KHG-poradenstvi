@@ -74,6 +74,20 @@
 @media (max-width: 768px) {
     .blog-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+
+    .blog-card-content {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .filter-buttons {
+        gap: var(--space-xs);
+    }
+
+    .filter-btn {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.875rem;
     }
 }
 
