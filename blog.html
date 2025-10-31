@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Mgr. Kristýna Hriciková Glattová | Články o psychologii a terapii</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Odborné články o psychologii, terapii a duševním zdraví. Rady a postřehy od psychologa a terapeuta Kristýny Hricikové Glattové.">
+    <meta name="keywords" content="psychologie blog, terapie články, duševní zdraví, rodičovství, dětská psychologie, vztahy">
+    <meta name="author" content="Mgr. Kristýna Hriciková Glattová">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Blog - Kristýna Hriciková Glattová">
+    <meta property="og:description" content="Odborné články o psychologii, terapii a duševním zdraví.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://khgporadenstvi.cz/blog.html">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/blog-styles.css">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <nav class="nav container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="KHG Poradenství Logo" class="logo-img">
+                </a>
+            </div>
+
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu">
+                <li><a href="index.html#o-mne" class="nav-link">O mně</a></li>
+                <li><a href="index.html#sluzby" class="nav-link">Služby</a></li>
+                <li><a href="blog.html" class="nav-link active">Blog</a></li>
+                <li><a href="index.html#kontakt" class="nav-link">Kontakt</a></li>
+                <li><a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-primary" target="_blank" rel="noopener">Objednat se</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Blog Hero -->
+    <section class="blog-hero">
+        <div class="container">
+            <h1 class="blog-hero-title">Blog</h1>
+            <p class="blog-hero-subtitle">
+                Sdílím s vámi poznatky z psychologie, terapie a osobního růstu.<br>
+                Články o tématech, která rezonují s každodenním životem.
+            </p>
+        </div>
+    </section>
+
+    <!-- Blog Content -->
+    <section class="blog-section">
+        <div class="container">
+            <!-- Categories Filter -->
+            <div class="blog-categories">
+                <button class="category-btn active" data-category="all">Vše</button>
+                <button class="category-btn" data-category="terapie">Terapie</button>
+                <button class="category-btn" data-category="rodina">Rodina</button>
+                <button class="category-btn" data-category="deti">Děti</button>
+                <button class="category-btn" data-category="osobni-rust">Osobní růst</button>
+            </div>
+
+            <!-- Blog Posts Grid -->
+            <div class="blog-grid" id="blogGrid">
+                <!-- Sample Blog Post 1 -->
+                <article class="blog-card" data-category="rodina">
+                    <div class="blog-card-image">
+                        <img src="images/kristyna-hricikova-cover.png" alt="Vliv narození prvního dítěte na partnerský vztah">
+                        <span class="blog-category-tag">Rodina</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <time class="blog-date" datetime="2025-01-15">15. ledna 2025</time>
+                        <h2 class="blog-card-title">Vliv narození prvního dítěte na partnerský vztah</h2>
+                        <p class="blog-card-excerpt">
+                            Příchod prvního dítěte je nádhernou, ale zároveň náročnou životní změnou.
+                            Jak si v této době udržet kvalitní partnerský vztah a vzájemné porozumění?
+                        </p>
+                        <a href="blog-post-1.html" class="blog-read-more">Číst více →</a>
+                    </div>
+                </article>
+
+                <!-- Sample Blog Post 2 -->
+                <article class="blog-card" data-category="terapie">
+                    <div class="blog-card-image">
+                        <img src="images/kristyna-hricikova-cover.png" alt="Co je daseinsanalýza a jak funguje?">
+                        <span class="blog-category-tag">Terapie</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <time class="blog-date" datetime="2025-01-10">10. ledna 2025</time>
+                        <h2 class="blog-card-title">Co je daseinsanalýza a jak funguje?</h2>
+                        <p class="blog-card-excerpt">
+                            Daseinsanalýza je terapeutický přístup, který klade důraz na jedinečnost
+                            každého člověka a jeho svobodu v rozhodování. Pojďme se podívat blíže.
+                        </p>
+                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                    </div>
+                </article>
+
+                <!-- Sample Blog Post 3 -->
+                <article class="blog-card" data-category="deti">
+                    <div class="blog-card-image">
+                        <img src="images/kristyna-hricikova-cover.png" alt="Kdy vyhledat psychologa pro vaše dítě?">
+                        <span class="blog-category-tag">Děti</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <time class="blog-date" datetime="2025-01-05">5. ledna 2025</time>
+                        <h2 class="blog-card-title">Kdy vyhledat psychologa pro vaše dítě?</h2>
+                        <p class="blog-card-excerpt">
+                            Rozpoznání signálů, kdy je vhodné vyhledat odbornou pomoc, může být
+                            klíčové pro zdravý vývoj vašeho dítěte. Na co si dát pozor?
+                        </p>
+                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                    </div>
+                </article>
+
+                <!-- Sample Blog Post 4 -->
+                <article class="blog-card" data-category="osobni-rust">
+                    <div class="blog-card-image">
+                        <img src="images/kristyna-hricikova-cover.png" alt="Sebepéče není sobectví">
+                        <span class="blog-category-tag">Osobní růst</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <time class="blog-date" datetime="2024-12-28">28. prosince 2024</time>
+                        <h2 class="blog-card-title">Sebepéče není sobectví</h2>
+                        <p class="blog-card-excerpt">
+                            V dnešní uspěchané době často zapomínáme na vlastní potřeby.
+                            Proč je důležité pečovat o sebe sama, abyste mohli být tam pro ostatní?
+                        </p>
+                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                    </div>
+                </article>
+
+                <!-- Sample Blog Post 5 -->
+                <article class="blog-card" data-category="terapie">
+                    <div class="blog-card-image">
+                        <img src="images/kristyna-hricikova-cover.png" alt="Výhody online terapie v moderní době">
+                        <span class="blog-category-tag">Terapie</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <time class="blog-date" datetime="2024-12-20">20. prosince 2024</time>
+                        <h2 class="blog-card-title">Výhody online terapie v moderní době</h2>
+                        <p class="blog-card-excerpt">
+                            Online terapie nabízí flexibilitu a pohodlí, které může být pro
+                            mnohé klienty klíčové. Jak funguje a pro koho je vhodná?
+                        </p>
+                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                    </div>
+                </article>
+
+                <!-- Sample Blog Post 6 -->
+                <article class="blog-card" data-category="rodina">
+                    <div class="blog-card-image">
+                        <img src="images/kristyna-hricikova-cover.png" alt="Zdravá komunikace v rodině">
+                        <span class="blog-category-tag">Rodina</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <time class="blog-date" datetime="2024-12-15">15. prosince 2024</time>
+                        <h2 class="blog-card-title">Zdravá komunikace v rodině</h2>
+                        <p class="blog-card-excerpt">
+                            Kvalitní komunikace je základem funkčních vztahů. Jak nastavit
+                            vzorce komunikace, které podpoří porozumění a blízkost?
+                        </p>
+                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Empty State (shown when no posts match filter) -->
+            <div class="blog-empty" id="emptyState" style="display: none;">
+                <div class="blog-empty-icon">📝</div>
+                <h3>Zatím zde nejsou žádné příspěvky</h3>
+                <p>V této kategorii brzy přibudou nové články</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h2>Přihlaste se k odběru novinek</h2>
+                    <p>Dostávejte nové články přímo do své emailové schránky</p>
+                </div>
+                <div class="newsletter-form">
+                    <form id="newsletterForm">
+                        <input type="email" placeholder="Váš email" required class="newsletter-input">
+                        <button type="submit" class="btn btn-primary">Přihlásit se</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="blog-cta">
+        <div class="container">
+            <h2>Máte zájem o terapii?</h2>
+            <p>Neváhejte se ozvat a domluvíme si první setkání</p>
+            <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-large" target="_blank" rel="noopener">
+                Objednat se
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="images/logo.png" alt="KHG Poradenství" class="footer-logo">
+                    <p>Mgr. Kristýna Hriciková Glattová</p>
+                    <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Navigace</h4>
+                    <ul>
+                        <li><a href="index.html#o-mne">O mně</a></li>
+                        <li><a href="index.html#sluzby">Služby</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="index.html#kontakt">Kontakt</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact">
+                    <h4>Kontakt</h4>
+                    <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
+                    <p><a href="tel:+420605990980">+420 605 990 980</a></p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/blog-script.js"></script>
+</body>
+</html>
