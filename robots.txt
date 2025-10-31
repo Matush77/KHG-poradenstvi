@@ -1,0 +1,12 @@
+# robots.txt for khgporadenstvi.cz
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow utility/test pages
+Disallow: /download-assets.html
+Disallow: /test-image.html
+
+# Sitemap location
+Sitemap: https://khgporadenstvi.cz/sitemap.xml
