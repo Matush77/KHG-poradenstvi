@@ -152,12 +152,17 @@
 .blog-post-cta .cta-heading {
     font-family: var(--font-heading);
     font-size: 2.25rem;
-    color: var(--bg-light);
+    color: #FFFFFF;
     margin: 0 0 var(--space-md);
     line-height: 1.2;
     position: relative;
     z-index: 1;
     display: block;
+}
+
+.blog-post-cta .cta-heading strong {
+    color: #FFFFFF;
+    font-weight: 700;
 }
 
 .blog-post-cta p {

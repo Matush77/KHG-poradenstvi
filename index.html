@@ -19,11 +19,14 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Preload Critical Fonts -->
+    <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
 
+    <!-- Preload Hero Image -->
+    <link rel="preload" as="image" href="images/photo-800.webp" type="image/webp" imagesrcset="images/photo-400.webp 400w, images/photo-800.webp 800w, images/photo.webp 1200w" imagesizes="(max-width: 768px) 90vw, 500px">
+
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -32,7 +35,10 @@
         <nav class="nav container">
             <div class="nav-logo">
                 <a href="index.html">
-                    <img src="images/logo.png" alt="KHG Poradenství Logo" class="logo-img">
+                    <picture>
+                        <source srcset="images/logo.webp" type="image/webp">
+                        <img src="images/logo.png" alt="KHG Poradenství Logo" class="logo-img" width="120" height="40">
+                    </picture>
                 </a>
             </div>
 
@@ -88,7 +94,23 @@
 
             <div class="hero-image">
                 <div class="blob-shape">
-                    <img src="images/photo.jpg" alt="Mgr. Kristýna Hriciková Glattová - Psycholog a terapeut" class="profile-img">
+                    <picture>
+                        <source
+                            srcset="images/photo-400.webp 400w,
+                                    images/photo-800.webp 800w,
+                                    images/photo.webp 1200w"
+                            type="image/webp"
+                            sizes="(max-width: 768px) 90vw, 500px">
+                        <source
+                            srcset="images/photo.jpg"
+                            type="image/jpeg">
+                        <img src="images/photo.jpg"
+                             alt="Mgr. Kristýna Hriciková Glattová - Psycholog a terapeut"
+                             class="profile-img"
+                             width="500"
+                             height="500"
+                             loading="eager">
+                    </picture>
                 </div>
             </div>
         </div>
@@ -503,7 +525,10 @@
             <!-- ČAP Membership -->
             <div class="cap-membership">
                 <div class="cap-logo">
-                    <img src="images/ceska-asociace-pro-psychoterapii.png" alt="Česká asociace pro psychoterapii (ČAP)" class="cap-logo-img">
+                    <picture>
+                        <source srcset="images/ceska-asociace-pro-psychoterapii.webp" type="image/webp">
+                        <img src="images/ceska-asociace-pro-psychoterapii.png" alt="Česká asociace pro psychoterapii (ČAP)" class="cap-logo-img" width="120" height="120">
+                    </picture>
                 </div>
                 <div class="cap-content">
                     <h3>Kandidátní členka České asociace pro psychoterapii (ČAP)</h3>
@@ -519,17 +544,26 @@
             <h3 class="featured-subtitle">Kde mě najdete online</h3>
             <div class="featured-links">
                 <a href="https://app.terapie.cz/profile/589-Kristyna-Glattova" target="_blank" rel="noopener" class="featured-link">
-                    <img src="images/terapie-cz-logo.jpg" alt="Terapie.cz" class="featured-logo">
+                    <picture>
+                        <source srcset="images/terapie-cz-logo.webp" type="image/webp">
+                        <img src="images/terapie-cz-logo.jpg" alt="Terapie.cz" class="featured-logo" width="150" height="50" loading="lazy">
+                    </picture>
                     <span>Terapie.cz</span>
                 </a>
 
                 <a href="https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut/benesov" target="_blank" rel="noopener" class="featured-link">
-                    <img src="images/znamy-lekar-logo.jpg" alt="ZnámýLékař.cz" class="featured-logo">
+                    <picture>
+                        <source srcset="images/znamy-lekar-logo.webp" type="image/webp">
+                        <img src="images/znamy-lekar-logo.jpg" alt="ZnámýLékař.cz" class="featured-logo" width="150" height="50" loading="lazy">
+                    </picture>
                     <span>ZnámýLékař.cz</span>
                 </a>
 
                 <a href="https://www.denproskolu.cz/cs/komunita-dobrovolniku#/dobrovolnik/807" target="_blank" rel="noopener" class="featured-link">
-                    <img src="images/den-pro-skolu-logo.jpg" alt="Den pro školu" class="featured-logo">
+                    <picture>
+                        <source srcset="images/den-pro-skolu-logo.webp" type="image/webp">
+                        <img src="images/den-pro-skolu-logo.jpg" alt="Den pro školu" class="featured-logo" width="150" height="50" loading="lazy">
+                    </picture>
                     <span>Den pro školu</span>
                 </a>
             </div>
@@ -598,7 +632,10 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="images/logo.png" alt="KHG Poradenství" class="footer-logo">
+                    <picture>
+                        <source srcset="images/logo.webp" type="image/webp">
+                        <img src="images/logo.png" alt="KHG Poradenství" class="footer-logo" width="120" height="40" loading="lazy">
+                    </picture>
                     <p>Mgr. Kristýna Hriciková Glattová</p>
                     <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
                 </div>
