@@ -94,26 +94,30 @@ window.addEventListener('scroll', () => {
     lastScroll = currentScroll;
 });
 
-// Intersection Observer for Fade-in Animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
+// Intersection Observer for Fade-in Animations (disabled on mobile)
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-            observer.unobserve(entry.target);
-        }
+if (!isMobile) {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const animateElements = document.querySelectorAll('.service-card, .credential-card, .contact-item, .featured-link, .benefit-item, .step, .target-group, .faq-item');
+        animateElements.forEach(el => observer.observe(el));
     });
-}, observerOptions);
-
-// Observe elements for animation
-document.addEventListener('DOMContentLoaded', () => {
-    const animateElements = document.querySelectorAll('.service-card, .credential-card, .contact-item, .featured-link, .benefit-item, .step, .target-group, .faq-item');
-    animateElements.forEach(el => observer.observe(el));
-});
+}
 
 // External Links - Open in New Tab with Security
 document.querySelectorAll('a[target="_blank"]').forEach(link => {
@@ -228,8 +232,15 @@ function animateCounter(element, target, duration = 2000) {
     requestAnimationFrame(update);
 }
 
-// Start counter animation when page loads
+// Start counter animation when page loads (disabled on mobile)
 document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    // Skip counter animation on mobile for better performance
+    if (isMobile) {
+        return;
+    }
+
     const stats = document.querySelectorAll('.hero-stat-text');
 
     stats.forEach(stat => {
