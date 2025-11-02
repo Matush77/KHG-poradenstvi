@@ -250,7 +250,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem var(--space-lg);
+    padding: 0.75rem var(--space-lg);
 }
 
 .nav-logo {
@@ -263,7 +263,7 @@ a:hover {
 }
 
 .logo-img {
-    height: 50px;
+    height: 65px;
     width: auto;
     display: block;
     transition: var(--transition);
@@ -410,6 +410,12 @@ a:hover {
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--primary);
+}
+
+.counter-number {
+    display: inline-block;
+    min-width: 3.5em;
+    text-align: left;
 }
 
 .hero-image {
@@ -1231,6 +1237,163 @@ a:hover {
 }
 
 /* ==========================================
+   TESTIMONIALS CAROUSEL
+   ========================================== */
+
+.testimonials {
+    padding: var(--space-2xl) 0;
+    background: linear-gradient(to bottom, var(--bg-light) 0%, #F0F7FA 100%);
+}
+
+.testimonials-carousel {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-xl) 0;
+}
+
+.testimonials-track {
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+}
+
+.testimonial-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+    transform: translateX(0);
+}
+
+.testimonial-card.active {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+}
+
+.testimonial-content {
+    background: white;
+    padding: var(--space-xl);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    border: 2px solid var(--border-light);
+}
+
+.testimonial-text {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: var(--text-dark);
+    margin-bottom: var(--space-lg);
+    font-style: italic;
+}
+
+.testimonial-author {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1.125rem;
+    margin-top: var(--space-md);
+}
+
+.testimonial-author::before {
+    content: "— ";
+}
+
+/* Carousel buttons removed - auto-play only */
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-xl);
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0;
+}
+
+.carousel-dot:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+}
+
+.carousel-dot.active {
+    background: var(--primary);
+    width: 32px;
+    border-radius: 6px;
+}
+
+@media (max-width: 1024px) {
+    .carousel-btn-prev {
+        left: -10px;
+    }
+
+    .carousel-btn-next {
+        right: -10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .testimonials {
+        padding: var(--space-xl) 0;
+    }
+
+    .testimonials-carousel {
+        padding: var(--space-md) 0;
+    }
+
+    .testimonial-content {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .testimonial-text {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    .testimonial-author {
+        font-size: 1rem;
+    }
+
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .carousel-btn-prev {
+        left: 0;
+    }
+
+    .carousel-btn-next {
+        right: 0;
+    }
+
+    .carousel-dots {
+        gap: var(--space-xs);
+    }
+
+    .carousel-dot {
+        width: 10px;
+        height: 10px;
+    }
+
+    .carousel-dot.active {
+        width: 24px;
+    }
+}
+
+/* ==========================================
    FOOTER
    ========================================== */
 
@@ -1252,10 +1415,7 @@ a:hover {
 }
 
 .footer-logo {
-    height: 40px;
-    width: auto;
-    margin-bottom: var(--space-sm);
-    filter: brightness(0) invert(1);
+    display: none;
 }
 
 .footer-brand p {
@@ -1302,6 +1462,28 @@ a:hover {
 .footer-contact p {
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: var(--space-xs);
+}
+
+.footer-social {
+    margin-top: var(--space-md);
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.social-link {
+    display: inline-block;
+    transition: var(--transition);
+}
+
+.social-link:hover {
+    transform: translateY(-3px);
+    opacity: 0.8;
+}
+
+.social-icon {
+    width: 32px;
+    height: 32px;
+    display: block;
     font-size: 0.9375rem;
 }
 

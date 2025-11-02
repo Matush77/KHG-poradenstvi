@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="#F0E6FF"/>
+  
+  <!-- Brain outline -->
+  <path d="M 100 60 C 70 60 50 80 50 100 C 50 120 60 135 75 140 C 80 145 90 150 100 150 C 110 150 120 145 125 140 C 140 135 150 120 150 100 C 150 80 130 60 100 60 Z" fill="#A29BFE" opacity="0.7"/>
+  
+  <!-- Brain details -->
+  <path d="M 100 65 Q 80 75 75 95 M 100 65 Q 120 75 125 95 M 90 110 Q 95 120 100 125 M 110 110 Q 105 120 100 125" stroke="#6C5CE7" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Heart -->
+  <path d="M 100 105 L 110 95 C 110 85 100 85 100 95 C 100 85 90 85 90 95 L 100 105 Z" fill="#E17055"/>
+  
+  <!-- Connection lines -->
+  <circle cx="100" cy="100" r="3" fill="#6C5CE7"/>
+  <line x1="100" y1="100" x2="70" y2="110" stroke="#6C5CE7" stroke-width="2"/>
+  <line x1="100" y1="100" x2="130" y2="110" stroke="#6C5CE7" stroke-width="2"/>
+  <circle cx="70" cy="110" r="4" fill="#A29BFE"/>
+  <circle cx="130" cy="110" r="4" fill="#A29BFE"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="#FFF4E6"/>
+  
+  <!-- Book -->
+  <rect x="60" y="70" width="80" height="60" rx="4" fill="#FDCB6E"/>
+  <line x1="100" y1="70" x2="100" y2="130" stroke="#F39C12" stroke-width="3"/>
+  
+  <!-- Question marks -->
+  <text x="80" y="105" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#E17055">?</text>
+  <text x="110" y="105" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#E17055">?</text>
+  
+  <!-- Light bulb above -->
+  <circle cx="100" cy="45" r="12" fill="#FFE066"/>
+  <rect x="96" y="57" width="8" height="8" rx="2" fill="#F39C12"/>
+  <path d="M 100 30 L 100 20 M 85 40 L 78 33 M 115 40 L 122 33" stroke="#FFE066" stroke-width="3" stroke-linecap="round"/>
+</svg>

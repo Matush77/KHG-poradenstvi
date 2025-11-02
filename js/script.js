@@ -220,12 +220,12 @@ function animateCounter(element, target, duration = 2000) {
         const easedProgress = easeOutQuart(progress);
         const current = Math.floor(easedProgress * target);
 
-        element.textContent = '+' + current.toLocaleString('cs-CZ');
+        element.textContent = '+' + current;
 
         if (progress < 1) {
             requestAnimationFrame(update);
         } else {
-            element.textContent = '+' + target.toLocaleString('cs-CZ');
+            element.textContent = '+' + target;
         }
     }
 
@@ -263,4 +263,104 @@ document.addEventListener('DOMContentLoaded', () => {
             animateCounter(numberSpan, number, 2000);
         }
     });
+});
+
+// Testimonials Carousel
+document.addEventListener('DOMContentLoaded', () => {
+    const track = document.querySelector('.testimonials-track');
+    if (!track) return; // Exit if testimonials section doesn't exist
+
+    const cards = document.querySelectorAll('.testimonial-card');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const prevBtn = document.querySelector('.carousel-btn-prev');
+    const nextBtn = document.querySelector('.carousel-btn-next');
+
+    let currentIndex = 0;
+    const totalCards = cards.length;
+
+    function setTrackHeight() {
+        const maxHeight = Math.max(...Array.from(cards).map(card => card.scrollHeight), 0);
+        if (maxHeight > 0) {
+            track.style.minHeight = `${maxHeight}px`;
+        }
+    }
+
+    // Function to update carousel
+    function updateCarousel(index) {
+        // Remove active class from all cards and dots
+        cards.forEach(card => card.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+
+        // Add active class to current card and dot
+        cards[index].classList.add('active');
+
+        if (dots[index]) {
+            dots[index].classList.add('active');
+        }
+
+        setTrackHeight();
+    }
+
+    // Next button
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % totalCards;
+            updateCarousel(currentIndex);
+        });
+    }
+
+    // Previous button
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + totalCards) % totalCards;
+            updateCarousel(currentIndex);
+        });
+    }
+
+    // Dot navigation
+    if (dots.length) {
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentIndex = index;
+                updateCarousel(currentIndex);
+            });
+        });
+    }
+
+    // Auto-advance carousel every 7 seconds
+    let autoAdvance = setInterval(() => {
+        currentIndex = (currentIndex + 1) % totalCards;
+        updateCarousel(currentIndex);
+    }, 7000);
+
+    // Pause auto-advance on hover
+    track.addEventListener('mouseenter', () => {
+        clearInterval(autoAdvance);
+    });
+
+    // Resume auto-advance on mouse leave
+    track.addEventListener('mouseleave', () => {
+        autoAdvance = setInterval(() => {
+            currentIndex = (currentIndex + 1) % totalCards;
+            updateCarousel(currentIndex);
+        }, 7000);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            currentIndex = (currentIndex - 1 + totalCards) % totalCards;
+            updateCarousel(currentIndex);
+        } else if (e.key === 'ArrowRight') {
+            currentIndex = (currentIndex + 1) % totalCards;
+            updateCarousel(currentIndex);
+        }
+    });
+
+    // Set initial height
+    setTrackHeight();
+    updateCarousel(0);
+
+    window.addEventListener('load', setTrackHeight);
+    window.addEventListener('resize', setTrackHeight);
 });

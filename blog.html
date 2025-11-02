@@ -17,11 +17,11 @@
     <meta property="og:url" content="https://khgporadenstvi.cz/blog.html">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/webp" href="images/favicon.webp">
 
-    <!-- Preload Critical Fonts -->
-    <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Preload Critical Fonts (only on desktop) -->
+    <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
+    <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/styles.css">
@@ -33,7 +33,7 @@
         <nav class="nav container">
             <div class="nav-logo">
                 <a href="index.html">
-                    <img src="images/logo.png" alt="KHG Poradenství Logo" class="logo-img">
+                    <img src="images/logo.webp" alt="KHG Poradenství Logo" class="logo-img">
                 </a>
             </div>
 
@@ -78,105 +78,71 @@
 
             <!-- Blog Posts Grid -->
             <div class="blog-grid" id="blogGrid">
-                <!-- Sample Blog Post 1 -->
+                <!-- Blog Post 1 -->
                 <article class="blog-card" data-category="rodina">
-                    <div class="blog-card-image">
-                        <img src="images/kristyna-hricikova-cover.png" alt="Vliv narození prvního dítěte na partnerský vztah">
-                        <span class="blog-category-tag">Rodina</span>
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #E8F4F8 0%, #B8E0ED 100%);">
+                        <img src="images/blog-icon-trauma.svg" alt="Jak nepřenést vlastní trauma na své děti" style="width: 80px; height: 80px; object-fit: contain;">
+                        <span class="blog-category-tag">Rodičovství</span>
                     </div>
                     <div class="blog-card-content">
-                        <time class="blog-date" datetime="2025-01-15">15. ledna 2025</time>
-                        <h2 class="blog-card-title">Vliv narození prvního dítěte na partnerský vztah</h2>
+                        <time class="blog-date" datetime="2025-08-06">6. srpna 2025</time>
+                        <h2 class="blog-card-title">Jak nepřenést vlastní trauma na své děti</h2>
                         <p class="blog-card-excerpt">
-                            Příchod prvního dítěte je nádhernou, ale zároveň náročnou životní změnou.
-                            Jak si v této době udržet kvalitní partnerský vztah a vzájemné porozumění?
+                            Bojíte se, že přenesete vlastní traumata na své dítě? Zjistěte, jak podle psychologů
+                            a psychoterapeutů zvládat náročné situace jinak a vytvořit laskavější prostředí pro své děti.
                         </p>
-                        <a href="blog-post-1.html" class="blog-read-more">Číst více →</a>
+                        <a href="blog-jak-neprenest-vlastni-trauma-na-sve-deti.html" class="blog-read-more">Číst více →</a>
                     </div>
                 </article>
 
-                <!-- Sample Blog Post 2 -->
-                <article class="blog-card" data-category="terapie">
-                    <div class="blog-card-image">
-                        <img src="images/kristyna-hricikova-cover.png" alt="Co je daseinsanalýza a jak funguje?">
-                        <span class="blog-category-tag">Terapie</span>
+                <!-- Blog Post 2 -->
+                <article class="blog-card" data-category="rodina">
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #FFF4E6 0%, #FFE5B4 100%);">
+                        <img src="images/blog-icon-myths.svg" alt="5 mýtů o výchově dětí" style="width: 80px; height: 80px; object-fit: contain;">
+                        <span class="blog-category-tag">Rodičovství</span>
                     </div>
                     <div class="blog-card-content">
-                        <time class="blog-date" datetime="2025-01-10">10. ledna 2025</time>
-                        <h2 class="blog-card-title">Co je daseinsanalýza a jak funguje?</h2>
+                        <time class="blog-date" datetime="2025-08-06">6. srpna 2025</time>
+                        <h2 class="blog-card-title">5 mýtů o výchově dětí: Jak na ně pohlíží nejnovější psychologické poznatky</h2>
                         <p class="blog-card-excerpt">
-                            Daseinsanalýza je terapeutický přístup, který klade důraz na jedinečnost
-                            každého člověka a jeho svobodu v rozhodování. Pojďme se podívat blíže.
+                            Rodiče jsou dnes vystaveni stovkám zdrojů rad. Zjistěte, které rady jsou mýty
+                            a jak na ně pohlíží nejnovější psychologické poznatky. Od fyzických trestů po obrazovky.
                         </p>
-                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                        <a href="blog-5-mytu-o-vychove-deti.html" class="blog-read-more">Číst více →</a>
                     </div>
                 </article>
 
-                <!-- Sample Blog Post 3 -->
-                <article class="blog-card" data-category="deti">
-                    <div class="blog-card-image">
-                        <img src="images/kristyna-hricikova-cover.png" alt="Kdy vyhledat psychologa pro vaše dítě?">
-                        <span class="blog-category-tag">Děti</span>
-                    </div>
-                    <div class="blog-card-content">
-                        <time class="blog-date" datetime="2025-01-05">5. ledna 2025</time>
-                        <h2 class="blog-card-title">Kdy vyhledat psychologa pro vaše dítě?</h2>
-                        <p class="blog-card-excerpt">
-                            Rozpoznání signálů, kdy je vhodné vyhledat odbornou pomoc, může být
-                            klíčové pro zdravý vývoj vašeho dítěte. Na co si dát pozor?
-                        </p>
-                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
-                    </div>
-                </article>
-
-                <!-- Sample Blog Post 4 -->
+                <!-- Blog Post 3 -->
                 <article class="blog-card" data-category="osobni-rust">
-                    <div class="blog-card-image">
-                        <img src="images/kristyna-hricikova-cover.png" alt="Sebepéče není sobectví">
-                        <span class="blog-category-tag">Osobní růst</span>
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #F0E6FF 0%, #D5C3F0 100%);">
+                        <img src="images/blog-icon-emotional.svg" alt="Co je emoční inteligence a proč je důležitá?" style="width: 80px; height: 80px; object-fit: contain;">
+                        <span class="blog-category-tag">Osobní rozvoj</span>
                     </div>
                     <div class="blog-card-content">
-                        <time class="blog-date" datetime="2024-12-28">28. prosince 2024</time>
-                        <h2 class="blog-card-title">Sebepéče není sobectví</h2>
+                        <time class="blog-date" datetime="2025-01-23">23. ledna 2025</time>
+                        <h2 class="blog-card-title">Co je emoční inteligence a proč je důležitá?</h2>
                         <p class="blog-card-excerpt">
-                            V dnešní uspěchané době často zapomínáme na vlastní potřeby.
-                            Proč je důležité pečovat o sebe sama, abyste mohli být tam pro ostatní?
+                            Věděli jste, že náš úspěch v životě nezávisí pouze na IQ, ale také na naší schopnosti
+                            pracovat s emocemi? Zjistěte více o emoční inteligenci a jak ji rozvíjet.
                         </p>
-                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                        <a href="blog-co-je-emocni-inteligence.html" class="blog-read-more">Číst více →</a>
                     </div>
                 </article>
 
-                <!-- Sample Blog Post 5 -->
+                <!-- Blog Post 4 -->
                 <article class="blog-card" data-category="terapie">
-                    <div class="blog-card-image">
-                        <img src="images/kristyna-hricikova-cover.png" alt="Výhody online terapie v moderní době">
-                        <span class="blog-category-tag">Terapie</span>
+                    <div class="blog-card-image" style="background: linear-gradient(135deg, #E8F8F5 0%, #B8E6D5 100%);">
+                        <img src="images/blog-icon-health.svg" alt="Co dělat při podezření na PPP?" style="width: 80px; height: 80px; object-fit: contain;">
+                        <span class="blog-category-tag">Zdraví</span>
                     </div>
                     <div class="blog-card-content">
-                        <time class="blog-date" datetime="2024-12-20">20. prosince 2024</time>
-                        <h2 class="blog-card-title">Výhody online terapie v moderní době</h2>
+                        <time class="blog-date" datetime="2024-05-06">6. května 2024</time>
+                        <h2 class="blog-card-title">Co dělat při podezření na PPP?</h2>
                         <p class="blog-card-excerpt">
-                            Online terapie nabízí flexibilitu a pohodlí, které může být pro
-                            mnohé klienty klíčové. Jak funguje a pro koho je vhodná?
+                            Trápí někoho z vašich blízkých mentální anorexie, bulimie nebo psychogenní přejídání?
+                            Zjistěte, jak jim můžete pomoci a jaké formy podpory existují.
                         </p>
-                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
-                    </div>
-                </article>
-
-                <!-- Sample Blog Post 6 -->
-                <article class="blog-card" data-category="rodina">
-                    <div class="blog-card-image">
-                        <img src="images/kristyna-hricikova-cover.png" alt="Zdravá komunikace v rodině">
-                        <span class="blog-category-tag">Rodina</span>
-                    </div>
-                    <div class="blog-card-content">
-                        <time class="blog-date" datetime="2024-12-15">15. prosince 2024</time>
-                        <h2 class="blog-card-title">Zdravá komunikace v rodině</h2>
-                        <p class="blog-card-excerpt">
-                            Kvalitní komunikace je základem funkčních vztahů. Jak nastavit
-                            vzorce komunikace, které podpoří porozumění a blízkost?
-                        </p>
-                        <a href="#" class="blog-read-more coming-soon" onclick="alert('Článek bude brzy k dispozici'); return false;">Brzy k dispozici</a>
+                        <a href="blog-co-delat-pri-podezreni-na-ppp.html" class="blog-read-more">Číst více →</a>
                     </div>
                 </article>
             </div>
@@ -186,24 +152,6 @@
                 <div class="blog-empty-icon">📝</div>
                 <h3>Zatím zde nejsou žádné příspěvky</h3>
                 <p>V této kategorii brzy přibudou nové články</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Newsletter Section -->
-    <section class="newsletter-section">
-        <div class="container">
-            <div class="newsletter-content">
-                <div class="newsletter-text">
-                    <h2>Přihlaste se k odběru novinek</h2>
-                    <p>Dostávejte nové články přímo do své emailové schránky</p>
-                </div>
-                <div class="newsletter-form">
-                    <form id="newsletterForm">
-                        <input type="email" placeholder="Váš email" required class="newsletter-input">
-                        <button type="submit" class="btn btn-primary">Přihlásit se</button>
-                    </form>
-                </div>
             </div>
         </div>
     </section>
@@ -224,7 +172,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="images/logo.png" alt="KHG Poradenství" class="footer-logo">
+                    <img src="images/logo.webp" alt="KHG Poradenství" class="footer-logo">
                     <p>Mgr. Kristýna Hriciková Glattová</p>
                     <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
                 </div>
@@ -243,6 +191,11 @@
                     <p class="footer-heading"><strong>Kontakt</strong></p>
                     <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
                     <p><a href="tel:+420605990980">+420 605 990 980</a></p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                            <img src="images/facebook-icon.svg" alt="Facebook" class="social-icon">
+                        </a>
+                    </div>
                 </div>
             </div>
 
