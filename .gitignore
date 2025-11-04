@@ -1,0 +1,22 @@
+# Node modules (if reinstalled in future)
+node_modules/
+package-lock.json
+
+# Claude Code internal files
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log

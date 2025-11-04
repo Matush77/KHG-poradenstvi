@@ -591,6 +591,47 @@ a:hover {
     margin-bottom: var(--space-lg);
 }
 
+/* Highlighted Text with Brush Effect */
+.highlighted-text {
+    position: relative;
+    padding: var(--space-md);
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFEDD5 100%);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    margin: var(--space-xl) 0;
+}
+
+.highlighted-text::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(232, 146, 124, 0.3) 10%,
+        rgba(232, 146, 124, 0.5) 50%,
+        rgba(232, 146, 124, 0.3) 90%,
+        transparent 100%);
+    border-radius: 0 0 8px 8px;
+}
+
+.highlighted-text a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: var(--transition);
+}
+
+.highlighted-text a:hover {
+    color: var(--accent);
+    text-decoration-color: var(--primary);
+}
+
 .credentials {
     display: flex;
     flex-direction: column;
