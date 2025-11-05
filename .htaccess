@@ -3,15 +3,12 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Set correct MIME type for sitemap
-<Files "sitemap.xml">
-    Header set Content-Type "application/xml; charset=utf-8"
-</Files>
+# Fix sitemap content-type - redirect to PHP version
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
-# Set correct MIME type for robots.txt
-<Files "robots.txt">
-    Header set Content-Type "text/plain; charset=utf-8"
-</Files>
+# Set correct MIME types
+AddType application/xml .xml
+AddType text/plain .txt
 
 # Compression
 <IfModule mod_deflate.c>
