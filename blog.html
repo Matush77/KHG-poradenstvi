@@ -19,6 +19,23 @@
     <!-- Canonical Tag -->
     <link rel="canonical" href="https://khgporadenstvi.cz/blog.html">
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11475595100"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-11475595100');
+    </script>
+
+    <!-- Google Ads Conversion Tracking Function -->
+    <script>
+      function trackConversion() {
+        gtag('event', 'conversion', {'send_to': 'AW-11475595100/Ybl-COeCpI4ZENze_t8q'});
+      }
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/webp" href="images/favicon.webp">
 
@@ -50,8 +67,9 @@
                 <li><a href="index.html#o-mne" class="nav-link">O mně</a></li>
                 <li><a href="index.html#sluzby" class="nav-link">Služby</a></li>
                 <li><a href="blog.html" class="nav-link active">Blog</a></li>
+                <li><a href="kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="index.html#kontakt" class="nav-link">Kontakt</a></li>
-                <li><a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-primary" target="_blank" rel="noopener">Objednat se</a></li>
+                <li><a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-primary" target="_blank" rel="noopener" onclick="trackConversion()">Objednat se</a></li>
             </ul>
         </nav>
     </header>
@@ -165,7 +183,7 @@
         <div class="container">
             <h2>Máte zájem o terapii?</h2>
             <p>Neváhejte se ozvat a domluvíme si první setkání</p>
-            <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-large" target="_blank" rel="noopener">
+            <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-large" target="_blank" rel="noopener" onclick="trackConversion()">
                 Objednat se
             </a>
         </div>

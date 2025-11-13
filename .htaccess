@@ -1,0 +1,48 @@
+# Redirect www to non-www
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.khgporadenstvi\.cz$ [NC]
+RewriteRule ^ https://khgporadenstvi.cz%{REQUEST_URI} [R=301,L]
+
+# Remove index.html from URL - redirect to root
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html\ HTTP/
+RewriteRule ^index\.html$ https://khgporadenstvi.cz/ [R=301,L]
+
+# Prevent direct access to index.html via clean URL
+RewriteCond %{REQUEST_URI} ^/index\.html$ [NC]
+RewriteRule ^.*$ https://khgporadenstvi.cz/ [R=301,L]
+
+
+#+PHPVersion
+#="php74"
+AddHandler x-httpd-php74 .php
+#-PHPVersion
+#+PHPVersion
+#=php74
+AddHandler x-httpd-php74 .php
+#-PHPVersion
+
+
+#+StackCache
+#={"images":"A86400","css":"A86400","javascript":"A86400"}
+ExpiresActive ON
+ExpiresByType "image/jpeg" "A86400"
+ExpiresByType "image/jpg" "A86400"
+ExpiresByType "image/gif" "A86400"
+ExpiresByType "image/png" "A86400"
+ExpiresByType "image/svg+xml" "A86400"
+ExpiresByType "image/webp" "A86400"
+ExpiresByType "image/vnd.microsoft.icon" "A86400"
+ExpiresByType "image/x-icon" "A86400"
+ExpiresByType "image/ico" "A86400"
+ExpiresByType "font/ttf" "A86400"
+ExpiresByType "font/otf" "A86400"
+ExpiresByType "application/x-font-opentype" "A86400"
+ExpiresByType "application/x-font-woff" "A86400"
+ExpiresByType "application/x-font-ttf" "A86400"
+ExpiresByType "application/font-woff" "A86400"
+ExpiresByType "font/woff2" "A86400"
+ExpiresByType "application/vnd.ms-fontobject" "A86400"
+ExpiresByType "text/css" "A86400"
+ExpiresByType "text/javascript" "A86400"
+ExpiresByType "application/javascript" "A86400"
+#-StackCache
