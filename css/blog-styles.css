@@ -10,6 +10,23 @@
     color: var(--bg-light);
 }
 
+.blog-hero .back-link {
+    color: var(--bg-light);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    margin-bottom: var(--space-lg);
+    display: inline-block;
+    transition: var(--transition);
+    opacity: 0.95;
+    text-align: left;
+}
+
+.blog-hero .back-link:hover {
+    color: var(--bg-light);
+    opacity: 1;
+    transform: translateX(-5px);
+}
+
 .blog-hero-title {
     font-family: var(--font-heading);
     font-size: clamp(3rem, 6vw, 5rem);
