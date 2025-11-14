@@ -411,7 +411,8 @@ class QuizController {
             optionDiv.appendChild(label);
 
             // Click handler for entire option div
-            optionDiv.addEventListener('click', () => {
+            optionDiv.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.selectOption(questionIndex, index, option.score);
             });
 
@@ -424,12 +425,22 @@ class QuizController {
         // Announce to screen readers
         this.announceToScreenReader(`Otázka ${questionIndex + 1} z ${quizConfig.questions.length}: ${question.text}`);
 
-        // Scroll to top
-        window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: 'smooth' });
+        // Scroll to top of quiz section (only on desktop or when changing questions)
+        // Avoid scrolling on mobile after selecting an option
+        const isMobile = window.innerWidth <= 768;
+        if (!isMobile) {
+            window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: 'smooth' });
+        } else {
+            // On mobile, scroll to keep question in view
+            this.quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     selectOption(questionIndex, optionIndex, score) {
         this.state.selectAnswer(questionIndex, optionIndex, score);
+
+        // Store current scroll position
+        const scrollPos = window.scrollY || window.pageYOffset;
 
         // Update UI
         const options = this.optionsContainer.querySelectorAll('.quiz-option');
@@ -438,6 +449,9 @@ class QuizController {
             const radio = opt.querySelector('input[type="radio"]');
             radio.checked = idx === optionIndex;
         });
+
+        // Restore scroll position to prevent unwanted scrolling
+        window.scrollTo(0, scrollPos);
 
         // Enable next button
         this.nextBtn.disabled = false;
@@ -526,9 +540,15 @@ class QuizController {
         }
 
         // Populate CTA
-        this.ctaHeading.textContent = result.cta.heading;
-        this.ctaDescription.textContent = result.cta.description;
-        this.ctaButton.textContent = result.cta.button;
+        if (this.ctaHeading) {
+            this.ctaHeading.textContent = result.cta.heading;
+        }
+        if (this.ctaDescription) {
+            this.ctaDescription.textContent = result.cta.description;
+        }
+        if (this.ctaButton) {
+            this.ctaButton.textContent = result.cta.button;
+        }
 
         // Clear saved progress
         this.state.clearProgress();

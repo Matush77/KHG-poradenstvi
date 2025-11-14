@@ -499,16 +499,25 @@ a:hover {
 
 @media (max-width: 968px) {
     .hero {
-        padding: 120px 0 var(--space-2xl);
+        padding: 100px 0 var(--space-2xl);
     }
 
     .hero-container {
         grid-template-columns: 1fr;
         gap: var(--space-xl);
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     .hero-content {
         text-align: center;
+    }
+
+    .hero-stats {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: var(--space-md);
     }
 
     .blob-shape {
@@ -886,11 +895,6 @@ a:hover {
 }
 
 @media (max-width: 768px) {
-    .hero-stats {
-        flex-direction: column;
-        gap: var(--space-sm);
-    }
-
     .service-main {
         padding: var(--space-lg) var(--space-md);
     }

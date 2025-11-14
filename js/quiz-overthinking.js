@@ -1,5 +1,5 @@
 /* ==========================================
-   QUIZ JAVASCRIPT - TOXICKÝ VZTAH
+   QUIZ JAVASCRIPT - OVERTHINKING
    ========================================== */
 
 // Quiz Configuration
@@ -7,112 +7,102 @@ const quizConfig = {
     questions: [
         {
             id: 1,
-            text: "Jak často váš partner respektuje vaše osobní hranice?",
+            text: "Jak často se vracíte k situacím, které už skončily?",
             options: [
-                { text: "Vždy", score: 0 },
-                { text: "Většinou", score: 2 },
-                { text: "Občas", score: 4 },
-                { text: "Zřídka", score: 6 },
-                { text: "Nikdy", score: 8 }
+                { text: "Zřídka", score: 0 },
+                { text: "Občas", score: 1 },
+                { text: "Často", score: 2 },
+                { text: "Neustále", score: 3 }
             ]
         },
         {
             id: 2,
-            text: "Cítíte se svobodně vyjádřit svůj názor, i když se neshodujete?",
+            text: "Máte problém vypnout myšlenky před spaním?",
             options: [
-                { text: "Určitě ano", score: 0 },
-                { text: "Spíše ano", score: 2 },
-                { text: "Někdy ano, někdy ne", score: 4 },
-                { text: "Spíše ne", score: 6 },
-                { text: "Určitě ne", score: 8 }
+                { text: "Ne, usínám snadno", score: 0 },
+                { text: "Občas to trvá déle", score: 1 },
+                { text: "Často mi to trvá dlouho", score: 2 },
+                { text: "Téměř vždy se nemůžu uklidnit", score: 3 }
             ]
         },
         {
             id: 3,
-            text: "Jak reaguje váš partner, když řeknete \"ne\"?",
+            text: "Analyzujete detaily konverzací i po jejich skončení?",
             options: [
-                { text: "Respektuje to bez problémů", score: 0 },
-                { text: "Většinou to akceptuje", score: 2 },
-                { text: "Někdy se zlobí, ale přijme to", score: 4 },
-                { text: "Často se naštve nebo mě přesvědčuje", score: 6 },
-                { text: "Nikdy to nepřijme, trvá na svém", score: 8 }
+                { text: "Málokdy", score: 0 },
+                { text: "Někdy, když byla důležitá", score: 1 },
+                { text: "Často, zejména když bylo něco nejasné", score: 2 },
+                { text: "Vždy, znovu a znovu si přehrávám každé slovo", score: 3 }
             ]
         },
         {
             id: 4,
-            text: "Jak často vás partner kritizuje nebo snižuje?",
+            text: "Vytváříte si v hlavě nejhorší možné scénáře?",
             options: [
-                { text: "Nikdy", score: 0 },
-                { text: "Zřídka", score: 2 },
-                { text: "Občas", score: 4 },
-                { text: "Často", score: 6 },
-                { text: "Neustále", score: 8 }
+                { text: "Ne, obvykle jsem optimista", score: 0 },
+                { text: "Občas mě napadnou", score: 1 },
+                { text: "Často si představuji, co všechno může jít špatně", score: 2 },
+                { text: "Neustále, nemůžu se od toho odpoutat", score: 3 }
             ]
         },
         {
             id: 5,
-            text: "Cítíte se ve vztahu bezpečně a respektovaně?",
+            text: "Máte pocit, že vám hlava \"nejede\" ani během odpočinku?",
             options: [
-                { text: "Vždy", score: 0 },
-                { text: "Většinou", score: 2 },
-                { text: "Někdy ano, někdy ne", score: 5 },
-                { text: "Spíše ne", score: 7 },
-                { text: "Určitě ne", score: 9 }
+                { text: "Ne, dokážu se dobře uvolnit", score: 0 },
+                { text: "Občas mi myšlenky bloudí", score: 1 },
+                { text: "Často se nemůžu odpojit", score: 2 },
+                { text: "Téměř nikdy nejsem v klidu", score: 3 }
             ]
         },
         {
             id: 6,
-            text: "Máte pocit, že chodíte \"po špičkách\", abyste partnera nenaštvali?",
+            text: "Jak moc vás paralyzuje rozhodování?",
             options: [
-                { text: "Nikdy", score: 0 },
-                { text: "Zřídka", score: 3 },
-                { text: "Občas", score: 5 },
-                { text: "Často", score: 7 },
-                { text: "Neustále", score: 9 }
+                { text: "Rozhoduji se poměrně snadno", score: 0 },
+                { text: "Občas zvažuji dlouho", score: 1 },
+                { text: "Často se nemůžu rozhodnout", score: 2 },
+                { text: "Skoro vždy mě to blokuje", score: 3 }
             ]
         },
         {
             id: 7,
-            text: "Snaží se váš partner kontrolovat, kam chodíte nebo s kým trávíte čas?",
+            text: "Bojíte se, co si o vás druzí pomyslí?",
             options: [
-                { text: "Vůbec ne", score: 0 },
-                { text: "Pouze se zajímá", score: 1 },
-                { text: "Někdy je přehnaně zvědavý/á", score: 4 },
-                { text: "Často chce vědět všechno", score: 7 },
-                { text: "Neustále mě kontroluje", score: 9 }
+                { text: "Málokdy mě to trápí", score: 0 },
+                { text: "Občas si tím dělám hlavu", score: 1 },
+                { text: "Často o tom přemýšlím", score: 2 },
+                { text: "Neustále analyzuji reakce druhých", score: 3 }
             ]
         },
         {
             id: 8,
-            text: "Jak se váš partner staví k vašim přátelům a rodině?",
+            text: "Máte pocit, že musíte mít všechno pod kontrolou?",
             options: [
-                { text: "Podporuje mé vztahy", score: 0 },
-                { text: "Je neutrální", score: 2 },
-                { text: "Někdy je kritický/á", score: 4 },
-                { text: "Často kritizuje nebo odrazuje od setkání", score: 7 },
-                { text: "Izoluje mě od blízkých", score: 9 }
+                { text: "Ne, jsem v pohodě s nejistotou", score: 0 },
+                { text: "Občas se cítím nekomfortně", score: 1 },
+                { text: "Často potřebuji vědět, co bude", score: 2 },
+                { text: "Neustále, nejistota mě velmi stresuje", score: 3 }
             ]
         },
         {
             id: 9,
-            text: "Jak váš partner řeší konflikty?",
+            text: "Jak často se cítíte duševně vyčerpaní?",
             options: [
-                { text: "Klidně a konstruktivně diskutujeme", score: 0 },
-                { text: "Většinou dobře, občas se pohádáme", score: 2 },
-                { text: "Často se vyhýbá nebo přehání", score: 5 },
-                { text: "Křičí, obviňuje nebo manipuluje", score: 7 },
-                { text: "Používá agresivní chování", score: 9 }
+                { text: "Zřídka", score: 0 },
+                { text: "Občas", score: 1 },
+                { text: "Často", score: 2 },
+                { text: "Téměř pořád", score: 3 }
             ]
         },
         {
             id: 10,
-            text: "Přijímá váš partner zodpovědnost za své chování?",
+            text: "Dokážete být přítomní v momentě?",
             options: [
-                { text: "Vždy", score: 0 },
-                { text: "Většinou", score: 2 },
-                { text: "Někdy", score: 4 },
-                { text: "Zřídka, často viní mě", score: 7 },
-                { text: "Nikdy, vždy jsem já ten špatný/á", score: 9 }
+                { text: "Ano, snadno se soustředím na přítomnost", score: 0 },
+                { text: "Občas mi myšlenky utíkají jinam", score: 1 },
+                { text: "Často jsem myšlenkami jinde", score: 2 },
+                { text: "Téměř nikdy nejsem plně přítomní", score: 3 }
             ]
         }
     ]
@@ -120,87 +110,87 @@ const quizConfig = {
 
 // Result Interpretations
 const resultInterpretations = {
-    healthy: {
-        range: [0, 20],
-        title: "Váš vztah vykazuje zdravé znaky",
+    minimal: {
+        range: [0, 7],
+        title: "Minimální overthinking",
         icon: "✓",
-        color: "#4A9D7B",
-        description: "Na základě vašich odpovědí se zdá, že váš vztah má pevné základy postavené na respektu, důvěře a otevřené komunikaci. To jsou klíčové prvky zdravého partnerského vztahu.",
+        color: "#4CAF50",
+        description: "Gratuluji! Overthinking vás téměř neovlivňuje. Máte zdravý vztah ke svým myšlenkám a dokážete se od nich odpoutat. Vaše mentální pohoda je dobrá.",
         recommendations: [
-            "Pokračujte v otevřené komunikaci a vzájemném respektu",
-            "Věnujte čas společným aktivitám i individuálním zájmům",
-            "Pravidelně si říkejte, co v vztahu funguje dobře",
-            "Buďte pozorní k potřebám partnera i svým vlastním"
+            "Pokračujte ve svých osvědčených strategiích",
+            "Můžete pomoci druhým sdílením svých postupů",
+            "Nezapomínejte na preventivní péči o duševní zdraví",
+            "Buďte k sobě laskaví i v případech, kdy se přece jen přistíhnete při přemýšlení"
         ],
         cta: {
-            heading: "I zdravé vztahy mohou těžit z terapie",
-            description: "Párová konzultace může posílit vaše pouto a naučit vás nové dovednosti pro ještě hlubší spojení.",
-            button: "Zjistit více o párové terapii"
+            heading: "Posilujte své mentální zdraví",
+            description: "I když overthinking není problém, terapie může posílit vaši psychickou odolnost a pomoci vám v dalších oblastech života.",
+            button: "Zjistit více o terapii"
         },
         showCrisis: false
     },
-    warning: {
-        range: [21, 45],
-        title: "Některé varovné signály",
-        icon: "⚠",
-        color: "#E8A87C",
-        description: "Vaše odpovědi naznačují, že ve vašem vztahu existují některé prvky, které by mohly být problematické. Není to ještě závažné, ale je důležité věnovat těmto signálům pozornost.",
+    mild: {
+        range: [8, 15],
+        title: "Mírný overthinking",
+        icon: "○",
+        color: "#8BC34A",
+        description: "Občas se přistihnete, že přemýšlíte více, než byste chtěli, ale celkově to zvládáte. S několika nástroji můžete tuto tendenci ještě více snížit.",
         recommendations: [
-            "Otevřeně promluvte s partnerem o tom, co vás trápí",
-            "Nastavte jasné hranice a komunikujte své potřeby",
-            "Zvažte párovou terapii pro zlepšení komunikace",
-            "Nevzdávejte se svých přátel a osobních zájmů",
-            "Sledujte, zda se situace zlepšuje nebo zhoršuje"
+            "Zjistěte, zda nejste vyčerpaní – můžete potřebovat odpočinek, ne disciplínu",
+            "Vytvořte si podporu – mluvte o tom s důvěryhodnými lidmi",
+            "Omezte multitasking a zaměřte se na jednu věc",
+            "Zkuste techniku \"5-4-3-2-1\" pro návrat do přítomnosti",
+            "Zapište si myšlenky na papír místo jejich opakování v hlavě",
+            "Nastavte si \"čas na přemýšlení\" – 15 minut denně"
         ],
         cta: {
-            heading: "Nenechte varovné signály přerůst v problém",
-            description: "Včasná intervence může vztahu pomoci. Pomohu vám najít cestu ke zdravějšímu vztahu.",
+            heading: "Prevence je klíčem",
+            description: "Terapie vám může pomoci rozvinout lepší strategie a předejít prohlubování overthinkingu.",
             button: "Promluvit si o tom"
         },
         showCrisis: false
     },
-    concerning: {
-        range: [46, 65],
-        title: "Výrazné znaky nezdravého vztahu",
+    moderate: {
+        range: [16, 23],
+        title: "Střední overthinking",
         icon: "!",
-        color: "#D97B7B",
-        description: "Vaše odpovědi ukazují na několik vážných problémů ve vašem vztahu. Tyto vzorce mohou negativně ovlivňovat vaše duševní zdraví a pohodu.",
+        color: "#FFC107",
+        description: "Overthinking vás ovlivňuje častěji a začíná negativně působit na váš každodenní život. Je čas začít s tím aktivně pracovat.",
         recommendations: [
-            "Vaše pocity jsou platné a důležité - věřte jim",
-            "Promluvte si s důvěryhodnou osobou o vaší situaci",
-            "Zvažte individuální terapii pro podporu a jasno",
-            "Vytvořte si bezpečnostní plán, pokud se cítíte ohroženi",
-            "Pamatujte: máte právo na bezpečný a respektující vztah",
-            "Informujte se o možnostech pomoci a podpory"
+            "Uvědomte si, že myšlenky nejsou fakta",
+            "Zkuste techniku \"zastavit myšlenku\" – říct si nahlas STOP",
+            "Praktikujte mindfulness nebo meditaci",
+            "Omezte kofein, který může zhoršovat úzkostné myšlenky",
+            "Pohybujte se – fyzická aktivita pomáhá snížit přemýšlení",
+            "Zvažte práci s terapeutem pro hlubší pochopení vzorců"
         ],
         cta: {
-            heading: "Nejste v tom sami",
-            description: "Pomohu vám najít cestu k bezpečí a uzdravení. Individuální terapie vám poskytne podporu a praktické nástroje.",
+            heading: "Je čas aktivně pracovat s overthinkingem",
+            description: "Terapie vám poskytne nástroje a podporu pro pochopení kořenů overthinkingu a změnu myšlenkových vzorců.",
             button: "Objednat konzultaci"
         },
         showCrisis: false
     },
-    toxic: {
-        range: [66, 90],
-        title: "Vážné znaky toxického vztahu",
+    high: {
+        range: [24, 30],
+        title: "Výrazný overthinking",
         icon: "⚠",
-        color: "#D97B7B",
-        description: "Vaše odpovědi naznačují, že jste v toxickém vztahu, který vážně ohrožuje vaše duševní a možná i fyzické zdraví. Je důležité, abyste věděli, že si nezasloužíte takové zacházení a pomoc je k dispozici.",
+        color: "#F44336",
+        description: "Overthinking vás výrazně ovlivňuje a pravděpodobně negativně působí na váš spánek, vztahy a celkovou pohodu. Je důležité vyhledat odbornou pomoc.",
         recommendations: [
-            "Vaše bezpečnost je absolutní prioritou",
-            "Obraťte se na odbornou pomoc - psychologa nebo centrum pomoci",
-            "Svěřte se někomu, komu důvěřujete",
-            "Vytvořte si bezpečnostní plán pro případ eskalace",
-            "Nejste zodpovědní za chování druhého člověka",
-            "Odchod z toxického vztahu je proces - buďte trpěliví a laskavý/á k sobě",
-            "Zdokumentujte případné incidenty (pro vlastní potřebu nebo právní ochranu)"
+            "Vyhledejte odbornou pomoc – terapeut vám pomůže najít kořeny overthinkingu",
+            "Začněte s malými kroky – zlepšení je proces",
+            "Buďte k sobě laskaví – overthinking není vaše chyba",
+            "Omezte stresory tam, kde to je možné",
+            "Vytvořte si večerní rutinu pro uklidnění mysli",
+            "Zvažte mindfulness nebo jógu jako doplňkovou podporu"
         ],
         cta: {
-            heading: "Pomohu vám najít cestu ven",
-            description: "Individuální terapie vám poskytne bezpečný prostor, podporu a praktické nástroje pro další kroky.",
+            heading: "Pomohu vám uklidnit mysl",
+            description: "Overthinking může být únavný a vyčerpávající. Terapie vám poskytne bezpečný prostor a konkrétní nástroje pro změnu.",
             button: "Vyhledat pomoc"
         },
-        showCrisis: true
+        showCrisis: false
     }
 };
 
@@ -256,12 +246,12 @@ class QuizState {
             score: this.score,
             timestamp: Date.now()
         };
-        localStorage.setItem('quiz-toxicky-vztah-progress', JSON.stringify(progress));
+        localStorage.setItem('quiz-overthinking-progress', JSON.stringify(progress));
     }
 
     loadProgress() {
         try {
-            const saved = localStorage.getItem('quiz-toxicky-vztah-progress');
+            const saved = localStorage.getItem('quiz-overthinking-progress');
             if (saved) {
                 const data = JSON.parse(saved);
                 // Only load if less than 24 hours old
@@ -277,7 +267,7 @@ class QuizState {
     }
 
     clearProgress() {
-        localStorage.removeItem('quiz-toxicky-vztah-progress');
+        localStorage.removeItem('quiz-overthinking-progress');
     }
 
     getResult() {
@@ -287,7 +277,7 @@ class QuizState {
                 return { type: key, ...result };
             }
         }
-        return resultInterpretations.healthy;
+        return resultInterpretations.minimal;
     }
 }
 
@@ -362,7 +352,7 @@ class QuizController {
     }
 
     checkResumeQuiz() {
-        const saved = localStorage.getItem('quiz-toxicky-vztah-progress');
+        const saved = localStorage.getItem('quiz-overthinking-progress');
         if (saved) {
             try {
                 const data = JSON.parse(saved);
@@ -387,7 +377,7 @@ class QuizController {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    renderQuestion() {
+    renderQuestion(shouldScroll = true) {
         const questionIndex = this.state.currentQuestion;
         const question = quizConfig.questions[questionIndex];
 
@@ -424,7 +414,8 @@ class QuizController {
             optionDiv.appendChild(label);
 
             // Click handler for entire option div
-            optionDiv.addEventListener('click', () => {
+            optionDiv.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.selectOption(questionIndex, index, option.score);
             });
 
@@ -437,12 +428,23 @@ class QuizController {
         // Announce to screen readers
         this.announceToScreenReader(`Otázka ${questionIndex + 1} z ${quizConfig.questions.length}: ${question.text}`);
 
-        // Scroll to top
-        window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: 'smooth' });
+        // Only scroll when moving between questions
+        if (shouldScroll) {
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: 'smooth' });
+            } else {
+                // On mobile, scroll to keep question in view
+                this.quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
     }
 
     selectOption(questionIndex, optionIndex, score) {
         this.state.selectAnswer(questionIndex, optionIndex, score);
+
+        // Store current scroll position
+        const scrollPos = window.scrollY || window.pageYOffset;
 
         // Update UI
         const options = this.optionsContainer.querySelectorAll('.quiz-option');
@@ -451,6 +453,9 @@ class QuizController {
             const radio = opt.querySelector('input[type="radio"]');
             radio.checked = idx === optionIndex;
         });
+
+        // Restore scroll position to prevent unwanted scrolling
+        window.scrollTo(0, scrollPos);
 
         // Enable next button
         this.nextBtn.disabled = false;
@@ -539,9 +544,15 @@ class QuizController {
         }
 
         // Populate CTA
-        this.ctaHeading.textContent = result.cta.heading;
-        this.ctaDescription.textContent = result.cta.description;
-        this.ctaButton.textContent = result.cta.button;
+        if (this.ctaHeading) {
+            this.ctaHeading.textContent = result.cta.heading;
+        }
+        if (this.ctaDescription) {
+            this.ctaDescription.textContent = result.cta.description;
+        }
+        if (this.ctaButton) {
+            this.ctaButton.textContent = result.cta.button;
+        }
 
         // Clear saved progress
         this.state.clearProgress();
@@ -651,7 +662,7 @@ function showShareMessage(message) {
 function restartQuiz() {
     if (confirm('Opravdu chcete začít test znovu? Vaše současné výsledky budou ztraceny.')) {
         // Clear state
-        localStorage.removeItem('quiz-toxicky-vztah-progress');
+        localStorage.removeItem('quiz-overthinking-progress');
 
         // Reload page to start fresh
         window.location.reload();
