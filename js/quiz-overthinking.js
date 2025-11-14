@@ -1,166 +1,210 @@
+/* ==========================================
+   QUIZ JAVASCRIPT - TOXICKÝ VZTAH
+   ========================================== */
+
 // Quiz Configuration
 const quizConfig = {
     questions: [
         {
             id: 1,
-            text: "Jak často se vracíte k situacím, které už dávno skončily?",
+            text: "Jak často váš partner respektuje vaše osobní hranice?",
             options: [
-                { text: "Málokdy, většinou se soustředím na přítomnost", points: 0 },
-                { text: "Občas, ale rychle se vrátím do současnosti", points: 1 },
-                { text: "Často, myslím na minulé situace několikrát týdně", points: 2 },
-                { text: "Neustále, stále dokola analyzuji, co se stalo", points: 3 }
+                { text: "Vždy", score: 0 },
+                { text: "Většinou", score: 2 },
+                { text: "Občas", score: 4 },
+                { text: "Zřídka", score: 6 },
+                { text: "Nikdy", score: 8 }
             ]
         },
         {
             id: 2,
-            text: "Dokážete vypnout myšlenky před spaním?",
+            text: "Cítíte se svobodně vyjádřit svůj názor, i když se neshodujete?",
             options: [
-                { text: "Ano, usínám snadno a klidně", points: 0 },
-                { text: "Většinou ano, jen občas mám problém", points: 1 },
-                { text: "Ne, často mi trvá dlouho usnout", points: 2 },
-                { text: "Vůbec ne, hlava mi jede i v noci", points: 3 }
+                { text: "Určitě ano", score: 0 },
+                { text: "Spíše ano", score: 2 },
+                { text: "Někdy ano, někdy ne", score: 4 },
+                { text: "Spíše ne", score: 6 },
+                { text: "Určitě ne", score: 8 }
             ]
         },
         {
             id: 3,
-            text: "Po rozhovoru s někým analyzujete, co jste řekli?",
+            text: "Jak reaguje váš partner, když řeknete \"ne\"?",
             options: [
-                { text: "Ne, nevracím se k tomu", points: 0 },
-                { text: "Jen pokud to bylo důležité", points: 1 },
-                { text: "Ano, často si přehrávám důležité konverzace", points: 2 },
-                { text: "Vždy, detailně analyzuję každé slovo", points: 3 }
+                { text: "Respektuje to bez problémů", score: 0 },
+                { text: "Většinou to akceptuje", score: 2 },
+                { text: "Někdy se zlobí, ale přijme to", score: 4 },
+                { text: "Často se naštve nebo mě přesvědčuje", score: 6 },
+                { text: "Nikdy to nepřijme, trvá na svém", score: 8 }
             ]
         },
         {
             id: 4,
-            text: "Jak často vytváříte scénáře \"co kdyby\" o budoucnosti?",
+            text: "Jak často vás partner kritizuje nebo snižuje?",
             options: [
-                { text: "Málokdy, žiju v přítomnosti", points: 0 },
-                { text: "Někdy, při důležitých rozhodnutích", points: 1 },
-                { text: "Často, plánuji různé varianty", points: 2 },
-                { text: "Neustále, připravuję se na každou možnost", points: 3 }
+                { text: "Nikdy", score: 0 },
+                { text: "Zřídka", score: 2 },
+                { text: "Občas", score: 4 },
+                { text: "Často", score: 6 },
+                { text: "Neustále", score: 8 }
             ]
         },
         {
             id: 5,
-            text: "Máte pocit, že potřebujete mít vše pod kontrolou?",
+            text: "Cítíte se ve vztahu bezpečně a respektovaně?",
             options: [
-                { text: "Ne, jsem v pohodě s nejistotou", points: 0 },
-                { text: "Občas, ale dokážu to zvládnout", points: 1 },
-                { text: "Ano, potřebuji vědět, co bude", points: 2 },
-                { text: "Určitě, nejistota mě velmi stresuje", points: 3 }
+                { text: "Vždy", score: 0 },
+                { text: "Většinou", score: 2 },
+                { text: "Někdy ano, někdy ne", score: 5 },
+                { text: "Spíše ne", score: 7 },
+                { text: "Určitě ne", score: 9 }
             ]
         },
         {
             id: 6,
-            text: "Jak dlouho vám trvá rozhodnutí v běžných věcech?",
+            text: "Máte pocit, že chodíte \"po špičkách\", abyste partnera nenaštvali?",
             options: [
-                { text: "Rozhoduji se rychle a bez problémů", points: 0 },
-                { text: "Normálně, občas potřebuji chvíli přemýšlet", points: 1 },
-                { text: "Dlouho, zvažuji všechny možnosti", points: 2 },
-                { text: "Velmi dlouho, často se nedokážu rozhodnout", points: 3 }
+                { text: "Nikdy", score: 0 },
+                { text: "Zřídka", score: 3 },
+                { text: "Občas", score: 5 },
+                { text: "Často", score: 7 },
+                { text: "Neustále", score: 9 }
             ]
         },
         {
             id: 7,
-            text: "Bojíte se udělat chybu?",
+            text: "Snaží se váš partner kontrolovat, kam chodíte nebo s kým trávíte čas?",
             options: [
-                { text: "Ne, chyby beru jako součást života", points: 0 },
-                { text: "Trochu, ale zvládám to", points: 1 },
-                { text: "Ano, snažím se jim vyhnout", points: 2 },
-                { text: "Velmi, strach z chyby mě často paralyzuje", points: 3 }
+                { text: "Vůbec ne", score: 0 },
+                { text: "Pouze se zajímá", score: 1 },
+                { text: "Někdy je přehnaně zvědavý/á", score: 4 },
+                { text: "Často chce vědět všechno", score: 7 },
+                { text: "Neustále mě kontroluje", score: 9 }
             ]
         },
         {
             id: 8,
-            text: "Cítíte se unavení z vlastních myšlenek?",
+            text: "Jak se váš partner staví k vašim přátelům a rodině?",
             options: [
-                { text: "Ne, mé myšlenky mě nevyčerpávají", points: 0 },
-                { text: "Občas, ale většinou je zvládám", points: 1 },
-                { text: "Často, přemýšlení mě unavuje", points: 2 },
-                { text: "Téměř neustále, jsem vyčerpaný/-á", points: 3 }
+                { text: "Podporuje mé vztahy", score: 0 },
+                { text: "Je neutrální", score: 2 },
+                { text: "Někdy je kritický/á", score: 4 },
+                { text: "Často kritizuje nebo odrazuje od setkání", score: 7 },
+                { text: "Izoluje mě od blízkých", score: 9 }
             ]
         },
         {
             id: 9,
-            text: "Dokážete se soustředit na jednu věc najednou?",
+            text: "Jak váš partner řeší konflikty?",
             options: [
-                { text: "Ano, soustředím se dobře", points: 0 },
-                { text: "Většinou ano, jen občas se rozptýlím", points: 1 },
-                { text: "Ne, myšlenky mi často skáčou", points: 2 },
-                { text: "Vůbec ne, hlava mi jede na mnoho věcí najednou", points: 3 }
+                { text: "Klidně a konstruktivně diskutujeme", score: 0 },
+                { text: "Většinou dobře, občas se pohádáme", score: 2 },
+                { text: "Často se vyhýbá nebo přehání", score: 5 },
+                { text: "Křičí, obviňuje nebo manipuluje", score: 7 },
+                { text: "Používá agresivní chování", score: 9 }
             ]
         },
         {
             id: 10,
-            text: "Jak moc vás zajímá, co si o vás myslí ostatní?",
+            text: "Přijímá váš partner zodpovědnost za své chování?",
             options: [
-                { text: "Málo, důležitý je můj vlastní názor", points: 0 },
-                { text: "Trochu, ale nepřemýšlím o tom moc", points: 1 },
-                { text: "Hodně, často to řeším", points: 2 },
-                { text: "Velmi, neustále o tom přemýšlím", points: 3 }
+                { text: "Vždy", score: 0 },
+                { text: "Většinou", score: 2 },
+                { text: "Někdy", score: 4 },
+                { text: "Zřídka, často viní mě", score: 7 },
+                { text: "Nikdy, vždy jsem já ten špatný/á", score: 9 }
             ]
-        }
-    ],
-    results: [
-        {
-            range: [0, 7],
-            level: "healthy",
-            title: "Zdravé přemýšlení",
-            description: "Gratuluji! Vypadá to, že máte zdravý vztah ke svým myšlenkám. Dokážete přemýšlet, aniž byste se v tom ztráceli. Umíte se soustředit na přítomnost a nepřetěžujete se zbytečnými scénáři.",
-            recommendations: [
-                "Pokračujte ve své praxi mindfulness nebo jakékoliv aktivitě, která vám pomáhá zůstat v přítomnosti",
-                "Sdílejte své strategie s ostatními, kteří s overthinkingem bojují",
-                "Buďte k sobě i nadále laskavý/á a udržujte si zdravé hranice"
-            ],
-            color: "#4CAF50"
-        },
-        {
-            range: [8, 15],
-            level: "mild",
-            title: "Mírný overthinking",
-            description: "Občas se vám stává, že přemýšlíte víc, než by bylo potřeba, ale v celku to zvládáte. Jsou situace, kdy vás myšlenky zatěžují, ale máte nástroje, jak se z toho dostat.",
-            recommendations: [
-                "Praktikujte techniku časového rámce – dejte si 10 minut na přemýšlení a pak to nechte být",
-                "Zkuste si myšlenky zapsat, aby přestaly kolovat v hlavě",
-                "Vraťte se k tělu – dýchání, procházka nebo protažení pomohou přerušit kolotoč myšlenek",
-                "Přečtěte si náš článek o overthinkingu pro další tipy"
-            ],
-            color: "#FFC107"
-        },
-        {
-            range: [16, 23],
-            level: "moderate",
-            title: "Výraznější overthinking",
-            description: "Overthinking vás ovlivňuje častěji a více. Myšlenky vás zatěžují, unavují a často vám brání v klidu a soustředění. Je čas na to začít aktivně pracovat s tímto vzorcem.",
-            recommendations: [
-                "Pojmenujte si, kdy se overthinking spouští – co jsou vaše spouštěče?",
-                "Cvičte toleranci k nejistotě – ne vše musí být pod kontrolou",
-                "Omezte rozhodování na \"dost dobré\" místo \"dokonalé\"",
-                "Vytvořte si rutinu pro uklidnění mysli před spaním",
-                "Zvažte práci s terapeutem, který vám pomůže najít vaše vlastní strategie"
-            ],
-            color: "#FF9800"
-        },
-        {
-            range: [24, 30],
-            level: "high",
-            title: "Intenzivní overthinking",
-            description: "Overthinking vás výrazně ovlivňuje v každodenním životě. Myšlenky vás vyčerpávají, brání vám v odpočinku a pravděpodobně ovlivňují váš spánek, rozhodování i vztahy. Je důležité s tím začít pracovat.",
-            recommendations: [
-                "Vyhledejte odbornou pomoc – terapeut vám pomůže najít cestu ven z tohoto vzorce",
-                "Začněte malými kroky – i 5 minut denní meditace nebo psaní deníku může pomoci",
-                "Buďte k sobě laskavý/á – overthinking není vaše chyba, je to naučený vzorec",
-                "Omezte příjem informací a podnětů, které mysl ještě více zatěžují",
-                "Vytvořte si podporu – mluvte o tom s důvěryhodnými lidmi"
-            ],
-            color: "#F44336",
-            showCTA: true
         }
     ]
 };
 
-// Quiz State Management
+// Result Interpretations
+const resultInterpretations = {
+    healthy: {
+        range: [0, 20],
+        title: "Váš vztah vykazuje zdravé znaky",
+        icon: "✓",
+        color: "#4A9D7B",
+        description: "Na základě vašich odpovědí se zdá, že váš vztah má pevné základy postavené na respektu, důvěře a otevřené komunikaci. To jsou klíčové prvky zdravého partnerského vztahu.",
+        recommendations: [
+            "Pokračujte v otevřené komunikaci a vzájemném respektu",
+            "Věnujte čas společným aktivitám i individuálním zájmům",
+            "Pravidelně si říkejte, co v vztahu funguje dobře",
+            "Buďte pozorní k potřebám partnera i svým vlastním"
+        ],
+        cta: {
+            heading: "I zdravé vztahy mohou těžit z terapie",
+            description: "Párová konzultace může posílit vaše pouto a naučit vás nové dovednosti pro ještě hlubší spojení.",
+            button: "Zjistit více o párové terapii"
+        },
+        showCrisis: false
+    },
+    warning: {
+        range: [21, 45],
+        title: "Některé varovné signály",
+        icon: "⚠",
+        color: "#E8A87C",
+        description: "Vaše odpovědi naznačují, že ve vašem vztahu existují některé prvky, které by mohly být problematické. Není to ještě závažné, ale je důležité věnovat těmto signálům pozornost.",
+        recommendations: [
+            "Otevřeně promluvte s partnerem o tom, co vás trápí",
+            "Nastavte jasné hranice a komunikujte své potřeby",
+            "Zvažte párovou terapii pro zlepšení komunikace",
+            "Nevzdávejte se svých přátel a osobních zájmů",
+            "Sledujte, zda se situace zlepšuje nebo zhoršuje"
+        ],
+        cta: {
+            heading: "Nenechte varovné signály přerůst v problém",
+            description: "Včasná intervence může vztahu pomoci. Pomohu vám najít cestu ke zdravějšímu vztahu.",
+            button: "Promluvit si o tom"
+        },
+        showCrisis: false
+    },
+    concerning: {
+        range: [46, 65],
+        title: "Výrazné znaky nezdravého vztahu",
+        icon: "!",
+        color: "#D97B7B",
+        description: "Vaše odpovědi ukazují na několik vážných problémů ve vašem vztahu. Tyto vzorce mohou negativně ovlivňovat vaše duševní zdraví a pohodu.",
+        recommendations: [
+            "Vaše pocity jsou platné a důležité - věřte jim",
+            "Promluvte si s důvěryhodnou osobou o vaší situaci",
+            "Zvažte individuální terapii pro podporu a jasno",
+            "Vytvořte si bezpečnostní plán, pokud se cítíte ohroženi",
+            "Pamatujte: máte právo na bezpečný a respektující vztah",
+            "Informujte se o možnostech pomoci a podpory"
+        ],
+        cta: {
+            heading: "Nejste v tom sami",
+            description: "Pomohu vám najít cestu k bezpečí a uzdravení. Individuální terapie vám poskytne podporu a praktické nástroje.",
+            button: "Objednat konzultaci"
+        },
+        showCrisis: false
+    },
+    toxic: {
+        range: [66, 90],
+        title: "Vážné znaky toxického vztahu",
+        icon: "⚠",
+        color: "#D97B7B",
+        description: "Vaše odpovědi naznačují, že jste v toxickém vztahu, který vážně ohrožuje vaše duševní a možná i fyzické zdraví. Je důležité, abyste věděli, že si nezasloužíte takové zacházení a pomoc je k dispozici.",
+        recommendations: [
+            "Vaše bezpečnost je absolutní prioritou",
+            "Obraťte se na odbornou pomoc - psychologa nebo centrum pomoci",
+            "Svěřte se někomu, komu důvěřujete",
+            "Vytvořte si bezpečnostní plán pro případ eskalace",
+            "Nejste zodpovědní za chování druhého člověka",
+            "Odchod z toxického vztahu je proces - buďte trpěliví a laskavý/á k sobě",
+            "Zdokumentujte případné incidenty (pro vlastní potřebu nebo právní ochranu)"
+        ],
+        cta: {
+            heading: "Pomohu vám najít cestu ven",
+            description: "Individuální terapie vám poskytne bezpečný prostor, podporu a praktické nástroje pro další kroky.",
+            button: "Vyhledat pomoc"
+        },
+        showCrisis: true
+    }
+};
+
+// Quiz State
 class QuizState {
     constructor() {
         this.currentQuestion = 0;
@@ -169,45 +213,81 @@ class QuizState {
         this.loadProgress();
     }
 
+    selectAnswer(questionIndex, optionIndex, score) {
+        // If there was a previous answer, subtract its score
+        const question = quizConfig.questions[questionIndex];
+        if (this.answers[questionIndex] !== null) {
+            const previousScore = question.options[this.answers[questionIndex]].score;
+            this.score -= previousScore;
+        }
+
+        // Add new answer and score
+        this.answers[questionIndex] = optionIndex;
+        this.score += score;
+        this.saveProgress();
+    }
+
+    nextQuestion() {
+        if (this.currentQuestion < quizConfig.questions.length - 1) {
+            this.currentQuestion++;
+            this.saveProgress();
+            return true;
+        }
+        return false;
+    }
+
+    previousQuestion() {
+        if (this.currentQuestion > 0) {
+            this.currentQuestion--;
+            this.saveProgress();
+            return true;
+        }
+        return false;
+    }
+
+    getProgress() {
+        return Math.round(((this.currentQuestion + 1) / quizConfig.questions.length) * 100);
+    }
+
     saveProgress() {
-        const progressData = {
+        const progress = {
             currentQuestion: this.currentQuestion,
             answers: this.answers,
             score: this.score,
             timestamp: Date.now()
         };
-        localStorage.setItem('quiz-overthinking-progress', JSON.stringify(progressData));
+        localStorage.setItem('quiz-toxicky-vztah-progress', JSON.stringify(progress));
     }
 
     loadProgress() {
-        const saved = localStorage.getItem('quiz-overthinking-progress');
-        if (saved) {
-            const data = JSON.parse(saved);
-            // Check if progress is less than 24 hours old
-            if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
-                this.currentQuestion = data.currentQuestion;
-                this.answers = data.answers;
-                this.score = data.score;
-            } else {
-                this.clearProgress();
+        try {
+            const saved = localStorage.getItem('quiz-toxicky-vztah-progress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                // Only load if less than 24 hours old
+                if (Date.now() - data.timestamp < 86400000) {
+                    this.currentQuestion = data.currentQuestion || 0;
+                    this.answers = data.answers || new Array(quizConfig.questions.length).fill(null);
+                    this.score = data.score || 0;
+                }
             }
+        } catch (e) {
+            console.error('Error loading progress:', e);
         }
     }
 
     clearProgress() {
-        localStorage.removeItem('quiz-overthinking-progress');
-    }
-
-    calculateScore() {
-        this.score = this.answers.reduce((sum, points) => sum + (points || 0), 0);
-        return this.score;
+        localStorage.removeItem('quiz-toxicky-vztah-progress');
     }
 
     getResult() {
-        const score = this.calculateScore();
-        return quizConfig.results.find(result =>
-            score >= result.range[0] && score <= result.range[1]
-        );
+        for (const key in resultInterpretations) {
+            const result = resultInterpretations[key];
+            if (this.score >= result.range[0] && this.score <= result.range[1]) {
+                return { type: key, ...result };
+            }
+        }
+        return resultInterpretations.healthy;
     }
 }
 
@@ -217,167 +297,251 @@ class QuizController {
         this.state = new QuizState();
         this.initializeElements();
         this.attachEventListeners();
-
-        // Resume quiz if in progress
-        if (this.state.currentQuestion > 0 && this.state.currentQuestion < quizConfig.questions.length) {
-            this.showQuestion();
-        }
+        this.checkResumeQuiz();
     }
 
     initializeElements() {
-        this.startBtn = document.getElementById('startQuiz');
-        this.quizContainer = document.getElementById('quizContainer');
-        this.questionContainer = document.getElementById('questionContainer');
-        this.progressBar = document.getElementById('progressBar');
-        this.progressText = document.getElementById('progressText');
+        // Intro elements
+        this.introSection = document.querySelector('.quiz-intro');
+        this.startBtn = document.getElementById('startQuizBtn');
+
+        // Quiz elements
+        this.quizSection = document.getElementById('quizSection');
+        this.questionCard = document.getElementById('questionCard');
+        this.questionText = document.getElementById('questionText');
+        this.optionsContainer = document.getElementById('optionsContainer');
+        this.prevBtn = document.getElementById('prevBtn');
+        this.nextBtn = document.getElementById('nextBtn');
+
+        // Progress elements
+        this.currentQuestionEl = document.getElementById('currentQuestion');
+        this.totalQuestionsEl = document.getElementById('totalQuestions');
+        this.progressPercentEl = document.getElementById('progressPercent');
+        this.progressFill = document.getElementById('progressFill');
+        this.liveRegion = document.getElementById('liveRegion');
+
+        // Results elements
         this.resultsSection = document.getElementById('resultsSection');
-        this.resultsContent = document.getElementById('resultsContent');
-        this.retakeBtn = document.getElementById('retakeQuiz');
-        this.shareBtn = document.getElementById('shareQuiz');
+        this.resultsIcon = document.getElementById('resultsIcon');
+        this.resultsTitle = document.getElementById('resultsTitle');
+        this.resultsScore = document.getElementById('resultsScore');
+        this.resultsDescription = document.getElementById('resultsDescription');
+        this.recommendationsList = document.getElementById('recommendationsList');
+        this.crisisResources = document.getElementById('crisisResources');
+        this.ctaHeading = document.getElementById('ctaHeading');
+        this.ctaDescription = document.getElementById('ctaDescription');
+        this.ctaButton = document.getElementById('ctaButton');
+
+        // Set total questions
+        if (this.totalQuestionsEl) {
+            this.totalQuestionsEl.textContent = quizConfig.questions.length;
+        }
     }
 
     attachEventListeners() {
-        this.startBtn.addEventListener('click', () => this.startQuiz());
-        this.retakeBtn.addEventListener('click', () => this.retakeQuiz());
-        this.shareBtn.addEventListener('click', () => this.shareResults());
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', () => this.startQuiz());
+        }
+
+        if (this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.handlePrevious());
+        }
+
+        if (this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.handleNext());
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (this.quizSection.style.display !== 'none') {
+                if (e.key === 'Enter' && !this.nextBtn.disabled) {
+                    this.handleNext();
+                }
+            }
+        });
+    }
+
+    checkResumeQuiz() {
+        const saved = localStorage.getItem('quiz-toxicky-vztah-progress');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (Date.now() - data.timestamp < 86400000 && data.currentQuestion > 0) {
+                    const resume = confirm('Chcete pokračovat v nedokončeném testu?');
+                    if (!resume) {
+                        this.state.clearProgress();
+                        this.state = new QuizState();
+                    }
+                }
+            } catch (e) {
+                console.error('Error checking resume:', e);
+            }
+        }
     }
 
     startQuiz() {
-        // Track quiz start with Google Analytics
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'quiz_start', {
-                'quiz_name': 'overthinking'
-            });
-        }
-
-        document.querySelector('.quiz-intro').style.display = 'none';
-        this.quizContainer.style.display = 'block';
-        this.showQuestion();
-    }
-
-    showQuestion() {
-        const question = quizConfig.questions[this.state.currentQuestion];
-        const progress = ((this.state.currentQuestion + 1) / quizConfig.questions.length) * 100;
-
-        this.progressBar.style.width = `${progress}%`;
-        this.progressText.textContent = `Otázka ${this.state.currentQuestion + 1} z ${quizConfig.questions.length}`;
-
-        this.questionContainer.innerHTML = `
-            <div class="quiz-question" data-question="${question.id}">
-                <h2 class="quiz-question-text">${question.text}</h2>
-                <div class="quiz-options">
-                    ${question.options.map((option, index) => `
-                        <button class="quiz-option ${this.state.answers[this.state.currentQuestion] === option.points ? 'selected' : ''}"
-                                data-points="${option.points}"
-                                data-index="${index}">
-                            <span class="quiz-option-text">${option.text}</span>
-                        </button>
-                    `).join('')}
-                </div>
-                ${this.state.currentQuestion > 0 ? '<button class="btn btn-secondary quiz-back-btn">Zpět</button>' : ''}
-            </div>
-        `;
-
-        // Attach option click handlers
-        const optionButtons = this.questionContainer.querySelectorAll('.quiz-option');
-        optionButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => this.selectOption(e));
-        });
-
-        // Attach back button handler
-        const backBtn = this.questionContainer.querySelector('.quiz-back-btn');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => this.previousQuestion());
-        }
-
-        // Scroll to top
+        this.trackEvent('quiz_started');
+        this.introSection.style.display = 'none';
+        this.quizSection.style.display = 'block';
+        this.renderQuestion();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    selectOption(event) {
-        const button = event.currentTarget;
-        const points = parseInt(button.dataset.points);
+    renderQuestion() {
+        const questionIndex = this.state.currentQuestion;
+        const question = quizConfig.questions[questionIndex];
 
-        // Remove selected class from all options
-        this.questionContainer.querySelectorAll('.quiz-option').forEach(btn => {
-            btn.classList.remove('selected');
+        // Update progress
+        this.updateProgress();
+
+        // Update question text
+        this.questionText.textContent = question.text;
+
+        // Render options
+        this.optionsContainer.innerHTML = '';
+        question.options.forEach((option, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'quiz-option';
+            if (this.state.answers[questionIndex] === index) {
+                optionDiv.classList.add('selected');
+            }
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = `question-${question.id}`;
+            radio.id = `q${question.id}-opt${index}`;
+            radio.value = index;
+            if (this.state.answers[questionIndex] === index) {
+                radio.checked = true;
+            }
+
+            const label = document.createElement('label');
+            label.htmlFor = radio.id;
+            label.className = 'quiz-option-label';
+            label.textContent = option.text;
+
+            optionDiv.appendChild(radio);
+            optionDiv.appendChild(label);
+
+            // Click handler for entire option div
+            optionDiv.addEventListener('click', () => {
+                this.selectOption(questionIndex, index, option.score);
+            });
+
+            this.optionsContainer.appendChild(optionDiv);
         });
 
-        // Add selected class to clicked option
-        button.classList.add('selected');
+        // Update navigation buttons
+        this.updateNavigationButtons();
 
-        // Save answer
-        this.state.answers[this.state.currentQuestion] = points;
-        this.state.saveProgress();
+        // Announce to screen readers
+        this.announceToScreenReader(`Otázka ${questionIndex + 1} z ${quizConfig.questions.length}: ${question.text}`);
 
-        // Track answer with Google Analytics
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'quiz_answer', {
-                'quiz_name': 'overthinking',
-                'question_number': this.state.currentQuestion + 1,
-                'answer_value': points
-            });
-        }
-
-        // Move to next question after brief delay
-        setTimeout(() => {
-            this.nextQuestion();
-        }, 300);
+        // Scroll to top
+        window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: 'smooth' });
     }
 
-    nextQuestion() {
-        if (this.state.currentQuestion < quizConfig.questions.length - 1) {
-            this.state.currentQuestion++;
-            this.state.saveProgress();
-            this.showQuestion();
+    selectOption(questionIndex, optionIndex, score) {
+        this.state.selectAnswer(questionIndex, optionIndex, score);
+
+        // Update UI
+        const options = this.optionsContainer.querySelectorAll('.quiz-option');
+        options.forEach((opt, idx) => {
+            opt.classList.toggle('selected', idx === optionIndex);
+            const radio = opt.querySelector('input[type="radio"]');
+            radio.checked = idx === optionIndex;
+        });
+
+        // Enable next button
+        this.nextBtn.disabled = false;
+
+        // Track event
+        this.trackEvent('quiz_question_answered', `Question ${questionIndex + 1}`);
+    }
+
+    handlePrevious() {
+        if (this.state.previousQuestion()) {
+            this.renderQuestion();
+        }
+    }
+
+    handleNext() {
+        const hasNext = this.state.nextQuestion();
+        if (hasNext) {
+            this.renderQuestion();
         } else {
             this.showResults();
         }
     }
 
-    previousQuestion() {
+    updateProgress() {
+        const questionNum = this.state.currentQuestion + 1;
+        const progress = this.state.getProgress();
+
+        this.currentQuestionEl.textContent = questionNum;
+        this.progressPercentEl.textContent = progress;
+        this.progressFill.style.width = `${progress}%`;
+        this.progressFill.parentElement.setAttribute('aria-valuenow', progress);
+    }
+
+    updateNavigationButtons() {
+        // Show/hide previous button
         if (this.state.currentQuestion > 0) {
-            this.state.currentQuestion--;
-            this.state.saveProgress();
-            this.showQuestion();
+            this.prevBtn.style.display = 'inline-block';
+        } else {
+            this.prevBtn.style.display = 'none';
         }
+
+        // Update next button text
+        if (this.state.currentQuestion === quizConfig.questions.length - 1) {
+            this.nextBtn.textContent = 'Zobrazit výsledky →';
+        } else {
+            this.nextBtn.textContent = 'Další →';
+        }
+
+        // Enable/disable next button based on answer
+        this.nextBtn.disabled = this.state.answers[this.state.currentQuestion] === null;
     }
 
     showResults() {
         const result = this.state.getResult();
 
-        // Track quiz completion with Google Analytics
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'quiz_complete', {
-                'quiz_name': 'overthinking',
-                'score': this.state.score,
-                'result_level': result.level
-            });
-        }
+        // Track completion
+        this.trackEvent('quiz_completed', result.type);
 
-        this.quizContainer.style.display = 'none';
+        // Hide quiz section
+        this.quizSection.style.display = 'none';
+
+        // Show results section
         this.resultsSection.style.display = 'block';
 
-        this.resultsContent.innerHTML = `
-            <div class="quiz-result-card" style="border-left: 4px solid ${result.color}">
-                <div class="quiz-result-score">
-                    <div class="quiz-result-score-circle" style="background: linear-gradient(135deg, ${result.color}22, ${result.color}44)">
-                        <span class="quiz-result-score-number">${this.state.score}</span>
-                        <span class="quiz-result-score-max">/ 30</span>
-                    </div>
-                </div>
+        // Populate results
+        this.resultsIcon.textContent = result.icon;
+        this.resultsIcon.style.color = result.color;
+        this.resultsTitle.textContent = result.title;
+        this.resultsTitle.style.color = result.color;
+        this.resultsScore.textContent = this.state.score;
+        this.resultsDescription.textContent = result.description;
 
-                <h3 class="quiz-result-title" style="color: ${result.color}">${result.title}</h3>
-                <p class="quiz-result-description">${result.description}</p>
+        // Populate recommendations
+        this.recommendationsList.innerHTML = '';
+        result.recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.textContent = rec;
+            this.recommendationsList.appendChild(li);
+        });
 
-                <div class="quiz-result-recommendations">
-                    <h4>Co vám může pomoci:</h4>
-                    <ul>
-                        ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                    </ul>
-                </div>
-            </div>
-        `;
+        // Show/hide crisis resources
+        if (result.showCrisis) {
+            this.crisisResources.style.display = 'block';
+        } else {
+            this.crisisResources.style.display = 'none';
+        }
+
+        // Populate CTA
+        this.ctaHeading.textContent = result.cta.heading;
+        this.ctaDescription.textContent = result.cta.description;
+        this.ctaButton.textContent = result.cta.button;
 
         // Clear saved progress
         this.state.clearProgress();
@@ -386,43 +550,115 @@ class QuizController {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    retakeQuiz() {
-        this.state = new QuizState();
-        this.resultsSection.style.display = 'none';
-        this.quizContainer.style.display = 'block';
-        this.showQuestion();
+    announceToScreenReader(message) {
+        if (this.liveRegion) {
+            this.liveRegion.textContent = message;
+        }
     }
 
-    shareResults() {
-        const result = this.state.getResult();
-        const shareText = `Dokončil/a jsem test overthinkingu na KHG Poradenství. Můj výsledek: ${result.title}`;
-        const shareUrl = window.location.href;
-
-        if (navigator.share) {
-            navigator.share({
-                title: 'Test overthinkingu - KHG Poradenství',
-                text: shareText,
-                url: shareUrl
-            }).catch(err => console.log('Sdílení zrušeno'));
-        } else {
-            // Fallback - copy to clipboard
-            navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
-                .then(() => alert('Odkaz zkopírován do schránky!'))
-                .catch(err => console.error('Chyba při kopírování:', err));
-        }
-
-        // Track sharing with Google Analytics
+    trackEvent(action, label = '') {
         if (typeof gtag !== 'undefined') {
-            gtag('event', 'share', {
-                'method': 'quiz_share',
-                'content_type': 'quiz',
-                'item_id': 'overthinking'
+            gtag('event', action, {
+                'event_category': 'Quiz',
+                'event_label': label
             });
         }
     }
 }
 
-// Initialize quiz when DOM is loaded
+// Social Sharing Functions
+function shareQuiz(platform) {
+    const url = window.location.href;
+    const text = encodeURIComponent('Test overthinkingu - Může vám pomoci zjistit, jak moc vás ovlivňuje přemýšlení');
+
+    console.log('Sharing quiz:', platform, 'URL:', url);
+
+    let shareUrl = '';
+
+    if (platform === 'facebook') {
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    } else if (platform === 'twitter') {
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${text}`;
+    }
+
+    console.log('Final share URL:', shareUrl);
+
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=600');
+
+        // Track share event
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'share', {
+                'event_category': 'Quiz',
+                'event_label': platform
+            });
+        }
+    }
+}
+
+function copyQuizLink() {
+    const url = window.location.href;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            showShareMessage('Odkaz byl zkopírován!');
+        }).catch(() => {
+            fallbackCopyLink(url);
+        });
+    } else {
+        fallbackCopyLink(url);
+    }
+
+    // Track copy event
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'share', {
+            'event_category': 'Quiz',
+            'event_label': 'copy_link'
+        });
+    }
+}
+
+function fallbackCopyLink(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+        showShareMessage('Odkaz byl zkopírován!');
+    } catch (err) {
+        showShareMessage('Chyba při kopírování odkazu');
+    }
+
+    document.body.removeChild(textarea);
+}
+
+function showShareMessage(message) {
+    const messageEl = document.getElementById('shareMessage');
+    if (messageEl) {
+        messageEl.textContent = message;
+        messageEl.style.display = 'block';
+
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+        }, 3000);
+    }
+}
+
+function restartQuiz() {
+    if (confirm('Opravdu chcete začít test znovu? Vaše současné výsledky budou ztraceny.')) {
+        // Clear state
+        localStorage.removeItem('quiz-toxicky-vztah-progress');
+
+        // Reload page to start fresh
+        window.location.reload();
+    }
+}
+
+// Initialize Quiz when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new QuizController();
+    const quiz = new QuizController();
 });

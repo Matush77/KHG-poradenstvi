@@ -568,19 +568,23 @@ class QuizController {
 
 // Social Sharing Functions
 function shareQuiz(platform) {
-    const url = encodeURIComponent(window.location.href);
+    const url = window.location.href;
     const text = encodeURIComponent('Test toxického vztahu - Může vám pomoci získat jasno ve vašem vztahu');
+
+    console.log('Sharing quiz:', platform, 'URL:', url);
 
     let shareUrl = '';
 
     if (platform === 'facebook') {
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     } else if (platform === 'twitter') {
-        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${text}`;
     }
 
+    console.log('Final share URL:', shareUrl);
+
     if (shareUrl) {
-        window.open(shareUrl, '_blank', 'width=600,height=400');
+        window.open(shareUrl, '_blank', 'width=600,height=600');
 
         // Track share event
         if (typeof gtag !== 'undefined') {
