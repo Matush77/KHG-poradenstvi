@@ -69,7 +69,7 @@
                 <li><a href="blog.html" class="nav-link active">Blog</a></li>
                 <li><a href="kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="index.html#kontakt" class="nav-link">Kontakt</a></li>
-                <li><a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-primary" target="_blank" rel="noopener" onclick="trackConversion()">Objednat se</a></li>
+                <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
             </ul>
         </nav>
     </header>
@@ -248,7 +248,7 @@
         <div class="container">
             <h2>Máte zájem o terapii?</h2>
             <p>Neváhejte se ozvat a domluvíme si první setkání</p>
-            <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft" class="btn btn-large" target="_blank" rel="noopener" onclick="trackConversion()">
+            <a href="#" class="btn btn-large" onclick="openBookingModal(); return false;">
                 Objednat se
             </a>
         </div>
@@ -296,6 +296,43 @@
             </div>
         </div>
     </footer>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="booking-modal-overlay">
+        <div class="booking-modal">
+            <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h2 class="booking-modal-title">Vyberte typ konzultace</h2>
+            <div class="booking-modal-options">
+                <a href="#" class="booking-option" onclick="bookOnline(); return false;">
+                    <div class="booking-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                            <circle cx="12" cy="10" r="2"></circle>
+                        </svg>
+                    </div>
+                    <span class="booking-option-title">Terapie online</span>
+                    <p class="booking-option-desc">Z pohodlí domova</p>
+                </a>
+                <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
+                    <div class="booking-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <span class="booking-option-title">Terapie osobně</span>
+                    <p class="booking-option-desc">V Ostravě</p>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script src="js/script.js"></script>
     <script src="js/blog-script.js"></script>

@@ -2,6 +2,58 @@
    MODERN THERAPY WEBSITE - INTERACTIVE JS
    ========================================== */
 
+// Booking Modal Functions
+const CALENDAR_ONLINE = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft';
+const CALENDAR_IN_PERSON = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3nWdQkWdPsdP3fc-me5LCSbNAX5SzFJOg47rgBe7utVxT7a8O38WGQ8Q8UgfupIuq0N_4MGgLG';
+
+function openBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function bookOnline() {
+    trackConversion();
+    window.open(CALENDAR_ONLINE, '_blank');
+    closeBookingModal();
+}
+
+function bookInPerson() {
+    trackConversion();
+    window.open(CALENDAR_IN_PERSON, '_blank');
+    closeBookingModal();
+}
+
+// Initialize modal event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        // Close on backdrop click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeBookingModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeBookingModal();
+            }
+        });
+    }
+});
+
 // Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.querySelector('.nav-toggle');
@@ -59,8 +111,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         const href = this.getAttribute('href');
 
-        // Don't prevent default for just "#" links
-        if (href === '#') return;
+        // Skip smooth scroll for booking modal buttons and plain # links
+        if (href === '#' || this.hasAttribute('onclick')) return;
 
         e.preventDefault();
         const target = document.querySelector(href);
@@ -153,6 +205,17 @@ document.querySelectorAll('a[href*="calendar.google.com"]').forEach(link => {
         // You can add analytics tracking here
         console.log('Calendar booking clicked');
     });
+});
+
+// Fix for bfcache (back-forward cache) issues on mobile
+// When returning from external pages, force a style recalculation
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // Page was restored from bfcache
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // Force reflow
+        document.body.style.display = '';
+    }
 });
 
 // Accessibility: Skip to Main Content
