@@ -122,10 +122,10 @@ const quizConfig = {
 const resultInterpretations = {
     healthy: {
         range: [0, 20],
-        title: "Váš vztah vykazuje zdravé znaky",
+        title: "Převažují znaky respektu a bezpečí",
         icon: "✓",
         color: "#4A9D7B",
-        description: "Na základě vašich odpovědí se zdá, že váš vztah má pevné základy postavené na respektu, důvěře a otevřené komunikaci. To jsou klíčové prvky zdravého partnerského vztahu.",
+        description: "Ve Vašich odpovědích převažují znaky respektu, důvěry a bezpečí. Test však nemůže posoudit celý vztah ani vyloučit konkrétní problematické chování.",
         recommendations: [
             "Pokračujte v otevřené komunikaci a vzájemném respektu",
             "Věnujte čas společným aktivitám i individuálním zájmům",
@@ -133,10 +133,11 @@ const resultInterpretations = {
             "Buďte pozorní k potřebám partnera i svým vlastním"
         ],
         cta: {
-            heading: "I zdravé vztahy mohou těžit z terapie",
-            description: "Párová konzultace může posílit vaše pouto a naučit vás nové dovednosti pro ještě hlubší spojení.",
-            button: "Zjistit více o párové terapii"
+            heading: "",
+            description: "",
+            button: ""
         },
+        showCta: false,
         showCrisis: false
     },
     warning: {
@@ -144,17 +145,17 @@ const resultInterpretations = {
         title: "Některé varovné signály",
         icon: "⚠",
         color: "#E8A87C",
-        description: "Vaše odpovědi naznačují, že ve vašem vztahu existují některé prvky, které by mohly být problematické. Není to ještě závažné, ale je důležité věnovat těmto signálům pozornost.",
+        description: "Některé odpovědi poukazují na chování, kterému je vhodné věnovat pozornost. Závažnost situace nelze určit pouze podle celkového skóre – důležitý je konkrétní kontext, zejména přítomnost strachu, nátlaku, kontroly, vyhrožování nebo násilí.",
         recommendations: [
-            "Otevřeně promluvte s partnerem o tom, co vás trápí",
-            "Nastavte jasné hranice a komunikujte své potřeby",
-            "Zvažte párovou terapii pro zlepšení komunikace",
+            "O tom, co Vás trápí, mluvte s partnerem pouze tehdy, pokud je to pro Vás bezpečné",
+            "Pokud se obáváte partnerovy reakce, svěřte se nejprve důvěryhodné osobě nebo odborné službě",
+            "Zvažte individuální odbornou konzultaci pro ujasnění situace",
             "Nevzdávejte se svých přátel a osobních zájmů",
             "Sledujte, zda se situace zlepšuje nebo zhoršuje"
         ],
         cta: {
-            heading: "Nenechte varovné signály přerůst v problém",
-            description: "Včasná intervence může vztahu pomoci. Pomohu vám najít cestu ke zdravějšímu vztahu.",
+            heading: "Chcete si situaci bezpečně ujasnit?",
+            description: "Při individuální konzultaci můžete popsat konkrétní situaci a promyslet další kroky s ohledem na své potřeby a bezpečí.",
             button: "Promluvit si o tom"
         },
         showCrisis: false
@@ -164,28 +165,28 @@ const resultInterpretations = {
         title: "Výrazné znaky nezdravého vztahu",
         icon: "!",
         color: "#D97B7B",
-        description: "Vaše odpovědi ukazují na několik vážných problémů ve vašem vztahu. Tyto vzorce mohou negativně ovlivňovat vaše duševní zdraví a pohodu.",
+        description: "Některé Vaše odpovědi mohou ukazovat na opakované nerespektování hranic, kontrolu nebo manipulaci. Test nemůže určit povahu celého vztahu, ale tyto konkrétní projevy je vhodné brát vážně.",
         recommendations: [
             "Vaše pocity jsou platné a důležité - věřte jim",
             "Promluvte si s důvěryhodnou osobou o vaší situaci",
-            "Zvažte individuální terapii pro podporu a jasno",
+            "Zvažte individuální odbornou konzultaci pro podporu a ujasnění situace",
             "Vytvořte si bezpečnostní plán, pokud se cítíte ohroženi",
             "Pamatujte: máte právo na bezpečný a respektující vztah",
             "Informujte se o možnostech pomoci a podpory"
         ],
         cta: {
-            heading: "Nejste v tom sami",
-            description: "Pomohu vám najít cestu k bezpečí a uzdravení. Individuální terapie vám poskytne podporu a praktické nástroje.",
+            heading: "Nejste na to sami",
+            description: "Individuální konzultace může nabídnout prostor pro zmapování situace a hledání bezpečných dalších kroků.",
             button: "Objednat konzultaci"
         },
         showCrisis: false
     },
     toxic: {
-        range: [66, 90],
+        range: [66, 86],
         title: "Vážné znaky toxického vztahu",
         icon: "⚠",
         color: "#D97B7B",
-        description: "Vaše odpovědi naznačují, že jste v toxickém vztahu, který vážně ohrožuje vaše duševní a možná i fyzické zdraví. Je důležité, abyste věděli, že si nezasloužíte takové zacházení a pomoc je k dispozici.",
+        description: "Některé z Vašich odpovědí popisují závažné varovné signály. Test nemůže určit povahu celého vztahu, ale pokud zažíváte strach, nátlak, kontrolu, vyhrožování nebo násilí, je důležité vyhledat bezpečnou podporu.",
         recommendations: [
             "Vaše bezpečnost je absolutní prioritou",
             "Obraťte se na odbornou pomoc - psychologa nebo centrum pomoci",
@@ -196,8 +197,8 @@ const resultInterpretations = {
             "Zdokumentujte případné incidenty (pro vlastní potřebu nebo právní ochranu)"
         ],
         cta: {
-            heading: "Pomohu vám najít cestu ven",
-            description: "Individuální terapie vám poskytne bezpečný prostor, podporu a praktické nástroje pro další kroky.",
+            heading: "Podpora je dostupná",
+            description: "Individuální konzultace může nabídnout prostor pro zmapování situace a hledání bezpečných dalších kroků.",
             button: "Vyhledat pomoc"
         },
         showCrisis: true
@@ -327,7 +328,7 @@ class QuizController {
         this.resultsScore = document.getElementById('resultsScore');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
-        this.crisisResources = document.getElementById('crisisResources');
+        this.resultsCta = document.getElementById('resultsCta');
         this.ctaHeading = document.getElementById('ctaHeading');
         this.ctaDescription = document.getElementById('ctaDescription');
         this.ctaButton = document.getElementById('ctaButton');
@@ -545,11 +546,8 @@ class QuizController {
             this.recommendationsList.appendChild(li);
         });
 
-        // Show/hide crisis resources
-        if (result.showCrisis) {
-            this.crisisResources.style.display = 'block';
-        } else {
-            this.crisisResources.style.display = 'none';
+        if (this.resultsCta) {
+            this.resultsCta.style.display = result.showCta === false ? 'none' : 'block';
         }
 
         // Populate CTA

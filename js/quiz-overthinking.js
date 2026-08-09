@@ -47,7 +47,7 @@ const quizConfig = {
         },
         {
             id: 5,
-            text: "Máte pocit, že vám hlava \"nejede\" ani během odpočinku?",
+            text: "Máte pocit, že Vám myšlenky běží i ve chvíli, kdy chcete odpočívat?",
             options: [
                 { text: "Ne, dokážu se dobře uvolnit", score: 0 },
                 { text: "Občas mi myšlenky bloudí", score: 1 },
@@ -102,7 +102,7 @@ const quizConfig = {
                 { text: "Ano, snadno se soustředím na přítomnost", score: 0 },
                 { text: "Občas mi myšlenky utíkají jinam", score: 1 },
                 { text: "Často jsem myšlenkami jinde", score: 2 },
-                { text: "Téměř nikdy nejsem plně přítomní", score: 3 }
+                { text: "Téměř nikdy nejsem plně v přítomném okamžiku", score: 3 }
             ]
         }
     ]
@@ -112,29 +112,30 @@ const quizConfig = {
 const resultInterpretations = {
     minimal: {
         range: [0, 7],
-        title: "Minimální overthinking",
+        title: "Málo známek nadměrného přemýšlení",
         icon: "✓",
         color: "#4CAF50",
-        description: "Gratuluji! Overthinking vás téměř neovlivňuje. Máte zdravý vztah ke svým myšlenkám a dokážete se od nich odpoutat. Vaše mentální pohoda je dobrá.",
+        description: "Ve Vašich odpovědích se objevilo jen málo situací spojených s nadměrným přemýšlením. Výsledek ale nepředstavuje celkové hodnocení Vašeho duševního zdraví.",
         recommendations: [
             "Pokračujte ve svých osvědčených strategiích",
-            "Můžete pomoci druhým sdílením svých postupů",
+            "Všímejte si, které postupy Vám pomáhají vracet pozornost k přítomnosti",
             "Nezapomínejte na preventivní péči o duševní zdraví",
             "Buďte k sobě laskaví i v případech, kdy se přece jen přistíhnete při přemýšlení"
         ],
         cta: {
-            heading: "Posilujte své mentální zdraví",
-            description: "I když overthinking není problém, terapie může posílit vaši psychickou odolnost a pomoci vám v dalších oblastech života.",
-            button: "Zjistit více o terapii"
+            heading: "",
+            description: "",
+            button: ""
         },
+        showCta: false,
         showCrisis: false
     },
     mild: {
         range: [8, 15],
-        title: "Mírný overthinking",
+        title: "Občasné nadměrné přemýšlení",
         icon: "○",
         color: "#8BC34A",
-        description: "Občas se přistihnete, že přemýšlíte více, než byste chtěli, ale celkově to zvládáte. S několika nástroji můžete tuto tendenci ještě více snížit.",
+        description: "Ve Vašich odpovědích se objevují některé situace, ve kterých přemýšlíte déle nebo intenzivněji, než byste chtěli. Můžete vyzkoušet několik postupů a sledovat, co Vám pomáhá.",
         recommendations: [
             "Zjistěte, zda nejste vyčerpaní – můžete potřebovat odpočinek, ne disciplínu",
             "Vytvořte si podporu – mluvte o tom s důvěryhodnými lidmi",
@@ -144,21 +145,21 @@ const resultInterpretations = {
             "Nastavte si \"čas na přemýšlení\" – 15 minut denně"
         ],
         cta: {
-            heading: "Prevence je klíčem",
-            description: "Terapie vám může pomoci rozvinout lepší strategie a předejít prohlubování overthinkingu.",
+            heading: "Chcete tématu lépe porozumět?",
+            description: "Pokud Vás opakované přemýšlení zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné způsoby práce s ním.",
             button: "Promluvit si o tom"
         },
         showCrisis: false
     },
     moderate: {
         range: [16, 23],
-        title: "Střední overthinking",
+        title: "Častější nadměrné přemýšlení",
         icon: "!",
         color: "#FFC107",
-        description: "Overthinking vás ovlivňuje častěji a začíná negativně působit na váš každodenní život. Je čas začít s tím aktivně pracovat.",
+        description: "Vaše odpovědi naznačují častější výskyt nadměrného přemýšlení. Pokud Vám zasahuje do odpočinku, rozhodování nebo každodenního fungování, může být užitečné začít s ním cíleně pracovat.",
         recommendations: [
             "Uvědomte si, že myšlenky nejsou fakta",
-            "Zkuste techniku \"zastavit myšlenku\" – říct si nahlas STOP",
+            "Pojmenujte si, že se znovu vracíte ke stejné obavě, a zaměřte pozornost na konkrétní činnost nebo na své okolí",
             "Praktikujte mindfulness nebo meditaci",
             "Omezte kofein, který může zhoršovat úzkostné myšlenky",
             "Pohybujte se – fyzická aktivita pomáhá snížit přemýšlení",
@@ -166,19 +167,19 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Je čas aktivně pracovat s overthinkingem",
-            description: "Terapie vám poskytne nástroje a podporu pro pochopení kořenů overthinkingu a změnu myšlenkových vzorců.",
+            description: "V terapii můžete prozkoumat souvislosti nadměrného přemýšlení a hledat způsoby, které budou odpovídat Vaší situaci.",
             button: "Objednat konzultaci"
         },
         showCrisis: false
     },
     high: {
         range: [24, 30],
-        title: "Výrazný overthinking",
+        title: "Výrazné nadměrné přemýšlení",
         icon: "⚠",
         color: "#F44336",
-        description: "Overthinking vás výrazně ovlivňuje a pravděpodobně negativně působí na váš spánek, vztahy a celkovou pohodu. Je důležité vyhledat odbornou pomoc.",
+        description: "Ve Vašich odpovědích se objevují výrazné projevy nadměrného přemýšlení. Pokud Vám narušují spánek, vztahy nebo každodenní fungování, může být užitečné probrat obtíže s psychologem nebo psychoterapeutem.",
         recommendations: [
-            "Vyhledejte odbornou pomoc – terapeut vám pomůže najít kořeny overthinkingu",
+            "Zvažte odbornou konzultaci, při které můžete prozkoumat souvislosti obtíží ve Vaší konkrétní situaci",
             "Začněte s malými kroky – zlepšení je proces",
             "Buďte k sobě laskaví – overthinking není vaše chyba",
             "Omezte stresory tam, kde to je možné",
@@ -186,8 +187,8 @@ const resultInterpretations = {
             "Zvažte mindfulness nebo jógu jako doplňkovou podporu"
         ],
         cta: {
-            heading: "Pomohu vám uklidnit mysl",
-            description: "Overthinking může být únavný a vyčerpávající. Terapie vám poskytne bezpečný prostor a konkrétní nástroje pro změnu.",
+            heading: "Nadměrné přemýšlení nemusíte řešit sami",
+            description: "V terapii můžete hledat souvislosti svých obtíží a postupy, které Vám pomohou lépe zvládat zatěžující myšlenky.",
             button: "Vyhledat pomoc"
         },
         showCrisis: false
@@ -317,7 +318,7 @@ class QuizController {
         this.resultsScore = document.getElementById('resultsScore');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
-        this.crisisResources = document.getElementById('crisisResources');
+        this.resultsCta = document.getElementById('resultsCta');
         this.ctaHeading = document.getElementById('ctaHeading');
         this.ctaDescription = document.getElementById('ctaDescription');
         this.ctaButton = document.getElementById('ctaButton');
@@ -536,11 +537,8 @@ class QuizController {
             this.recommendationsList.appendChild(li);
         });
 
-        // Show/hide crisis resources
-        if (result.showCrisis) {
-            this.crisisResources.style.display = 'block';
-        } else {
-            this.crisisResources.style.display = 'none';
+        if (this.resultsCta) {
+            this.resultsCta.style.display = result.showCta === false ? 'none' : 'block';
         }
 
         // Populate CTA

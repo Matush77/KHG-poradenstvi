@@ -2,13 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://khgporadenstvi.cz/</loc>
-    <lastmod>2025-11-11</lastmod>
+    <lastmod>2026-08-09</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://khgporadenstvi.cz/blog.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2026-08-09</lastmod>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://khgporadenstvi.cz/blog-jak-nastavit-hranice-bez-pocitu-viny.html</loc>
+    <lastmod>2026-08-09</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://khgporadenstvi.cz/blog-jak-poznam-ze-jsem-dobry-rodic.html</loc>
@@ -47,8 +52,13 @@
   </url>
   <url>
     <loc>https://khgporadenstvi.cz/kviz.html</loc>
-    <lastmod>2025-01-13</lastmod>
+    <lastmod>2026-08-09</lastmod>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://khgporadenstvi.cz/quiz-zdrave-hranice.html</loc>
+    <lastmod>2026-08-09</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://khgporadenstvi.cz/quiz-toxicky-vztah.html</loc>

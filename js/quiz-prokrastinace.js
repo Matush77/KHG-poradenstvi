@@ -115,18 +115,19 @@ const resultInterpretations = {
         title: "Minimální prokrastinace",
         icon: "✓",
         color: "#4CAF50",
-        description: "Gratuluji! Prokrastinace vás téměř neovlivňuje. Máte zdravý vztah k úkolům a většinou je zvládáte včas a bez zbytečného odkládání. Vaše strategie fungují dobře.",
+        description: "Ve svých odpovědích uvádíte jen málo obtíží spojených s odkládáním úkolů. Výsledek popisuje pouze situace zahrnuté v tomto testu.",
         recommendations: [
             "Pokračujte v tom, co děláte – vaše přístupy fungují",
-            "Můžete se stát inspirací pro ostatní – sdílejte své metody",
+            "Všímejte si, které podmínky Vám pomáhají úkoly zahájit a dokončit",
             "Buďte k sobě laskavý/-á i v případech, kdy něco přece jen odložíte",
             "Věnujte pozornost preventivní péči o duševní zdraví"
         ],
         cta: {
-            heading: "Pokračujte ve svých dobrých návycích",
-            description: "I když vám prokrastinace nedělá problémy, terapie může podpořit váš osobní růst a pomoci vám v dalších oblastech života.",
-            button: "Zjistit více o terapii"
+            heading: "",
+            description: "",
+            button: ""
         },
+        showCta: false,
         showCrisis: false
     },
     mild: {
@@ -134,7 +135,7 @@ const resultInterpretations = {
         title: "Mírná prokrastinace",
         icon: "○",
         color: "#8BC34A",
-        description: "Občas odkládáte úkoly, ale v celku si s tím poradíte. Prokrastinace vás ovlivňuje jen minimálně a většinou máte nástroje, jak ji překonat.",
+        description: "Ve Vašich odpovědích se objevuje občasné odkládání úkolů. Můžete vyzkoušet několik praktických postupů a sledovat, které Vám pomáhají.",
         recommendations: [
             "Zmenšete začátek na nejmenší možný krok",
             "Pracujte v krátkých časových blocích (např. 10-2-10)",
@@ -142,8 +143,8 @@ const resultInterpretations = {
             "Oceňujte se za dokončení, ne za dokonalost"
         ],
         cta: {
-            heading: "Posílejte své dovednosti pro zvládání úkolů",
-            description: "Terapie vám může pomoci najít ještě lepší strategie a předejít tomu, aby se mírná prokrastinace prohlubovala.",
+            heading: "Chcete lépe porozumět svému odkládání?",
+            description: "Pokud Vás odkládání zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné strategie.",
             button: "Promluvit si o tom"
         },
         showCrisis: false
@@ -153,7 +154,7 @@ const resultInterpretations = {
         title: "Střední prokrastinace",
         icon: "!",
         color: "#FFC107",
-        description: "Prokrastinace vás ovlivňuje častěji a více. Odkládání úkolů vám přináší stres, vinu nebo tlak. Je čas začít aktivně pracovat s tímto vzorcem.",
+        description: "Vaše odpovědi naznačují častější odkládání spojené se stresem, tlakem nebo výčitkami. Může být užitečné sledovat okolnosti, ve kterých se tento vzorec objevuje, a cíleně s nimi pracovat.",
         recommendations: [
             "Identifikujte, jakou emoci úkol spouští (strach, stud, odpor?)",
             "Nastavte si \"dost dobré\" místo \"dokonalé\"",
@@ -163,7 +164,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Je čas aktivně pracovat s prokrastinací",
-            description: "Terapie vám poskytne nástroje a podporu pro pochopení kořenů prokrastinace a změnu vzorců.",
+            description: "V terapii můžete prozkoumat různé souvislosti odkládání a hledat strategie, které budou odpovídat Vaší situaci.",
             button: "Objednat konzultaci"
         },
         showCrisis: false
@@ -173,18 +174,18 @@ const resultInterpretations = {
         title: "Výrazná prokrastinace",
         icon: "⚠",
         color: "#F44336",
-        description: "Prokrastinace vás výrazně ovlivňuje v každodenním životě. Odkládání úkolů vám přináší značný stres, vinu a pravděpodobně ovlivňuje vaše vztahy, práci i osobní cíle.",
+        description: "Ve Vašich odpovědích se objevuje výrazné odkládání úkolů. Pokud se promítá do práce, vztahů, studia nebo každodenního fungování, může být užitečné hledat cílenou podporu.",
         recommendations: [
-            "Vyhledejte odbornou pomoc – terapeut vám pomůže najít kořeny prokrastinace",
+            "Zvažte odbornou konzultaci, při které můžete prozkoumat různé souvislosti odkládání",
             "Začněte s nejmenšími možnými kroky (2 minuty)",
             "Buďte k sobě laskavý/-á – prokrastinace není lenost",
-            "Zjistěte, zda nejste vyčerpaní – možná potřebujete odpočinek, ne disciplínu",
+            "Zvažte, zda se na odkládání nepodílí únava, náročnost úkolu, obavy z výsledku nebo obtíže s plánováním",
             "Vytvořte si podporu – mluvte o tom s důvěryhodnými lidmi",
             "Omezte multitasking a zaměřte se na jednu věc"
         ],
         cta: {
-            heading: "Pomohu vám najít cestu ven z prokrastinace",
-            description: "Prokrastinace často není o lennosti, ale o hlubších emočních vzorcích. Terapie vám poskytne bezpečný prostor a konkrétní nástroje.",
+            heading: "Odkládání může mít více souvislostí",
+            description: "V terapii můžete prozkoumat, zda u Vás hraje roli náročnost úkolu, perfekcionismus, obavy, únava nebo plánování, a hledat vhodné další kroky.",
             button: "Vyhledat pomoc"
         },
         showCrisis: false
@@ -314,7 +315,7 @@ class QuizController {
         this.resultsScore = document.getElementById('resultsScore');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
-        this.crisisResources = document.getElementById('crisisResources');
+        this.resultsCta = document.getElementById('resultsCta');
         this.ctaHeading = document.getElementById('ctaHeading');
         this.ctaDescription = document.getElementById('ctaDescription');
         this.ctaButton = document.getElementById('ctaButton');
@@ -532,11 +533,8 @@ class QuizController {
             this.recommendationsList.appendChild(li);
         });
 
-        // Show/hide crisis resources
-        if (result.showCrisis) {
-            this.crisisResources.style.display = 'block';
-        } else {
-            this.crisisResources.style.display = 'none';
+        if (this.resultsCta) {
+            this.resultsCta.style.display = result.showCta === false ? 'none' : 'block';
         }
 
         // Populate CTA

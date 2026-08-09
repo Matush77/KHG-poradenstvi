@@ -6,6 +6,14 @@
 const CALENDAR_ONLINE = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft';
 const CALENDAR_IN_PERSON = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3nWdQkWdPsdP3fc-me5LCSbNAX5SzFJOg47rgBe7utVxT7a8O38WGQ8Q8UgfupIuq0N_4MGgLG';
 
+// Keep the copyright year current across all pages.
+document.addEventListener('DOMContentLoaded', function() {
+    const currentYear = new Date().getFullYear();
+    document.querySelectorAll('[data-current-year]').forEach(function(element) {
+        element.textContent = currentYear;
+    });
+});
+
 function openBookingModal() {
     const modal = document.getElementById('bookingModal');
     if (modal) {
@@ -62,8 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle mobile menu
     if (navToggle) {
+        navToggle.setAttribute('aria-expanded', 'false');
         navToggle.addEventListener('click', function() {
             navMenu.classList.toggle('active');
+            navToggle.setAttribute('aria-expanded', String(navMenu.classList.contains('active')));
 
             // Animate hamburger to X
             const spans = navToggle.querySelectorAll('span');
@@ -84,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', () => {
             if (navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
                 const spans = navToggle.querySelectorAll('span');
                 spans[0].style.transform = 'none';
                 spans[1].style.opacity = '1';

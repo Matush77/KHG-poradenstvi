@@ -90,6 +90,22 @@
     margin: 0 auto;
 }
 
+/* Four current quizzes and eight articles form balanced rows on wide screens. */
+@media (min-width: 1100px) {
+    #blogGrid,
+    #quizGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        max-width: 1200px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1099px) {
+    #blogGrid,
+    #quizGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
     .blog-grid {
         grid-template-columns: 1fr;
@@ -135,6 +151,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.blog-card-image-boundaries {
+    background: linear-gradient(135deg, #e8f2f7 0%, #c9dce7 100%);
+}
+
+.boundary-card-icon {
+    display: grid;
+    grid-template-columns: 22px 3px 22px;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+}
+
+.boundary-card-icon > span:not(.boundary-card-divider) {
+    width: 22px;
+    height: 22px;
+    border: 3px solid var(--primary);
+    border-radius: 50%;
+}
+
+.boundary-card-divider {
+    width: 3px;
+    height: 58px;
+    background: var(--accent);
+    border-radius: 4px;
 }
 
 .blog-card-image img {
