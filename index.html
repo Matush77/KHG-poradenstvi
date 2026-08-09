@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mgr. Kristýna Hriciková Glattová - Terapie online</title>
+    <title>Mgr. Kristýna Hriciková Glattová - Terapie pro děti a dospělé</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Psycholog ve zdravotnictví a terapeut pro děti a dospělé. Online terapie i osobní konzultace v Ostravě. Osobní přístup, specializace na klinickou psychologii.">
+    <meta name="description" content="Psycholog ve zdravotnictví a terapeut pro děti a dospělé. Terapie online i osobně v Ostravě. Osobní přístup, specializace na klinickou psychologii.">
     <meta name="keywords" content="psycholog Ostrava, online terapie, terapie pro děti, terapie pro dospělé, klinický psycholog, psychoterapie online">
     <meta name="author" content="Mgr. Kristýna Hriciková Glattová">
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Mgr. Kristýna Hriciková Glattová - Online Terapie">
+    <meta property="og:title" content="Mgr. Kristýna Hriciková Glattová - Terapie pro děti a dospělé">
     <meta property="og:description" content="Psycholog ve zdravotnictví a terapeut pro děti a dospělé. Online i osobně v Ostravě.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://khgporadenstvi.cz">
@@ -19,19 +19,35 @@
     <!-- Canonical Tag -->
     <link rel="canonical" href="https://khgporadenstvi.cz/">
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11475595100"></script>
+    <!-- Google Ads tracking is loaded after first render to protect mobile LCP. -->
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      function gtag(){window.dataLayer.push(arguments);}
 
-      gtag('config', 'AW-11475595100');
-    </script>
+      let googleTagLoaded = false;
+      function loadGoogleTag() {
+        if (googleTagLoaded) return;
+        googleTagLoaded = true;
 
-    <!-- Google Ads Conversion Tracking Function -->
-    <script>
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=AW-11475595100';
+        document.head.appendChild(script);
+
+        gtag('js', new Date());
+        gtag('config', 'AW-11475595100');
+      }
+
+      window.addEventListener('load', function() {
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(loadGoogleTag, { timeout: 3000 });
+        } else {
+          setTimeout(loadGoogleTag, 1500);
+        }
+      });
+
       function trackConversion() {
+        loadGoogleTag();
         gtag('event', 'conversion', {'send_to': 'AW-11475595100/Ybl-COeCpI4ZENze_t8q'});
       }
     </script>
@@ -44,10 +60,49 @@
     <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
 
     <!-- Preload Hero Image -->
-    <link rel="preload" as="image" href="images/photo-800.webp" type="image/webp" imagesrcset="images/photo-400.webp 400w, images/photo-800.webp 800w, images/photo.webp 1200w" imagesizes="(max-width: 768px) 90vw, 500px">
+    <link rel="preload" as="image" href="images/photo-800.webp" type="image/webp" imagesrcset="images/photo-400.webp 400w, images/photo-800.webp 800w, images/photo.webp 1200w" imagesizes="(max-width: 768px) 90vw, 500px" fetchpriority="high">
 
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Critical above-the-fold CSS for faster mobile first paint. -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box}
+      *{margin:0;padding:0}
+      :root{--primary:#2D5A7B;--primary-dark:#1e3d52;--primary-light:#4A7B9D;--accent:#E8927C;--accent-light:#F5B5A5;--text-dark:#2C3E50;--text-medium:#5A6C7D;--bg-cream:#FAF8F5;--bg-light:#fff;--space-xs:.5rem;--space-sm:1rem;--space-md:1.5rem;--space-lg:2rem;--space-xl:3rem;--space-2xl:4rem;--space-3xl:6rem;--transition:all .3s cubic-bezier(.4,0,.2,1)}
+      html{scroll-behavior:smooth;font-size:16px}
+      body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:400;color:var(--text-dark);background:var(--bg-light);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+      .container{max-width:1200px;margin:0 auto;padding:0 var(--space-lg)}
+      a{color:var(--primary);text-decoration:none}
+      p{margin-bottom:var(--space-md);color:var(--text-medium);font-size:1.0625rem;font-weight:400;line-height:1.7}
+      .btn{display:inline-block;padding:.875rem 2rem;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:1rem;font-weight:600;text-align:center;border-radius:50px;cursor:pointer;border:0;text-decoration:none;white-space:nowrap}
+      .btn-primary{background:var(--accent);color:var(--bg-light)}
+      .btn-hero{background:var(--primary);color:var(--bg-light)!important;padding:1.125rem 2.5rem;font-size:1.125rem;-webkit-text-fill-color:var(--bg-light)}
+      .header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.98);box-shadow:0 2px 20px rgba(0,0,0,.05);z-index:1000}
+      .nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem var(--space-lg)}
+      .nav-logo{flex-shrink:0}.nav-logo a{display:block;line-height:0}.logo-img{height:65px;width:auto;display:block}
+      .nav-menu{display:flex;list-style:none;align-items:center;gap:var(--space-xl)}
+      .nav-link{font-size:1rem;font-weight:500;color:var(--text-dark);position:relative}
+      .nav-toggle{display:none;flex-direction:column;background:transparent;border:0;cursor:pointer;padding:.5rem;gap:5px}
+      .nav-toggle span{width:25px;height:3px;background:var(--text-dark);border-radius:3px}
+      .hero{padding:140px 0 var(--space-3xl);background:linear-gradient(135deg,var(--bg-cream) 0%,var(--bg-light) 100%);overflow:hidden}
+      .hero-container{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3xl);align-items:center}
+      .hero-title{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:700;color:var(--text-dark);margin-bottom:var(--space-lg);line-height:1.1}
+      .hero-subtitle{font-size:clamp(1.125rem,2vw,1.375rem);color:var(--text-medium);margin-bottom:var(--space-xl);line-height:1.6}
+      .hero-stats{display:flex;gap:var(--space-lg);margin-bottom:var(--space-xl)}
+      .hero-stat{display:flex;align-items:center;gap:var(--space-sm)}
+      .hero-stat-icon{flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+      .hero-stat-text{font-size:.9375rem;font-weight:600;color:var(--primary)}
+      .hero-image{position:relative;display:flex;justify-content:center;align-items:center}
+      .blob-shape{position:relative;width:100%;max-width:500px;aspect-ratio:1;overflow:hidden;border-radius:30% 70% 70% 30%/30% 30% 70% 70%;background:linear-gradient(135deg,var(--primary-light) 0%,var(--accent-light) 100%);box-shadow:0 20px 60px rgba(45,90,123,.2)}
+      .profile-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+      .booking-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;visibility:hidden;padding:var(--space-md)}
+      .booking-modal-overlay.active{opacity:1;visibility:visible}
+      .booking-modal{background:var(--bg-light);border-radius:24px;padding:var(--space-2xl);max-width:600px;width:100%;position:relative;transform:translateY(20px);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+      @media (max-width:968px){.nav-toggle{display:flex}.nav-menu{position:fixed;top:80px;left:-100%;flex-direction:column;background:var(--bg-light);width:100%;padding:var(--space-xl) var(--space-lg);box-shadow:0 10px 30px rgba(0,0,0,.1);gap:var(--space-lg);align-items:flex-start}.nav-menu.active{left:0}.hero{padding:100px 0 var(--space-2xl)}.hero-container{grid-template-columns:1fr;gap:var(--space-xl);max-width:600px;margin:0 auto}.hero-content{text-align:center}.hero-stats{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:var(--space-md)}.blob-shape{max-width:350px;margin:0 auto}}
+      @media (max-width:768px){.container{padding:0 var(--space-sm)}.hero-title{font-size:2.35rem}.hero-subtitle{font-size:1.05rem}.hero-stats{gap:var(--space-sm)}.hero-stat{gap:.5rem}.hero-stat-text{font-size:.8rem}.btn-hero{padding:1rem 2rem;font-size:1rem}.blob-shape{max-width:330px}}
+    </style>
+
+    <!-- Full stylesheet is loaded asynchronously after critical CSS. -->
+    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/styles.css"></noscript>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
@@ -56,7 +111,7 @@
       "@type": "ProfessionalService",
       "name": "KHG Poradenství - Mgr. Kristýna Hriciková Glattová",
       "image": "https://khgporadenstvi.cz/images/photo.webp",
-      "description": "Psycholog ve zdravotnictví a psychoterapeutka pro děti a dospělé. Online terapie i osobní konzultace v Ostravě. Členka ČAP a AKP.",
+      "description": "Psycholog ve zdravotnictví a psychoterapeutka pro děti a dospělé. Terapie online i osobně v Ostravě. Členka ČAP a AKP.",
       "url": "https://khgporadenstvi.cz",
       "telephone": "+420605990980",
       "email": "kristyna@khgporadenstvi.cz",
@@ -72,7 +127,7 @@
         "latitude": "49.8358",
         "longitude": "18.2928"
       },
-      "priceRange": "900 Kč",
+      "priceRange": "950 Kč",
       "openingHoursSpecification": [
         {
           "@type": "OpeningHoursSpecification",
@@ -98,7 +153,7 @@
               "name": "Online terapie",
               "description": "Individuální online terapie pro děti, dospívající a dospělé"
             },
-            "price": "900",
+            "price": "950",
             "priceCurrency": "CZK"
           },
           {
@@ -108,7 +163,7 @@
               "name": "Osobní terapie v Ostravě",
               "description": "Osobní setkání v soukromé ordinaci, Vítkovická 3299/3a, Ostrava"
             },
-            "price": "900",
+            "price": "950",
             "priceCurrency": "CZK"
           }
         ]
@@ -165,7 +220,7 @@
     <header class="header">
         <nav class="nav container">
             <div class="nav-logo">
-                <a href="index.html">
+                <a href="/">
                     <img src="images/logo.webp" alt="KHG Poradenství Logo" class="logo-img">
                 </a>
             </div>
@@ -192,7 +247,7 @@
     <section class="hero">
         <div class="container hero-container">
             <div class="hero-content">
-                <h1 class="hero-title">Online terapie<br>pro děti a dospělé</h1>
+                <h1 class="hero-title">Terapie<br>pro děti a dospělé</h1>
                 <p class="hero-subtitle">
                     Individuální psychoterapie <strong>online</strong> nebo osobně v <strong>Ostravě</strong>. Pro děti, dospívající i dospělé. Pracuji s temáty jako rodičovství, vztahy, úzkost, deprese a osobní růst.
                 </p>
@@ -205,7 +260,7 @@
                                 <path d="M16 8V16L21 19" stroke="#2D5A7B" stroke-width="2" stroke-linecap="round"/>
                             </svg>
                         </div>
-                        <span class="hero-stat-text">+3000 hodin praxe</span>
+                        <span class="hero-stat-text">+4000 hodin praxe</span>
                     </div>
                     <div class="hero-stat">
                         <div class="hero-stat-icon">
@@ -231,15 +286,18 @@
                                     images/photo.webp 1200w"
                             type="image/webp"
                             sizes="(max-width: 768px) 90vw, 500px">
-                        <source
-                            srcset="images/photo.jpg"
-                            type="image/jpeg">
-                        <img src="images/photo.jpg"
+                        <img src="images/photo-800.webp"
+                             srcset="images/photo-400.webp 400w,
+                                     images/photo-800.webp 800w,
+                                     images/photo.webp 1200w"
+                             sizes="(max-width: 768px) 90vw, 500px"
                              alt="Mgr. Kristýna Hriciková Glattová - Psycholog a terapeut"
                              class="profile-img"
                              width="500"
                              height="500"
-                             loading="eager">
+                             loading="eager"
+                             fetchpriority="high"
+                             decoding="async">
                     </picture>
                 </div>
             </div>
@@ -353,9 +411,9 @@
                         <path d="M30 44C32 46 36 47 40 47C44 47 48 46 50 44" stroke="white" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </div>
-                <h3>Online terapie pro děti a dospělé</h3>
+                <h3>Terapie pro děti a dospělé</h3>
                 <p class="service-description">
-                    Nabízím individuální terapeutickou podporu primárně online, s možností osobního setkání
+                    Nabízím individuální terapeutickou podporu online i osobně, podle toho, co vám vyhovuje
                     v soukromé ordinaci v Ostravě. Pracuji s dětmi, adolescenty i dospělými
                     v bezpečném a respektujícím prostředí.
                 </p>
@@ -386,7 +444,7 @@
                         </div>
                         <div class="detail-content">
                             <p class="detail-label"><strong>Cena</strong></p>
-                            <p>900 Kč</p>
+                            <p>950 Kč</p>
                         </div>
                     </div>
 
@@ -607,7 +665,7 @@
                 <div class="faq-item">
                     <h3 class="faq-question">Kolik stojí terapie?</h3>
                     <div class="faq-answer">
-                        <p>Cena jednoho sezení pro dospělé je <strong>900 Kč</strong>, a to jak pro online terapii, tak pro osobní setkání v Ostravě.</p>
+                        <p>Cena jednoho sezení pro dospělé je <strong>950 Kč</strong>, a to jak pro online terapii, tak pro osobní setkání v Ostravě.</p>
                     </div>
                 </div>
 
@@ -648,7 +706,7 @@
                 <div class="cap-logo">
                     <picture>
                         <source srcset="images/ceska-asociace-pro-psychoterapii.webp" type="image/webp">
-                        <img src="images/ceska-asociace-pro-psychoterapii.png" alt="Česká asociace pro psychoterapii (ČAP)" class="cap-logo-img" width="120" height="120">
+                        <img src="images/ceska-asociace-pro-psychoterapii.webp" alt="Česká asociace pro psychoterapii (ČAP)" class="cap-logo-img" width="120" height="120" loading="lazy">
                     </picture>
                 </div>
                 <div class="cap-content">
@@ -667,7 +725,7 @@
                 <a href="https://app.terapie.cz/profile/589-Kristyna-Glattova" target="_blank" rel="noopener" class="featured-link">
                     <picture>
                         <source srcset="images/terapie-cz-logo.webp" type="image/webp">
-                        <img src="images/terapie-cz-logo.jpg" alt="Terapie.cz" class="featured-logo" width="150" height="50" loading="lazy">
+                        <img src="images/terapie-cz-logo.webp" alt="Terapie.cz" class="featured-logo" width="150" height="50" loading="lazy">
                     </picture>
                     <span>Terapie.cz</span>
                 </a>
@@ -675,7 +733,7 @@
                 <a href="https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut/benesov" target="_blank" rel="noopener" class="featured-link">
                     <picture>
                         <source srcset="images/znamy-lekar-logo.webp" type="image/webp">
-                        <img src="images/znamy-lekar-logo.jpg" alt="ZnámýLékař.cz" class="featured-logo" width="150" height="50" loading="lazy">
+                        <img src="images/znamy-lekar-logo.webp" alt="ZnámýLékař.cz" class="featured-logo" width="150" height="50" loading="lazy">
                     </picture>
                     <span>ZnámýLékař.cz</span>
                 </a>
@@ -683,7 +741,7 @@
                 <a href="https://www.denproskolu.cz/cs/komunita-dobrovolniku#/dobrovolnik/807" target="_blank" rel="noopener" class="featured-link">
                     <picture>
                         <source srcset="images/den-pro-skolu-logo.webp" type="image/webp">
-                        <img src="images/den-pro-skolu-logo.jpg" alt="Den pro školu" class="featured-logo" width="150" height="50" loading="lazy">
+                        <img src="images/den-pro-skolu-logo.webp" alt="Den pro školu" class="featured-logo" width="150" height="50" loading="lazy">
                     </picture>
                     <span>Den pro školu</span>
                 </a>
@@ -858,7 +916,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2025 Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
+                <p>&copy; 2026 Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
             </div>
         </div>
     </footer>
@@ -884,22 +942,27 @@
                         </svg>
                     </div>
                     <span class="booking-option-title">Terapie online</span>
-                    <p class="booking-option-desc">Z pohodlí domova</p>
+                    <p class="booking-option-desc">Pondělí až pátek</p>
                 </a>
                 <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
                     <div class="booking-option-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
+                            <path d="M3 21h18"></path>
+                            <path d="M5 21V7l8-4v18"></path>
+                            <path d="M19 21V11l-6-4"></path>
+                            <path d="M9 9v.01"></path>
+                            <path d="M9 12v.01"></path>
+                            <path d="M9 15v.01"></path>
+                            <path d="M9 18v.01"></path>
                         </svg>
                     </div>
                     <span class="booking-option-title">Terapie osobně</span>
-                    <p class="booking-option-desc">V Ostravě</p>
+                    <p class="booking-option-desc">Pondělí a úterý</p>
                 </a>
             </div>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+<script src="js/script.js"></script>
 </body>
 </html>
