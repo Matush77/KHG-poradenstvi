@@ -628,6 +628,9 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--primary);
+    background: #E8F4FD;
+    border-radius: 50%;
 }
 
 .credential-icon svg {
@@ -815,6 +818,7 @@ a:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    color: var(--primary);
 }
 
 .service-icon-large svg {
@@ -860,6 +864,14 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+}
+
+.detail-icon--duration,
+.detail-icon--price,
+.detail-icon--location {
+    color: var(--primary);
+    background: #E8F4FD;
 }
 
 .detail-icon svg {
@@ -1684,6 +1696,7 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--primary);
     background: linear-gradient(135deg, var(--primary-light) 0%, rgba(74, 144, 226, 0.1) 100%);
     border-radius: 50%;
 }

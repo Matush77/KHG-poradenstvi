@@ -81,10 +81,14 @@
 
 .blog-post-image {
     width: 100%;
-    height: 400px;
+    height: auto;
+    aspect-ratio: 40 / 21;
     object-fit: cover;
+    display: block;
     border-radius: 20px;
     margin-bottom: var(--space-xl);
+    background: #E8F4FD;
+    box-shadow: 0 12px 32px rgba(45, 90, 123, 0.1);
 }
 
 .blog-post-content {
@@ -343,7 +347,7 @@
     }
 
     .blog-post-image {
-        height: 300px;
+        border-radius: 14px;
     }
 
     .blog-post-cta {
