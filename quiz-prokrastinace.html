@@ -193,12 +193,15 @@
 
                 <!-- Question Card -->
                 <div class="quiz-card" id="questionCard">
-                    <h2 class="quiz-question" id="questionText"></h2>
+                    <h2 class="quiz-question" id="questionText">Otázka k zamyšlení</h2>
 
-                    <form id="quizForm" role="radiogroup" aria-labelledby="questionText">
-                        <div id="optionsContainer" class="quiz-options">
-                            <!-- Options will be dynamically inserted here -->
-                        </div>
+                    <form id="quizForm">
+                        <fieldset class="quiz-fieldset">
+                            <legend class="sr-only">Vyberte jednu odpověď</legend>
+                            <div id="optionsContainer" class="quiz-options">
+                                <!-- Options will be dynamically inserted here -->
+                            </div>
+                        </fieldset>
                     </form>
 
                     <div class="quiz-navigation">
@@ -222,7 +225,7 @@
                 <div class="quiz-results-card">
                     <div class="quiz-results-header">
                         <div class="quiz-results-icon" id="resultsIcon"></div>
-                        <h2 class="quiz-results-title" id="resultsTitle"></h2>
+                        <h2 class="quiz-results-title" id="resultsTitle">Výsledek kvízu</h2>
                         <p class="quiz-results-score">Vaše skóre: <strong id="resultsScore"></strong>/30</p>
                     </div>
 
@@ -236,7 +239,7 @@
 
                         <!-- CTA Section -->
                         <div class="quiz-results-cta" id="resultsCta">
-                            <h3 id="ctaHeading"></h3>
+                            <h3 id="ctaHeading">Další krok</h3>
                             <p id="ctaDescription"></p>
                             <a href="#"
                                class="btn btn-large"
