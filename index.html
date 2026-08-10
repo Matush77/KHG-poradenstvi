@@ -97,24 +97,34 @@
       .booking-modal-overlay.active{opacity:1;visibility:visible}
       .booking-modal{background:var(--bg-light);border-radius:24px;padding:var(--space-2xl);max-width:600px;width:100%;position:relative;transform:translateY(20px);box-shadow:0 20px 60px rgba(0,0,0,.2)}
       @media (max-width:968px){.nav-toggle{display:flex}.nav-menu{position:fixed;top:80px;left:-100%;flex-direction:column;background:var(--bg-light);width:100%;padding:var(--space-xl) var(--space-lg);box-shadow:0 10px 30px rgba(0,0,0,.1);gap:var(--space-lg);align-items:flex-start}.nav-menu.active{left:0}.hero{padding:100px 0 var(--space-2xl)}.hero-container{grid-template-columns:1fr;gap:var(--space-xl);max-width:600px;margin:0 auto}.hero-content{text-align:center}.hero-stats{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:var(--space-md)}.blob-shape{max-width:350px;margin:0 auto}}
-      @media (max-width:768px){.container{padding:0 var(--space-sm)}.hero-title{font-size:2.35rem}.hero-subtitle{font-size:1.05rem}.hero-stats{gap:var(--space-sm)}.hero-stat{gap:.5rem}.hero-stat-text{font-size:.8rem}.btn-hero{padding:1rem 2rem;font-size:1rem}.blob-shape{max-width:330px}}
+      @media (max-width:768px){.container{padding:0 var(--space-sm)}.nav{padding:.75rem var(--space-lg)}}
     </style>
 
-    <!-- Full stylesheet is loaded asynchronously after critical CSS. -->
-    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- Full stylesheet is loaded asynchronously after matching critical CSS. -->
+    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
     <noscript><link rel="stylesheet" href="css/styles.css"></noscript>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ProfessionalService",
-      "name": "KHG Poradenství - Mgr. Kristýna Hriciková Glattová",
+      "@type": "LocalBusiness",
+      "@id": "https://khgporadenstvi.cz/#practice",
+      "name": "KHG Poradenství",
+      "legalName": "Kristýna Hriciková Glattová",
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "IČO",
+        "value": "11702711"
+      },
       "image": "https://khgporadenstvi.cz/images/photo.webp",
       "description": "Psycholog ve zdravotnictví a psychoterapeutka pro děti a dospělé. Terapie online i osobně v Ostravě. Členka ČAP a AKP.",
       "url": "https://khgporadenstvi.cz",
       "telephone": "+420605990980",
       "email": "kristyna@khgporadenstvi.cz",
+      "founder": {
+        "@id": "https://khgporadenstvi.cz/#person"
+      },
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Vítkovická 3299/3a",
@@ -127,6 +137,7 @@
         "latitude": "49.8358",
         "longitude": "18.2928"
       },
+      "hasMap": "https://share.google/GunHQdaRB3wMknJMA",
       "priceRange": "950 Kč",
       "openingHoursSpecification": [
         {
@@ -140,7 +151,8 @@
         "https://www.facebook.com/terapieglattova",
         "https://www.instagram.com/sitmyslenek/",
         "https://app.terapie.cz/profile/589-Kristyna-Glattova",
-        "https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut"
+        "https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut",
+        "https://share.google/GunHQdaRB3wMknJMA"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
@@ -175,17 +187,24 @@
     {
       "@context": "https://schema.org",
       "@type": "Person",
+      "@id": "https://khgporadenstvi.cz/#person",
       "name": "Kristýna Hriciková Glattová",
       "honorificPrefix": "Mgr.",
       "jobTitle": "Psycholog ve zdravotnictví a psychoterapeutka",
       "image": "https://khgporadenstvi.cz/images/photo.webp",
-      "url": "https://khgporadenstvi.cz",
+      "url": "https://khgporadenstvi.cz/#o-mne",
       "email": "kristyna@khgporadenstvi.cz",
       "telephone": "+420605990980",
-      "worksFor": {
-        "@type": "Hospital",
-        "name": "Fakultní nemocnice Ostrava"
-      },
+      "worksFor": [
+        {
+          "@type": "Hospital",
+          "name": "Fakultní nemocnice Ostrava",
+          "url": "https://www.fno.cz/klinika-detskeho-lekarstvi"
+        },
+        {
+          "@id": "https://khgporadenstvi.cz/#practice"
+        }
+      ],
       "memberOf": [
         {
           "@type": "Organization",
@@ -209,6 +228,7 @@
         "Online terapie"
       ],
       "sameAs": [
+        "https://czap.cz/Sys/PublicProfile/78959097",
         "https://www.facebook.com/terapieglattova",
         "https://www.instagram.com/sitmyslenek/"
       ]
@@ -229,7 +249,9 @@
       },
       "contributor": {
         "@type": "Person",
-        "name": "Mgr. Kristýna Hriciková Glattová",
+        "@id": "https://khgporadenstvi.cz/#person",
+        "name": "Kristýna Hriciková Glattová",
+        "honorificPrefix": "Mgr.",
         "url": "https://khgporadenstvi.cz/#o-mne"
       }
     }
@@ -241,7 +263,7 @@
         <nav class="nav container">
             <div class="nav-logo">
                 <a href="/">
-                    <img src="images/logo.webp" alt="KHG Poradenství Logo" class="logo-img">
+                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství Logo" class="logo-img">
                 </a>
             </div>
 
@@ -635,14 +657,24 @@
             </div>
 
             <div class="technical-info">
-                <h3>Praktické informace</h3>
-                <ul>
-                    <li><strong>Osobní setkání:</strong> Přicházejte a zvoňte prosím až v čase Vašeho objednaného sezení. V prostorách poradny není čekárna.</li>
-                    <li><strong>Online setkání:</strong> Odkaz na videohovor obdržíte automaticky v e-mailu s potvrzením rezervace. Potřebujete stabilní připojení a klidné, soukromé místo.</li>
-                    <li><strong>Délka setkání:</strong> Jedno terapeutické setkání trvá 50 minut.</li>
-                    <li><strong>Zrušení termínu:</strong> Termín prosím zrušte nejpozději 36 hodin před začátkem. Při pozdějším zrušení nebo nedostavení se je sezení účtováno v plné výši.</li>
-                </ul>
-                <p><strong>Když si nejste jistí:</strong> Nemusíte se předem rozhodnout pro dlouhodobou terapii. První setkání může sloužit i ke společnému zmapování toho, zda a jak by Vám psychoterapie mohla být užitečná.</p>
+                <div class="technical-info-content">
+                    <h3>Praktické informace</h3>
+                    <ul>
+                        <li><strong>Osobní setkání:</strong> Přicházejte a zvoňte prosím až v čase Vašeho objednaného sezení. V prostorách poradny není čekárna.</li>
+                        <li><strong>Online setkání:</strong> Odkaz na videohovor obdržíte automaticky v e-mailu s potvrzením rezervace. Potřebujete stabilní připojení a klidné, soukromé místo.</li>
+                        <li><strong>Délka setkání:</strong> Jedno terapeutické setkání trvá 50 minut.</li>
+                        <li><strong>Zrušení termínu:</strong> Termín prosím zrušte nejpozději 36 hodin před začátkem. Při pozdějším zrušení nebo nedostavení se je sezení účtováno v plné výši.</li>
+                    </ul>
+                    <p><strong>Když si nejste jistí:</strong> Nemusíte se předem rozhodnout pro dlouhodobou terapii. První setkání může sloužit i ke společnému zmapování toho, zda a jak by Vám psychoterapie mohla být užitečná.</p>
+                </div>
+
+                <figure class="office-photo">
+                    <picture>
+                        <source media="(max-width: 768px)" srcset="images/ordinace-ostrava-640.webp" type="image/webp">
+                        <img src="images/ordinace-ostrava-1200.webp" alt="Terapeutická ordinace pro osobní setkání v Ostravě" width="1200" height="900" loading="lazy" decoding="async">
+                    </picture>
+                    <figcaption>Prostor pro osobní terapii na Vítkovické ulici v Ostravě.</figcaption>
+                </figure>
             </div>
         </div>
     </section>
@@ -758,10 +790,12 @@
             <!-- ČAP Membership -->
             <div class="cap-membership">
                 <div class="cap-logo">
-                    <picture>
-                        <source srcset="images/ceska-asociace-pro-psychoterapii.webp" type="image/webp">
-                        <img src="images/ceska-asociace-pro-psychoterapii.webp" alt="Česká asociace pro psychoterapii (ČAP)" class="cap-logo-img" width="120" height="120" loading="lazy">
-                    </picture>
+                    <a href="https://czap.cz/Sys/PublicProfile/78959097" target="_blank" rel="noopener noreferrer" class="cap-logo-link" aria-label="Můj veřejný profil v České asociaci pro psychoterapii">
+                        <picture>
+                            <source srcset="images/ceska-asociace-pro-psychoterapii.webp" type="image/webp">
+                            <img src="images/ceska-asociace-pro-psychoterapii.webp" alt="Česká asociace pro psychoterapii (ČAP)" class="cap-logo-img" width="120" height="120" loading="lazy">
+                        </picture>
+                    </a>
                 </div>
                 <div class="cap-content">
                     <h3>Kandidátní členka České asociace pro psychoterapii (ČAP)</h3>
@@ -771,6 +805,9 @@
                         Členství v ČAP je pro mě závazkem k dalšímu vzdělávání, odbornému růstu
                         a poskytování kvalitní péče svým klientům.
                     </p>
+                    <a href="https://czap.cz/Sys/PublicProfile/78959097" target="_blank" rel="noopener noreferrer" class="cap-profile-link">
+                        Můj profil v ČAP <span aria-hidden="true">↗</span>
+                    </a>
                 </div>
             </div>
 
@@ -938,9 +975,10 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="images/logo.webp" alt="KHG Poradenství" class="footer-logo" loading="lazy">
+                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="footer-logo" loading="lazy">
                     <p>Mgr. Kristýna Hriciková Glattová</p>
                     <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
+                    <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>
                 </div>
 
                 <div class="footer-links">
@@ -949,6 +987,7 @@
                         <li><a href="#o-mne">O mně</a></li>
                         <li><a href="#sluzby">Služby</a></li>
                         <li><a href="blog.html">Blog</a></li>
+                        <li><a href="kviz.html">Kvízy</a></li>
                         <li><a href="#kontakt">Kontakt</a></li>
                     </ul>
                 </div>
@@ -960,10 +999,10 @@
                     <p><a href="https://share.google/hNU7Q7iU2ZYKX8Eln" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></p>
                     <div class="footer-social">
                         <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
-                            <img src="images/facebook-icon.svg" alt="Facebook" class="social-icon">
+                            <img src="images/facebook-icon.svg" width="32" height="32" alt="Facebook" class="social-icon">
                         </a>
                         <a href="https://www.instagram.com/sitmyslenek/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
-                            <img src="images/instagram-icon.svg" alt="Instagram" class="social-icon">
+                            <img src="images/instagram-icon.svg" width="32" height="32" alt="Instagram" class="social-icon">
                         </a>
                     </div>
                 </div>

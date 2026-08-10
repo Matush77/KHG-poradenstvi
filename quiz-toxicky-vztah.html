@@ -59,85 +59,55 @@
       "@type": "Quiz",
       "name": "Test toxického vztahu - Jsem v toxickém vztahu?",
       "description": "Psychologický test od psycholožky zaměřený na respekt, hranice, kontrolu a bezpečí ve vztahu.",
+      "url": "https://khgporadenstvi.cz/quiz-toxicky-vztah.html",
+      "inLanguage": "cs-CZ",
+      "dateCreated": "2025-11-13",
+      "dateModified": "2026-08-10",
       "about": {
         "@type": "Thing",
         "name": "Toxický vztah"
       },
       "author": {
         "@type": "Person",
-        "name": "Mgr. Kristýna Hriciková Glattová",
+        "@id": "https://khgporadenstvi.cz/#person",
+        "name": "Kristýna Hriciková Glattová",
+        "honorificPrefix": "Mgr.",
         "jobTitle": "Psycholog ve zdravotnictví a terapeut",
         "url": "https://khgporadenstvi.cz/#o-mne"
       },
       "publisher": {
         "@type": "Organization",
+        "@id": "https://khgporadenstvi.cz/#practice",
         "name": "KHG Poradenství"
       },
-      "inLanguage": "cs",
       "isAccessibleForFree": true
     }
     </script>
 
-    <!-- Structured Data (Schema.org) - HowTo -->
+    <!-- Breadcrumb Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "HowTo",
-      "name": "Jak poznat toxický vztah",
-      "description": "Naučte se rozpoznat varovné signály toxického vztahu pomocí psychologického testu",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Projděte si psychologický test",
-          "text": "Odpovězte upřímně na 10 otázek týkajících se Vašeho vztahu."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Získejte okamžité výsledky",
-          "text": "Ihned po dokončení uvidíte vyhodnocení vašich odpovědí."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Přečtěte si orientační vyhodnocení",
-          "text": "Získejte obecné podněty na základě svých odpovědí."
-        }
-      ]
+      "@type": "BreadcrumbList",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Domů",
+        "item": "https://khgporadenstvi.cz/"
+      },{
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Kvízy",
+        "item": "https://khgporadenstvi.cz/kviz.html"
+      },{
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Test toxického vztahu",
+        "item": "https://khgporadenstvi.cz/quiz-toxicky-vztah.html"
+      }]
     }
     </script>
 
-    <!-- Structured Data (Schema.org) - FAQPage -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Co je toxický vztah?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Toxický vztah je vztah, který negativně ovlivňuje vaše duševní nebo fyzické zdraví. Vyznačuje se nerespektováním hranic, manipulací, kontrolou, kritizováním nebo emocionálním vydíráním."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Je tento test diagnostickým nástrojem?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Ne, tento test není diagnostickým nástrojem. Slouží jako orientační hodnocení, které vám může pomoci získat jasno. Pro profesionální posouzení vyhledejte kvalifikovaného psychologa nebo terapeuta."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Jsou moje odpovědi anonymní?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Odpovědi z testu se neodesílají ani neukládají na server. Rozpracovaný průběh se dočasně ukládá pouze ve vašem prohlížeči."
-          }
-        }
-      ]
-    }
-    </script>
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -145,7 +115,7 @@
         <nav class="nav container">
             <div class="nav-logo">
                 <a href="/">
-                    <img src="images/logo.webp" alt="KHG Poradenství Logo" class="logo-img">
+                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství Logo" class="logo-img">
                 </a>
             </div>
 
@@ -320,9 +290,10 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="images/logo.webp" alt="KHG Poradenství" class="footer-logo" loading="lazy">
+                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="footer-logo" loading="lazy">
                     <p>Mgr. Kristýna Hriciková Glattová</p>
                     <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
+                    <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>
                 </div>
 
                 <div class="footer-links">
@@ -342,10 +313,10 @@
                     <p><a href="tel:+420605990980">+420 605 990 980</a></p>
                     <div class="footer-social">
                         <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
-                            <img src="images/facebook-icon.svg" alt="Facebook" class="social-icon">
+                            <img src="images/facebook-icon.svg" width="32" height="32" alt="Facebook" class="social-icon">
                         </a>
                         <a href="https://www.instagram.com/sitmyslenek/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
-                            <img src="images/instagram-icon.svg" alt="Instagram" class="social-icon">
+                            <img src="images/instagram-icon.svg" width="32" height="32" alt="Instagram" class="social-icon">
                         </a>
                     </div>
                 </div>

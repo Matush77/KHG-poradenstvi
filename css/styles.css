@@ -1047,10 +1047,20 @@ a:hover {
     flex-shrink: 0;
 }
 
+.cap-logo-link {
+    display: block;
+    border-radius: 12px;
+}
+
 .cap-logo-img {
     width: 120px;
     height: auto;
     display: block;
+    transition: var(--transition);
+}
+
+.cap-logo-link:hover .cap-logo-img {
+    transform: translateY(-2px);
 }
 
 .cap-content h3 {
@@ -1065,6 +1075,28 @@ a:hover {
     font-size: 1.0625rem;
     line-height: 1.7;
     margin: 0;
+}
+
+.cap-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: var(--space-md);
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+}
+
+.cap-profile-link:hover {
+    color: var(--primary-dark);
+}
+
+.cap-logo-link:focus-visible,
+.cap-profile-link:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
 }
 
 @media (max-width: 768px) {
@@ -1512,6 +1544,11 @@ a:hover {
     font-size: 0.9375rem;
 }
 
+.footer-brand .footer-company-id {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.875rem;
+}
+
 .footer-tagline {
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.875rem;
@@ -1783,12 +1820,20 @@ a:hover {
 }
 
 .technical-info {
-    max-width: 800px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    align-items: center;
+    gap: var(--space-xl);
+    max-width: 1100px;
     margin: 0 auto;
     padding: var(--space-xl);
     background: linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%);
     border-radius: 16px;
     border-left: 4px solid var(--primary);
+}
+
+.technical-info-content {
+    min-width: 0;
 }
 
 .technical-info h3 {
@@ -1830,6 +1875,26 @@ a:hover {
     margin: 0;
 }
 
+.office-photo {
+    margin: 0;
+}
+
+.office-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.office-photo figcaption {
+    margin-top: var(--space-sm);
+    color: var(--text-light);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
 /* Keep four related items evenly distributed on desktop. */
 @media (min-width: 1100px) {
     .benefits-grid,
@@ -1859,6 +1924,17 @@ a:hover {
     .process-steps {
         grid-template-columns: 1fr;
         gap: var(--space-xl);
+    }
+
+    .technical-info {
+        grid-template-columns: 1fr;
+        max-width: 800px;
+    }
+
+    .office-photo {
+        width: 100%;
+        max-width: 640px;
+        margin: 0 auto;
     }
 }
 
