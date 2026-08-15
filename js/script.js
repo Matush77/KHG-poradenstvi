@@ -17,6 +17,199 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Enlarge office photos without loading the large version until it is requested.
+document.addEventListener('DOMContentLoaded', function() {
+    const gallery = document.querySelector('.office-gallery');
+    const lightbox = document.getElementById('officeLightbox');
+    const lightboxImage = document.getElementById('officeLightboxImage');
+    const lightboxCaption = document.getElementById('officeLightboxCaption');
+    const lightboxCounter = document.getElementById('officeLightboxCounter');
+    const closeButton = lightbox ? lightbox.querySelector('.office-lightbox-close') : null;
+    const previousButton = lightbox ? lightbox.querySelector('.office-lightbox-prev') : null;
+    const nextButton = lightbox ? lightbox.querySelector('.office-lightbox-next') : null;
+    const galleryButtons = gallery ? Array.from(gallery.querySelectorAll('.office-gallery-open')) : [];
+    let lightboxTrigger = null;
+    let previousBodyOverflow = '';
+    let currentPhotoIndex = 0;
+    let swipeStartX = null;
+    let swipeStartY = null;
+
+    if (!gallery || !lightbox || !lightboxImage || !lightboxCaption || !lightboxCounter || !closeButton || !previousButton || !nextButton || !galleryButtons.length) return;
+
+    function setBackgroundInert(shouldBeInert) {
+        if (shouldBeInert) {
+            Array.from(document.body.children).forEach(function(element) {
+                if (element === lightbox || element.tagName === 'SCRIPT' || element.hasAttribute('inert')) return;
+                element.setAttribute('inert', '');
+                element.dataset.officeLightboxInert = 'true';
+            });
+            return;
+        }
+
+        document.querySelectorAll('[data-office-lightbox-inert="true"]').forEach(function(element) {
+            element.removeAttribute('inert');
+            delete element.dataset.officeLightboxInert;
+        });
+    }
+
+    function showPhoto(index) {
+        const normalizedIndex = (index + galleryButtons.length) % galleryButtons.length;
+        const button = galleryButtons[normalizedIndex];
+        const thumbnail = button.querySelector('img');
+        const fullImage = button.dataset.lightboxSrc;
+        if (!thumbnail || !fullImage) return;
+
+        currentPhotoIndex = normalizedIndex;
+        lightboxImage.src = fullImage;
+        lightboxImage.alt = thumbnail.alt;
+        lightboxCaption.textContent = thumbnail.alt;
+        lightboxCounter.textContent = (currentPhotoIndex + 1) + ' / ' + galleryButtons.length;
+    }
+
+    function openLightbox(button) {
+        const selectedIndex = galleryButtons.indexOf(button);
+        if (selectedIndex < 0) return;
+
+        lightboxTrigger = button;
+        previousBodyOverflow = document.body.style.overflow;
+        swipeStartX = null;
+        swipeStartY = null;
+        showPhoto(selectedIndex);
+        lightbox.hidden = false;
+        lightbox.setAttribute('aria-hidden', 'false');
+        setBackgroundInert(true);
+        document.body.style.overflow = 'hidden';
+
+        window.requestAnimationFrame(function() {
+            closeButton.focus();
+        });
+    }
+
+    function closeLightbox() {
+        if (lightbox.hidden) return;
+
+        lightbox.hidden = true;
+        lightbox.setAttribute('aria-hidden', 'true');
+        swipeStartX = null;
+        swipeStartY = null;
+        setBackgroundInert(false);
+        document.body.style.overflow = previousBodyOverflow;
+
+        const trigger = lightboxTrigger;
+        lightboxTrigger = null;
+        if (trigger && trigger.isConnected) {
+            window.requestAnimationFrame(function() {
+                trigger.focus();
+            });
+        }
+    }
+
+    gallery.addEventListener('click', function(event) {
+        const button = event.target.closest('.office-gallery-open');
+        if (button && gallery.contains(button)) openLightbox(button);
+    });
+
+    closeButton.addEventListener('click', closeLightbox);
+    previousButton.addEventListener('click', function() {
+        showPhoto(currentPhotoIndex - 1);
+    });
+    nextButton.addEventListener('click', function() {
+        showPhoto(currentPhotoIndex + 1);
+    });
+
+    lightboxImage.addEventListener('pointerdown', function(event) {
+        if (event.pointerType === 'mouse') return;
+        swipeStartX = event.clientX;
+        swipeStartY = event.clientY;
+        if (lightboxImage.setPointerCapture) lightboxImage.setPointerCapture(event.pointerId);
+    });
+
+    lightboxImage.addEventListener('pointerup', function(event) {
+        if (swipeStartX === null || swipeStartY === null || event.pointerType === 'mouse') return;
+
+        const horizontalDistance = event.clientX - swipeStartX;
+        const verticalDistance = event.clientY - swipeStartY;
+        swipeStartX = null;
+        swipeStartY = null;
+        if (lightboxImage.hasPointerCapture && lightboxImage.hasPointerCapture(event.pointerId)) {
+            lightboxImage.releasePointerCapture(event.pointerId);
+        }
+
+        if (Math.abs(horizontalDistance) < 50 || Math.abs(horizontalDistance) <= Math.abs(verticalDistance)) return;
+        showPhoto(currentPhotoIndex + (horizontalDistance < 0 ? 1 : -1));
+    });
+
+    lightboxImage.addEventListener('pointercancel', function() {
+        swipeStartX = null;
+        swipeStartY = null;
+    });
+
+    lightbox.addEventListener('click', function(event) {
+        if (event.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (lightbox.hidden) return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeLightbox();
+        } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            showPhoto(currentPhotoIndex - 1);
+        } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            showPhoto(currentPhotoIndex + 1);
+        } else if (event.key === 'Tab') {
+            const focusableButtons = [closeButton, previousButton, nextButton];
+            const firstButton = focusableButtons[0];
+            const lastButton = focusableButtons[focusableButtons.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstButton) {
+                event.preventDefault();
+                lastButton.focus();
+            } else if (!event.shiftKey && document.activeElement === lastButton) {
+                event.preventDefault();
+                firstButton.focus();
+            }
+        }
+    });
+});
+
+// FAQ accordion: keep at most one answer open and preserve a useful no-JS fallback.
+document.addEventListener('DOMContentLoaded', function() {
+    const faqList = document.querySelector('.faq-list');
+    if (!faqList) return;
+
+    const faqItems = Array.from(faqList.querySelectorAll('.faq-item'));
+
+    function setFaqState(item, isOpen) {
+        const button = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        if (!button || !answer) return;
+
+        button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        answer.hidden = !isOpen;
+        item.classList.toggle('is-open', isOpen);
+    }
+
+    faqItems.forEach(function(item) {
+        setFaqState(item, false);
+    });
+
+    faqList.addEventListener('click', function(event) {
+        const button = event.target.closest('.faq-question');
+        if (!button || !faqList.contains(button)) return;
+
+        const selectedItem = button.closest('.faq-item');
+        const shouldOpen = button.getAttribute('aria-expanded') !== 'true';
+
+        faqItems.forEach(function(item) {
+            setFaqState(item, item === selectedItem && shouldOpen);
+        });
+    });
+});
+
 function openBookingModal() {
     const modal = document.getElementById('bookingModal');
     if (!modal || modal.classList.contains('active')) return;
@@ -501,6 +694,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
+        if (e.defaultPrevented) return;
+
         if (e.key === 'ArrowLeft') {
             currentIndex = (currentIndex - 1 + totalCards) % totalCards;
             updateCarousel(currentIndex);

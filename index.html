@@ -80,8 +80,8 @@
     </style>
 
     <!-- Full stylesheet is loaded asynchronously after matching critical CSS. -->
-    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
-    <noscript><link rel="stylesheet" href="css/styles.css"></noscript>
+    <link rel="preload" href="css/styles.css?v=20260815-4" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
+    <noscript><link rel="stylesheet" href="css/styles.css?v=20260815-4"></noscript>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
@@ -707,12 +707,42 @@
                     <p><strong>Když si nejste jistí:</strong> Nemusíte se předem rozhodnout pro dlouhodobou terapii. První setkání může sloužit i ke společnému zmapování toho, zda a jak by Vám psychoterapie mohla být užitečná.</p>
                 </div>
 
-                <figure class="office-photo">
-                    <picture>
-                        <source media="(max-width: 768px)" srcset="images/ordinace-ostrava-640.webp" type="image/webp">
-                        <img src="images/ordinace-ostrava-1200.webp" alt="Terapeutická ordinace pro osobní setkání v Ostravě" width="1200" height="900" loading="lazy" decoding="async">
-                    </picture>
-                    <figcaption>Prostor pro osobní terapii na Vítkovické ulici v Ostravě.</figcaption>
+                <figure class="office-gallery" id="ordinace" aria-labelledby="office-gallery-caption">
+                    <div class="office-gallery-grid">
+                        <div class="office-gallery-image office-gallery-image--main">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="images/office-gallery/1200/ordinace1.webp" aria-label="Zvětšit fotografii: celkový pohled do terapeutické ordinace v Ostravě">
+                                <picture>
+                                    <source media="(max-width: 768px)" srcset="images/office-gallery/640/ordinace1.webp" type="image/webp">
+                                    <img src="images/office-gallery/1200/ordinace1.webp" alt="Celkový pohled do terapeutické ordinace v Ostravě" width="1200" height="900" loading="lazy" decoding="async">
+                                </picture>
+                            </button>
+                        </div>
+                        <div class="office-gallery-image">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="images/office-gallery/1200/ordinace2.webp" aria-label="Zvětšit fotografii: pohovka a křeslo v terapeutické ordinaci">
+                                <img src="images/office-gallery/640/ordinace2.webp"
+                                     srcset="images/office-gallery/640/ordinace2.webp 640w, images/office-gallery/1200/ordinace2.webp 1200w"
+                                     sizes="(max-width: 768px) 30vw, 200px"
+                                     alt="Pohovka a křeslo v terapeutické ordinaci" width="640" height="480" loading="lazy" decoding="async">
+                            </button>
+                        </div>
+                        <div class="office-gallery-image">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="images/office-gallery/1200/ordinace3.webp?v=20260815-2" aria-label="Zvětšit fotografii: klidné posezení v ordinaci u oken">
+                                <img src="images/office-gallery/640/ordinace3.webp?v=20260815-2"
+                                     srcset="images/office-gallery/640/ordinace3.webp?v=20260815-2 640w, images/office-gallery/1200/ordinace3.webp?v=20260815-2 1200w"
+                                     sizes="(max-width: 768px) 30vw, 200px"
+                                     alt="Klidné posezení v ordinaci u oken" width="640" height="480" loading="lazy" decoding="async">
+                            </button>
+                        </div>
+                        <div class="office-gallery-image">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="images/office-gallery/1200/ordinace4.webp" aria-label="Zvětšit fotografii: detail prostoru pro osobní terapeutické setkání">
+                                <img src="images/office-gallery/640/ordinace4.webp"
+                                     srcset="images/office-gallery/640/ordinace4.webp 640w, images/office-gallery/1200/ordinace4.webp 1200w"
+                                     sizes="(max-width: 768px) 30vw, 200px"
+                                     alt="Detail prostoru pro osobní terapeutické setkání" width="640" height="480" loading="lazy" decoding="async">
+                            </button>
+                        </div>
+                    </div>
+                    <figcaption id="office-gallery-caption">Prostor pro osobní terapii na Vítkovické ulici v Ostravě.</figcaption>
                 </figure>
             </div>
         </div>
@@ -774,43 +804,55 @@
 
             <div class="faq-list">
                 <div class="faq-item">
-                    <h3 class="faq-question">Jak dlouho trvá jedno sezení?</h3>
-                    <div class="faq-answer">
+                    <h3 class="faq-heading">
+                        <button type="button" class="faq-question" id="faq-question-1" aria-expanded="true" aria-controls="faq-answer-1">Jak dlouho trvá jedno sezení?</button>
+                    </h3>
+                    <div class="faq-answer" id="faq-answer-1" role="region" aria-labelledby="faq-question-1">
                         <p>Standardní terapeutické sezení trvá <strong>50 minut</strong>. </p>
                     </div>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">Kolik stojí terapie?</h3>
-                    <div class="faq-answer">
+                    <h3 class="faq-heading">
+                        <button type="button" class="faq-question" id="faq-question-2" aria-expanded="true" aria-controls="faq-answer-2">Kolik stojí terapie?</button>
+                    </h3>
+                    <div class="faq-answer" id="faq-answer-2" role="region" aria-labelledby="faq-question-2">
                         <p>Cena jednoho individuálního terapeutického setkání je <strong>950 Kč</strong>, a to jak pro online terapii, tak pro osobní setkání v Ostravě. <a href="cenik.html">Podrobnosti najdete v ceníku.</a></p>
                     </div>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">Jak často bychom se měli vídat?</h3>
-                    <div class="faq-answer">
+                    <h3 class="faq-heading">
+                        <button type="button" class="faq-question" id="faq-question-3" aria-expanded="true" aria-controls="faq-answer-3">Jak často bychom se měli vídat?</button>
+                    </h3>
+                    <div class="faq-answer" id="faq-answer-3" role="region" aria-labelledby="faq-question-3">
                         <p>Na začátku terapie doporučuji <strong>setkávání jednou týdně</strong>, abychom mohli efektivně pracovat na vašich cílech. Postupem času, když se začnete cítit lépe, můžeme přejít na setkávání jednou za 14 dní. Frekvenci vždy upravujeme podle vašich potřeb a pokroku.</p>
                     </div>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">Pracujete s pojišťovnami?</h3>
-                    <div class="faq-answer">
+                    <h3 class="faq-heading">
+                        <button type="button" class="faq-question" id="faq-question-4" aria-expanded="true" aria-controls="faq-answer-4">Pracujete s pojišťovnami?</button>
+                    </h3>
+                    <div class="faq-answer" id="faq-answer-4" role="region" aria-labelledby="faq-question-4">
                         <p>Momentálně <strong>nepracuji přímo s pojišťovnami</strong> a terapie je plně hrazená klientem. Některé pojišťovny ale poskytují příspěvek na psychoterapii v rámci preventivních programů - doporučuji se informovat přímo u vaší pojišťovny. Ráda vám vystavím fakturu či potvrzení o absolvování terapie, které můžete předložit pojišťovně.</p>
                     </div>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">Mohu přijít osobně i využít online terapii?</h3>
-                    <div class="faq-answer">
+                    <h3 class="faq-heading">
+                        <button type="button" class="faq-question" id="faq-question-5" aria-expanded="true" aria-controls="faq-answer-5">Mohu přijít osobně i využít online terapii?</button>
+                    </h3>
+                    <div class="faq-answer" id="faq-answer-5" role="region" aria-labelledby="faq-question-5">
                         <p>Ano. Nabízím <strong>osobní setkání v Ostravě</strong> i <strong>online terapii</strong>. Formu si zvolíte při rezervaci a v průběhu spolupráce ji můžeme podle potřeby změnit.</p>
                     </div>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">Jak mohu termín zrušit?</h3>
-                    <div class="faq-answer">
+                    <h3 class="faq-heading">
+                        <button type="button" class="faq-question" id="faq-question-6" aria-expanded="true" aria-controls="faq-answer-6">Jak mohu termín zrušit?</button>
+                    </h3>
+                    <div class="faq-answer" id="faq-answer-6" role="region" aria-labelledby="faq-question-6">
                         <p>Pokud se na domluvený termín nemůžete dostavit, zrušte jej prosím nejpozději <strong>36 hodin před začátkem sezení</strong>. Při pozdějším zrušení nebo nedostavení se na termín je sezení účtováno v plné výši.</p>
                     </div>
                 </div>
@@ -1104,7 +1146,36 @@
         </div>
     </div>
 
+    <!-- Office Gallery Lightbox -->
+    <div id="officeLightbox" class="office-lightbox" role="dialog" aria-modal="true" aria-label="Zvětšená fotografie ordinace" aria-describedby="officeLightboxCaption officeLightboxCounter" aria-hidden="true" tabindex="-1" hidden>
+        <div class="office-lightbox-dialog">
+            <button type="button" class="office-lightbox-close" aria-label="Zavřít zvětšenou fotografii">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <button type="button" class="office-lightbox-nav office-lightbox-prev" aria-label="Předchozí fotografie">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+            </button>
+            <figure>
+                <img id="officeLightboxImage" class="office-lightbox-image" alt="" draggable="false">
+                <figcaption class="office-lightbox-caption">
+                    <span id="officeLightboxCaption"></span>
+                    <span id="officeLightboxCounter" class="office-lightbox-counter" aria-live="polite"></span>
+                </figcaption>
+            </figure>
+            <button type="button" class="office-lightbox-nav office-lightbox-next" aria-label="Další fotografie">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
 <script src="js/privacy-consent.js"></script>
-<script src="js/script.js"></script>
+<script src="js/script.js?v=20260815-3"></script>
 </body>
 </html>
