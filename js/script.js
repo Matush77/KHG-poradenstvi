@@ -5,6 +5,9 @@
 // Booking Modal Functions
 const CALENDAR_ONLINE = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft';
 const CALENDAR_IN_PERSON = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3nWdQkWdPsdP3fc-me5LCSbNAX5SzFJOg47rgBe7utVxT7a8O38WGQ8Q8UgfupIuq0N_4MGgLG';
+const BOOKING_MODAL_FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+let bookingModalTrigger = null;
+let bookingModalPreviousOverflow = '';
 
 // Keep the copyright year current across all pages.
 document.addEventListener('DOMContentLoaded', function() {
@@ -16,28 +19,72 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function openBookingModal() {
     const modal = document.getElementById('bookingModal');
-    if (modal) {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
+    if (!modal || modal.classList.contains('active')) return;
+
+    const activeElement = document.activeElement;
+    bookingModalTrigger = activeElement && typeof activeElement.focus === 'function'
+        ? activeElement
+        : null;
+    bookingModalPreviousOverflow = document.body.style.overflow;
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    setBookingModalBackgroundInert(modal, true);
+    document.body.style.overflow = 'hidden';
+
+    window.requestAnimationFrame(function() {
+        const initialFocus = modal.querySelector('.booking-modal-close') || modal;
+        initialFocus.focus();
+    });
 }
 
 function closeBookingModal() {
     const modal = document.getElementById('bookingModal');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
+    if (!modal || !modal.classList.contains('active')) return;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    setBookingModalBackgroundInert(modal, false);
+    document.body.style.overflow = bookingModalPreviousOverflow;
+
+    const trigger = bookingModalTrigger;
+    bookingModalTrigger = null;
+
+    if (trigger && trigger.isConnected) {
+        window.requestAnimationFrame(function() {
+            trigger.focus();
+        });
     }
 }
 
+function setBookingModalBackgroundInert(modal, shouldBeInert) {
+    if (shouldBeInert) {
+        Array.from(document.body.children).forEach(function(element) {
+            if (element === modal || element.tagName === 'SCRIPT' || element.hasAttribute('inert')) return;
+            element.setAttribute('inert', '');
+            element.dataset.bookingModalInert = 'true';
+        });
+        return;
+    }
+
+    document.querySelectorAll('[data-booking-modal-inert="true"]').forEach(function(element) {
+        element.removeAttribute('inert');
+        delete element.dataset.bookingModalInert;
+    });
+}
+
+function getBookingModalFocusableElements(modal) {
+    return Array.from(modal.querySelectorAll(BOOKING_MODAL_FOCUSABLE)).filter(function(element) {
+        return element.getAttribute('aria-hidden') !== 'true' && element.offsetParent !== null;
+    });
+}
+
 function bookOnline() {
-    trackConversion();
     window.open(CALENDAR_ONLINE, '_blank');
     closeBookingModal();
 }
 
 function bookInPerson() {
-    trackConversion();
     window.open(CALENDAR_IN_PERSON, '_blank');
     closeBookingModal();
 }
@@ -46,6 +93,8 @@ function bookInPerson() {
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('bookingModal');
     if (modal) {
+        modal.setAttribute('aria-hidden', modal.classList.contains('active') ? 'false' : 'true');
+
         // Close on backdrop click
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
@@ -53,10 +102,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Close on Escape key
+        // Keep keyboard focus inside the modal and allow Escape to close it.
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.classList.contains('active')) {
+            if (!modal.classList.contains('active')) return;
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
                 closeBookingModal();
+                return;
+            }
+
+            if (e.key !== 'Tab') return;
+
+            const focusableElements = getBookingModalFocusableElements(modal);
+            if (!focusableElements.length) {
+                e.preventDefault();
+                modal.focus();
+                return;
+            }
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey && (document.activeElement === firstElement || !modal.contains(document.activeElement))) {
+                e.preventDefault();
+                lastElement.focus();
+            } else if (!e.shiftKey && (document.activeElement === lastElement || !modal.contains(document.activeElement))) {
+                e.preventDefault();
+                firstElement.focus();
             }
         });
     }
@@ -365,13 +438,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCarousel(index) {
         // Remove active class from all cards and dots
         cards.forEach(card => card.classList.remove('active'));
-        dots.forEach(dot => dot.classList.remove('active'));
+        dots.forEach(dot => {
+            dot.classList.remove('active');
+            dot.removeAttribute('aria-current');
+        });
 
         // Add active class to current card and dot
         cards[index].classList.add('active');
 
         if (dots[index]) {
             dots[index].classList.add('active');
+            dots[index].setAttribute('aria-current', 'true');
         }
 
         setTrackHeight();

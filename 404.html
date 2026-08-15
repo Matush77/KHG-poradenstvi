@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stránka nebyla nalezena | KHG Poradenství</title>
+    <meta name="description" content="Požadovaná stránka na webu KHG Poradenství nebyla nalezena.">
+    <meta name="robots" content="noindex,follow">
+    <base id="document-base" href="/">
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.getElementById('document-base').setAttribute('href', './');
+        }
+    </script>
+    <link rel="icon" type="image/webp" href="images/favicon.webp">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container" aria-label="Hlavní navigace">
+            <div class="nav-logo">
+                <a href="/" aria-label="KHG Poradenství – úvodní stránka">
+                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="logo-img">
+                </a>
+            </div>
+            <button class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="/#o-mne" class="nav-link">O mně</a></li>
+                <li><a href="/#sluzby" class="nav-link">Služby</a></li>
+                <li><a href="/cenik.html" class="nav-link">Ceník</a></li>
+                <li><a href="/blog.html" class="nav-link">Blog</a></li>
+                <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
+                <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="error-page">
+        <div class="container error-content">
+            <p class="error-code">Chyba 404</p>
+            <h1>Tahle stránka se ztratila.</h1>
+            <p class="error-lead">Odkaz může být zastaralý nebo je v adrese překlep. Z bezpečného místa můžete pokračovat na hlavní stránku, blog nebo ceník.</p>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">Zpět na úvod</a>
+                <a href="/blog.html" class="btn btn-secondary">Přejít na blog</a>
+                <a href="/cenik.html" class="btn btn-secondary">Zobrazit ceník</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <p>Mgr. Kristýna Hriciková Glattová</p>
+                    <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
+                    <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>
+                </div>
+                <div class="footer-links">
+                    <p class="footer-heading"><strong>Navigace</strong></p>
+                    <ul>
+                        <li><a href="/#o-mne">O mně</a></li>
+                        <li><a href="/#sluzby">Služby</a></li>
+                        <li><a href="/cenik.html">Ceník</a></li>
+                        <li><a href="/blog.html">Blog</a></li>
+                        <li><a href="/kviz.html">Kvízy</a></li>
+                        <li><a href="/#kontakt">Kontakt</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <p class="footer-heading"><strong>Kontakt</strong></p>
+                    <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
+                    <p><a href="tel:+420605990980">+420&nbsp;605&nbsp;990&nbsp;980</a></p>
+                    <p><a href="https://share.google/hNU7Q7iU2ZYKX8Eln" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                            <img src="images/facebook-icon.svg" width="32" height="32" alt="Facebook" class="social-icon">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span data-current-year>2026</span> Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
+                <div class="footer-legal">
+                    <a href="/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a>
+                    <button type="button" class="footer-legal-button" data-cookie-settings>Informace o cookies</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/privacy-consent.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

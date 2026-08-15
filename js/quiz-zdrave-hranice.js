@@ -299,9 +299,7 @@ class BoundariesQuiz {
     }
 
     track(action) {
-        if (typeof gtag === 'function') {
-            gtag('event', action, { event_category: 'Quiz' });
-        }
+        // Průběh ani výsledek kvízu se neposílají do reklamních systémů.
     }
 }
 

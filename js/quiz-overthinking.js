@@ -566,12 +566,7 @@ class QuizController {
     }
 
     trackEvent(action, label = '') {
-        if (typeof gtag !== 'undefined') {
-            gtag('event', action, {
-                'event_category': 'Quiz',
-                'event_label': label
-            });
-        }
+        // Odpovědi ani výsledek kvízu se neposílají do reklamních systémů.
     }
 }
 
@@ -594,14 +589,6 @@ function shareQuiz(platform) {
 
     if (shareUrl) {
         window.open(shareUrl, '_blank', 'width=600,height=600');
-
-        // Track share event
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'share', {
-                'event_category': 'Quiz',
-                'event_label': platform
-            });
-        }
     }
 }
 
@@ -618,13 +605,6 @@ function copyQuizLink() {
         fallbackCopyLink(url);
     }
 
-    // Track copy event
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'share', {
-            'event_category': 'Quiz',
-            'event_label': 'copy_link'
-        });
-    }
 }
 
 function fallbackCopyLink(text) {

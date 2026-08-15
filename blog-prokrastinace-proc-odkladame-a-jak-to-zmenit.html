@@ -24,28 +24,14 @@
     <!-- Canonical Tag -->
     <link rel="canonical" href="https://khgporadenstvi.cz/blog-prokrastinace-proc-odkladame-a-jak-to-zmenit.html">
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11475595100"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      gtag('config', 'AW-11475595100');
-    </script>
 
-    <!-- Google Ads Conversion Tracking Function -->
-    <script>
-      function trackConversion() {
-        gtag('event', 'conversion', {'send_to': 'AW-11475595100/Ybl-COeCpI4ZENze_t8q'});
-      }
-    </script>
+
+
 
     <!-- Favicon -->
     <link rel="icon" type="image/webp" href="images/favicon.webp">
 
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin media="(max-width: 768px)">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" media="(max-width: 768px)">
 
     <!-- Preload Critical Fonts (only on desktop) -->
     <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
@@ -138,7 +124,7 @@
             <ul class="nav-menu">
                 <li><a href="/#o-mne" class="nav-link">O mně</a></li>
                 <li><a href="/#sluzby" class="nav-link">Služby</a></li>
-                <li><a href="blog.html" class="nav-link active">Blog</a></li>
+                <li><a href="cenik.html" class="nav-link">Cen&iacute;k</a></li>
                 <li><a href="kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
                 <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
@@ -305,6 +291,14 @@
                 </p>
                 <p><strong>Někdy mohou pro začátek stačit dvě minuty. Jindy bude potřeba úkol přeformulovat, odpočinout si nebo vyhledat podporu.</strong></p>
 
+                <aside class="related-articles" aria-labelledby="related-articles-title">
+                    <h2 id="related-articles-title">Související články</h2>
+                    <ul class="related-articles-list">
+                        <li><a href="blog-overthinking-proc-vznika-a-jak-ho-zastavit.html">Overthinking: proč vzniká a jak ho zastavit</a></li>
+                        <li><a href="blog-jak-nastavit-hranice-bez-pocitu-viny.html">Jak nastavit hranice bez pocitu viny</a></li>
+                    </ul>
+                </aside>
+
                 <aside class="article-author-box" aria-labelledby="article-author-title">
                     <img src="images/photo-400.webp" alt="Mgr. Kristýna Hriciková Glattová" width="96" height="96" loading="lazy">
                     <div>
@@ -345,6 +339,7 @@
                     <ul>
                         <li><a href="/#o-mne">O mně</a></li>
                         <li><a href="/#sluzby">Služby</a></li>
+                        <li><a href="cenik.html">Cen&iacute;k</a></li>
                         <li><a href="blog.html">Blog</a></li>
                         <li><a href="kviz.html">Kvízy</a></li>
                         <li><a href="/#kontakt">Kontakt</a></li>
@@ -373,15 +368,15 @@
     </footer>
 
     <!-- Booking Modal -->
-    <div id="bookingModal" class="booking-modal-overlay">
+    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1">
         <div class="booking-modal">
-            <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít">
+            <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
-            <h2 class="booking-modal-title">Vyberte typ konzultace</h2>
+            <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
             <div class="booking-modal-options">
                 <a href="#" class="booking-option" onclick="bookOnline(); return false;">
                     <div class="booking-option-icon">
@@ -414,6 +409,7 @@
         </div>
     </div>
 
+    <script src="js/privacy-consent.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

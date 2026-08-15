@@ -21,20 +21,10 @@
 
     <link rel="canonical" href="https://khgporadenstvi.cz/quiz-zdrave-hranice.html">
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11475595100"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'AW-11475595100');
-      function trackConversion() {
-        gtag('event', 'conversion', {'send_to': 'AW-11475595100/Ybl-COeCpI4ZENze_t8q'});
-      }
-    </script>
+
+
 
     <link rel="icon" type="image/webp" href="images/favicon.webp">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin media="(max-width: 768px)">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" media="(max-width: 768px)">
     <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
     <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
     <link rel="stylesheet" href="css/styles.css">
@@ -109,7 +99,7 @@
             <ul class="nav-menu">
                 <li><a href="/#o-mne" class="nav-link">O mně</a></li>
                 <li><a href="/#sluzby" class="nav-link">Služby</a></li>
-                <li><a href="blog.html" class="nav-link">Blog</a></li>
+                <li><a href="cenik.html" class="nav-link">Cen&iacute;k</a></li>
                 <li><a href="kviz.html" class="nav-link active">Kvízy</a></li>
                 <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
                 <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
@@ -241,6 +231,7 @@
                     <ul>
                         <li><a href="/#o-mne">O mně</a></li>
                         <li><a href="/#sluzby">Služby</a></li>
+                        <li><a href="cenik.html">Cen&iacute;k</a></li>
                         <li><a href="blog.html">Blog</a></li>
                         <li><a href="kviz.html">Kvízy</a></li>
                         <li><a href="/#kontakt">Kontakt</a></li>
@@ -262,9 +253,9 @@
         </div>
     </footer>
 
-    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
+    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1">
         <div class="booking-modal">
-            <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
+            <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
             <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
@@ -283,6 +274,7 @@
         </div>
     </div>
 
+    <script src="js/privacy-consent.js"></script>
     <script src="js/script.js"></script>
     <script src="js/quiz-zdrave-hranice.js"></script>
 </body>
