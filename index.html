@@ -80,8 +80,8 @@
     </style>
 
     <!-- Full stylesheet is loaded asynchronously after matching critical CSS. -->
-    <link rel="preload" href="css/styles.css?v=20260818-5" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
-    <noscript><link rel="stylesheet" href="css/styles.css?v=20260818-5"></noscript>
+    <link rel="preload" href="css/styles.css?v=20260818-8" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
+    <noscript><link rel="stylesheet" href="css/styles.css?v=20260818-8"></noscript>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
@@ -425,47 +425,19 @@
 
                 <div class="credentials">
                     <div class="credential-card">
-                        <div class="credential-icon">
-                            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <rect x="16" y="14" width="32" height="28" rx="3"/>
-                                <path d="M23 22h18M23 28h13"/>
-                                <circle cx="39" cy="39" r="5" fill="#E8F4FD"/>
-                                <path d="m36.5 43-1 8 3.5-2 3.5 2-1-8"/>
-                            </svg>
-                        </div>
-                        <p class="credential-label"><strong>Vzdělání</strong></p>
+                        <h3 class="credential-label">Vzdělání</h3>
                         <p>Mgr. psychologie, PVŠPS Praha</p>
                         <p>Pětiletý výcvik v daseinsanalýze</p>
                     </div>
 
                     <div class="credential-card">
-                        <div class="credential-icon">
-                            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <rect x="13" y="22" width="38" height="28" rx="3"/>
-                                <path d="M24 22v-5h16v5"/>
-                                <path d="M13 32c10 5 28 5 38 0"/>
-                                <circle cx="45" cy="44" r="7" fill="#E8F4FD"/>
-                                <path d="m42 44 2 2 4-4"/>
-                            </svg>
-                        </div>
-                        <p class="credential-label"><strong>Praxe</strong></p>
+                        <h3 class="credential-label">Praxe</h3>
                         <p>Fakultní nemocnice Ostrava</p>
                         <p>Klinika dětského lékařství</p>
                     </div>
 
                     <div class="credential-card">
-                        <div class="credential-icon">
-                            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <path d="M33 13h15a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-6l-5 4v-4h-4a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4Z"/>
-                                <circle cx="38" cy="20" r="1.25" fill="currentColor" stroke="none"/>
-                                <circle cx="44" cy="20" r="1.25" fill="currentColor" stroke="none"/>
-                                <circle cx="23" cy="34" r="5"/>
-                                <circle cx="42" cy="37" r="4"/>
-                                <path d="M12 51c.5-8 4.5-12 11-12s10.5 4 11 12"/>
-                                <path d="M35 51c.5-6.5 3-10 7-10s6.5 3.5 7 10"/>
-                            </svg>
-                        </div>
-                        <p class="credential-label"><strong>Supervize</strong></p>
+                        <h3 class="credential-label">Supervize</h3>
                         <p>PhDr. Marek Hošek</p>
                         <p>MUDr. Michal Kryl</p>
                     </div>
@@ -1029,10 +1001,11 @@
 
     <!-- Footer -->
     <footer class="footer">
+        <!-- Generated from partials/footer.html by scripts/sync-footer.ps1. -->
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="footer-logo" loading="lazy">
+                    <img src="/images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="footer-logo" loading="lazy">
                     <p>Mgr. Kristýna Hriciková Glattová</p>
                     <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
                     <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>
@@ -1041,26 +1014,26 @@
                 <div class="footer-links">
                     <p class="footer-heading"><strong>Navigace</strong></p>
                     <ul>
-                        <li><a href="#o-mne">O mně</a></li>
-                        <li><a href="#sluzby">Služby</a></li>
-                        <li><a href="cenik.html">Cen&iacute;k</a></li>
-                        <li><a href="blog.html">Blog</a></li>
-                        <li><a href="kviz.html">Kvízy</a></li>
-                        <li><a href="#kontakt">Kontakt</a></li>
+                        <li><a href="/#o-mne">O mně</a></li>
+                        <li><a href="/#sluzby">Služby</a></li>
+                        <li><a href="/cenik.html">Ceník</a></li>
+                        <li><a href="/blog.html">Blog</a></li>
+                        <li><a href="/kviz.html">Kvízy</a></li>
+                        <li><a href="/#kontakt">Kontakt</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-contact">
                     <p class="footer-heading"><strong>Kontakt</strong></p>
                     <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
-                    <p><a href="tel:+420605990980">+420 605 990 980</a></p>
+                    <p><a href="tel:+420605990980">+420&nbsp;605&nbsp;990&nbsp;980</a></p>
                     <p><a href="https://share.google/hNU7Q7iU2ZYKX8Eln" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></p>
                     <div class="footer-social">
                         <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
-                            <img src="images/facebook-icon.svg" width="32" height="32" alt="Facebook" class="social-icon">
+                            <img src="/images/facebook-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
                         </a>
                         <a href="https://www.instagram.com/sitmyslenek/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
-                            <img src="images/instagram-icon.svg" width="32" height="32" alt="Instagram" class="social-icon">
+                            <img src="/images/instagram-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
                         </a>
                     </div>
                 </div>
@@ -1068,6 +1041,10 @@
 
             <div class="footer-bottom">
                 <p>&copy; <span data-current-year>2026</span> Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
+                <div class="footer-legal">
+                    <a href="/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a>
+                    <button type="button" class="footer-legal-button" data-cookie-settings>Informace o cookies</button>
+                </div>
             </div>
         </div>
     </footer>
