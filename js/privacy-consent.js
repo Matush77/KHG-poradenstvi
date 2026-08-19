@@ -68,7 +68,7 @@
             '<div class="cookie-consent-inner">' +
                 '<div class="cookie-consent-copy">' +
                     '<h2 id="cookie-consent-title">Informace o cookies</h2>' +
-                    '<p id="cookie-consent-description">Tento web nepoužívá analytické ani marketingové cookies. Nezbytné lokální úložiště slouží pouze k zapamatování tohoto oznámení a rozepsaného kvízu. <a href="/ochrana-osobnich-udaju.html">Podrobnosti o zpracování</a>.</p>' +
+                    '<p id="cookie-consent-description">Tento web nepoužívá analytické ani marketingové cookies. Nezbytné lokální úložiště slouží pouze k zapamatování tohoto oznámení, důležitého provozního sdělení a rozepsaného kvízu. <a href="/ochrana-osobnich-udaju.html">Podrobnosti o zpracování</a>.</p>' +
                 '</div>' +
                 '<div class="cookie-consent-actions">' +
                     '<button type="button" class="cookie-choice cookie-notice-dismiss" data-cookie-dismiss>' +
