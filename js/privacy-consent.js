@@ -3,11 +3,13 @@
 
     const STORAGE_KEY = 'khg_cookie_notice_v1';
     const LEGACY_CONSENT_KEY = 'khg_privacy_consent_v1';
+    const LEGACY_PRICE_NOTICE_KEY = 'khg_price_notice_20260901_v1';
     const NOTICE_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
 
     function readNoticeState() {
         try {
             localStorage.removeItem(LEGACY_CONSENT_KEY);
+            localStorage.removeItem(LEGACY_PRICE_NOTICE_KEY);
 
             const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
             const isCurrent = stored &&
@@ -68,7 +70,7 @@
             '<div class="cookie-consent-inner">' +
                 '<div class="cookie-consent-copy">' +
                     '<h2 id="cookie-consent-title">Informace o cookies</h2>' +
-                    '<p id="cookie-consent-description">Tento web nepoužívá analytické ani marketingové cookies. Nezbytné lokální úložiště slouží pouze k zapamatování tohoto oznámení, důležitého provozního sdělení a rozepsaného kvízu. <a href="/ochrana-osobnich-udaju.html">Podrobnosti o zpracování</a>.</p>' +
+                    '<p id="cookie-consent-description">Tento web nepoužívá analytické ani marketingové cookies. Nezbytné lokální úložiště slouží pouze k zapamatování tohoto oznámení a rozepsaného kvízu. <a href="/ochrana-osobnich-udaju.html">Podrobnosti o zpracování</a>.</p>' +
                 '</div>' +
                 '<div class="cookie-consent-actions">' +
                     '<button type="button" class="cookie-choice cookie-notice-dismiss" data-cookie-dismiss>' +

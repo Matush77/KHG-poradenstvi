@@ -15,27 +15,32 @@
     <link rel="icon" type="image/webp" href="images/favicon.webp">
     <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/styles.css?v=20260819-1">
+    <link rel="stylesheet" href="css/styles.css?v=20260831-4">
 </head>
 <body>
     <header class="header">
+        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
         <nav class="nav container" aria-label="Hlavní navigace">
             <div class="nav-logo">
                 <a href="/" aria-label="KHG Poradenství – úvodní stránka">
-                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="logo-img">
+                    <img src="/images/logo.webp" width="381" height="96" alt="" class="logo-img">
                 </a>
             </div>
-            <button class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
-                <span></span><span></span><span></span>
+
+            <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false" aria-controls="primary-navigation">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
-            <ul class="nav-menu">
+
+            <ul class="nav-menu" id="primary-navigation">
                 <li><a href="/#o-mne" class="nav-link">O mně</a></li>
                 <li><a href="/#sluzby" class="nav-link">Služby</a></li>
                 <li><a href="/cenik.html" class="nav-link">Ceník</a></li>
                 <li><a href="/blog.html" class="nav-link">Blog</a></li>
                 <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
-                <li><a href="/#kontakt" class="btn btn-primary nav-cta">Objednat termín</a></li>
+                <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
             </ul>
         </nav>
     </header>
@@ -45,7 +50,7 @@
             <header class="legal-header">
                 <h1>Ochrana osobních údajů a cookies</h1>
                 <p class="legal-lead">Zde najdete informace o tom, jaké údaje mohou být zpracovány při používání tohoto webu, proč se zpracovávají a jaká máte práva.</p>
-                <p><strong>Platnost od:</strong> 19. srpna 2026</p>
+                <p><strong>Platnost od:</strong> 31. srpna 2026</p>
             </header>
 
             <div class="legal-content">
@@ -74,7 +79,7 @@
 
                 <section class="legal-section" aria-labelledby="cookies">
                     <h2 id="cookies">3. Cookies a úložiště prohlížeče</h2>
-                    <p>Web nepoužívá analytické ani marketingové cookies. Používá pouze nezbytné lokální úložiště pro zapamatování cookie oznámení, zavření důležitého provozního sdělení a rozepsaného kvízu. K tomuto technickému úložišti není podle ÚOOÚ vyžadován souhlas, informační povinnost ale zůstává zachována na této stránce.</p>
+                    <p>Web nepoužívá analytické ani marketingové cookies. Používá pouze nezbytné lokální úložiště pro zapamatování cookie oznámení a rozepsaného kvízu. K tomuto technickému úložišti není podle ÚOOÚ vyžadován souhlas, informační povinnost ale zůstává zachována na této stránce.</p>
                     <div class="legal-table-wrap">
                         <table class="legal-table">
                             <thead>
@@ -89,12 +94,6 @@
                                 <tr>
                                     <td><code>khg_cookie_notice_v1</code></td>
                                     <td>Zapamatování zavření cookie oznámení, aby se nezobrazovalo při každé návštěvě.</td>
-                                    <td>Lokální úložiště, nejvýše 12 měsíců.</td>
-                                    <td>Nezbytné pro zapamatování uživatelské volby.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>khg_price_notice_20260901_v1</code></td>
-                                    <td>Zapamatování zavření důležitého oznámení o změně ceny, aby se nezobrazovalo při každém přechodu mezi stránkami.</td>
                                     <td>Lokální úložiště, nejvýše 12 měsíců.</td>
                                     <td>Nezbytné pro zapamatování uživatelské volby.</td>
                                 </tr>
@@ -189,8 +188,49 @@
         </div>
     </footer>
 
-    <script src="js/privacy-consent.js?v=20260819-1"></script>
-    <script src="js/site-announcement.js?v=20260819-1"></script>
-    <script src="js/script.js"></script>
+    <!-- Generated from partials/booking-modal.html by scripts/sync-header.ps1. -->
+    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1" inert>
+        <div class="booking-modal">
+            <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
+            <div class="booking-modal-options">
+                <a href="#" class="booking-option" onclick="bookOnline(); return false;">
+                    <div class="booking-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                            <circle cx="12" cy="10" r="2"></circle>
+                        </svg>
+                    </div>
+                    <span class="booking-option-title">Terapie online</span>
+                    <p class="booking-option-desc">Pondělí až pátek</p>
+                </a>
+                <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
+                    <div class="booking-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M3 21h18"></path>
+                            <path d="M5 21V7l8-4v18"></path>
+                            <path d="M19 21V11l-6-4"></path>
+                            <path d="M9 9v.01"></path>
+                            <path d="M9 12v.01"></path>
+                            <path d="M9 15v.01"></path>
+                            <path d="M9 18v.01"></path>
+                        </svg>
+                    </div>
+                    <span class="booking-option-title">Terapie osobně</span>
+                    <p class="booking-option-desc">Pondělí a úterý</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/privacy-consent.js?v=20260831-1"></script>
+    <script src="js/script.js?v=20260831-5"></script>
 </body>
 </html>

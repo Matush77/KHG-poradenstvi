@@ -1,0 +1,26 @@
+<header class="header">
+    <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
+    <nav class="nav container" aria-label="Hlavní navigace">
+        <div class="nav-logo">
+            <a href="/" aria-label="KHG Poradenství – úvodní stránka">
+                <img src="/images/logo.webp" width="381" height="96" alt="" class="logo-img">
+            </a>
+        </div>
+
+        <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="nav-menu" id="primary-navigation">
+            <li><a href="/#o-mne" class="nav-link">O mně</a></li>
+            <li><a href="/#sluzby" class="nav-link">Služby</a></li>
+            <li><a href="/cenik.html" class="nav-link{{CENIK_ACTIVE}}"{{CENIK_CURRENT}}>Ceník</a></li>
+            <li><a href="/blog.html" class="nav-link{{BLOG_ACTIVE}}"{{BLOG_CURRENT}}>Blog</a></li>
+            <li><a href="/kviz.html" class="nav-link{{QUIZ_ACTIVE}}"{{QUIZ_CURRENT}}>Kvízy</a></li>
+            <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
+            <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
+        </ul>
+    </nav>
+</header>

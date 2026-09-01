@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ceník psychoterapie online a v Ostravě | KHG Poradenství</title>
 
-    <meta name="description" content="Ceník individuální psychoterapie online a osobně v Ostravě. Jedno setkání trvá 50 minut a stojí 950 Kč. Praktické informace a storno podmínky.">
+    <meta name="description" content="Ceník individuální psychoterapie online a osobně v Ostravě. Jedno setkání trvá 50 minut a stojí 1 100 Kč. Praktické informace a storno podmínky.">
     <meta name="author" content="Mgr. Kristýna Hriciková Glattová">
 
     <meta property="og:title" content="Ceník psychoterapie online a v Ostravě">
-    <meta property="og:description" content="Jedno individuální terapeutické setkání trvá 50 minut a stojí 950 Kč. Online nebo osobně v Ostravě.">
+    <meta property="og:description" content="Jedno individuální terapeutické setkání trvá 50 minut a stojí 1 100 Kč. Online nebo osobně v Ostravě.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://khgporadenstvi.cz/cenik.html">
     <meta property="og:image" content="https://khgporadenstvi.cz/images/og-home.png">
@@ -19,7 +19,7 @@
     <meta property="og:image:alt" content="KHG Poradenství – psychoterapie online a osobně v Ostravě">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Ceník psychoterapie online a v Ostravě">
-    <meta name="twitter:description" content="Jedno individuální terapeutické setkání trvá 50 minut a stojí 950 Kč.">
+    <meta name="twitter:description" content="Jedno individuální terapeutické setkání trvá 50 minut a stojí 1 100 Kč.">
     <meta name="twitter:image" content="https://khgporadenstvi.cz/images/og-home.png">
     <meta name="twitter:image:alt" content="KHG Poradenství – psychoterapie online a osobně v Ostravě">
 
@@ -30,7 +30,7 @@
     <link rel="icon" type="image/webp" href="images/favicon.webp">
     <link rel="preload" href="fonts/Inter/Inter-VariableFont_opsz,wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
     <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
-    <link rel="stylesheet" href="css/styles.css?v=20260819-1">
+    <link rel="stylesheet" href="css/styles.css?v=20260831-4">
     <link rel="stylesheet" href="css/cenik-styles.css">
 
     <script type="application/ld+json">
@@ -80,7 +80,7 @@
             {
               "@type": "Offer",
               "url": "https://khgporadenstvi.cz/cenik.html#online",
-              "price": "950",
+              "price": "1100",
               "priceCurrency": "CZK",
               "itemOffered": {
                 "@type": "Service",
@@ -94,7 +94,7 @@
             {
               "@type": "Offer",
               "url": "https://khgporadenstvi.cz/cenik.html#osobne",
-              "price": "950",
+              "price": "1100",
               "priceCurrency": "CZK",
               "itemOffered": {
                 "@type": "Service",
@@ -113,24 +113,26 @@
 </head>
 <body>
     <header class="header">
+        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
         <nav class="nav container" aria-label="Hlavní navigace">
             <div class="nav-logo">
-                <a href="/">
-                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="logo-img">
+                <a href="/" aria-label="KHG Poradenství – úvodní stránka">
+                    <img src="/images/logo.webp" width="381" height="96" alt="" class="logo-img">
                 </a>
             </div>
 
-            <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
+            <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false" aria-controls="primary-navigation">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
 
-            <ul class="nav-menu">
+            <ul class="nav-menu" id="primary-navigation">
                 <li><a href="/#o-mne" class="nav-link">O mně</a></li>
                 <li><a href="/#sluzby" class="nav-link">Služby</a></li>
-                <li><a href="cenik.html" class="nav-link active" aria-current="page">Ceník</a></li>
-                <li><a href="kviz.html" class="nav-link">Kvízy</a></li>
+                <li><a href="/cenik.html" class="nav-link active" aria-current="page">Ceník</a></li>
+                <li><a href="/blog.html" class="nav-link">Blog</a></li>
+                <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
                 <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
             </ul>
@@ -151,7 +153,7 @@
                     <article class="pricing-card" id="online">
                         <p class="pricing-card-label">Online</p>
                         <h2>Online terapie</h2>
-                        <p class="pricing-price"><strong>950 Kč</strong><span>/ 50 minut</span></p>
+                        <p class="pricing-price"><strong>1 100 Kč</strong><span>/ 50 minut</span></p>
                         <ul class="pricing-facts">
                             <li>Odkaz přijde automaticky v potvrzení rezervace</li>
                             <li>Termíny od pondělí do pátku</li>
@@ -162,7 +164,7 @@
                     <article class="pricing-card" id="osobne">
                         <p class="pricing-card-label">Ostrava</p>
                         <h2>Osobní terapie</h2>
-                        <p class="pricing-price"><strong>950 Kč</strong><span>/ 50 minut</span></p>
+                        <p class="pricing-price"><strong>1 100 Kč</strong><span>/ 50 minut</span></p>
                         <ul class="pricing-facts">
                             <li>Soukromá ordinace na Vítkovické ulici</li>
                             <li>Osobní termíny v pondělí a úterý</li>
@@ -249,10 +251,11 @@
         </div>
     </footer>
 
-    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1">
+    <!-- Generated from partials/booking-modal.html by scripts/sync-header.ps1. -->
+    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1" inert>
         <div class="booking-modal">
             <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
@@ -260,8 +263,8 @@
             <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
             <div class="booking-modal-options">
                 <a href="#" class="booking-option" onclick="bookOnline(); return false;">
-                    <div class="booking-option-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="booking-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                             <line x1="8" y1="21" x2="16" y2="21"></line>
                             <line x1="12" y1="17" x2="12" y2="21"></line>
@@ -272,8 +275,8 @@
                     <p class="booking-option-desc">Pondělí až pátek</p>
                 </a>
                 <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
-                    <div class="booking-option-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="booking-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                             <path d="M3 21h18"></path>
                             <path d="M5 21V7l8-4v18"></path>
                             <path d="M19 21V11l-6-4"></path>
@@ -290,8 +293,7 @@
         </div>
     </div>
 
-    <script src="js/privacy-consent.js?v=20260819-1"></script>
-    <script src="js/site-announcement.js?v=20260819-1"></script>
-    <script src="js/script.js"></script>
+    <script src="js/privacy-consent.js?v=20260831-1"></script>
+    <script src="js/script.js?v=20260831-5"></script>
 </body>
 </html>

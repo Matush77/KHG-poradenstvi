@@ -40,30 +40,32 @@
     <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 769px)">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=20260819-1">
+    <link rel="stylesheet" href="css/styles.css?v=20260831-4">
     <link rel="stylesheet" href="css/blog-styles.css">
 </head>
 <body>
     <!-- Header & Navigation -->
     <header class="header">
-        <nav class="nav container">
+        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
+        <nav class="nav container" aria-label="Hlavní navigace">
             <div class="nav-logo">
-                <a href="/">
-                    <img src="images/logo.webp" width="381" height="96" alt="KHG Poradenství Logo" class="logo-img">
+                <a href="/" aria-label="KHG Poradenství – úvodní stránka">
+                    <img src="/images/logo.webp" width="381" height="96" alt="" class="logo-img">
                 </a>
             </div>
 
-            <button class="nav-toggle" aria-label="Toggle navigation">
+            <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false" aria-controls="primary-navigation">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
 
-            <ul class="nav-menu">
+            <ul class="nav-menu" id="primary-navigation">
                 <li><a href="/#o-mne" class="nav-link">O mně</a></li>
                 <li><a href="/#sluzby" class="nav-link">Služby</a></li>
-                <li><a href="cenik.html" class="nav-link">Cen&iacute;k</a></li>
-                <li><a href="kviz.html" class="nav-link">Kvízy</a></li>
+                <li><a href="/cenik.html" class="nav-link">Ceník</a></li>
+                <li><a href="/blog.html" class="nav-link active" aria-current="page">Blog</a></li>
+                <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
                 <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
             </ul>
@@ -334,11 +336,11 @@
         </div>
     </footer>
 
-    <!-- Booking Modal -->
-    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1">
+    <!-- Generated from partials/booking-modal.html by scripts/sync-header.ps1. -->
+    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1" inert>
         <div class="booking-modal">
             <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
@@ -347,7 +349,7 @@
             <div class="booking-modal-options">
                 <a href="#" class="booking-option" onclick="bookOnline(); return false;">
                     <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                             <line x1="8" y1="21" x2="16" y2="21"></line>
                             <line x1="12" y1="17" x2="12" y2="21"></line>
@@ -359,7 +361,7 @@
                 </a>
                 <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
                     <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                             <path d="M3 21h18"></path>
                             <path d="M5 21V7l8-4v18"></path>
                             <path d="M19 21V11l-6-4"></path>
@@ -376,9 +378,8 @@
         </div>
     </div>
 
-    <script src="js/privacy-consent.js?v=20260819-1"></script>
-    <script src="js/site-announcement.js?v=20260819-1"></script>
-    <script src="js/script.js"></script>
+    <script src="js/privacy-consent.js?v=20260831-1"></script>
+    <script src="js/script.js?v=20260831-5"></script>
     <script src="js/blog-script.js"></script>
     <script src="js/card-reveal.js"></script>
 </body>

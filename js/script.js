@@ -220,14 +220,17 @@ function openBookingModal() {
         : null;
     bookingModalPreviousOverflow = document.body.style.overflow;
 
+    modal.removeAttribute('inert');
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
-    setBookingModalBackgroundInert(modal, true);
     document.body.style.overflow = 'hidden';
 
+    // Let Chrome render the removed inert state before focusing the dialog.
     window.requestAnimationFrame(function() {
-        const initialFocus = modal.querySelector('.booking-modal-close') || modal;
-        initialFocus.focus();
+        window.requestAnimationFrame(function() {
+            modal.focus({ preventScroll: true });
+            setBookingModalBackgroundInert(modal, true);
+        });
     });
 }
 
@@ -237,6 +240,7 @@ function closeBookingModal() {
 
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('inert', '');
     setBookingModalBackgroundInert(modal, false);
     document.body.style.overflow = bookingModalPreviousOverflow;
 
@@ -286,7 +290,9 @@ function bookInPerson() {
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('bookingModal');
     if (modal) {
-        modal.setAttribute('aria-hidden', modal.classList.contains('active') ? 'false' : 'true');
+        const isActive = modal.classList.contains('active');
+        modal.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+        modal.toggleAttribute('inert', !isActive);
 
         // Close on backdrop click
         modal.addEventListener('click', function(e) {
@@ -332,39 +338,31 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.querySelector('.nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
+    if (!navToggle || !navMenu) return;
 
-    // Toggle mobile menu
-    if (navToggle) {
-        navToggle.setAttribute('aria-expanded', 'false');
-        navToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-            navToggle.setAttribute('aria-expanded', String(navMenu.classList.contains('active')));
+    const navLinks = navMenu.querySelectorAll('a');
+    const toggleLines = navToggle.querySelectorAll('span');
 
-            // Animate hamburger to X
-            const spans = navToggle.querySelectorAll('span');
-            if (navMenu.classList.contains('active')) {
-                spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-                spans[1].style.opacity = '0';
-                spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
-            } else {
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
-            }
-        });
+    function setMobileNavigationState(isOpen) {
+        navMenu.classList.toggle('active', isOpen);
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+        navToggle.setAttribute('aria-label', isOpen ? 'Zavřít navigaci' : 'Otevřít navigaci');
+
+        toggleLines[0].style.transform = isOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none';
+        toggleLines[1].style.opacity = isOpen ? '0' : '1';
+        toggleLines[2].style.transform = isOpen ? 'rotate(-45deg) translate(7px, -6px)' : 'none';
     }
+
+    setMobileNavigationState(false);
+    navToggle.addEventListener('click', function() {
+        setMobileNavigationState(!navMenu.classList.contains('active'));
+    });
 
     // Close mobile menu when clicking a link
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             if (navMenu.classList.contains('active')) {
-                navMenu.classList.remove('active');
-                navToggle.setAttribute('aria-expanded', 'false');
-                const spans = navToggle.querySelectorAll('span');
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
+                setMobileNavigationState(false);
             }
         });
     });
@@ -374,11 +372,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (navMenu.classList.contains('active') &&
             !navMenu.contains(event.target) &&
             !navToggle.contains(event.target)) {
-            navMenu.classList.remove('active');
-            const spans = navToggle.querySelectorAll('span');
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
+            setMobileNavigationState(false);
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && navMenu.classList.contains('active')) {
+            setMobileNavigationState(false);
+            navToggle.focus();
         }
     });
 });
