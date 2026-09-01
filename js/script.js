@@ -456,35 +456,6 @@ document.querySelectorAll('a[target="_blank"]').forEach(link => {
     }
 });
 
-// Performance: Lazy Load Images (if you add more images later)
-if ('loading' in HTMLImageElement.prototype) {
-    const images = document.querySelectorAll('img[loading="lazy"]');
-    images.forEach(img => {
-        if (img.dataset.src) {
-            img.src = img.dataset.src;
-        }
-    });
-} else {
-    // Fallback for browsers that don't support lazy loading
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
-    document.body.appendChild(script);
-}
-
-// Form Validation (if you add a contact form later)
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-// Google Calendar Link Analytics (optional)
-document.querySelectorAll('a[href*="calendar.google.com"]').forEach(link => {
-    link.addEventListener('click', () => {
-        // You can add analytics tracking here
-        console.log('Calendar booking clicked');
-    });
-});
-
 // Fix for bfcache (back-forward cache) issues on mobile
 // When returning from external pages, force a style recalculation
 window.addEventListener('pageshow', function(event) {
@@ -503,48 +474,72 @@ document.addEventListener('DOMContentLoaded', () => {
     skipLink.className = 'skip-to-main';
     skipLink.textContent = 'Přejít k hlavnímu obsahu';
     skipLink.style.cssText = `
-        position: absolute;
-        top: -40px;
+        position: fixed;
+        top: 0;
         left: 0;
         background: var(--primary);
         color: white;
         padding: 8px;
         text-decoration: none;
-        z-index: 100;
+        transform: translateY(-100%);
+        z-index: 11000;
     `;
 
     skipLink.addEventListener('focus', () => {
-        skipLink.style.top = '0';
+        skipLink.style.transform = 'translateY(0)';
     });
 
     skipLink.addEventListener('blur', () => {
-        skipLink.style.top = '-40px';
+        skipLink.style.transform = 'translateY(-100%)';
+    });
+
+    skipLink.addEventListener('click', (event) => {
+        const mainContent = document.getElementById('main');
+        if (!mainContent) return;
+
+        event.preventDefault();
+        mainContent.setAttribute('tabindex', '-1');
+        mainContent.focus();
     });
 
     document.body.insertBefore(skipLink, document.body.firstChild);
 });
 
 // Add active state to current nav item based on scroll position
-window.addEventListener('scroll', () => {
-    let current = '';
-    const sections = document.querySelectorAll('section[id]');
+const isHomepage = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
 
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (pageYOffset >= (sectionTop - 200)) {
-            current = section.getAttribute('id');
-        }
+if (isHomepage) {
+    const scrollSpyLinks = Array.from(document.querySelectorAll('.nav-link')).filter(link => {
+        const url = new URL(link.href, window.location.href);
+        return url.hash && (url.pathname === '/' || url.pathname.endsWith('/index.html'));
     });
+    const sectionIds = new Set(scrollSpyLinks.map(link => new URL(link.href, window.location.href).hash.slice(1)));
+    const sections = Array.from(document.querySelectorAll('section[id]')).filter(section => sectionIds.has(section.id));
 
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-            link.classList.add('active');
-        }
-    });
-});
+    const updateActiveNavLink = () => {
+        let current = '';
+
+        sections.forEach(section => {
+            if (window.scrollY >= section.offsetTop - 200) {
+                current = section.id;
+            }
+        });
+
+        scrollSpyLinks.forEach(link => {
+            const isCurrent = new URL(link.href, window.location.href).hash === `#${current}`;
+            link.classList.toggle('active', isCurrent);
+
+            if (isCurrent) {
+                link.setAttribute('aria-current', 'location');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', updateActiveNavLink, { passive: true });
+    updateActiveNavLink();
+}
 
 // Number Counter Animation with easing
 function animateCounter(element, target, duration = 2000) {

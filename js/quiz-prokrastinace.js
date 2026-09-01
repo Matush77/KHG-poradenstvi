@@ -298,6 +298,7 @@ class QuizController {
         this.questionCard = document.getElementById('questionCard');
         this.questionText = document.getElementById('questionText');
         this.optionsContainer = document.getElementById('optionsContainer');
+        this.quizForm = document.getElementById('quizForm');
         this.prevBtn = document.getElementById('prevBtn');
         this.nextBtn = document.getElementById('nextBtn');
 
@@ -339,14 +340,9 @@ class QuizController {
             this.nextBtn.addEventListener('click', () => this.handleNext());
         }
 
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (this.quizSection.style.display !== 'none') {
-                if (e.key === 'Enter' && !this.nextBtn.disabled) {
-                    this.handleNext();
-                }
-            }
-        });
+        if (this.quizForm) {
+            this.quizForm.addEventListener('submit', (event) => event.preventDefault());
+        }
     }
 
     checkResumeQuiz() {
@@ -571,8 +567,6 @@ function shareQuiz(platform) {
     const url = window.location.href;
     const text = encodeURIComponent('Test prokrastinace - Může vám pomoci zjistit, co vás brzdí v plnění úkolů');
 
-    console.log('Sharing quiz:', platform, 'URL:', url);
-
     let shareUrl = '';
 
     if (platform === 'facebook') {
@@ -580,8 +574,6 @@ function shareQuiz(platform) {
     } else if (platform === 'twitter') {
         shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${text}`;
     }
-
-    console.log('Final share URL:', shareUrl);
 
     if (shareUrl) {
         window.open(shareUrl, '_blank', 'width=600,height=600');

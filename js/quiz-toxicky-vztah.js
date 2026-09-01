@@ -311,6 +311,7 @@ class QuizController {
         this.questionCard = document.getElementById('questionCard');
         this.questionText = document.getElementById('questionText');
         this.optionsContainer = document.getElementById('optionsContainer');
+        this.quizForm = document.getElementById('quizForm');
         this.prevBtn = document.getElementById('prevBtn');
         this.nextBtn = document.getElementById('nextBtn');
 
@@ -328,6 +329,7 @@ class QuizController {
         this.resultsScore = document.getElementById('resultsScore');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
+        this.crisisHelp = document.getElementById('crisisHelp');
         this.resultsCta = document.getElementById('resultsCta');
         this.ctaHeading = document.getElementById('ctaHeading');
         this.ctaDescription = document.getElementById('ctaDescription');
@@ -352,14 +354,9 @@ class QuizController {
             this.nextBtn.addEventListener('click', () => this.handleNext());
         }
 
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (this.quizSection.style.display !== 'none') {
-                if (e.key === 'Enter' && !this.nextBtn.disabled) {
-                    this.handleNext();
-                }
-            }
-        });
+        if (this.quizForm) {
+            this.quizForm.addEventListener('submit', (event) => event.preventDefault());
+        }
     }
 
     checkResumeQuiz() {
@@ -546,6 +543,10 @@ class QuizController {
             this.recommendationsList.appendChild(li);
         });
 
+        if (this.crisisHelp) {
+            this.crisisHelp.hidden = result.showCrisis !== true;
+        }
+
         if (this.resultsCta) {
             this.resultsCta.style.display = result.showCta === false ? 'none' : 'block';
         }
@@ -584,8 +585,6 @@ function shareQuiz(platform) {
     const url = window.location.href;
     const text = encodeURIComponent('Test toxického vztahu - Může vám pomoci získat jasno ve vašem vztahu');
 
-    console.log('Sharing quiz:', platform, 'URL:', url);
-
     let shareUrl = '';
 
     if (platform === 'facebook') {
@@ -593,8 +592,6 @@ function shareQuiz(platform) {
     } else if (platform === 'twitter') {
         shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${text}`;
     }
-
-    console.log('Final share URL:', shareUrl);
 
     if (shareUrl) {
         window.open(shareUrl, '_blank', 'width=600,height=600');
