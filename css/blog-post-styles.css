@@ -185,6 +185,12 @@
     border-left: 4px solid #b9822f;
 }
 
+.article-safety-note a[href^="tel:"] {
+    color: #8a1c13;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
 .article-examples {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
