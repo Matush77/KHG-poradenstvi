@@ -247,7 +247,11 @@ class QuizState {
             score: this.score,
             timestamp: Date.now()
         };
-        localStorage.setItem('quiz-overthinking-progress', JSON.stringify(progress));
+        try {
+            localStorage.setItem('quiz-overthinking-progress', JSON.stringify(progress));
+        } catch (e) {
+            // The quiz keeps working in memory when storage is unavailable.
+        }
     }
 
     loadProgress() {
@@ -256,10 +260,18 @@ class QuizState {
             if (saved) {
                 const data = JSON.parse(saved);
                 // Only load if less than 24 hours old
-                if (Date.now() - data.timestamp < 86400000) {
-                    this.currentQuestion = data.currentQuestion || 0;
-                    this.answers = data.answers || new Array(quizConfig.questions.length).fill(null);
-                    this.score = data.score || 0;
+                const questions = quizConfig.questions;
+                const isFresh = Number.isFinite(data?.timestamp) && Date.now() - data.timestamp < 86400000;
+                const hasValidAnswers = Array.isArray(data?.answers) && data.answers.length === questions.length;
+                if (isFresh && hasValidAnswers) {
+                    // Only trust answers that match an existing option; the
+                    // score is recalculated rather than read from storage.
+                    this.answers = data.answers.map((answer, index) =>
+                        Number.isInteger(answer) && answer >= 0 && answer < questions[index].options.length ? answer : null
+                    );
+                    this.score = this.answers.reduce((total, answer, index) =>
+                        answer === null ? total : total + questions[index].options[answer].score, 0);
+                    this.currentQuestion = Math.min(Math.max(Number(data.currentQuestion) || 0, 0), questions.length - 1);
                 }
             }
         } catch (e) {
@@ -268,7 +280,11 @@ class QuizState {
     }
 
     clearProgress() {
-        localStorage.removeItem('quiz-overthinking-progress');
+        try {
+            localStorage.removeItem('quiz-overthinking-progress');
+        } catch (e) {
+            // Nothing to remove without storage.
+        }
     }
 
     getResult() {
@@ -348,20 +364,19 @@ class QuizController {
     }
 
     checkResumeQuiz() {
-        const saved = localStorage.getItem('quiz-overthinking-progress');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                if (Date.now() - data.timestamp < 86400000 && data.currentQuestion > 0) {
-                    const resume = confirm('Chcete pokračovat v nedokončeném testu?');
-                    if (!resume) {
-                        this.state.clearProgress();
-                        this.state = new QuizState();
-                    }
+        try {
+            const saved = localStorage.getItem('quiz-overthinking-progress');
+            if (!saved) return;
+            const data = JSON.parse(saved);
+            if (Date.now() - data.timestamp < 86400000 && data.currentQuestion > 0) {
+                const resume = confirm('Chcete pokračovat v nedokončeném testu?');
+                if (!resume) {
+                    this.state.clearProgress();
+                    this.state = new QuizState();
                 }
-            } catch (e) {
-                console.error('Error checking resume:', e);
             }
+        } catch (e) {
+            console.error('Error checking resume:', e);
         }
     }
 
@@ -409,10 +424,17 @@ class QuizController {
             optionDiv.appendChild(radio);
             optionDiv.appendChild(label);
 
-            // Click handler for entire option div
+            // The native radio drives selection, so keyboard, mouse and
+            // screen readers all see the same checked state.
+            radio.addEventListener('change', () => {
+                if (radio.checked) {
+                    this.selectOption(questionIndex, index, option.score);
+                }
+            });
+
+            // Clicks on the padding around the label select the radio too.
             optionDiv.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.selectOption(questionIndex, index, option.score);
+                if (e.target === optionDiv) radio.click();
             });
 
             this.optionsContainer.appendChild(optionDiv);
