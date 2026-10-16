@@ -56,8 +56,8 @@ const quizConfig = {
                 { text: "Vždy", score: 0 },
                 { text: "Většinou", score: 2 },
                 { text: "Někdy ano, někdy ne", score: 5 },
-                { text: "Spíše ne", score: 7 },
-                { text: "Určitě ne", score: 9 }
+                { text: "Spíše ne", score: 7, redFlag: true },
+                { text: "Určitě ne", score: 9, redFlag: true }
             ]
         },
         {
@@ -68,7 +68,7 @@ const quizConfig = {
                 { text: "Zřídka", score: 3 },
                 { text: "Občas", score: 5 },
                 { text: "Často", score: 7 },
-                { text: "Neustále", score: 9 }
+                { text: "Neustále", score: 9, redFlag: true }
             ]
         },
         {
@@ -79,7 +79,7 @@ const quizConfig = {
                 { text: "Pouze se zajímá", score: 1 },
                 { text: "Někdy je přehnaně zvědavý/á", score: 4 },
                 { text: "Často chce vědět všechno", score: 7 },
-                { text: "Neustále mě kontroluje", score: 9 }
+                { text: "Neustále mě kontroluje", score: 9, redFlag: true }
             ]
         },
         {
@@ -90,7 +90,7 @@ const quizConfig = {
                 { text: "Je neutrální", score: 2 },
                 { text: "Někdy je kritický/á", score: 4 },
                 { text: "Často kritizuje nebo odrazuje od setkání", score: 7 },
-                { text: "Izoluje mě od blízkých", score: 9 }
+                { text: "Izoluje mě od blízkých", score: 9, redFlag: true }
             ]
         },
         {
@@ -101,7 +101,7 @@ const quizConfig = {
                 { text: "Většinou dobře, občas se pohádáme", score: 2 },
                 { text: "Často se vyhýbá nebo přehání", score: 5 },
                 { text: "Křičí, obviňuje nebo manipuluje", score: 7 },
-                { text: "Používá agresivní chování", score: 9 }
+                { text: "Používá agresivní chování", score: 9, redFlag: true }
             ]
         },
         {
@@ -281,14 +281,34 @@ class QuizState {
         localStorage.removeItem('quiz-toxicky-vztah-progress');
     }
 
+    hasRedFlag() {
+        return this.answers.some((optionIndex, questionIndex) => {
+            if (optionIndex === null) return false;
+            const option = quizConfig.questions[questionIndex]?.options[optionIndex];
+            return option?.redFlag === true;
+        });
+    }
+
     getResult() {
+        let result = { type: 'healthy', ...resultInterpretations.healthy };
         for (const key in resultInterpretations) {
-            const result = resultInterpretations[key];
-            if (this.score >= result.range[0] && this.score <= result.range[1]) {
-                return { type: key, ...result };
+            const band = resultInterpretations[key];
+            if (this.score >= band.range[0] && this.score <= band.range[1]) {
+                result = { type: key, ...band };
+                break;
             }
         }
-        return resultInterpretations.healthy;
+
+        // A single answer describing fear, aggression, control or isolation
+        // must never get the reassuring result, whatever the total score.
+        if (this.hasRedFlag()) {
+            if (result.type === 'healthy') {
+                result = { type: 'warning', ...resultInterpretations.warning };
+            }
+            result.showCrisis = true;
+        }
+
+        return result;
     }
 }
 
