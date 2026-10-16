@@ -5,6 +5,39 @@
     const LEGACY_CONSENT_KEY = 'khg_privacy_consent_v1';
     const LEGACY_PRICE_NOTICE_KEY = 'khg_price_notice_20260901_v1';
     const NOTICE_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
+    const QUIZ_PROGRESS_KEYS = [
+        'quiz-overthinking-progress',
+        'quiz-prokrastinace-progress',
+        'quiz-toxicky-vztah-progress',
+        'quiz-zdrave-hranice-progress'
+    ];
+    const QUIZ_PROGRESS_LIFETIME_MS = 24 * 60 * 60 * 1000;
+
+    // localStorage nemá expiraci, proto rozepsané kvízy starší než 24 hodin
+    // mažeme při každém načtení libovolné stránky webu.
+    function removeExpiredQuizProgress() {
+        QUIZ_PROGRESS_KEYS.forEach(function (key) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null) return;
+
+                let saved = null;
+                try {
+                    saved = JSON.parse(raw);
+                } catch (error) {
+                    // Poškozený záznam se smaže níže.
+                }
+
+                const isFresh = saved &&
+                    Number.isFinite(saved.timestamp) &&
+                    Date.now() - saved.timestamp < QUIZ_PROGRESS_LIFETIME_MS;
+
+                if (!isFresh) localStorage.removeItem(key);
+            } catch (error) {
+                // Bez lokálního úložiště není co mazat.
+            }
+        });
+    }
 
     function readNoticeState() {
         try {
@@ -102,6 +135,7 @@
     }
 
     const noticeWasDismissed = readNoticeState();
+    removeExpiredQuizProgress();
     clearLegacyGoogleCookies();
 
     document.addEventListener('DOMContentLoaded', function () {
