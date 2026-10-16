@@ -243,7 +243,6 @@ class BoundariesQuiz {
         icon.style.color = result.color;
         title.textContent = result.title;
         title.style.color = result.color;
-        document.getElementById('resultsScore').textContent = score;
 
         description.replaceChildren();
         result.paragraphs.forEach(paragraph => {

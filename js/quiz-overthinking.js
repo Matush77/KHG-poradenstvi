@@ -316,7 +316,6 @@ class QuizController {
         this.resultsSection = document.getElementById('resultsSection');
         this.resultsIcon = document.getElementById('resultsIcon');
         this.resultsTitle = document.getElementById('resultsTitle');
-        this.resultsScore = document.getElementById('resultsScore');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
         this.resultsCta = document.getElementById('resultsCta');
@@ -522,7 +521,6 @@ class QuizController {
         this.resultsIcon.style.color = result.color;
         this.resultsTitle.textContent = result.title;
         this.resultsTitle.style.color = result.color;
-        this.resultsScore.textContent = this.state.score;
         this.resultsDescription.textContent = result.description;
 
         // Populate recommendations
