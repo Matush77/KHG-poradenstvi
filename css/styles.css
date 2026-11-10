@@ -18,6 +18,71 @@
     font-display: swap;
 }
 
+/* Metric-matched fallbacks: system fonts resized to take the same space as
+   Inter / Playfair Display, so text does not reflow (layout shift) when the
+   web fonts finish loading. Values computed from the font files on Czech text.
+   Desktop/iOS use Arial + Georgia, Android uses Roboto + Noto Serif.
+   Keep in sync with the inline critical CSS in index.html. */
+@font-face {
+    font-family: 'Inter Fallback';
+    src: local('Arial'), local('ArialMT');
+    font-weight: 300 500;
+    size-adjust: 106.44%;
+    ascent-override: 91.01%;
+    descent-override: 22.66%;
+    line-gap-override: 0%;
+}
+
+@font-face {
+    font-family: 'Inter Fallback';
+    src: local('Arial Bold'), local('Arial-BoldMT');
+    font-weight: 600 700;
+    size-adjust: 106.44%;
+    ascent-override: 91.01%;
+    descent-override: 22.66%;
+    line-gap-override: 0%;
+}
+
+@font-face {
+    font-family: 'Inter Fallback Android';
+    src: local('Roboto'), local('Roboto-Regular');
+    font-weight: 300 500;
+    size-adjust: 107.27%;
+    ascent-override: 90.31%;
+    descent-override: 22.49%;
+    line-gap-override: 0%;
+}
+
+@font-face {
+    font-family: 'Inter Fallback Android';
+    src: local('Roboto Bold'), local('Roboto-Bold');
+    font-weight: 600 700;
+    size-adjust: 107.27%;
+    ascent-override: 90.31%;
+    descent-override: 22.49%;
+    line-gap-override: 0%;
+}
+
+@font-face {
+    font-family: 'Playfair Display Fallback';
+    src: local('Georgia Bold'), local('Georgia-Bold');
+    font-weight: 600 700;
+    size-adjust: 89.48%;
+    ascent-override: 120.92%;
+    descent-override: 28.05%;
+    line-gap-override: 0%;
+}
+
+@font-face {
+    font-family: 'Playfair Display Fallback Android';
+    src: local('Noto Serif Bold'), local('NotoSerif-Bold');
+    font-weight: 600 700;
+    size-adjust: 90.52%;
+    ascent-override: 119.53%;
+    descent-override: 27.73%;
+    line-gap-override: 0%;
+}
+
 /* ==========================================
    MODERN THERAPY WEBSITE - PREMIUM DESIGN
    ========================================== */
@@ -47,8 +112,8 @@
     --border-light: #E8E8E8;
 
     /* Typography */
-    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-primary: 'Inter', 'Inter Fallback', 'Inter Fallback Android', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heading: 'Playfair Display', 'Playfair Display Fallback', 'Playfair Display Fallback Android', Georgia, serif;
 
     /* Spacing */
     --space-xs: 0.5rem;

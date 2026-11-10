@@ -45,13 +45,21 @@
     <style>
       *,*::before,*::after{box-sizing:border-box}
       *{margin:0;padding:0}
+      @font-face{font-family:'Inter';src:url('fonts/Inter/Inter-LatinExt-var.woff2') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}
+      @font-face{font-family:'Playfair Display';src:url('fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+      @font-face{font-family:'Inter Fallback';src:local('Arial'),local('ArialMT');font-weight:300 500;size-adjust:106.44%;ascent-override:91.01%;descent-override:22.66%;line-gap-override:0%}
+      @font-face{font-family:'Inter Fallback';src:local('Arial Bold'),local('Arial-BoldMT');font-weight:600 700;size-adjust:106.44%;ascent-override:91.01%;descent-override:22.66%;line-gap-override:0%}
+      @font-face{font-family:'Inter Fallback Android';src:local('Roboto'),local('Roboto-Regular');font-weight:300 500;size-adjust:107.27%;ascent-override:90.31%;descent-override:22.49%;line-gap-override:0%}
+      @font-face{font-family:'Inter Fallback Android';src:local('Roboto Bold'),local('Roboto-Bold');font-weight:600 700;size-adjust:107.27%;ascent-override:90.31%;descent-override:22.49%;line-gap-override:0%}
+      @font-face{font-family:'Playfair Display Fallback';src:local('Georgia Bold'),local('Georgia-Bold');font-weight:600 700;size-adjust:89.48%;ascent-override:120.92%;descent-override:28.05%;line-gap-override:0%}
+      @font-face{font-family:'Playfair Display Fallback Android';src:local('Noto Serif Bold'),local('NotoSerif-Bold');font-weight:600 700;size-adjust:90.52%;ascent-override:119.53%;descent-override:27.73%;line-gap-override:0%}
       :root{--primary:#2D5A7B;--primary-dark:#1e3d52;--primary-light:#4A7B9D;--accent:#E8927C;--accent-light:#F5B5A5;--text-dark:#2C3E50;--text-medium:#5A6C7D;--bg-cream:#FAF8F5;--bg-light:#fff;--space-xs:.5rem;--space-sm:1rem;--space-md:1.5rem;--space-lg:2rem;--space-xl:3rem;--space-2xl:4rem;--space-3xl:6rem;--transition:all .3s cubic-bezier(.4,0,.2,1)}
       html{scroll-behavior:smooth;font-size:16px}
-      body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:400;color:var(--text-dark);background:var(--bg-light);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+      body{font-family:Inter,"Inter Fallback","Inter Fallback Android",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:400;color:var(--text-dark);background:var(--bg-light);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
       .container{max-width:1200px;margin:0 auto;padding:0 var(--space-lg)}
       a{color:var(--primary);text-decoration:none}
       p{margin-bottom:var(--space-md);color:var(--text-medium);font-size:1.0625rem;font-weight:400;line-height:1.7}
-      .btn{display:inline-block;padding:.875rem 2rem;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:1rem;font-weight:600;text-align:center;border-radius:50px;cursor:pointer;border:0;text-decoration:none;white-space:nowrap}
+      .btn{display:inline-block;padding:.875rem 2rem;font-family:Inter,"Inter Fallback","Inter Fallback Android",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:1rem;font-weight:600;text-align:center;border-radius:50px;cursor:pointer;border:0;text-decoration:none;white-space:nowrap}
       .btn-primary{background:var(--accent);color:var(--bg-light)}
       .btn-hero{background:var(--primary);color:var(--bg-light)!important;padding:1.125rem 2.5rem;font-size:1.125rem;-webkit-text-fill-color:var(--bg-light)}
       .header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.98);box-shadow:0 2px 20px rgba(0,0,0,.05);z-index:1000}
@@ -64,7 +72,7 @@
       .nav-toggle span{width:25px;height:3px;background:var(--text-dark);border-radius:3px}
       .hero{padding:140px 0 var(--space-3xl);background:linear-gradient(135deg,var(--bg-cream) 0%,var(--bg-light) 100%);overflow:hidden}
       .hero-container{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3xl);align-items:center}
-      .hero-title{font-family:"Playfair Display",Georgia,serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:700;color:var(--text-dark);margin-bottom:var(--space-lg);line-height:1.1}
+      .hero-title{font-family:"Playfair Display","Playfair Display Fallback","Playfair Display Fallback Android",Georgia,serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:700;color:var(--text-dark);margin-bottom:var(--space-lg);line-height:1.1}
       .hero-subtitle{font-size:clamp(1.125rem,2vw,1.375rem);color:var(--text-medium);margin-bottom:var(--space-xl);line-height:1.6}
       .hero-stats{display:flex;gap:var(--space-lg);margin-bottom:var(--space-xl)}
       .hero-stat{display:flex;align-items:center;gap:var(--space-sm)}
@@ -82,8 +90,8 @@
     </style>
 
     <!-- Full stylesheet is loaded asynchronously after matching critical CSS. -->
-    <link rel="preload" href="css/styles.css?v=20261110-2" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
-    <noscript><link rel="stylesheet" href="css/styles.css?v=20261110-2"></noscript>
+    <link rel="preload" href="css/styles.css?v=20261110-3" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
+    <noscript><link rel="stylesheet" href="css/styles.css?v=20261110-3"></noscript>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
