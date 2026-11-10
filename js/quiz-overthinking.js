@@ -385,7 +385,6 @@ class QuizController {
         this.introSection.style.display = 'none';
         this.quizSection.style.display = 'block';
         this.renderQuestion();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     renderQuestion(shouldScroll = true) {
@@ -652,7 +651,11 @@ function showShareMessage(message) {
 function restartQuiz() {
     if (confirm('Opravdu chcete začít test znovu? Vaše současné výsledky budou ztraceny.')) {
         // Clear state
-        localStorage.removeItem('quiz-overthinking-progress');
+        try {
+            localStorage.removeItem('quiz-overthinking-progress');
+        } catch (e) {
+            // The quiz can restart even when storage is unavailable.
+        }
 
         // Reload page to start fresh
         window.location.reload();

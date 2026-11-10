@@ -670,26 +670,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Auto-advance carousel every 7 seconds
-    let autoAdvance = setInterval(() => {
-        currentIndex = (currentIndex + 1) % totalCards;
-        updateCarousel(currentIndex);
-    }, 7000);
+    let autoAdvance = null;
 
-    // Pause auto-advance on hover
-    track.addEventListener('mouseenter', () => {
+    function stopAutoAdvance() {
         clearInterval(autoAdvance);
-    });
+        autoAdvance = null;
+    }
 
-    // Resume auto-advance on mouse leave
-    track.addEventListener('mouseleave', () => {
+    // Always clear first so repeated calls never stack timers.
+    function startAutoAdvance() {
+        stopAutoAdvance();
         autoAdvance = setInterval(() => {
             currentIndex = (currentIndex + 1) % totalCards;
             updateCarousel(currentIndex);
         }, 7000);
-    });
+    }
 
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
+    startAutoAdvance();
+
+    // Pause auto-advance on hover
+    track.addEventListener('mouseenter', stopAutoAdvance);
+
+    // Resume auto-advance on mouse leave
+    track.addEventListener('mouseleave', startAutoAdvance);
+
+    // Keyboard navigation, only while focus is inside the carousel.
+    const carousel = track.closest('.testimonials-carousel') || track.parentElement;
+    carousel.addEventListener('keydown', (e) => {
         if (e.defaultPrevented) return;
 
         if (e.key === 'ArrowLeft') {
