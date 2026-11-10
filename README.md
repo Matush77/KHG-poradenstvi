@@ -44,7 +44,7 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 └── docs/                                             developer notes
 ```
 
-`partials/`, `scripts/` and `docs/` are for development only and are not uploaded to the server.
+`partials/`, `scripts/` and `docs/` are for development only. The site is deployed from this repository by Git, so they are on the server, but `.htaccess` answers any request for them with a 404.
 
 ## Running locally
 

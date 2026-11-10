@@ -4,6 +4,12 @@ RewriteEngine On
 # Keep the original missing URL and HTTP 404 status, but show a useful page.
 ErrorDocument 404 /404.html
 
+# The whole repository is deployed by Git, so hide the development-only
+# files and the Git metadata. They answer with the normal 404 page.
+RewriteRule (^|/)\.git(/|$) - [R=404,L]
+RewriteRule ^(partials|scripts|docs)(/|$) - [R=404,L]
+RewriteRule ^(README\.md|\.gitignore)$ - [R=404,L]
+
 RewriteCond %{HTTP_HOST} ^www\.khgporadenstvi\.cz$ [NC]
 RewriteRule ^ https://khgporadenstvi.cz%{REQUEST_URI} [R=301,L]
 
