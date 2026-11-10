@@ -191,6 +191,14 @@ a:hover {
     box-shadow: 0 12px 28px rgba(232, 146, 124, 0.3);
 }
 
+/* Long button labels wrap instead of running off narrow phones. */
+@media (max-width: 480px) {
+    .btn {
+        white-space: normal;
+        max-width: 100%;
+    }
+}
+
 /* ==========================================
    HEADER & NAVIGATION
    ========================================== */
@@ -266,10 +274,14 @@ a:hover {
 .nav-toggle {
     display: none;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0;
     gap: 5px;
 }
 
@@ -1687,8 +1699,11 @@ a:hover {
     gap: var(--space-sm);
 }
 
+/* Padding gives a 44px tap area; the matching negative margin keeps the layout. */
 .social-link {
     display: inline-block;
+    padding: 6px;
+    margin: -6px;
     transition: var(--transition);
 }
 

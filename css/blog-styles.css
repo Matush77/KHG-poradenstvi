@@ -14,8 +14,11 @@
     color: var(--bg-light);
     font-weight: 600;
     font-size: 1.0625rem;
-    margin-bottom: var(--space-lg);
-    display: inline-block;
+    margin-top: -9px;
+    margin-bottom: calc(var(--space-lg) - 9px);
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     transition: var(--transition);
     opacity: 0.95;
     text-align: left;
