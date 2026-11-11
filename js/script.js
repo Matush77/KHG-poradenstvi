@@ -384,6 +384,62 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Arriving at /#section from another page: the browser jumps to the section
+// right after the first paint, but on phones the full stylesheets switch on a
+// moment later (see the loader in index.html) and the page grows by several
+// screens, so the section slid away (e.g. "Kontakt" landed on "Profesní
+// členství"). Keep the target aligned while the layout settles, and stop as
+// soon as the visitor scrolls or touches the page.
+// Address links: computers open Google Maps directions in a new tab (the href).
+// Android gets a geo: link, which opens the visitor's default maps app (or asks
+// which one: Google Maps, Mapy.cz, Waze...). iPhones and iPads get Apple Maps,
+// as a web page can't ask iOS for the visitor's preferred maps app.
+(function openAddressInMapsApp() {
+    const ua = navigator.userAgent;
+    const android = /Android/i.test(ua);
+    const iOS = /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!android && !iOS) return;
+    document.querySelectorAll('a[href^="https://www.google.com/maps/dir/"]').forEach(link => {
+        const destination = new URL(link.href).searchParams.get('destination');
+        if (!destination) return;
+        if (android) {
+            link.href = 'geo:0,0?q=' + encodeURIComponent(destination);
+            link.removeAttribute('target');   // a new tab would be left blank
+        } else {
+            link.href = 'https://maps.apple.com/?daddr=' + encodeURIComponent(destination);
+        }
+    });
+})();
+
+(function keepHashTargetInView() {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const target = id ? document.getElementById(id) : null;
+    if (!target || !('ResizeObserver' in window)) return;
+    // on a reload the browser restores the visitor's own scroll position; keep it
+    const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (nav && (nav.type === 'reload' || nav.type === 'back_forward')) return;
+
+    const userEvents = ['wheel', 'touchstart', 'keydown', 'mousedown'];
+    let active = true;
+    const align = () => {
+        if (active) target.scrollIntoView({ block: 'start', behavior: 'instant' });
+    };
+    const observer = new ResizeObserver(align);
+    const stop = () => {
+        active = false;
+        observer.disconnect();
+        userEvents.forEach(type => window.removeEventListener(type, stop, true));
+    };
+
+    observer.observe(document.body);
+    userEvents.forEach(type => window.addEventListener(type, stop, { capture: true, passive: true }));
+    window.addEventListener('load', () => {
+        align();
+        setTimeout(stop, 2000);
+    });
+})();
+
 // Smooth Scroll with Offset for Fixed Header
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {

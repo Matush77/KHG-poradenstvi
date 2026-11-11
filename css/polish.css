@@ -440,6 +440,12 @@ a, button, [role="button"], label, summary { -webkit-tap-highlight-color: transp
 }
 .blob-shape.is-offscreen { animation-play-state: paused; }
 
+/* ==================================================================
+   [P20] Anchor jumps land below the fixed header (89 px), matching the
+   100 px offset the in-page smooth scroll in js/script.js uses.
+   ================================================================== */
+main section[id], main [id].section { scroll-margin-top: 100px; }
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .btn, .featured-link { transition: none; }
