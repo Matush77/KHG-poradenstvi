@@ -87,11 +87,23 @@
       @media (max-width:968px){.nav-toggle{display:flex}.nav-menu{position:fixed;top:80px;left:-100%;flex-direction:column;background:var(--bg-light);width:100%;max-height:calc(100dvh - 80px);padding:var(--space-xl) var(--space-lg);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 10px 30px rgba(0,0,0,.1);gap:var(--space-lg);align-items:flex-start}.nav-menu.active{left:0}.hero{padding:100px 0 var(--space-2xl)}.hero-container{grid-template-columns:1fr;gap:var(--space-xl);max-width:600px;margin:0 auto}.hero-content{text-align:center}.hero-stats{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:var(--space-md)}.blob-shape{max-width:350px;margin:0 auto}}
       @media (max-width:768px){.container{padding:0 var(--space-sm)}.nav{padding:.75rem var(--space-lg)}}
       @media (max-height:560px) and (orientation:landscape){.booking-modal-overlay{align-items:flex-start;overflow-y:auto;padding:.5rem 1rem}.booking-modal{max-height:calc(100dvh - 1rem);padding:1.25rem 1.5rem;overflow-y:auto;border-radius:18px}}
+      /* Polished hero (css/polish.css P1, P2, P8, P15): kept identical here so nothing shifts when the full CSS arrives */
+      :root{--text-light:#66727F;--fs-small:.9375rem;--fs-lead:clamp(1.0625rem,1rem + .35vw,1.25rem);--fs-h1:clamp(2.5rem,1.8rem + 2.9vw,4rem);--lh-body:1.65;--section-y:clamp(3.5rem,2.4rem + 4.4vw,6rem)}
+      body{line-height:var(--lh-body)}p{line-height:var(--lh-body);text-wrap:pretty}
+      h1,.hero-title{text-wrap:balance;line-height:1.08;letter-spacing:-.02em}
+      .hero-title{font-size:var(--fs-h1)}.hero-subtitle{font-size:var(--fs-lead);max-width:34rem}
+      .hero-stats{display:block}.hero-stats-line{margin:0;font-size:var(--fs-small);line-height:1.5;color:var(--text-medium)}.hero-stats-line strong{color:var(--primary);font-weight:700}.stats-dot{color:var(--accent);margin:0 .625rem;font-weight:700}
+      .btn{padding:.8125rem 1.75rem;font-size:1rem;line-height:1.375;letter-spacing:.005em;border-radius:999px}.btn-hero{padding:1rem 2.125rem;font-size:1.0625rem}
+      .header{box-shadow:0 1px 0 #E9E4DD,0 6px 20px hsl(205 40% 25% / .04)}
+      @media (max-width:968px){.hero-subtitle{margin-inline:auto}.hero{padding-bottom:var(--section-y)}}
     </style>
 
-    <!-- Full stylesheet is loaded asynchronously after matching critical CSS. -->
-    <link rel="preload" href="css/styles.css?v=20261110-3" as="style" onload="this.onload=null;const stylesheet=this;const mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(function(){stylesheet.rel='stylesheet'})})}else{stylesheet.rel='stylesheet'}">
-    <noscript><link rel="stylesheet" href="css/styles.css?v=20261110-3"></noscript>
+    <!-- Full stylesheets are loaded asynchronously after matching critical CSS.
+         Both switch on together, so the page restyles once (after two frames on mobile). -->
+    <script>window.khgCss=function(l){var q=window.khgCssQ=window.khgCssQ||[];q.push(l);if(q.length<2)return;var go=function(){q.forEach(function(x){x.rel='stylesheet'})};var mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(go)})}else{go()}}</script>
+    <link rel="preload" href="css/styles.css?v=20261110-3" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
+    <link rel="preload" href="css/polish.css?v=20261111-1" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
+    <noscript><link rel="stylesheet" href="css/styles.css?v=20261110-3"><link rel="stylesheet" href="css/polish.css?v=20261111-1"></noscript>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
@@ -346,23 +358,7 @@
                 </p>
 
                 <div class="hero-stats">
-                    <div class="hero-stat">
-                        <div class="hero-stat-icon">
-                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="16" cy="16" r="14" stroke="#2D5A7B" stroke-width="2" fill="none"/>
-                                <path d="M16 8V16L21 19" stroke="#2D5A7B" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <span class="hero-stat-text">+4000 hodin praxe</span>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-icon">
-                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16 4L19.5 11.5L28 12.5L22 18.5L23.5 27L16 23L8.5 27L10 18.5L4 12.5L12.5 11.5L16 4Z" fill="#2D5A7B"/>
-                            </svg>
-                        </div>
-                        <span class="hero-stat-text">+100 doporučení</span>
-                    </div>
+                    <p class="hero-stats-line"><strong>4&nbsp;000+</strong>&nbsp;hodin praxe<span class="stats-dot" aria-hidden="true">·</span><strong>100+</strong>&nbsp;doporučení</p>
                 </div>
 
                 <a href="#" class="btn btn-hero" onclick="openBookingModal(); return false;">
@@ -550,60 +546,21 @@
 
                 <div class="benefits-grid">
                     <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <path d="M6 22 24 7l18 15"/>
-                                <path d="M10 20v21h28V20"/>
-                                <path d="M24 19l8 3v6c0 5.2-3.2 9.6-8 11.5-4.8-1.9-8-6.3-8-11.5v-6l8-3Z"/>
-                                <path d="m20.5 29 2.5 2.5 4.8-5"/>
-                            </svg>
-                        </div>
                         <h3>Pohodlí a soukromí</h3>
                         <p>Zvolte si prostředí, ve kterém se můžete cítit bezpečně – klidnou poradnu nebo soukromé místo pro online hovor.</p>
                     </div>
 
                     <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <rect x="3.5" y="7.5" width="18" height="22" rx="3"/>
-                                <rect x="26.5" y="7.5" width="18" height="22" rx="3"/>
-                                <rect x="7.5" y="14" width="7" height="7" rx="1.5"/>
-                                <path d="m14.5 16.2 3.5-1.7v6l-3.5-1.7Z"/>
-                                <circle cx="33.5" cy="15" r="2.5"/>
-                                <circle cx="39.5" cy="15" r="2.5"/>
-                                <path d="M29.5 24c.3-3.5 1.7-5.5 4-5.5s3.7 2 4 5.5"/>
-                                <path d="M35.5 24c.3-3.5 1.7-5.5 4-5.5s3.7 2 4 5.5"/>
-                                <path d="M11 39h26m-26 0 4-4m-4 4 4 4m22-4-4-4m4 4-4 4"/>
-                            </svg>
-                        </div>
                         <h3>Forma podle Vašich potřeb</h3>
                         <p>Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.</p>
                     </div>
 
                     <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <rect x="6" y="9" width="36" height="26" rx="3"/>
-                                <path d="M3 39h42"/>
-                                <path d="M17 21c4-4 10-4 14 0"/>
-                                <path d="M20.5 24.5c2-2 5-2 7 0"/>
-                                <circle cx="24" cy="28" r="1.25" fill="currentColor" stroke="none"/>
-                            </svg>
-                        </div>
                         <h3>Online odkudkoliv</h3>
                         <p>Připojit se můžete z domova nebo jiného klidného a soukromého místa v Česku i v zahraničí.</p>
                     </div>
 
                     <div class="benefit-item">
-                        <div class="benefit-icon">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <path d="M24 44s13-12.5 13-25a13 13 0 1 0-26 0c0 12.5 13 25 13 25Z"/>
-                                <circle cx="20" cy="18" r="2.5"/>
-                                <circle cx="28" cy="18" r="2.5"/>
-                                <path d="M15.5 28c.4-4.5 2-7 4.5-7s4.1 2.5 4.5 7"/>
-                                <path d="M23.5 28c.4-4.5 2-7 4.5-7s4.1 2.5 4.5 7"/>
-                            </svg>
-                        </div>
                         <h3>Osobně v Ostravě</h3>
                         <p>Setkání tváří v tvář v klidném prostoru poradny pro ty, kterým osobní kontakt vyhovuje více.</p>
                     </div>
@@ -934,9 +891,6 @@
 
                 <!-- Carousel Dots -->
                 <div class="carousel-dots">
-                    <button type="button" class="carousel-arrow carousel-btn-prev" aria-label="Předchozí recenze">
-                        <span aria-hidden="true"></span>
-                    </button>
                     <div class="carousel-indicators">
                         <button type="button" class="carousel-dot active" data-index="0" aria-label="Recenze 1" aria-current="true"></button>
                         <button type="button" class="carousel-dot" data-index="1" aria-label="Recenze 2"></button>
@@ -945,9 +899,6 @@
                         <button type="button" class="carousel-dot" data-index="4" aria-label="Recenze 5"></button>
                         <button type="button" class="carousel-dot" data-index="5" aria-label="Recenze 6"></button>
                     </div>
-                    <button type="button" class="carousel-arrow carousel-btn-next" aria-label="Další recenze">
-                        <span aria-hidden="true"></span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -963,39 +914,22 @@
             <div class="contact-compact">
                 <div class="contact-info-compact">
                     <div class="contact-item-compact">
-                        <div class="contact-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="3" y="5" width="18" height="14" rx="2" stroke="#2D5A7B" stroke-width="2"/>
-                                <path d="M3 7L12 13L21 7" stroke="#2D5A7B" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </div>
                         <div class="contact-details">
-                            <span class="contact-label">Email:</span>
+                            <span class="contact-label">E-mail</span>
                             <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>
                         </div>
                     </div>
 
                     <div class="contact-item-compact">
-                        <div class="contact-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6 4C5 4 4 5 4 6V8C4 14 8 18 14 20H16C17 20 18 19 18 18V15C18 14.5 17.5 14 17 14L14 13C13.5 13 13 13.5 13 14V15C11 15 9 13 9 11V10C9 9.5 9.5 9 10 9L11 6C11 5.5 10.5 5 10 5H7C6.5 5 6 5.5 6 6Z" stroke="#2D5A7B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
                         <div class="contact-details">
-                            <span class="contact-label">Telefon:</span>
+                            <span class="contact-label">Telefon</span>
                             <a href="tel:+420605990980">+420 605 990 980</a>
                         </div>
                     </div>
 
                     <div class="contact-item-compact">
-                        <div class="contact-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2C8.5 2 5.5 5 5.5 8.5C5.5 13 12 22 12 22C12 22 18.5 13 18.5 8.5C18.5 5 15.5 2 12 2Z" stroke="#2D5A7B" stroke-width="2"/>
-                                <circle cx="12" cy="9" r="2.5" stroke="#2D5A7B" stroke-width="2"/>
-                            </svg>
-                        </div>
                         <div class="contact-details">
-                            <span class="contact-label">Osobní setkání:</span>
+                            <span class="contact-label">Osobní setkání</span>
                             <a href="https://share.google/hNU7Q7iU2ZYKX8Eln" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a>
                         </div>
                     </div>
@@ -1072,29 +1006,12 @@
             <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
             <div class="booking-modal-options">
                 <a href="#" class="booking-option" onclick="bookOnline(); return false;">
-                    <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                            <circle cx="12" cy="10" r="2"></circle>
-                        </svg>
-                    </div>
+                    <span class="booking-option-label">Online</span>
                     <span class="booking-option-title">Terapie online</span>
                     <p class="booking-option-desc">Pondělí až pátek</p>
                 </a>
                 <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
-                    <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <path d="M3 21h18"></path>
-                            <path d="M5 21V7l8-4v18"></path>
-                            <path d="M19 21V11l-6-4"></path>
-                            <path d="M9 9v.01"></path>
-                            <path d="M9 12v.01"></path>
-                            <path d="M9 15v.01"></path>
-                            <path d="M9 18v.01"></path>
-                        </svg>
-                    </div>
+                    <span class="booking-option-label">Ostrava</span>
                     <span class="booking-option-title">Terapie osobně</span>
                     <p class="booking-option-desc">Pondělí a úterý</p>
                 </a>
@@ -1132,6 +1049,6 @@
     </div>
 
 <script src="js/privacy-consent.js?v=20261016-2"></script>
-<script src="js/script.js?v=20261110-1"></script>
+<script src="js/script.js?v=20261111-1"></script>
 </body>
 </html>

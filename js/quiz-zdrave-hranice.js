@@ -234,13 +234,10 @@ class BoundariesQuiz {
         this.quizSection.style.display = 'none';
         this.resultsSection.style.display = 'block';
 
-        const icon = document.getElementById('resultsIcon');
         const title = document.getElementById('resultsTitle');
         const description = document.getElementById('resultsDescription');
         const recommendations = document.getElementById('recommendationsList');
 
-        icon.textContent = result.icon;
-        icon.style.color = result.color;
         title.textContent = result.title;
         title.style.color = result.color;
 

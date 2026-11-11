@@ -541,136 +541,35 @@ if (isHomepage) {
     updateActiveNavLink();
 }
 
-// Number Counter Animation with easing
-function animateCounter(element, target, duration = 2000) {
-    const startTime = performance.now();
-
-    // Easing function - starts fast, slows down at the end
-    function easeOutQuart(t) {
-        return 1 - Math.pow(1 - t, 4);
-    }
-
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Apply easing to progress
-        const easedProgress = easeOutQuart(progress);
-        const current = Math.floor(easedProgress * target);
-
-        element.textContent = '+' + current;
-
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        } else {
-            element.textContent = '+' + target;
-        }
-    }
-
-    requestAnimationFrame(update);
-}
-
-// Start counter animation when page loads (disabled on mobile)
-document.addEventListener('DOMContentLoaded', () => {
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
-    // Skip counter animation on mobile for better performance
-    if (isMobile) {
-        return;
-    }
-
-    const stats = document.querySelectorAll('.hero-stat-text');
-
-    stats.forEach(stat => {
-        const text = stat.textContent.trim();
-
-        // Extract number from text like "+1500 hodin praxe"
-        const match = text.match(/\+?(\d+)/);
-        if (match) {
-            const number = parseInt(match[1]);
-            const restOfText = text.replace(/\+?\d+/, '').trim();
-
-            // Create a span for the number
-            const numberSpan = document.createElement('span');
-            numberSpan.className = 'counter-number';
-            stat.textContent = '';
-            stat.appendChild(numberSpan);
-            stat.appendChild(document.createTextNode(' ' + restOfText));
-
-            // Animate the counter
-            animateCounter(numberSpan, number, 2000);
-        }
-    });
-});
-
 // Testimonials Carousel
+// All cards sit in one CSS grid cell (css/polish.css), so the track is as tall as
+// the longest review and nothing below it moves. Auto-advance runs every 7 s
+// until the visitor swipes, taps a dot or uses the arrow keys, then stops for
+// good; with "reduce motion" it never starts.
 document.addEventListener('DOMContentLoaded', () => {
     const track = document.querySelector('.testimonials-track');
     if (!track) return; // Exit if testimonials section doesn't exist
 
     const cards = document.querySelectorAll('.testimonial-card');
     const dots = document.querySelectorAll('.carousel-dot');
-    const prevBtn = document.querySelector('.carousel-btn-prev');
-    const nextBtn = document.querySelector('.carousel-btn-next');
-
-    let currentIndex = 0;
     const totalCards = cards.length;
-
-    function setTrackHeight() {
-        const maxHeight = Math.max(...Array.from(cards).map(card => card.scrollHeight), 0);
-        if (maxHeight > 0) {
-            track.style.minHeight = `${maxHeight}px`;
-        }
-    }
-
-    // Function to update carousel
-    function updateCarousel(index) {
-        // Remove active class from all cards and dots
-        cards.forEach(card => card.classList.remove('active'));
-        dots.forEach(dot => {
-            dot.classList.remove('active');
-            dot.removeAttribute('aria-current');
-        });
-
-        // Add active class to current card and dot
-        cards[index].classList.add('active');
-
-        if (dots[index]) {
-            dots[index].classList.add('active');
-            dots[index].setAttribute('aria-current', 'true');
-        }
-
-        setTrackHeight();
-    }
-
-    // Next button
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex + 1) % totalCards;
-            updateCarousel(currentIndex);
-        });
-    }
-
-    // Previous button
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex - 1 + totalCards) % totalCards;
-            updateCarousel(currentIndex);
-        });
-    }
-
-    // Dot navigation
-    if (dots.length) {
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                currentIndex = index;
-                updateCarousel(currentIndex);
-            });
-        });
-    }
-
-    // Auto-advance carousel every 7 seconds
+    let currentIndex = 0;
     let autoAdvance = null;
+    let userTookOver = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function updateCarousel(index) {
+        currentIndex = (index + totalCards) % totalCards;
+        cards.forEach((card, i) => card.classList.toggle('active', i === currentIndex));
+        dots.forEach((dot, i) => {
+            const isActive = i === currentIndex;
+            dot.classList.toggle('active', isActive);
+            if (isActive) {
+                dot.setAttribute('aria-current', 'true');
+            } else {
+                dot.removeAttribute('aria-current');
+            }
+        });
+    }
 
     function stopAutoAdvance() {
         clearInterval(autoAdvance);
@@ -680,38 +579,64 @@ document.addEventListener('DOMContentLoaded', () => {
     // Always clear first so repeated calls never stack timers.
     function startAutoAdvance() {
         stopAutoAdvance();
-        autoAdvance = setInterval(() => {
-            currentIndex = (currentIndex + 1) % totalCards;
-            updateCarousel(currentIndex);
-        }, 7000);
+        if (userTookOver) return;
+        autoAdvance = setInterval(() => updateCarousel(currentIndex + 1), 7000);
     }
 
-    startAutoAdvance();
+    function takeOver() {
+        userTookOver = true;
+        stopAutoAdvance();
+    }
 
-    // Pause auto-advance on hover
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            takeOver();
+            updateCarousel(index);
+        });
+    });
+
+    // Pause while a mouse is over the review; resume only if nobody took over.
     track.addEventListener('mouseenter', stopAutoAdvance);
-
-    // Resume auto-advance on mouse leave
     track.addEventListener('mouseleave', startAutoAdvance);
 
     // Keyboard navigation, only while focus is inside the carousel.
     const carousel = track.closest('.testimonials-carousel') || track.parentElement;
     carousel.addEventListener('keydown', (e) => {
         if (e.defaultPrevented) return;
-
-        if (e.key === 'ArrowLeft') {
-            currentIndex = (currentIndex - 1 + totalCards) % totalCards;
-            updateCarousel(currentIndex);
-        } else if (e.key === 'ArrowRight') {
-            currentIndex = (currentIndex + 1) % totalCards;
-            updateCarousel(currentIndex);
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            takeOver();
+            updateCarousel(currentIndex + (e.key === 'ArrowRight' ? 1 : -1));
         }
     });
 
-    // Set initial height
-    setTrackHeight();
-    updateCarousel(0);
+    // Swipe on touch screens. Mostly-horizontal swipes of 40 px or more change
+    // the review; vertical ones keep scrolling the page (touch-action: pan-y).
+    let touchX = null;
+    let touchY = 0;
+    track.addEventListener('touchstart', (e) => {
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+    }, { passive: true });
+    track.addEventListener('touchend', (e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        const dy = e.changedTouches[0].clientY - touchY;
+        touchX = null;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        takeOver();
+        updateCarousel(currentIndex + (dx < 0 ? 1 : -1));
+    }, { passive: true });
 
-    window.addEventListener('load', setTrackHeight);
-    window.addEventListener('resize', setTrackHeight);
+    updateCarousel(0);
+    startAutoAdvance();
+});
+
+// Hero blob: its shape animation loops (css/polish.css); pause it while the
+// portrait is off-screen so phones don't redraw it for nothing.
+document.addEventListener('DOMContentLoaded', () => {
+    const blob = document.querySelector('.blob-shape');
+    if (!blob || !('IntersectionObserver' in window)) return;
+    new IntersectionObserver(([entry]) => {
+        blob.classList.toggle('is-offscreen', !entry.isIntersecting);
+    }).observe(blob);
 });

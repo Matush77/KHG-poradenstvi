@@ -42,6 +42,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/styles.css?v=20261110-3">
     <link rel="stylesheet" href="css/blog-styles.css?v=20261110-3">
+    <link rel="stylesheet" href="css/polish.css?v=20261111-1">
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -267,9 +268,9 @@
 
             <!-- Empty State (shown when no posts match filter) -->
             <div class="blog-empty" id="emptyState" style="display: none;">
-                <div class="blog-empty-icon">📝</div>
                 <h3>Zatím zde nejsou žádné příspěvky</h3>
-                <p>V této kategorii brzy přibudou nové články</p>
+                <p>V této kategorii brzy přibudou nové články.</p>
+                <button type="button" class="blog-empty-link">Zobrazit všechny články →</button>
             </div>
         </div>
     </section>
@@ -347,29 +348,12 @@
             <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
             <div class="booking-modal-options">
                 <a href="#" class="booking-option" onclick="bookOnline(); return false;">
-                    <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                            <circle cx="12" cy="10" r="2"></circle>
-                        </svg>
-                    </div>
+                    <span class="booking-option-label">Online</span>
                     <span class="booking-option-title">Terapie online</span>
                     <p class="booking-option-desc">Pondělí až pátek</p>
                 </a>
                 <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
-                    <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <path d="M3 21h18"></path>
-                            <path d="M5 21V7l8-4v18"></path>
-                            <path d="M19 21V11l-6-4"></path>
-                            <path d="M9 9v.01"></path>
-                            <path d="M9 12v.01"></path>
-                            <path d="M9 15v.01"></path>
-                            <path d="M9 18v.01"></path>
-                        </svg>
-                    </div>
+                    <span class="booking-option-label">Ostrava</span>
                     <span class="booking-option-title">Terapie osobně</span>
                     <p class="booking-option-desc">Pondělí a úterý</p>
                 </a>
@@ -378,8 +362,8 @@
     </div>
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
-    <script src="js/script.js?v=20261110-1"></script>
-    <script src="js/blog-script.js?v=20260901-1"></script>
+    <script src="js/script.js?v=20261111-1"></script>
+    <script src="js/blog-script.js?v=20261111-1"></script>
     <script src="js/card-reveal.js"></script>
 </body>
 </html>

@@ -124,7 +124,7 @@ const resultInterpretations = {
         range: [0, 20],
         title: "Převažují znaky respektu a bezpečí",
         icon: "✓",
-        color: "#4A9D7B",
+        color: "#3F7652",
         description: "Ve Vašich odpovědích převažují znaky respektu, důvěry a bezpečí. Test však nemůže posoudit celý vztah ani vyloučit konkrétní problematické chování.",
         recommendations: [
             "Pokračujte v otevřené komunikaci a vzájemném respektu",
@@ -144,7 +144,7 @@ const resultInterpretations = {
         range: [21, 45],
         title: "Některé varovné signály",
         icon: "⚠",
-        color: "#E8A87C",
+        color: "#9A712B",
         description: "Některé odpovědi poukazují na chování, kterému je vhodné věnovat pozornost. Závažnost situace nelze určit pouze podle celkového skóre – důležitý je konkrétní kontext, zejména přítomnost strachu, nátlaku, kontroly, vyhrožování nebo násilí.",
         recommendations: [
             "O tom, co Vás trápí, mluvte s partnerem pouze tehdy, pokud je to pro Vás bezpečné",
@@ -164,7 +164,7 @@ const resultInterpretations = {
         range: [46, 65],
         title: "Výrazné znaky nezdravého vztahu",
         icon: "!",
-        color: "#D97B7B",
+        color: "#A65F55",
         description: "Některé Vaše odpovědi mohou ukazovat na opakované nerespektování hranic, kontrolu nebo manipulaci. Test nemůže určit povahu celého vztahu, ale tyto konkrétní projevy je vhodné brát vážně.",
         recommendations: [
             "Vaše pocity jsou platné a důležité - věřte jim",
@@ -185,7 +185,7 @@ const resultInterpretations = {
         range: [66, 86],
         title: "Vážné znaky toxického vztahu",
         icon: "⚠",
-        color: "#D97B7B",
+        color: "#A65F55",
         description: "Některé z Vašich odpovědí popisují závažné varovné signály. Test nemůže určit povahu celého vztahu, ale pokud zažíváte strach, nátlak, kontrolu, vyhrožování nebo násilí, je důležité vyhledat bezpečnou podporu.",
         recommendations: [
             "Vaše bezpečnost je absolutní prioritou",
@@ -360,7 +360,6 @@ class QuizController {
 
         // Results elements
         this.resultsSection = document.getElementById('resultsSection');
-        this.resultsIcon = document.getElementById('resultsIcon');
         this.resultsTitle = document.getElementById('resultsTitle');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
@@ -568,8 +567,6 @@ class QuizController {
         this.resultsSection.style.display = 'block';
 
         // Populate results
-        this.resultsIcon.textContent = result.icon;
-        this.resultsIcon.style.color = result.color;
         this.resultsTitle.textContent = result.title;
         this.resultsTitle.style.color = result.color;
         this.resultsDescription.textContent = result.description;

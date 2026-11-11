@@ -40,4 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // "Zobrazit všechny články" in the empty state switches back to "Vše"
+    const showAll = document.querySelector('.blog-empty-link');
+    const allBtn = document.querySelector('.category-btn[data-category="all"]');
+    if (showAll && allBtn) {
+        showAll.addEventListener('click', () => allBtn.click());
+    }
 });

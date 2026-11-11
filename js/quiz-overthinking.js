@@ -114,7 +114,7 @@ const resultInterpretations = {
         range: [0, 7],
         title: "Málo známek nadměrného přemýšlení",
         icon: "✓",
-        color: "#4CAF50",
+        color: "#3F7652",
         description: "Ve Vašich odpovědích se objevilo jen málo situací spojených s nadměrným přemýšlením. Výsledek ale nepředstavuje celkové hodnocení Vašeho duševního zdraví.",
         recommendations: [
             "Pokračujte ve svých osvědčených strategiích",
@@ -134,7 +134,7 @@ const resultInterpretations = {
         range: [8, 15],
         title: "Občasné nadměrné přemýšlení",
         icon: "○",
-        color: "#8BC34A",
+        color: "#2D5A7B",
         description: "Ve Vašich odpovědích se objevují některé situace, ve kterých přemýšlíte déle nebo intenzivněji, než byste chtěli. Můžete vyzkoušet několik postupů a sledovat, co Vám pomáhá.",
         recommendations: [
             "Zjistěte, zda nejste vyčerpaní – můžete potřebovat odpočinek, ne disciplínu",
@@ -155,7 +155,7 @@ const resultInterpretations = {
         range: [16, 23],
         title: "Častější nadměrné přemýšlení",
         icon: "!",
-        color: "#FFC107",
+        color: "#9A712B",
         description: "Vaše odpovědi naznačují častější výskyt nadměrného přemýšlení. Pokud Vám zasahuje do odpočinku, rozhodování nebo každodenního fungování, může být užitečné začít s ním cíleně pracovat.",
         recommendations: [
             "Uvědomte si, že myšlenky nejsou fakta",
@@ -176,7 +176,7 @@ const resultInterpretations = {
         range: [24, 30],
         title: "Výrazné nadměrné přemýšlení",
         icon: "⚠",
-        color: "#F44336",
+        color: "#A65F55",
         description: "Ve Vašich odpovědích se objevují výrazné projevy nadměrného přemýšlení. Pokud Vám narušují spánek, vztahy nebo každodenní fungování, může být užitečné probrat obtíže s psychologem nebo psychoterapeutem.",
         recommendations: [
             "Zvažte odbornou konzultaci, při které můžete prozkoumat souvislosti obtíží ve Vaší konkrétní situaci",
@@ -330,7 +330,6 @@ class QuizController {
 
         // Results elements
         this.resultsSection = document.getElementById('resultsSection');
-        this.resultsIcon = document.getElementById('resultsIcon');
         this.resultsTitle = document.getElementById('resultsTitle');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
@@ -538,8 +537,6 @@ class QuizController {
         this.resultsSection.style.display = 'block';
 
         // Populate results
-        this.resultsIcon.textContent = result.icon;
-        this.resultsIcon.style.color = result.color;
         this.resultsTitle.textContent = result.title;
         this.resultsTitle.style.color = result.color;
         this.resultsDescription.textContent = result.description;

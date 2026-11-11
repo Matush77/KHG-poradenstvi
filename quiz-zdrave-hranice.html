@@ -29,6 +29,7 @@
     <link rel="preload" href="fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="css/styles.css?v=20261110-3">
     <link rel="stylesheet" href="css/quiz-styles.css?v=20261110-3">
+    <link rel="stylesheet" href="css/polish.css?v=20261111-1">
 
     <script type="application/ld+json">
     {
@@ -128,11 +129,7 @@
 
                         <div class="quiz-info-boxes">
                             <div class="quiz-info-box">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M12 2C10 2 8 3 8 5V6H6C5 6 4 7 4 8V20C4 21 5 22 6 22H18C19 22 20 21 20 20V8C20 7 19 6 18 6H16V5C16 3 14 2 12 2Z" stroke="currentColor" stroke-width="2"/>
-                                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                <span>12 otázek</span>
+                                <span><strong>12</strong>&nbsp;otázek<span class="stats-dot" aria-hidden="true">·</span>výsledek ihned</span>
                             </div>
                         </div>
 
@@ -178,7 +175,7 @@
             <div class="container">
                 <div class="quiz-results-card">
                     <div class="quiz-results-header">
-                        <div class="quiz-results-icon" id="resultsIcon" aria-hidden="true"></div>
+                        <p class="quiz-results-label">Váš výsledek</p>
                         <h2 class="quiz-results-title" id="resultsTitle">Výsledek kvízu</h2>
                     </div>
                     <div class="quiz-results-content">
@@ -281,29 +278,12 @@
             <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
             <div class="booking-modal-options">
                 <a href="#" class="booking-option" onclick="bookOnline(); return false;">
-                    <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                            <circle cx="12" cy="10" r="2"></circle>
-                        </svg>
-                    </div>
+                    <span class="booking-option-label">Online</span>
                     <span class="booking-option-title">Terapie online</span>
                     <p class="booking-option-desc">Pondělí až pátek</p>
                 </a>
                 <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
-                    <div class="booking-option-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <path d="M3 21h18"></path>
-                            <path d="M5 21V7l8-4v18"></path>
-                            <path d="M19 21V11l-6-4"></path>
-                            <path d="M9 9v.01"></path>
-                            <path d="M9 12v.01"></path>
-                            <path d="M9 15v.01"></path>
-                            <path d="M9 18v.01"></path>
-                        </svg>
-                    </div>
+                    <span class="booking-option-label">Ostrava</span>
                     <span class="booking-option-title">Terapie osobně</span>
                     <p class="booking-option-desc">Pondělí a úterý</p>
                 </a>
@@ -312,7 +292,7 @@
     </div>
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
-    <script src="js/script.js?v=20261110-1"></script>
-    <script src="js/quiz-zdrave-hranice.js?v=20261016-1"></script>
+    <script src="js/script.js?v=20261111-1"></script>
+    <script src="js/quiz-zdrave-hranice.js?v=20261111-1"></script>
 </body>
 </html>

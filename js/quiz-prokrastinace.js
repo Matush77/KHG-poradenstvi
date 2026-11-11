@@ -114,7 +114,7 @@ const resultInterpretations = {
         range: [0, 5],
         title: "Minimální prokrastinace",
         icon: "✓",
-        color: "#4CAF50",
+        color: "#3F7652",
         description: "Ve svých odpovědích uvádíte jen málo obtíží spojených s odkládáním úkolů. Výsledek popisuje pouze situace zahrnuté v tomto testu.",
         recommendations: [
             "Pokračujte v tom, co děláte – vaše přístupy fungují",
@@ -134,7 +134,7 @@ const resultInterpretations = {
         range: [6, 12],
         title: "Mírná prokrastinace",
         icon: "○",
-        color: "#8BC34A",
+        color: "#2D5A7B",
         description: "Ve Vašich odpovědích se objevuje občasné odkládání úkolů. Můžete vyzkoušet několik praktických postupů a sledovat, které Vám pomáhají.",
         recommendations: [
             "Zmenšete začátek na nejmenší možný krok",
@@ -153,7 +153,7 @@ const resultInterpretations = {
         range: [13, 20],
         title: "Střední prokrastinace",
         icon: "!",
-        color: "#FFC107",
+        color: "#9A712B",
         description: "Vaše odpovědi naznačují častější odkládání spojené se stresem, tlakem nebo výčitkami. Může být užitečné sledovat okolnosti, ve kterých se tento vzorec objevuje, a cíleně s nimi pracovat.",
         recommendations: [
             "Identifikujte, jakou emoci úkol spouští (strach, stud, odpor?)",
@@ -173,7 +173,7 @@ const resultInterpretations = {
         range: [21, 30],
         title: "Výrazná prokrastinace",
         icon: "⚠",
-        color: "#F44336",
+        color: "#A65F55",
         description: "Ve Vašich odpovědích se objevuje výrazné odkládání úkolů. Pokud se promítá do práce, vztahů, studia nebo každodenního fungování, může být užitečné hledat cílenou podporu.",
         recommendations: [
             "Zvažte odbornou konzultaci, při které můžete prozkoumat různé souvislosti odkládání",
@@ -327,7 +327,6 @@ class QuizController {
 
         // Results elements
         this.resultsSection = document.getElementById('resultsSection');
-        this.resultsIcon = document.getElementById('resultsIcon');
         this.resultsTitle = document.getElementById('resultsTitle');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
@@ -534,8 +533,6 @@ class QuizController {
         this.resultsSection.style.display = 'block';
 
         // Populate results
-        this.resultsIcon.textContent = result.icon;
-        this.resultsIcon.style.color = result.color;
         this.resultsTitle.textContent = result.title;
         this.resultsTitle.style.color = result.color;
         this.resultsDescription.textContent = result.description;
