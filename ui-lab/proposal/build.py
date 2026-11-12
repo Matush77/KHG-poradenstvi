@@ -316,8 +316,36 @@ def build_page(name, layer):
         assert n == 1, name
         # no entrance animation: the reveal script is not loaded (one request fewer)
         p = p.replace('    <script src="js/card-reveal.js"></script>\n', "")
+        if name == "blog.html":
+            # owner, 12 Nov: no category filter for 10 articles; the list is short enough to read whole.
+            # The filter row, its empty state and its script go (one request fewer); the topic stays on each card.
+            p, n = re.subn(r'\n\s*<!-- Categories Filter -->\s*<div class="blog-categories">.*?</div>\n', "\n", p, flags=re.S)
+            assert n == 1, name
+            p, n = re.subn(r'\n\s*<!-- Empty State[^>]*-->\s*<div class="blog-empty".*?</button>\s*</div>', "", p, flags=re.S)
+            assert n == 1, name
+            p, n = re.subn(r'\s*<script src="js/blog-script\.js\?v=[\w-]+"></script>', "", p)
+            assert n == 1, name
     else:
         s('<main id="main">', '<main id="main" class="doc">')
+
+    if layer == "article.css":
+        # owner, 12 Nov: one meta line under the title, name + one date. The job title moves to the author box;
+        # "Aktualizováno" only when the article was really revised after it came out. JSON-LD keeps both dates.
+        def meta(m):
+            pub, pub_t, mod, mod_t = m.group(2), m.group(3), m.group(4), m.group(5)
+            when = (f'<time datetime="{pub}">{pub_t}</time>' if pub == mod
+                    else f'Aktualizováno <time datetime="{mod}">{mod_t}</time>')
+            return f'{m.group(1)} <span aria-hidden="true">·</span> <span class="blog-post-date">{when}</span></p>'
+        p, n = re.subn(r'(<p class="blog-post-byline"><a href="/#o-mne">[^<]*</a>) · [^<]*</p>\s*'
+                       r'<p class="blog-post-date">Publikováno: <time datetime="([\d-]+)">([^<]*)</time> · '
+                       r'Aktualizováno: <time datetime="([\d-]+)">([^<]*)</time></p>', meta, p)
+        assert n == 1, name
+        # author box: two short sentences, the credentials a reader checks first; the rest is one tap away on "O mně"
+        p, n = re.subn(r'<p><strong>Mgr\. Kristýna Hriciková Glattová</strong> je psycholog.*?</p>',
+                       '<p><strong>Mgr. Kristýna Hriciková Glattová</strong> je psycholog ve zdravotnictví ve Fakultní nemocnici Ostrava '
+                       'a terapeut pro děti a dospělé. Je členkou Asociace klinických psychologů a kandidátní členkou České asociace pro psychoterapii.</p>',
+                       p, flags=re.S)
+        assert n == 1, name
 
     if layer == "quiz.css":
         # steps forward are navy; coral stays for booking

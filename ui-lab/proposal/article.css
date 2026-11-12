@@ -13,6 +13,9 @@
 .blog-post-byline { font-size: .9375rem !important; font-weight: 500 !important; color: var(--slate) !important; margin: 0 0 4px !important; }
 .blog-post-byline a { color: var(--navy) !important; }
 .blog-post-date { font-size: .9375rem !important; font-weight: 400 !important; color: var(--mute) !important; margin: 0 !important; }
+/* 12 Nov: name and date share one line (the date is a span inside the byline) */
+.blog-post-byline { margin: 0 !important; color: var(--mute) !important; }
+.blog-post-byline .blog-post-date { display: inline !important; white-space: nowrap; }
 
 /* illustration: an image like the others — r12, no shadow, sky while it loads */
 .blog-post-image { border-radius: var(--r) !important; box-shadow: none !important; background: var(--sky) !important; margin: 0 0 var(--block-gap) !important; }

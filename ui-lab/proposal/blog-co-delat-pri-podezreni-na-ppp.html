@@ -652,6 +652,9 @@ html { scrollbar-gutter: stable; }
 .blog-post-byline { font-size: .9375rem !important; font-weight: 500 !important; color: var(--slate) !important; margin: 0 0 4px !important; }
 .blog-post-byline a { color: var(--navy) !important; }
 .blog-post-date { font-size: .9375rem !important; font-weight: 400 !important; color: var(--mute) !important; margin: 0 !important; }
+/* 12 Nov: name and date share one line (the date is a span inside the byline) */
+.blog-post-byline { margin: 0 !important; color: var(--mute) !important; }
+.blog-post-byline .blog-post-date { display: inline !important; white-space: nowrap; }
 
 /* illustration: an image like the others — r12, no shadow, sky while it loads */
 .blog-post-image { border-radius: var(--r) !important; box-shadow: none !important; background: var(--sky) !important; margin: 0 0 var(--block-gap) !important; }
@@ -799,8 +802,7 @@ html { scrollbar-gutter: stable; }
                 <a href="/ui-lab/proposal/blog.html" class="back-link">← Zpět na blog</a>
                 <span class="blog-post-category">Zdraví</span>
                 <h1 class="blog-post-title">Co jsou poruchy příjmu potravy a jak pomoci</h1>
-                <p class="blog-post-byline"><a href="/ui-lab/proposal/#o-mne">Mgr. Kristýna Hriciková Glattová</a> · Psycholog ve zdravotnictví a terapeut</p>
-                <p class="blog-post-date">Publikováno: <time datetime="2024-05-06">6. května 2024</time> · Aktualizováno: <time datetime="2026-08-10">10. srpna 2026</time></p>
+                <p class="blog-post-byline"><a href="/ui-lab/proposal/#o-mne">Mgr. Kristýna Hriciková Glattová</a> <span aria-hidden="true">·</span> <span class="blog-post-date">Aktualizováno <time datetime="2026-08-10">10. srpna 2026</time></span></p>
             </div>
 
             <img class="blog-post-image" src="images/editorial/blog-ppp-podpora-1200.webp" srcset="images/editorial/blog-ppp-podpora-640.webp 640w, images/editorial/blog-ppp-podpora-1200.webp 1200w" sizes="(max-width: 768px) calc(100vw - 2rem), 936px" alt="Ilustrace citlivého podpůrného rozhovoru" width="1200" height="630" decoding="async" fetchpriority="high">
@@ -877,7 +879,7 @@ html { scrollbar-gutter: stable; }
                     <img src="images/photo-400.webp" alt="Mgr. Kristýna Hriciková Glattová" width="96" height="96" loading="lazy">
                     <div>
                         <h2 id="article-author-title">O autorce</h2>
-                        <p><strong>Mgr. Kristýna Hriciková Glattová</strong> je psycholog ve zdravotnictví a terapeut pro děti a dospělé. Působí ve Fakultní nemocnici Ostrava a je ve specializačním vzdělávání v oboru klinická psychologie. Je kandidátní členkou České asociace pro psychoterapii a členkou Asociace klinických psychologů.</p>
+                        <p><strong>Mgr. Kristýna Hriciková Glattová</strong> je psycholog ve zdravotnictví ve Fakultní nemocnici Ostrava a terapeut pro děti a dospělé. Je členkou Asociace klinických psychologů a kandidátní členkou České asociace pro psychoterapii.</p>
                         <a href="/ui-lab/proposal/#o-mne">Více o vzdělání a způsobu práce</a>
                     </div>
                 </aside>

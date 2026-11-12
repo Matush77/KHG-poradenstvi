@@ -592,15 +592,6 @@ html { scrollbar-gutter: stable; }
 /* cards band */
 .blog-section { background: var(--sky) !important; padding: var(--section-y) 0 !important; }
 
-/* filter: white pills, the chosen one navy (coral is for booking) */
-.blog-categories { justify-content: flex-start !important; gap: 8px !important; margin: 0 0 var(--block-gap) !important; }
-.category-btn { min-height: 44px; padding: 0 20px !important; background: #fff !important; border: 0 !important; border-radius: 999px !important;
-  font-family: var(--font-ui) !important; font-size: .9375rem !important; font-weight: 500 !important; color: var(--navy) !important;
-  transform: none !important; transition: background-color .15s ease, color .15s ease !important; }
-.category-btn.active { background: var(--navy) !important; color: #fff !important; }
-@media (hover: hover) { .category-btn:not(.active):hover { box-shadow: inset 0 0 0 1px var(--navy); } }
-@media (max-width: 400px) { .category-btn { padding: 0 16px !important; } }
-
 /* grid: full width; articles 1 / 2 / 3 columns, the four quizzes 1 / 2 */
 .blog-grid { max-width: none !important; margin: 0 !important; gap: var(--card-gap) !important; grid-template-columns: 1fr !important; }
 @media (min-width: 640px) { .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
@@ -624,12 +615,6 @@ html { scrollbar-gutter: stable; }
 .blog-read-more:focus-visible::after { outline: 2px solid var(--navy); outline-offset: 3px; }
 @media (hover: hover) { .blog-card:hover .blog-card-title { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; } }
 
-/* empty filter result */
-.blog-empty { text-align: left !important; padding: 0 !important; }
-.blog-empty h3 { font-size: var(--fs-h3) !important; color: var(--navy) !important; margin: 0 0 8px !important; }
-.blog-empty p { font-size: 1.0625rem !important; color: var(--slate) !important; }
-.blog-empty-link { padding: 12px 0 !important; margin: 0 !important; font-size: 1.0625rem; color: var(--primary) !important; text-decoration: underline; text-underline-offset: 3px; }
-
 /* "O kvízech": one white card across the band, list as dots, the disclaimer as small print under a hairline */
 .quiz-overview-note { max-width: none !important; margin: var(--block-gap) 0 0 !important; padding: var(--card-pad) !important;
   background: #fff !important; border: 0 !important; border-radius: var(--r) !important; box-shadow: none !important; }
@@ -651,7 +636,6 @@ html { scrollbar-gutter: stable; }
 .blog-card { box-shadow: inset 0 0 0 1px var(--line) !important; }
 .blog-card-image { background: var(--peach) !important; }
 .blog-meta-topic { color: var(--coral-ink); }
-.category-btn:not(.active) { box-shadow: inset 0 0 0 1px var(--line); }
 .quiz-overview-note { background: var(--peach) !important; }
 .quiz-overview-note .quiz-overview-disclaimer { border-top-color: var(--peach-line) !important; color: var(--slate) !important; }
 .blog-cta { padding-top: 0 !important; }
@@ -698,18 +682,10 @@ html { scrollbar-gutter: stable; }
 .blog-cta .cta-section .cta-heading { color: var(--navy) !important; }
 .blog-cta .cta-section p { color: var(--slate) !important; }
 
-/* phone: the four filters on one line (owner, 12 Nov: "Osobní růst" fell to a second line); a very narrow phone scrolls them sideways */
-@media (max-width: 639px) {
-  .blog-categories { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter, 16px)) !important; padding-inline: var(--gutter, 16px); gap: 6px !important; }
-  .blog-categories::-webkit-scrollbar { display: none; }
-  .category-btn { flex: none; padding: 0 14px !important; }
-}
 /* a hairline just inside every illustration's edge: pale artwork no longer melts into the paper background
    (drawn on top of the image, so no layout change; the lead card's own hairline sits under its image) */
 .blog-card-image::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   box-shadow: inset 0 0 0 1px rgba(22, 58, 85, .12); }
-/* the filter hides cards with .hide; the row and lead layouts above must not bring them back */
-#blogGrid .blog-card.hide { display: none !important; }
 
     </style>
 
@@ -770,13 +746,6 @@ html { scrollbar-gutter: stable; }
     <!-- Blog Content -->
     <section class="blog-section">
         <div class="container">
-            <!-- Categories Filter -->
-            <div class="blog-categories">
-                <button class="category-btn active" data-category="all">Vše</button>
-                <button class="category-btn" data-category="terapie">Terapie</button>
-                <button class="category-btn" data-category="rodina">Rodina</button>
-                <button class="category-btn" data-category="osobni-rust">Osobní růst</button>
-            </div>
 
             <!-- Blog Posts Grid -->
             <div class="blog-grid" id="blogGrid">
@@ -926,13 +895,6 @@ html { scrollbar-gutter: stable; }
                     </div>
                 </article>
             </div>
-
-            <!-- Empty State (shown when no posts match filter) -->
-            <div class="blog-empty" id="emptyState" style="display: none;">
-                <h3>Zatím zde nejsou žádné příspěvky</h3>
-                <p>V této kategorii brzy přibudou nové články.</p>
-                <button type="button" class="blog-empty-link">Zobrazit všechny články →</button>
-            </div>
         </div>
     </section>
 
@@ -1022,6 +984,5 @@ html { scrollbar-gutter: stable; }
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
     <script src="js/script.js?v=20261111-5"></script>
-    <script src="js/blog-script.js?v=20261111-2"></script>
 </body>
 </html>
