@@ -475,14 +475,6 @@ html { scrollbar-gutter: stable; }
 .about-more[open] > summary { margin-bottom: 16px; }
 .about-more p { margin-bottom: 16px !important; }
 
-.credentials { gap: 0 !important; border-top: 1px solid var(--sky-line); align-self: start; }
-.about .credentials .credential-card { background: none !important; border: 0 !important; border-bottom: 1px solid var(--sky-line) !important; border-radius: 0 !important; padding: 16px 0 !important; }
-.about .credential-card .credential-label { margin: 0 0 4px !important; }
-.about .credential-card p { margin: 0 !important; color: var(--slate) !important; }
-@media (max-width: 968px) and (min-width: 400px) {
-  .about .credentials .credential-card { display: grid; grid-template-columns: 104px 1fr; column-gap: 16px; }
-  .about .credential-card .credential-label { grid-row: 1 / span 2; margin: 3px 0 0 !important; }
-}
 
 
 .featured .publication-feature { border: 1px solid var(--line) !important; border-radius: var(--r) !important; padding: var(--card-pad) !important; margin: 0 0 var(--block-gap) !important; }
@@ -684,6 +676,32 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 }
 
 
+.target-groups, .who-for .target-groups, .who-for .target-group, .target-group, .benefits-grid, .benefit-item,
+.process-steps, .faq-list, .faq-item, .info-rows, .info-row, .contact-rows, .contact-row,
+.service-facts, .service-main .service-facts, .format-facts, .format-facts li { border-top: 0 !important; border-bottom: 0 !important; }
+.service-fact + .service-fact, .service-main .service-fact + .service-fact { border-left: 0 !important; border-top: 0 !important; }
+.rv .rv-card .rv-who, .rv-who { border-top: 0 !important; }
+.process-steps { padding-top: 0 !important; }
+
+.format-facts li { padding: 4px 0 !important; }
+
+.service-main .service-facts { column-gap: var(--block-gap) !important; }
+.service-main .service-fact + .service-fact { padding-left: 0 !important; }
+.service-main .service-fact { padding-top: 8px !important; }
+@media (max-width: 768px) {
+  .nav-menu li { border-bottom: 0 !important; }
+  .service-fact + .service-fact { padding-left: 0 !important; }
+}
+
+.faq-item + .faq-item { margin-top: 4px !important; }
+
+.about-content { grid-template-columns: minmax(0, 1fr) !important; }
+.about-text { max-width: 66ch !important; }
+.about-description > .highlighted-text { margin-bottom: 8px !important; }
+
+.format-facts li { color: var(--navy) !important; font-weight: 500 !important; }
+
+
 
 :root { --page-top: 140px; --doc-w: 43rem; 
         --fs-doc-title: clamp(2rem, 1.55rem + 1.9vw, 2.75rem);  }
@@ -837,6 +855,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .quiz-results-recommendations li { padding: 0 0 0 4px !important; margin: 0 0 8px !important; border-bottom: 0 !important; }
 .quiz-results-recommendations li::before { content: none !important; display: none !important; }
 .quiz-results-recommendations li::marker { color: var(--primary); }
+
+
+.quiz-results-header { border-bottom: 0 !important; padding-bottom: 0 !important; }
+.quiz-social-share { border-top: 0 !important; padding-top: 0 !important; }
 
     </style>
 
