@@ -101,6 +101,38 @@ page, n = re.subn(r'<div class="technical-info">\s*<div class="technical-info-co
                   info_rows, page, count=1, flags=re.S)
 assert n == 1
 
+# Osobní a online (audit 12 Nov, owner: "fix all"): two cards in the format tints, as on Ceník and in the booking window,
+# instead of four rows that mixed both formats. The two shared points join the lead ("Pohodlí a soukromí" repeated it).
+m = re.search(r'<div class="why-online-content">.*?\n            </div>\n(?=        </div>\n    </section>)', page, flags=re.S)
+assert m and "Online odkudkoliv" in m.group(0) and "Osobně v Ostravě" in m.group(0)
+page = page[:m.start()] + """<div class="why-online-content">
+                <p class="lead-text">
+                    Terapeutická setkání nabízím <strong>osobně v Ostravě</strong> i <strong>online</strong>.
+                    Můžete si zvolit formu, ve které se cítíte bezpečně a která odpovídá vašim možnostem.
+                    Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.
+                </p>
+
+                <div class="format-cards">
+                    <article class="format-card format-card--online">
+                        <h3>Online</h3>
+                        <p>Připojit se můžete z domova nebo jiného klidného a soukromého místa v Česku i v zahraničí.</p>
+                        <ul class="format-facts">
+                            <li>Odkaz přijde automaticky v potvrzení rezervace</li>
+                            <li>Termíny od pondělí do pátku</li>
+                        </ul>
+                    </article>
+                    <article class="format-card format-card--osobne">
+                        <h3>Osobně v Ostravě</h3>
+                        <p>Setkání tváří v tvář v klidném prostoru poradny pro ty, kterým osobní kontakt vyhovuje více.</p>
+                        <ul class="format-facts">
+                            <li>Soukromá ordinace na Vítkovické ulici</li>
+                            <li>Osobní termíny v pondělí a úterý</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+""" + page[m.end():]
+
 # O mně, shorter (owner, 12 Nov): first paragraph shown, the rest behind "Číst dál" (native <details>, no JS);
 # the publication moves to "Profesní členství a reference", next to the ČAP membership
 m = re.search(r'(<div class="about-description">\s*<p>.*?</p>)(.*?)(\n\s*</div>\n\s*</div>\n\s*<div class="credentials">)', page, flags=re.S)

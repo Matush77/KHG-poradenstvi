@@ -593,6 +593,82 @@ html { scrollbar-gutter: stable; }
   .contact-row dt { margin: 0; }
 }
 
+/* ==== 20. Homepage audit, 12 Nov evening (owner: "fix all") ==== */
+/* one hairline: navy at 14 % reads as the old sky line on sky and as a neutral line on paper
+   (the beige #E3E0DA was left from the old palette). Peach keeps its own warm line, as on Ceník. */
+:root { --line: rgba(22, 58, 85, .14); --sky-line: rgba(22, 58, 85, .14); --border-light: rgba(22, 58, 85, .14); }
+.faq-list { border-top-color: var(--line) !important; }
+.faq-item { border-bottom-color: var(--line) !important; }
+.rv-btn { border-color: var(--line) !important; }
+.rv .rv-card:nth-child(3n+2) .rv-who, .rv .rv-card:nth-child(3n+3) .rv-who { border-top-color: var(--line) !important; }
+
+/* booking panel: peach with navy text, as on Blog, Kvízy and the articles (the owner's favourite part) */
+.cta-section { background: var(--peach) !important; }
+.cta-section .cta-heading { color: var(--navy) !important; }
+.cta-section p { color: var(--slate) !important; }
+
+/* Osobní a online: two cards in the format tints (online sky, in person peach), as on Ceník; markup from build.py */
+.format-cards { display: grid; gap: var(--card-gap); margin-top: var(--block-gap); }
+@media (min-width: 769px) { .format-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.format-card { border-radius: var(--r); padding: var(--card-pad); }
+.format-card--online { background: var(--sky); }
+.format-card--osobne { background: var(--peach); }
+.format-card h3 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 8px !important; }
+.format-card p { margin: 0 0 24px; font-size: var(--fs-body, 1.0625rem); line-height: 1.65; color: var(--slate); max-width: 66ch; }
+.format-facts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.format-facts li { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-body, 1.0625rem); line-height: 1.5; color: var(--slate); }
+.format-facts li::before { display: none !important; }
+.format-card--osobne .format-facts, .format-card--osobne .format-facts li { border-color: var(--peach-line); }
+
+/* Praktické informace: from the title's left edge at full width, like the steps above and the photos below */
+.how-it-works .technical-info { max-width: none !important; margin-inline: 0 !important; }
+
+/* Recenze: the title centres on phones like every other section title; the arrows sit under it */
+@media (max-width: 768px) {
+  .rv-head { flex-direction: column; align-items: center !important; text-align: center; }
+}
+
+/* title -> content: Kontakt takes the same gap as every other section */
+.contact .section-header { margin-bottom: var(--section-head-gap) !important; }
+
+/* headings: card and block headings are h3 size everywhere (row headings stay at lead size) */
+.featured .featured-subtitle, .featured :is(.cap-content, .publication-content) h3 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; }
+.featured :is(.cap-content, .publication-content) :is(h3, p) { text-align: left !important; }
+.featured :is(.cap-content, .publication-content) h3 { margin: 0 0 12px !important; }
+
+/* membership cards: one structure — picture left at the same width, text right, heading at the top */
+.featured .cap-membership, .featured .publication-feature {
+  display: grid !important; grid-template-columns: 120px minmax(0, 1fr) !important; column-gap: var(--block-gap) !important; row-gap: 0 !important;
+  align-items: start !important; text-align: left !important; background: #fff !important; border: 1px solid var(--line) !important;
+  border-radius: var(--r) !important; padding: var(--card-pad) !important; }
+.featured .publication-cover { grid-column: 1; grid-row: 1; justify-self: start; margin: 0 !important; }
+.featured .publication-content { grid-column: 2; grid-row: 1; }
+.featured .publication-cover img { width: 120px !important; box-shadow: none !important; }
+.featured .cap-logo-img { margin: 0 !important; }
+@media (max-width: 700px) {
+  .featured .cap-membership, .featured .publication-feature { grid-template-columns: 72px minmax(0, 1fr) !important; column-gap: 16px !important; row-gap: 16px !important; align-items: center !important; }
+  .featured .cap-membership { grid-template-areas: "cover title" "text text" "link link"; }
+  .featured .publication-feature { grid-template-areas: "cover title" "text text"; }
+  .featured .cap-content, .featured .publication-content { display: contents; }
+  .featured .cap-logo, .featured .publication-cover { grid-area: cover; }
+  .featured :is(.cap-content, .publication-content) h3 { grid-area: title; margin: 0 !important; }
+  .featured :is(.cap-content, .publication-content) p { grid-area: text; margin: 0 !important; }
+  .featured .cap-profile-link { grid-area: link; justify-self: start; margin: 0 !important; }
+  .featured .cap-logo-img, .featured .publication-cover img { width: 72px !important; }
+}
+
+/* text links inside running text: one style (blue, 500, 1 px underline). Row values (Kontakt) stay navy; link rows keep ↗ */
+main p a:not(.btn), .cap-profile-link, .rv-source a, .service-fact-detail a {
+  color: var(--primary) !important; font-weight: 500 !important;
+  text-decoration: underline !important; text-decoration-thickness: 1px !important; text-underline-offset: 3px !important; }
+@media (hover: hover) { main p a:not(.btn):hover, .cap-profile-link:hover, .rv-source a:hover, .service-fact-detail a:hover { color: var(--navy) !important; } }
+
+/* bold inside text: navy 600 everywhere (FAQ answers had blue) */
+main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight: 600 !important; }
+
+/* review author: small text is 400/500 */
+.rv-who { font-weight: 500 !important; }
+
 /* LAB: parts shared by the blog and quiz pages in the 12 Nov theme. Layered after proposal.css (same tokens).
    Buttons: coral stays for booking only. Every other action is navy: solid for the step forward, outline for the rest. */
 
