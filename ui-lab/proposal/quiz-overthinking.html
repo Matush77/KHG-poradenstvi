@@ -485,7 +485,7 @@ html { scrollbar-gutter: stable; }
 
 /* ==== 16. O mně, shorter (owner, 12 Nov): about 1 phone screen instead of 3.4.
    First paragraph shown, the rest behind "Číst dál" (native details: no JS, keyboard and screen-reader ready);
-   credentials as hairline rows instead of three cards; the publication lives in "Profesní členství a reference". ==== */
+   credential summaries dropped (13 Nov); the publication lives in "Profesní členství a reference". ==== */
 .about-description > p { margin-bottom: 16px !important; }
 .about-more > summary { list-style: none; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer;
   font-size: 1.0625rem; font-weight: 600; color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
@@ -497,14 +497,6 @@ html { scrollbar-gutter: stable; }
 .about-more[open] > summary { margin-bottom: 16px; }
 .about-more p { margin-bottom: 16px !important; }
 
-.credentials { gap: 0 !important; border-top: 1px solid var(--sky-line); align-self: start; }
-.about .credentials .credential-card { background: none !important; border: 0 !important; border-bottom: 1px solid var(--sky-line) !important; border-radius: 0 !important; padding: 16px 0 !important; }
-.about .credential-card .credential-label { margin: 0 0 4px !important; }
-.about .credential-card p { margin: 0 !important; color: var(--slate) !important; }
-@media (max-width: 968px) and (min-width: 400px) {
-  .about .credentials .credential-card { display: grid; grid-template-columns: 104px 1fr; column-gap: 16px; }
-  .about .credential-card .credential-label { grid-row: 1 / span 2; margin: 3px 0 0 !important; }
-}
 
 /* publication next to the ČAP card: same white card with a hairline; on phones a small cover beside the title */
 .featured .publication-feature { border: 1px solid var(--line) !important; border-radius: var(--r) !important; padding: var(--card-pad) !important; margin: 0 0 var(--block-gap) !important; }
@@ -722,6 +714,35 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
   .booking-modal-options .booking-option, .booking-option::after, .pricing-card#online, .pricing-card#osobne { transition: none !important; }
 }
 
+/* ==== 26. No row lines (owner, 13 Nov): "I don't see what purpose they serve".
+   Rows are told apart by their heading and by space, not by hairlines. Kept: the "Kde mě najdete online" link rows
+   (and the related-article link rows, the same pattern), card edges, buttons and the footer strip.
+   Where a row was only one short line (format facts, price facts), the rows close up into a plain list. ==== */
+.target-groups, .who-for .target-groups, .who-for .target-group, .target-group, .benefits-grid, .benefit-item,
+.process-steps, .faq-list, .faq-item, .info-rows, .info-row, .contact-rows, .contact-row,
+.service-facts, .service-main .service-facts, .format-facts, .format-facts li { border-top: 0 !important; border-bottom: 0 !important; }
+.service-fact + .service-fact, .service-main .service-fact + .service-fact { border-left: 0 !important; border-top: 0 !important; }
+.rv .rv-card .rv-who, .rv-who { border-top: 0 !important; }
+.process-steps { padding-top: 0 !important; }
+/* facts in the format cards: a closed-up list under the description */
+.format-facts li { padding: 4px 0 !important; }
+/* Služby: the two facts sit apart by the column gap, not a divider */
+.service-main .service-facts { column-gap: var(--block-gap) !important; }
+.service-main .service-fact + .service-fact { padding-left: 0 !important; }
+.service-main .service-fact { padding-top: 8px !important; }
+@media (max-width: 768px) {
+  .nav-menu li { border-bottom: 0 !important; }
+  .service-fact + .service-fact { padding-left: 0 !important; }
+}
+/* FAQ: questions keep their full tap height; space alone separates them */
+.faq-item + .faq-item { margin-top: 4px !important; }
+/* O mně without the credential summaries (owner, 13 Nov): one text column; the IVF group shows above "Číst dál" */
+.about-content { grid-template-columns: minmax(0, 1fr) !important; }
+.about-text { max-width: 66ch !important; }
+.about-description > .highlighted-text { margin-bottom: 8px !important; }
+/* without their rows the facts would read as a second paragraph: navy 500 keeps them "facts" */
+.format-facts li { color: var(--navy) !important; font-weight: 500 !important; }
+
 /* LAB: parts shared by the blog and quiz pages in the 12 Nov theme. Layered after proposal.css (same tokens).
    Buttons: coral stays for booking only. Every other action is navy: solid for the step forward, outline for the rest. */
 
@@ -880,6 +901,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .quiz-results-recommendations li { padding: 0 0 0 4px !important; margin: 0 0 8px !important; border-bottom: 0 !important; }
 .quiz-results-recommendations li::before { content: none !important; display: none !important; }
 .quiz-results-recommendations li::marker { color: var(--primary); }
+
+/* ==== No row lines (owner, 13 Nov) ==== */
+.quiz-results-header { border-bottom: 0 !important; padding-bottom: 0 !important; }
+.quiz-social-share { border-top: 0 !important; padding-top: 0 !important; }
 
     </style>
 

@@ -144,9 +144,15 @@ page = page[:m.start()] + """<div class="why-online-content">
 # O mně, shorter (owner, 12 Nov): first paragraph shown, the rest behind "Číst dál" (native <details>, no JS);
 # the publication moves to "Profesní členství a reference", next to the ČAP membership
 m = re.search(r'(<div class="about-description">\s*<p>.*?</p>)(.*?)(\n\s*</div>\n\s*</div>\n\s*<div class="credentials">)', page, flags=re.S)
-page = (page[:m.start()] + m.group(1) +
+# the IVF group stays in view, right under the first paragraph (owner, 13 Nov)
+ivf = re.search(r'\n\s*<p class="highlighted-text">.*?IVF.*?</p>', m.group(2), flags=re.S)
+assert ivf
+page = (page[:m.start()] + m.group(1) + ivf.group(0) +
         '\n                        <details class="about-more">\n                            <summary><span class="about-more-open">Číst dál</span><span class="about-more-close">Skrýt</span></summary>' +
-        m.group(2) + '\n                        </details>' + m.group(3) + page[m.end():])
+        m.group(2).replace(ivf.group(0), '', 1) + '\n                        </details>' + m.group(3) + page[m.end():])
+# no credential summaries (owner, 13 Nov): the supervisors are in the text, the rest in the article author boxes
+page, n = re.subn(r'\n\s*<div class="credentials">.*?\n                </div>\n', '\n', page, count=1, flags=re.S)
+assert n == 1
 m = re.search(r'\n\s*<article class="publication-feature".*?</article>', page, flags=re.S)
 pub = m.group(0)
 page = page[:m.start()] + page[m.end():]

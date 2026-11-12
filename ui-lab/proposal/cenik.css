@@ -52,3 +52,11 @@
 .pricing-first-session p { font-size: var(--fs-body, 1.0625rem) !important; color: var(--slate) !important; max-width: 66ch; margin: 0 0 24px !important; }
 .pricing-first-session .btn { margin: 0 !important; }
 @media (max-width: 480px) { .pricing-first-session .btn { width: 100% !important; } }
+
+/* ==== No row lines (owner, 13 Nov): the facts close up into a plain list, the info items are told apart by their titles ==== */
+.pricing-facts, .pricing-facts li, .pricing-card#online .pricing-facts, .pricing-card#online .pricing-facts li,
+.pricing-card#osobne .pricing-facts, .pricing-card#osobne .pricing-facts li { border-top: 0 !important; border-bottom: 0 !important; }
+.pricing-facts li { padding: 4px 0 !important; color: var(--navy) !important; font-weight: 500 !important; }
+.pricing-info-grid { border-top: 0 !important; }
+.pricing-info-item { border-bottom: 0 !important; }
+.pricing-info-item:first-child { padding-top: 0 !important; }

@@ -122,15 +122,14 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
 .facts dd { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--navy); letter-spacing: -0.01em; }
 @media (max-width: 520px) { .facts { flex-direction: column; } .facts div { padding: 0; border: 0; } }
 .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
-.steps li { counter-increment: s; display: grid; grid-template-columns: 2.5rem 1fr; gap: 4px 12px; padding: 16px 0; border-top: 1px solid var(--line); }
-.steps li:first-child { border-top: 0; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2.5rem 1fr; gap: 4px 12px; padding: 16px 0; }
+.steps li:first-child { padding-top: 0; }
 .steps li::before { content: counter(s) '.'; font-weight: 600; color: var(--coral-ink); font-size: var(--t-h3); line-height: 1.3; }
 .steps b { color: var(--navy); font-weight: 600; display: block; }
 .review { border-radius: var(--r-lg); padding: 28px; background: var(--blue); color: rgba(255,255,255,.9); }
-.review p.who { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.22); font-size: var(--t-small); font-weight: 600; color: #fff; }
+.review p.who { margin-top: 16px; font-size: var(--t-small); font-weight: 600; color: #fff; }
 .review p.who span { font-weight: 400; opacity: .8; }
-.faq { border-top: 1px solid var(--line); }
-.faq div { padding: 16px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; color: var(--navy); font-weight: 600; }
+.faq div { padding: 16px 0; display: flex; justify-content: space-between; gap: 16px; color: var(--navy); font-weight: 600; }
 .faq div span { color: var(--mute); font-weight: 400; }
 .cmp { display: grid; gap: 12px; }
 .cmp > div { padding: 20px; border-radius: var(--r); background: var(--white); }
@@ -216,7 +215,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     <div class="grid g2">
       <div class="card"><h3>1. Take it from the illustrations</h3><p>Every colour on the site comes from the blog art: warm paper, pale sky, two blues, navy, and the coral sun. Nothing else.</p></div>
       <div class="card"><h3>2. Two families, each with one job</h3><p>Headings in Fraunces (soft, 500), everything else in Inter at 400 / 500 / 600. Owner, 12 Nov: Inter alone had no character. Buttons, menu, labels and FAQ stay Inter. Logo: the owner&#8217;s coral heart + name in Fraunces + role in Inter caps, as text, no image.</p></div>
-      <div class="card"><h3>3. Tone, not boxes</h3><p>Group things with a background band or a hairline. A white card only where something really is a separate object (a review, a price, a booking option). No shadows on cards.</p></div>
+      <div class="card"><h3>3. Tone, not boxes</h3><p>Group things with a background band and space. A white card only where something really is a separate object (a review, a price, a booking option). No shadows on cards.</p></div>
       <div class="card"><h3>4. Coral means "act"</h3><p>Coral is for booking buttons and at most one small accent per screen. No coral underlines, bars or gradients.</p></div>
       <div class="card"><h3>5. Kristýna's words, not a template's</h3><p>Cut sentences any therapist could sign. Prefer one concrete fact (price, place, method, who it's for) over a reassuring phrase.</p></div>
       <div class="card"><h3>And: keep what already works</h3><p>Real portrait and room, up-front prices, credentials, 17 px text, 66-character lines, no trackers, coral booking buttons.</p></div>
@@ -284,7 +283,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     <div class="head">
       <p class="kicker">Shape and parts</p>
       <h2>Two radii, one line, no gradients</h2>
-      <p class="mute" style="margin-top:12px">Radius 12 (cards, images) and 24 (big panels, review cards), pill for buttons. One 1 px hairline. No shadows except the booking window. No coloured side bars.</p>
+      <p class="mute" style="margin-top:12px">Radius 12 (cards, images) and 24 (big panels, review cards), pill for buttons. One 1 px hairline, for card edges, the online profile links and the footer only (no row lines, owner 13 Nov). No shadows except the booking window. No coloured side bars.</p>
     </div>
     <div class="grid g2">
       <div class="card">
@@ -324,7 +323,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
           <div>Kolik stojí terapie? <span>+</span></div>
           <div>Pracujete s pojišťovnami? <span>+</span></div>
         </div>
-        <p class="small mute" style="margin-top:14px">No card, no gradient, no left bar — hairlines and space do the grouping.</p>
+        <p class="small mute" style="margin-top:14px">No card, no gradient, no left bar, no lines — the + control and space do the grouping.</p>
       </div>
     </div>
   </div>
@@ -341,7 +340,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
 
     <h3>1. Parts</h3>
     <div class="spec"><div class="m"><b>Band</b>whole section</div><div>Paper or sky, alternating. Navy only for the footer. <span class="mute">All 10 homepage sections.</span></div></div>
-    <div class="spec"><div class="m"><b>Rows</b>hairline list</div><div>No box; a 1 px line between items. For lists of like things. <span class="mute">Vzdělání / Praxe / Supervize, Pro koho, kroky, Praktické informace, FAQ, Kontakt, profily online, fact rows in cards.</span></div></div>
+    <div class="spec"><div class="m"><b>Rows</b>space, no line</div><div>No box and no line between items (owner, 13 Nov): each row is told apart by its heading and the space around it. One-line facts close up into a plain list (4 px rows, navy 500). <span class="mute">Pro koho, kroky, Praktické informace, FAQ, Kontakt, facts in cards. <b>Exception:</b> link rows with an arrow keep their hairlines (profily online, related articles).</span></div></div>
     <div class="spec"><div class="m"><b>Card</b>white, r12</div><div>A separate object: white, 1 px line on paper (none on sky), radius 12, no shadow. <span class="mute">Služba, ČAP, Publikace, the format cards (tinted sky / peach instead of white), Ceník prices.</span></div></div>
     <div class="spec"><div class="m"><b>Panel</b>r24</div><div>The few large, coloured or featured blocks. <span class="mute">Booking panel (peach, everywhere), review cards, the booking window.</span></div></div>
     <div class="spec"><div class="m"><b>Photo</b>r12</div><div>Real photos only, radius 12, sized to fit the layout. <span class="mute">Ordinace (large + 3 on desktop, swipe row on phones). The portrait keeps its rounded blob shape, still (no animation), as the one exception.</span></div></div>
@@ -368,7 +367,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     <h3 style="margin-top:40px">4. Width and alignment</h3>
     <ul class="list">
       <li>Everything in a section starts at the same left edge as its title. Only the hero and the section titles centre, and only on phones; paragraphs, cards, panels and buttons inside sections are always left-aligned (centred multi-line text is harder to read).</li>
-      <li><b>Blocks are always full width</b> on every screen; a narrow block next to an empty half reads as unfinished. On desktop a block uses its own columns instead: Pro koho rows put the title left and the text right, topics run in 2 columns, credentials sit beside the About text, Kontakt rows have a 14rem label column. The service card is one column. <b>Long text stops at 66 characters</b> per line (the reading measure), wherever it sits.</li>
+      <li><b>Blocks are always full width</b> on every screen; a narrow block next to an empty half reads as unfinished. On desktop a block uses its own columns instead: Pro koho rows put the title left and the text right, topics run in 2 columns, the About text is one column (no credential summaries, owner 13 Nov; the IVF group shows above "Číst dál"), Kontakt rows have a 14rem label column. The service card is one column. <b>Long text stops at 66 characters</b> per line (the reading measure), wherever it sits.</li>
     </ul>
 
     <h3 style="margin-top:40px">5. Order: the questions a first-time client asks</h3>
@@ -377,10 +376,10 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     <h3 style="margin-top:40px">6. Button, review colours, motion</h3>
     <ul class="list">
       <li><b>One booking button:</b> coral with navy text (4.99 : 1; white on this coral is 2.38 : 1 and fails WCAG even for large text), pill, 18 px / 600. Two sizes: compact 44 px in the header; 56 px / 18 px text in the page, full column width on phones (measured 12 Nov: Hedepy hero button 335×76 on a 375 px phone, Terapie.cz 311×38, live site 168×55; ours at 156×52 read as too small). Repeating the same primary action is allowed; a different-looking button for it is not. Hover darkens nothing and moves nothing: it switches to the light coral.</li>
-      <li><b>Phone menu and booking window use the same parts.</b> Menu: paper, full height, links as hairline rows at lead size, the page-size booking button last; it slides in with transform only (200 ms, none with reduced motion). Booking window: a paper panel (r24, panel padding, the one allowed shadow), title left at h3, options stacked in one column; the title leads with the format ("Online", "Osobně v Ostravě"), then one line and a navy "→", no separate labels. <b>Format tints:</b> online is always sky, in person always peach, here and on the Ceník cards. Both are tinted and of equal weight: one white card beside a tinted one reads as "already selected". On tints, meta text is slate (mute is only 4.3 : 1 on peach). <b>Hover (desktop, mouse only):</b> a format card that is one action (booking option, Ceník price card) is clickable as a whole; on hover its tint deepens one step (sky #DCE6EE, peach #F2DBCC), the arrow moves 4 px right or the button turns light coral. 150 ms, no movement of the card, none with reduced motion.</li>
-      <li><b>Facts inside a card are rows, not a box.</b> Hairline above and below, hairlines between columns (rows on phones), no fill or radius; label 15 / 500 mute, value navy 600 (Fraunces 500 when it is a price or length), detail 15 / 400 slate. Kontakt rows follow the same rule: label 15 / 500 mute, value Inter 600 at lead size. Step numbers are navy Fraunces, not coral. A coral-ink label above a card title is 15 / 500. Round arrow controls: white, hairline, navy glyph, sky on hover.</li>
+      <li><b>Phone menu and booking window use the same parts.</b> Menu: paper, full height, links as rows at lead size (no lines), the page-size booking button last; it slides in with transform only (200 ms, none with reduced motion). Booking window: a paper panel (r24, panel padding, the one allowed shadow), title left at h3, options stacked in one column; the title leads with the format ("Online", "Osobně v Ostravě"), then one line and a navy "→", no separate labels. <b>Format tints:</b> online is always sky, in person always peach, here and on the Ceník cards. Both are tinted and of equal weight: one white card beside a tinted one reads as "already selected". On tints, meta text is slate (mute is only 4.3 : 1 on peach). <b>Hover (desktop, mouse only):</b> a format card that is one action (booking option, Ceník price card) is clickable as a whole; on hover its tint deepens one step (sky #DCE6EE, peach #F2DBCC), the arrow moves 4 px right or the button turns light coral. 150 ms, no movement of the card, none with reduced motion.</li>
+      <li><b>Facts inside a card are plain, not a box.</b> No lines, fill or radius; columns sit apart by the gap; label 15 / 500 mute, value navy 600 (Fraunces 500 when it is a price or length), detail 15 / 400 slate. Kontakt rows follow the same rule: label 15 / 500 mute, value Inter 600 at lead size. Step numbers are navy Fraunces, not coral. A coral-ink label above a card title is 15 / 500. Round arrow controls: white, hairline, navy glyph, sky on hover.</li>
       <li><b>Footer is a navy band.</b> Band spacing (56 → 96 above, 32 → 48 below), blocks 32 → 48 apart. Two text colours: white for the name (Fraunces 19 / 500, like the logo, on every page) and headings, #C9D8E3 for everything else (8.1 : 1). Every text link is a 44 px target. Left aligned; no logo image (the name is the logo). No crisis note (owner removed it, 12 Nov); the same footer on every page, Kontakt column included (owner, 13 Nov); Facebook and Instagram are two 44 px round hairline controls, the first starting at the column's left edge; on desktop the bottom line has © on the left and the privacy link on the right.</li>
-      <li><b>Ceník uses the same parts</b> (lab: <code>ui-lab/proposal/cenik.html</code>). Hero on paper; the two prices are cards in the format tints, sky and peach (title names the format: "Online", "Osobně v Ostravě", h3; price at h2 size, facts as one-line rows, full-width button); Praktické informace is its own sky band with rows (three columns from 769 px); První setkání is the peach booking panel from the homepage. No uppercase labels, tick marks, shadows or cards on cards.</li>
+      <li><b>Ceník uses the same parts</b> (lab: <code>ui-lab/proposal/cenik.html</code>). Hero on paper; the two prices are cards in the format tints, sky and peach (title names the format: "Online", "Osobně v Ostravě", h3; price at h2 size, facts as a closed-up list, full-width button); Praktické informace is its own sky band with rows, no lines (three columns from 769 px); První setkání is the peach booking panel from the homepage. No uppercase labels, tick marks, shadows or cards on cards.</li>
       <li><b>Review cards</b> cycle through three palette colours only: blue (white text), a light one, white with a hairline. The light one is sky on a paper band and paper on a sky band (the homepage has Recenze on sky). Name only, no details.</li>
       <li><b>No entrance or scroll animations.</b> Motion only as feedback (FAQ opening, menu, hover colour), at most 200 ms, and none when the visitor asks for reduced motion.</li>
     </ul>

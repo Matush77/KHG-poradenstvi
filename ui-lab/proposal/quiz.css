@@ -112,3 +112,7 @@
 .quiz-results-recommendations li { padding: 0 0 0 4px !important; margin: 0 0 8px !important; border-bottom: 0 !important; }
 .quiz-results-recommendations li::before { content: none !important; display: none !important; }
 .quiz-results-recommendations li::marker { color: var(--primary); }
+
+/* ==== No row lines (owner, 13 Nov) ==== */
+.quiz-results-header { border-bottom: 0 !important; padding-bottom: 0 !important; }
+.quiz-social-share { border-top: 0 !important; padding-top: 0 !important; }

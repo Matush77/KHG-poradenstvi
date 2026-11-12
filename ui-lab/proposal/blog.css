@@ -108,3 +108,6 @@
    (drawn on top of the image, so no layout change; the lead card's own hairline sits under its image) */
 .blog-card-image::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   box-shadow: inset 0 0 0 1px rgba(22, 58, 85, .12); }
+
+/* ==== No row lines (owner, 13 Nov) ==== */
+.quiz-overview-note .quiz-overview-disclaimer { border-top: 0 !important; padding-top: 0 !important; }

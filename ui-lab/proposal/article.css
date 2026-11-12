@@ -107,3 +107,12 @@
 .blog-post-cta { background: var(--peach) !important; }
 .blog-post-cta .cta-heading { color: var(--navy) !important; }
 .blog-post-cta p { color: var(--slate) !important; }
+
+/* ==== No row lines (owner, 13 Nov). Kept: the related-article link rows (same pattern as "Kde mě najdete online").
+   The summary keeps its coral label, the callout reads as a navy lead paragraph with room around it. ==== */
+.article-summary { border-top: 0 !important; padding-top: 0 !important; }
+.article-callout { border-top: 0 !important; border-bottom: 0 !important; padding: 8px 0 !important; }
+.article-callout p { font-weight: 500 !important; }
+.article-examples { border-top: 0 !important; }
+.article-examples p { border-bottom: 0 !important; padding: 6px 0 !important; }
+.article-author-box { border-top: 0 !important; padding-top: 0 !important; }
