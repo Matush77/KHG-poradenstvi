@@ -36,8 +36,7 @@
 /* outline button on a sky card: hover turns white (sky on sky would not show) */
 .related-resource .btn.btn-secondary:hover, .quiz-related-article .btn.btn-secondary:hover { background: #fff !important; }
 
-/* ==== Visual audit, 12 Nov: the footer name matches the logo (Fraunces); the current page in the menu is marked ==== */
-.footer-brand > p:not([class]) { font-family: var(--font-heading) !important; font-weight: 500 !important; font-size: 1.1875rem !important; }
+/* ==== Visual audit, 12 Nov: the footer name (now in proposal.css §13, every page); the current page in the menu is marked ==== */
 @media (min-width: 969px) {
   .nav-link.active { font-weight: 600 !important; }
   .nav-link.active::after { transform: scaleX(1) !important; width: 100% !important; opacity: 1 !important; }

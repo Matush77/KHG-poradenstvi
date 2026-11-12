@@ -68,8 +68,16 @@ page = re.sub(r"(?<=[a-zěščřžýáíéůúňťď,„(] )(Vy|Vám|Vás|Vámi|
 
 # copy: CTA as facts instead of a slogan
 sub('<p class="cta-heading">Připraveni začít?</p>', '<p class="cta-heading">První setkání</p>')
-sub('<p>Objednejte si první setkání a společně najdeme cestu k vašim cílům.</p>',
-    '<p>50 minut, 1 100 Kč, online nebo osobně na Vítkovické v Ostravě.</p>')
+# Služby B (owner, 12 Nov): on the homepage the facts stand once, in the service card right above; the panel is only the action
+page, n = re.subn(r'\n\s*<p>Objednejte si první setkání a společně najdeme cestu k vašim cílům\.</p>', "", page, count=1)
+assert n == 1
+
+# Služby B: "osobně" belongs to the ordinace; Forma goes (the next section is about exactly that)
+page, n = re.subn(r'Nabízím individuální terapeutickou podporu online i osobně, podle toho, co vám vyhovuje\s+v soukromé ordinaci v Ostravě\.',
+                  'Nabízím individuální terapeutickou podporu osobně v soukromé ordinaci v Ostravě i online,\n                    podle toho, co vám vyhovuje.', page, count=1)
+assert n == 1
+page, n = re.subn(r'\n\s*<div class="service-fact">\s*<dt>Forma</dt>.*?</div>', "", page, count=1, flags=re.S)
+assert n == 1
 
 # booking window: the format leads the title, no separate label (owner, 12 Nov)
 sub('<span class="booking-option-label">Online</span>\n                    <span class="booking-option-title">Terapie online</span>',
@@ -143,6 +151,10 @@ m = re.search(r'\n\s*<article class="publication-feature".*?</article>', page, f
 pub = m.group(0)
 page = page[:m.start()] + page[m.end():]
 sub('\n            <h3 class="featured-subtitle">Kde mě najdete online</h3>', pub + '\n\n            <h3 class="featured-subtitle">Kde mě najdete online</h3>')
+
+# ČAP logo is a picture, not a link (owner, 12 Nov): "Můj profil v ČAP ↗" under the text is the one link to the profile
+page, n = re.subn(r'<a href="https://czap\.cz/[^"]*"[^>]*class="cap-logo-link"[^>]*>\s*(<picture>.*?</picture>)\s*</a>', r'\1', page, count=1, flags=re.S)
+assert n == 1
 
 # Kontakt = 1G from ui-lab/kontakt-1.html (owner, 12 Nov): no card, no booking button, full-width hairline rows
 # with the same measures as Praktické informace (.info-row: 20px rows, 14rem label column from 769 px)
@@ -218,6 +230,9 @@ FAV_F = ('<link rel="icon" href="ui-lab/proposal/icons/heart.svg" type="image/sv
 def brand(html, logo, fav):
     assert LOGO_IMG in html and FAVICON_OLD in html
     html = html.replace(LOGO_IMG, logo, 1).replace(FAVICON_OLD, fav, 1)
+    # the old gold logo image in the footer was hidden by CSS but still in the markup; the footer name is the logo now (13 Nov)
+    html, n = re.subn(r'\n\s*<img src="/images/logo\.webp"[^>]*class="footer-logo"[^>]*>', "", html, count=1)
+    assert n == 1, "footer logo not found"
     return html.replace("</head>", BRAND_CSS + "\n</head>", 1)
 
 page = brand(page, LOGO_F, FAV_F)

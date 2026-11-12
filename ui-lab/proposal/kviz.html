@@ -167,7 +167,7 @@ strong, b { font-weight: 600 !important; }
 .step { background: transparent !important; box-shadow: none !important; border: 0 !important; text-align: left !important; padding: 0 !important; }
 .step-number {
   background: none !important; box-shadow: none !important; width: auto !important; height: auto !important; border-radius: 0 !important;
-  color: var(--coral-ink) !important; font: 600 1.5rem/1.2 var(--font-heading) !important; justify-content: flex-start !important;
+  color: var(--navy) !important; font: 500 1.5rem/1.2 var(--font-heading) !important; justify-content: flex-start !important;
   margin: 0 0 8px !important; display: block !important;
 }
 .step-number::after { content: '.'; }
@@ -415,7 +415,7 @@ cite { font-weight: 600 !important; }
 .footer { padding: var(--section-y) 0 var(--block-gap) !important; }
 .footer p, .footer li, .footer a, .footer span { color: #C9D8E3 !important; -webkit-text-fill-color: #C9D8E3; opacity: 1 !important; }
 .footer-heading, .footer-heading strong, .footer-brand > p:not([class]) { color: #fff !important; -webkit-text-fill-color: #fff; }
-.footer-brand > p:not([class]) { font-size: 1.0625rem !important; font-weight: 600 !important; line-height: 1.4 !important; margin: 0 0 4px !important; }
+.footer-brand > p:not([class]) { font-family: var(--font-heading) !important; font-size: 1.1875rem !important; font-weight: 500 !important; line-height: 1.3 !important; margin: 0 0 4px !important; font-synthesis: none; } /* name in Fraunces like the logo, on every page */
 .footer-tagline { font-size: .9375rem !important; margin: 0 0 16px !important; }
 .footer-company-id { margin: 0 !important; line-height: 1.5 !important; }
 .footer-content { gap: var(--block-gap) !important; margin-bottom: var(--block-gap) !important; }
@@ -546,10 +546,10 @@ html { scrollbar-gutter: stable; }
 .contact .section-header { margin-bottom: var(--block-gap) !important; }
 .contact-rows { margin: 0; border-top: 1px solid var(--sky-line, #CCD8E2); }
 .contact-row { padding: 20px 0; border-bottom: 1px solid var(--sky-line, #CCD8E2); }
-.contact-row dt { font-size: .9375rem !important; font-weight: 500 !important; line-height: 1.4 !important; color: var(--slate) !important;
+.contact-row dt { font-size: .9375rem !important; font-weight: 500 !important; line-height: 1.4 !important; color: var(--mute) !important;
   letter-spacing: 0 !important; text-transform: none !important; margin: 0 0 4px; }
 .contact-row dd { margin: 0; }
-.contact-row a { font-size: var(--fs-lead); font-weight: 500; line-height: 1.4; color: var(--navy); overflow-wrap: anywhere;
+.contact-row a { font-size: var(--fs-lead); font-weight: 600; line-height: 1.4; color: var(--navy); overflow-wrap: anywhere;
   text-decoration: underline; text-decoration-color: var(--sky-line, #CCD8E2); text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .contact-row a:hover { text-decoration-color: currentColor; }
 @media (min-width: 769px) {
@@ -633,6 +633,68 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 /* review author: small text is 400/500 */
 .rv-who { font-weight: 500 !important; }
 
+/* ==== 21. Služby B (owner, 12 Nov): facts once, in the card; the panel below is only the action ====
+   Two facts side by side at every width, values in the Ceník price style, the row ends with the card (no closing line).
+   Homepage only: Blog, Kvízy and the articles keep the fact line in their panel, where it is the only place it appears. */
+.service-main .service-facts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; border-bottom: 0 !important; margin-bottom: 0 !important; }
+.service-main .service-fact { padding-bottom: 0 !important; }
+.service-main .service-fact + .service-fact { padding-left: 24px !important; border-left: 1px solid var(--line) !important; border-top: 0 !important; }
+.service-main .service-fact dd:not(.service-fact-detail) { font-family: var(--font-heading) !important; font-size: var(--fs-h2) !important;
+  font-weight: 500 !important; line-height: 1.1 !important; letter-spacing: -0.02em; font-synthesis: none; margin-top: 4px !important; }
+.service-main .service-fact-detail a { white-space: nowrap; }
+@media (max-width: 768px) { .service-main .service-fact { padding-top: 16px !important; } }
+.services .cta-section .cta-heading { margin-bottom: 24px !important; }
+@media (min-width: 769px) {
+  .services .cta-section { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 24px; }
+  .services .cta-section .cta-heading { margin: 0 !important; }
+}
+
+/* ==== 22. Pro koho (owner, 12 Nov): one line between the rows and the topics, not two.
+   The rows keep their closing hairline; the topics block loses its top line and starts one block gap below it. ==== */
+.who-for .common-issues { border-top: 0 !important; padding-top: 0 !important; }
+
+/* ==== 23. Theme check, 13 Nov (owner: "fix both") ====
+   Step numbers navy (coral is for booking; four coral numerals on one screen broke rule 4), see §steps.
+   Kontakt rows use the facts rule: label 15/500 mute, value navy 600 at lead size, see §19.
+   Fraunces is one 500 file: every Fraunces declaration says 500, see §21.
+   "Zvětšit" on the office photos at the Tiny size (13), not 11/12. */
+.office-gallery-open::after { font-size: .8125rem !important; }
+
+/* ==== 24. Footer social icons (owner, 13 Nov): the Kontakt column stays on every page.
+   The two glyphs differ in width (Facebook 8 px, Instagram 16 px of a 24 px box), so on their own they never line up
+   with the text above or with each other. Each sits in the same 44 px round hairline control (like the review arrows),
+   the first circle starts at the column's left edge, glyph centred. Hover: colour only, no lift. ==== */
+.footer-social { display: flex !important; gap: 12px !important; margin-top: 16px !important; }
+.footer-social .social-link { width: 44px; height: 44px; padding: 0 !important; margin: 0 !important; display: grid !important; place-items: center;
+  border: 1px solid rgba(255, 255, 255, .28); border-radius: 50%; transition: border-color .15s, background-color .15s !important; }
+.footer-social .social-icon { width: 22px !important; height: 22px !important; }
+@media (hover: hover) { .footer-social .social-link:hover { transform: none !important; opacity: 1 !important; border-color: #fff; background: rgba(255, 255, 255, .08); } }
+.footer-social .social-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .footer-social .social-link { transition: none !important; } }
+
+/* ==== 25. Hover on the format cards, desktop only (owner, 13 Nov) ====
+   Booking window options and the Ceník price cards are one action each, so the whole card is the target:
+   the tint deepens one step and the arrow / button answers. Colour and transform only, 150 ms, none with reduced motion.
+   Tints stay readable: slate on the hover peach #F2DBCC is 6.3:1, navy 10:1. */
+:root { --sky-hover: #DCE6EE; --peach-hover: #F2DBCC; }
+.booking-modal-options .booking-option .booking-option-desc { color: var(--slate) !important; } /* mute is only 4.3:1 on peach */
+.booking-modal-options .booking-option { transition: background-color .15s !important; }
+.booking-option::after { transition: transform .15s; }
+.pricing-card#online, .pricing-card#osobne { position: relative; transition: background-color .15s, border-color .15s; }
+.pricing-card#online .btn::after, .pricing-card#osobne .btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole card is the button */
+@media (hover: hover) and (pointer: fine) {
+  .booking-modal-options .booking-option:first-child:hover { background: var(--sky-hover) !important; }
+  .booking-modal-options .booking-option:last-child:hover { background: var(--peach-hover) !important; }
+  .booking-option:hover::after { transform: translate(4px, -50%); }
+  .pricing-card#online:hover { background: var(--sky-hover) !important; border-color: var(--sky-hover) !important; }
+  .pricing-card#osobne:hover { background: var(--peach-hover) !important; border-color: var(--peach-hover) !important; }
+  .pricing-card#online:hover .btn, .pricing-card#osobne:hover .btn { background: var(--accent-light) !important; }
+}
+.booking-option:focus-visible, .pricing-card .btn:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .booking-modal-options .booking-option, .booking-option::after, .pricing-card#online, .pricing-card#osobne { transition: none !important; }
+}
+
 /* LAB: parts shared by the blog and quiz pages in the 12 Nov theme. Layered after proposal.css (same tokens).
    Buttons: coral stays for booking only. Every other action is navy: solid for the step forward, outline for the rest. */
 
@@ -671,8 +733,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 /* outline button on a sky card: hover turns white (sky on sky would not show) */
 .related-resource .btn.btn-secondary:hover, .quiz-related-article .btn.btn-secondary:hover { background: #fff !important; }
 
-/* ==== Visual audit, 12 Nov: the footer name matches the logo (Fraunces); the current page in the menu is marked ==== */
-.footer-brand > p:not([class]) { font-family: var(--font-heading) !important; font-weight: 500 !important; font-size: 1.1875rem !important; }
+/* ==== Visual audit, 12 Nov: the footer name (now in proposal.css §13, every page); the current page in the menu is marked ==== */
 @media (min-width: 969px) {
   .nav-link.active { font-weight: 600 !important; }
   .nav-link.active::after { transform: scaleX(1) !important; width: 100% !important; opacity: 1 !important; }
@@ -954,7 +1015,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="/images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="footer-logo" loading="lazy">
                     <p>Mgr. Kristýna Hriciková Glattová</p>
                     <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
                     <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>

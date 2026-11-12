@@ -7,6 +7,7 @@
 <title>KHG theme proposal</title>
 <style>
 @font-face { font-family: 'Inter'; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: 'Fraunces'; src: url('/ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
 @font-face { font-family: 'Playfair Display'; src: url('/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2'); font-weight: 600 700; font-display: swap; }
 
 /* ===== PROPOSED TOKENS (this page is built with them) ===== */
@@ -21,9 +22,12 @@
   --paper: #FBF8F3;     /* warm page ground from the art */
   --sky: #E8EFF4;       /* pale sky band from the art */
   --white: #FFFFFF;     /* cards on sky/paper */
-  --line: #E3E0DA;      /* one hairline */
-  /* type: Inter only, 7 sizes, 3 weights */
+  --line: rgba(22, 58, 85, .14); /* one hairline (navy at 14 %), same on paper and sky */
+  --peach: #F6E6DC;     /* in-person tint, booking panel */
+  --peach-line: #E8D3C5; /* hairline on peach */
+  /* type: Fraunces 500 for headings, Inter 400/500/600 for the rest, 7 sizes */
   --f: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fh: 'Fraunces', Georgia, serif;
   --t-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);   /* 36 → 52 */
   --t-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);   /* 28 → 36 */
   --t-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);   /* 20 → 24 */
@@ -42,7 +46,7 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); color: var(--slate); font: 400 var(--t-body)/1.65 var(--f); }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 769px) { .wrap { padding: 0 32px; } }
-h1, h2, h3 { color: var(--navy); font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h1, h2, h3 { color: var(--navy); font-family: var(--fh); font-weight: 500; font-synthesis: none; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
 h1 { font-size: var(--t-h1); line-height: 1.08; }
 h2 { font-size: var(--t-h2); line-height: 1.15; }
 h3 { font-size: var(--t-h3); line-height: 1.3; letter-spacing: -0.01em; }
@@ -146,7 +150,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
 <!-- HERO -->
 <section class="band">
   <div class="wrap">
-    <p class="kicker">Návrh vizuálního stylu · 12. 11. 2026</p>
+    <p class="kicker">Návrh vizuálního stylu · 12. 11. 2026 · aktualizováno 13. 11.</p>
     <h1>Méně ozdob, víc Kristýny</h1>
     <p class="lead" style="margin-top:16px">A proposal for the next theme of khgporadenstvi.cz, built from about 20 sources on good web design, AI-generated "tells" and therapist websites — and checked against what the live site measures today. This page is itself set in the proposed theme.</p>
     <div class="row" style="margin-top:28px">
@@ -164,7 +168,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     </div>
     <div>
       <p class="lead">In 2026 the purple gradient is no longer the main AI look. Critics now name <b style="color:var(--navy)">serif headings + warm cream + terracotta</b> as the new default that models reach for. Our site is Playfair Display + cream #FAF8F5 + coral #E8927C — exactly that cluster — on top of Inter, which is the other most-cited default.</p>
-      <p style="margin-top:14px">None of that is wrong by itself; the problem is when all of them stack with no reason. The fix is not to chase another trend, but to take every choice from something true about this practice. We have one: <b style="color:var(--navy)">the blog illustrations</b> you like — paper, three blues, a coral sun. This proposal takes the palette from them, drops the serif, and removes decoration that carries no meaning.</p>
+      <p style="margin-top:14px">None of that is wrong by itself; the problem is when all of them stack with no reason. The fix is not to chase another trend, but to take every choice from something true about this practice. We have one: <b style="color:var(--navy)">the blog illustrations</b> you like — paper, three blues, a coral sun. This proposal takes the palette from them, swaps the default serif (Playfair) for one picked to match the art (Fraunces, soft), and removes decoration that carries no meaning.</p>
     </div>
   </div>
 </section>
@@ -225,23 +229,23 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
   <div class="wrap">
     <div class="head">
       <p class="kicker">Typography</p>
-      <h2>7 sizes, 3 weights (headings now Fraunces 500, see rule 2)</h2>
-      <p class="mute" style="margin-top:12px">Down from 40 styles and 6 weights. Headings are 600 with slightly tight spacing, sentence case, no underline. The Playfair file (about 40 kB) goes away, which also removes one font swap.</p>
+      <h2>7 sizes, two families</h2>
+      <p class="mute" style="margin-top:12px">Down from 40 styles and 6 weights. Headings are Fraunces 500 (soft) with slightly tight spacing, sentence case, no underline; Fraunces is one 500 file, so no heading asks for another weight. Everything else is Inter 400 / 500 / 600. Playfair (about 40 kB) goes, Fraunces (30 kB, Czech subset) comes: the same one font swap as today.</p>
     </div>
     <div>
-      <div class="spec"><div class="m"><b>H1 · page title</b>600 · 52 → 36 · lh 1.08</div><h1>Terapie pro děti a dospělé</h1></div>
-      <div class="spec"><div class="m"><b>H2 · section</b>600 · 36 → 28 · lh 1.15</div><h2>Jak probíhá první setkání</h2></div>
-      <div class="spec"><div class="m"><b>H3 · card, panel</b>600 · 24 → 20 · lh 1.3</div><h3>Rodiče a budoucí rodiče</h3></div>
+      <div class="spec"><div class="m"><b>H1 · page title</b>Fraunces 500 · 52 → 36 · lh 1.08</div><h1>Terapie pro děti a dospělé</h1></div>
+      <div class="spec"><div class="m"><b>H2 · section</b>Fraunces 500 · 36 → 28 · lh 1.15</div><h2>Jak probíhá první setkání</h2></div>
+      <div class="spec"><div class="m"><b>H3 · card, panel</b>Fraunces 500 · 24 → 20 · lh 1.3</div><h3>Rodiče a budoucí rodiče</h3></div>
       <div class="spec"><div class="m"><b>Lead</b>400 · 20 → 18 · lh 1.55</div><p class="lead">Individuální psychoterapie online nebo osobně v Ostravě.</p></div>
       <div class="spec"><div class="m"><b>Body</b>400 · 17 · lh 1.65</div><p>Nemusíte se nijak zvlášť připravovat ani mít předem jasno v tom, co přesně chcete řešit. Začneme tím, co je pro vás právě důležité.</p></div>
       <div class="spec"><div class="m"><b>Small · label</b>400 / 500 · 15</div><p class="small mute">Délka setkání · <span style="font-weight:500;color:var(--coral-ink)">Online i osobně</span></p></div>
-      <div class="spec"><div class="m"><b>Tiny</b>400 · 13 · counters, legal only</div><p style="font-size:var(--t-tiny)" class="mute">Recenze 1 / 6 · © 2026</p></div>
+      <div class="spec"><div class="m"><b>Tiny</b>400 / 600 · 13 · legal, photo labels</div><p style="font-size:var(--t-tiny)" class="mute">Recenze 1 / 6 · © 2026</p></div>
     </div>
     <div class="cmp grid g2" style="margin-top:32px">
       <div style="background:var(--paper)"><span class="tagline">Today</span><p style="font-family:'Playfair Display',serif;font-weight:700;font-size:var(--t-h2);line-height:1.15;color:#2C3E50">Co říkají klienti</p><p class="small mute" style="margin-top:6px">Serif + cream + coral: the 2026 default.</p></div>
-      <div style="background:var(--sky)"><span class="tagline">Proposed</span><h2>Co říkají klienti</h2><p class="small mute" style="margin-top:6px">Inter 600, navy. You already preferred this in variant B.</p></div>
+      <div style="background:var(--sky)"><span class="tagline">Proposed</span><h2>Co říkají klienti</h2><p class="small mute" style="margin-top:6px">Fraunces 500 (soft), navy. Picked by the owner on 12 Nov from six faces in <code>ui-lab/fonts.html</code>, after Inter alone had no character.</p></div>
     </div>
-    <p class="small mute" style="margin-top:16px">Option to test later: one character face for H1/H2 only, chosen to fit the illustrations' hand-drawn feel. It would cost one font file and must be measured for layout shift, so it's not part of this proposal.</p>
+    <p class="small mute" style="margin-top:16px">Measured with Fraunces on the lab homepage at 375 px: CLS 0, same LCP element, +1 request, +30 kB. Fallbacks are metric-matched (Georgia Bold, Noto Serif Bold).</p>
   </div>
 </section>
 
@@ -257,8 +261,8 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
       <div class="sw"><i style="background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)"></i><div><b>Paper</b>#FBF8F3<br><span>page ground (60 %)</span></div></div>
       <div class="sw"><i style="background:var(--sky)"></i><div><b>Sky</b>#E8EFF4<br><span>alternate bands</span></div></div>
       <div class="sw"><i style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"></i><div><b>White</b>#FFFFFF<br><span>objects: reviews, prices</span></div></div>
-      <div class="sw"><i style="background:#F6E6DC"></i><div><b>Peach</b>#F6E6DC<br><span>in-person tint (warm halo in the illustrations)</span></div></div>
-      <div class="sw"><i style="background:var(--navy)"></i><div><b>Navy</b>#163A55<br><span>headings, footer · 11.2 : 1</span></div></div>
+      <div class="sw"><i style="background:#F6E6DC"></i><div><b>Peach</b>#F6E6DC<br><span>in-person tint, booking panel (warm halo in the illustrations)</span></div></div>
+      <div class="sw"><i style="background:var(--navy)"></i><div><b>Navy</b>#163A55<br><span>headings, values, footer · 11.2 : 1</span></div></div>
       <div class="sw"><i style="background:var(--blue)"></i><div><b>Blue</b>#2D5A7B<br><span>links, hero button · 7.3 : 1</span></div></div>
       <div class="sw"><i style="background:var(--slate)"></i><div><b>Slate</b>#44576A<br><span>body text · 7.0 : 1</span></div></div>
       <div class="sw"><i style="background:var(--mute)"></i><div><b>Mute</b>#5E6E7C<br><span>meta · 4.5–5.0 : 1</span></div></div>
@@ -270,7 +274,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
       <div style="flex:30;background:var(--sky);color:var(--navy)">sky + blues 30 %</div>
       <div style="flex:10;background:var(--coral);color:var(--navy)">10 %</div>
     </div>
-    <p class="small mute" style="margin-top:16px">Removed: cream #FAF8F5 (replaced by paper), cool grey #F8F9FB, ice blue #E8F4FD, pale cyan gradient, slate-grey #2C3E50 text (replaced by navy from the art), blue→coral gradient.</p>
+    <p class="small mute" style="margin-top:16px">Also in use, as tones of the colours above: the hairline (navy at 14 %), peach line #E8D3C5 on peach, and #C9D8E3 for text on the navy footer (8.1 : 1). Logos of other services (Terapie.cz, ZnámýLékař, Den pro školu) keep their own colours.<br>Removed: cream #FAF8F5 (replaced by paper), cool grey #F8F9FB, ice blue #E8F4FD, pale cyan gradient, slate-grey #2C3E50 text (replaced by navy from the art), blue→coral gradient.</p>
   </div>
 </section>
 
@@ -288,9 +292,9 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
         <div class="row" style="margin-top:16px">
           <a class="btn coral" href="#">Objednat se</a>
           <a class="btn coral navytext" href="#">Objednat se</a>
-          <a class="btn ghost" href="#">Ceník</a>
+          <a href="#" style="align-self:center">Ceník →</a>
         </div>
-        <p class="small mute" style="margin-top:14px">Coral stays, with navy text: 5.0 : 1 instead of 2.4 : 1 with white — same colour, readable for everyone. The first button above is the old version, shown for comparison.</p>
+        <p class="small mute" style="margin-top:14px">Coral stays, with navy text: 5.0 : 1 instead of 2.4 : 1 with white — same colour, readable for everyone. The first button above is the old version, shown for comparison. Anything that is not booking is a text link, like "Ceník →".</p>
       </div>
       <div class="card">
         <h3>Facts instead of label boxes</h3>
@@ -299,7 +303,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
           <div><dt>Cena</dt><dd>1 100 Kč</dd></div>
           <div><dt>Kde</dt><dd>Online · Ostrava</dd></div>
         </dl>
-        <p class="small mute" style="margin-top:14px">Sentence-case label above a bold value. No uppercase, no boxes.</p>
+        <p class="small mute" style="margin-top:14px">Sentence-case label above a navy value. No uppercase, no boxes. In the Služby card the two values (Délka, Cena) are Fraunces at H2 size, as on Ceník.</p>
       </div>
       <div class="card">
         <h3>Steps without circles</h3>
@@ -311,8 +315,8 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
       </div>
       <div class="review">
         <p>S Kristýnou spolupracuji už více než rok a mohu ji s čistým svědomím doporučit. Kristýna je velmi empatická a trpělivá…</p>
-        <p class="who">Ivana <span>· [zdroj recenze]</span></p>
-        <p class="small" style="margin-top:10px;opacity:.75">Review cards from the lab, plus the source of each review (fill in the real source).</p>
+        <p class="who">Ivana</p>
+        <p class="small" style="margin-top:10px;opacity:.75">Name only on the card (owner, 12 Nov). The sources are one line under the row: "Všechna hodnocení: Známý lékař · Google".</p>
       </div>
       <div class="card" style="grid-column:1/-1">
         <h3>FAQ as plain rows</h3>
@@ -336,26 +340,26 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     </div>
 
     <h3>1. Parts</h3>
-    <div class="spec"><div class="m"><b>Band</b>whole section</div><div>Paper or sky, alternating. Navy only for the footer and the one booking panel. <span class="mute">All 10 homepage sections.</span></div></div>
-    <div class="spec"><div class="m"><b>Rows</b>hairline list</div><div>No box; a 1 px line between items. For lists of like things. <span class="mute">Výhody online, Pro koho, FAQ, kontakty, profily online.</span></div></div>
-    <div class="spec"><div class="m"><b>Card</b>white, r12</div><div>A separate object: white, 1 px line on paper (none on sky), radius 12, no shadow. <span class="mute">Vzdělání a praxe, Služba, Praktické informace, Nejčastější témata, ČAP, Kontakt.</span></div></div>
-    <div class="spec"><div class="m"><b>Panel</b>r24</div><div>The few large, coloured or featured blocks. <span class="mute">Kniha, booking panel (navy), review cards.</span></div></div>
-    <div class="spec"><div class="m"><b>Photo</b>r12</div><div>Real photos only, radius 12, sized to fit the layout. <span class="mute">Ordinace (large + 3 on desktop, swipe row on phones). The portrait keeps its rounded blob shape as the one exception.</span></div></div>
-    <div class="spec"><div class="m"><b>Action</b>button / link</div><div>One button style for booking (below). Everything else is a text link: underline or ↗ for external. <span class="mute">No ghost or second-colour buttons.</span></div></div>
+    <div class="spec"><div class="m"><b>Band</b>whole section</div><div>Paper or sky, alternating. Navy only for the footer. <span class="mute">All 10 homepage sections.</span></div></div>
+    <div class="spec"><div class="m"><b>Rows</b>hairline list</div><div>No box; a 1 px line between items. For lists of like things. <span class="mute">Vzdělání / Praxe / Supervize, Pro koho, kroky, Praktické informace, FAQ, Kontakt, profily online, fact rows in cards.</span></div></div>
+    <div class="spec"><div class="m"><b>Card</b>white, r12</div><div>A separate object: white, 1 px line on paper (none on sky), radius 12, no shadow. <span class="mute">Služba, ČAP, Publikace, the format cards (tinted sky / peach instead of white), Ceník prices.</span></div></div>
+    <div class="spec"><div class="m"><b>Panel</b>r24</div><div>The few large, coloured or featured blocks. <span class="mute">Booking panel (peach, everywhere), review cards, the booking window.</span></div></div>
+    <div class="spec"><div class="m"><b>Photo</b>r12</div><div>Real photos only, radius 12, sized to fit the layout. <span class="mute">Ordinace (large + 3 on desktop, swipe row on phones). The portrait keeps its rounded blob shape, still (no animation), as the one exception.</span></div></div>
+    <div class="spec"><div class="m"><b>Action</b>button / link</div><div>One button style for booking (below). Everything else is a text link: underline or ↗ for external. <span class="mute">No ghost or second-colour button for booking. Blog and quizzes only: non-booking actions (start, next, back) are navy, solid for the main step and outline for the rest.</span></div></div>
 
     <h3 style="margin-top:40px">2. Type roles: 7 sizes</h3>
-    <div class="spec"><div class="m"><b>H1</b>52 → 36 · 600</div><div>Hero title only.</div></div>
-    <div class="spec"><div class="m"><b>H2</b>36 → 28 · 600</div><div>Section titles, including Recenze.</div></div>
-    <div class="spec"><div class="m"><b>H3</b>24 → 20 · 600</div><div>Card and panel headings.</div></div>
-    <div class="spec"><div class="m"><b>Lead / row</b>20 → 18 · 400 / 600</div><div>Lead paragraphs (400); row headings, fact values, sub-headings (600).</div></div>
+    <div class="spec"><div class="m"><b>H1</b>52 → 36 · 500</div><div>Hero title only. Fraunces 500.</div></div>
+    <div class="spec"><div class="m"><b>H2</b>36 → 28 · 500</div><div>Section titles, including Recenze.</div></div>
+    <div class="spec"><div class="m"><b>H3</b>24 → 20 · 500</div><div>Card and panel headings, and a block heading inside a section (Nejčastější témata, Praktické informace, Kde mě najdete online).</div></div>
+    <div class="spec"><div class="m"><b>Lead / row</b>20 → 18 · 400 / 600</div><div>Lead paragraphs (Inter 400); row headings and step titles (Fraunces 500); values in Kontakt rows (Inter 600).</div></div>
     <div class="spec"><div class="m"><b>Body</b>17 · 400 / 500 / 600</div><div>All running text, lists, FAQ questions, body buttons, review text, in-text links.</div></div>
     <div class="spec"><div class="m"><b>Small</b>15 · 400 / 500</div><div>Labels, navigation, header button, captions, review author, counters, footer text.</div></div>
-    <div class="spec"><div class="m"><b>Tiny</b>13 · 400</div><div>Legal line and company ID only.</div></div>
+    <div class="spec"><div class="m"><b>Tiny</b>13 · 400 / 600</div><div>Legal line, company ID, the "Zvětšit" label on photos. Nothing smaller, except the logo's role line (10.5 caps), which is part of the logo, not text.</div></div>
 
     <h3 style="margin-top:40px">3. Space: an 8 px scale, phone → desktop</h3>
     <div class="spec"><div class="m"><b>Section</b>56 → 96</div><div>Top and bottom padding of every band.</div></div>
-    <div class="spec"><div class="m"><b>Title → content</b>40 → 64</div><div>Same in every section, Recenze included.</div></div>
-    <div class="spec"><div class="m"><b>Block → block</b>32 → 48</div><div>Between different blocks in one section (steps → info card → photos).</div></div>
+    <div class="spec"><div class="m"><b>Title → content</b>40 → 64</div><div>Same in every section, measured from the bottom of the header block. In Recenze the header block holds the title, the 1 / 12 counter and the arrows.</div></div>
+    <div class="spec"><div class="m"><b>Block → block</b>32 → 48</div><div>Between different blocks in one section (steps → Praktické informace → photos).</div></div>
     <div class="spec"><div class="m"><b>Card → card</b>24 → 32</div><div>Between sibling cards in a grid or row.</div></div>
     <div class="spec"><div class="m"><b>Card padding</b>24 → 32</div><div>All cards.</div></div>
     <div class="spec"><div class="m"><b>Panel padding</b>32 → 48</div><div>Booking panel, book panel.</div></div>
@@ -364,20 +368,20 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
     <h3 style="margin-top:40px">4. Width and alignment</h3>
     <ul class="list">
       <li>Everything in a section starts at the same left edge as its title. Only the hero and the section titles centre, and only on phones; paragraphs, cards, panels and buttons inside sections are always left-aligned (centred multi-line text is harder to read).</li>
-      <li><b>Blocks are always full width</b> on every screen; a narrow block next to an empty half reads as unfinished. On desktop a block uses its own columns instead: the service card splits into description + facts and "Co nabízím", topics run in 4 columns, contacts in 3. <b>Long text stops at 66 characters</b> per line (the reading measure), wherever it sits.</li>
+      <li><b>Blocks are always full width</b> on every screen; a narrow block next to an empty half reads as unfinished. On desktop a block uses its own columns instead: Pro koho rows put the title left and the text right, topics run in 2 columns, credentials sit beside the About text, Kontakt rows have a 14rem label column. The service card is one column. <b>Long text stops at 66 characters</b> per line (the reading measure), wherever it sits.</li>
     </ul>
 
     <h3 style="margin-top:40px">5. Order: the questions a first-time client asks</h3>
-    <p class="mute">Czech research names price, waiting and shame as the reasons people don't start; clients check fit, credentials and reviews before booking. The homepage answers in that order: <b>Hero</b> (who, online or Ostrava, price and booking) → <b>Pro koho</b> (is this for me?) → <b>Recenze</b> (do others trust her?) → <b>O mně</b> (who is she?) → <b>Služby</b> (what, how much) → <b>Jak probíhá</b> → <b>Osobní a online</b> → <b>FAQ</b> → <b>Členství</b> → <b>Kontakt</b>. Bands alternate paper / sky in this order.</p>
+    <p class="mute">Czech research names price, waiting and shame as the reasons people don't start; clients check fit, credentials and reviews before booking. The homepage answers in that order: <b>Hero</b> (who, online or Ostrava, booking) → <b>O mně</b> (who is she? owner, 12 Nov: first) → <b>Pro koho</b> (is this for me?) → <b>Recenze</b> (do others trust her?) → <b>Služby</b> (what, how much; the price lives here, not in the hero) (what, how much) → <b>Jak probíhá</b> → <b>Osobní a online</b> → <b>FAQ</b> → <b>Členství</b> → <b>Kontakt</b>. Bands alternate paper / sky in this order: paper for Hero, Pro koho, Služby, Osobní a online, Členství; sky for O mně, Recenze, Jak probíhá, FAQ, Kontakt.</p>
 
     <h3 style="margin-top:40px">6. Button, review colours, motion</h3>
     <ul class="list">
       <li><b>One booking button:</b> coral with navy text (4.99 : 1; white on this coral is 2.38 : 1 and fails WCAG even for large text), pill, 18 px / 600. Two sizes: compact 44 px in the header; 56 px / 18 px text in the page, full column width on phones (measured 12 Nov: Hedepy hero button 335×76 on a 375 px phone, Terapie.cz 311×38, live site 168×55; ours at 156×52 read as too small). Repeating the same primary action is allowed; a different-looking button for it is not. Hover darkens nothing and moves nothing: it switches to the light coral.</li>
-      <li><b>Phone menu and booking window use the same parts.</b> Menu: paper, full height, links as hairline rows at lead size, the page-size booking button last; it slides in with transform only (200 ms, none with reduced motion). Booking window: a paper panel (r24, panel padding, the one allowed shadow), title left at h3, options stacked in one column; the title leads with the format ("Online", "Osobně v Ostravě"), then one line and a navy "→", no separate labels. <b>Format tints:</b> online is always sky, in person always peach, here and on the Ceník cards. Both are tinted and of equal weight: one white card beside a tinted one reads as "already selected". On tints, meta text is slate (mute is only 4.3 : 1 on peach).</li>
-      <li><b>Facts inside a card are rows, not a box.</b> Hairline above and below, hairlines between columns (rows on phones), no fill or radius; label 15 / 500 mute, value navy 600, detail 15 / 400 slate. A coral-ink label above a card title is 15 / 500. Round arrow controls: white, hairline, navy glyph, sky on hover.</li>
-      <li><b>Footer is a navy band.</b> Band spacing (56 → 96 above, 32 → 48 below), blocks 32 → 48 apart. Two text colours, as in the navy panel: white for the name (17 / 600) and headings, #C9D8E3 for everything else (8.1 : 1). Every text link is a 44 px target. Left aligned; on desktop the bottom line has © on the left and the privacy link on the right.</li>
-      <li><b>Ceník uses the same parts</b> (lab: <code>ui-lab/proposal/cenik.html</code>). Hero on paper; the two prices are cards in the format tints, sky and peach (title names the format: "Online", "Osobně v Ostravě", h3; price at h2 size, facts as one-line rows, full-width button); Praktické informace is its own sky band with rows (three columns from 769 px); První setkání is the navy panel from the homepage. No uppercase labels, tick marks, shadows or cards on cards.</li>
-      <li><b>Review cards</b> cycle through three palette colours only: blue (white text), sky, white with a hairline. No mixed tints.</li>
+      <li><b>Phone menu and booking window use the same parts.</b> Menu: paper, full height, links as hairline rows at lead size, the page-size booking button last; it slides in with transform only (200 ms, none with reduced motion). Booking window: a paper panel (r24, panel padding, the one allowed shadow), title left at h3, options stacked in one column; the title leads with the format ("Online", "Osobně v Ostravě"), then one line and a navy "→", no separate labels. <b>Format tints:</b> online is always sky, in person always peach, here and on the Ceník cards. Both are tinted and of equal weight: one white card beside a tinted one reads as "already selected". On tints, meta text is slate (mute is only 4.3 : 1 on peach). <b>Hover (desktop, mouse only):</b> a format card that is one action (booking option, Ceník price card) is clickable as a whole; on hover its tint deepens one step (sky #DCE6EE, peach #F2DBCC), the arrow moves 4 px right or the button turns light coral. 150 ms, no movement of the card, none with reduced motion.</li>
+      <li><b>Facts inside a card are rows, not a box.</b> Hairline above and below, hairlines between columns (rows on phones), no fill or radius; label 15 / 500 mute, value navy 600 (Fraunces 500 when it is a price or length), detail 15 / 400 slate. Kontakt rows follow the same rule: label 15 / 500 mute, value Inter 600 at lead size. Step numbers are navy Fraunces, not coral. A coral-ink label above a card title is 15 / 500. Round arrow controls: white, hairline, navy glyph, sky on hover.</li>
+      <li><b>Footer is a navy band.</b> Band spacing (56 → 96 above, 32 → 48 below), blocks 32 → 48 apart. Two text colours: white for the name (Fraunces 19 / 500, like the logo, on every page) and headings, #C9D8E3 for everything else (8.1 : 1). Every text link is a 44 px target. Left aligned; no logo image (the name is the logo). No crisis note (owner removed it, 12 Nov); the same footer on every page, Kontakt column included (owner, 13 Nov); Facebook and Instagram are two 44 px round hairline controls, the first starting at the column's left edge; on desktop the bottom line has © on the left and the privacy link on the right.</li>
+      <li><b>Ceník uses the same parts</b> (lab: <code>ui-lab/proposal/cenik.html</code>). Hero on paper; the two prices are cards in the format tints, sky and peach (title names the format: "Online", "Osobně v Ostravě", h3; price at h2 size, facts as one-line rows, full-width button); Praktické informace is its own sky band with rows (three columns from 769 px); První setkání is the peach booking panel from the homepage. No uppercase labels, tick marks, shadows or cards on cards.</li>
+      <li><b>Review cards</b> cycle through three palette colours only: blue (white text), a light one, white with a hairline. The light one is sky on a paper band and paper on a sky band (the homepage has Recenze on sky). Name only, no details.</li>
       <li><b>No entrance or scroll animations.</b> Motion only as feedback (FAQ opening, menu, hover colour), at most 200 ms, and none when the visitor asks for reduced motion.</li>
     </ul>
   </div>
@@ -392,13 +396,13 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
       <p class="mute" style="margin-top:12px">Same spacing tokens as today (they work). Section headers left-aligned on desktop, centred on phones (your earlier call), no subtitle unless it says something specific.</p>
     </div>
     <div class="grid g3">
-      <div class="card" style="background:var(--paper)"><b style="color:var(--navy)">Paper</b><p class="small mute">Hero, Recenze, Služby, Osobní a online, Členství</p></div>
-      <div class="card" style="background:var(--sky)"><b style="color:var(--navy)">Sky</b><p class="small mute">Pro koho, O mně, Jak probíhá, FAQ, Kontakt</p></div>
-      <div class="card" style="background:var(--navy);color:#C9D8E3"><b style="color:#fff">Navy</b><p class="small">Footer and the booking panel, solid — no gradient</p></div>
+      <div class="card" style="background:var(--paper)"><b style="color:var(--navy)">Paper</b><p class="small mute">Hero, Pro koho, Služby, Osobní a online, Členství</p></div>
+      <div class="card" style="background:var(--sky)"><b style="color:var(--navy)">Sky</b><p class="small mute">O mně, Recenze, Jak probíhá, FAQ, Kontakt</p></div>
+      <div class="card" style="background:var(--navy);color:#C9D8E3"><b style="color:#fff">Navy</b><p class="small">Footer only, solid — no gradient. The booking panel is peach.</p></div>
     </div>
     <ul class="list" style="margin-top:28px">
       <li><b style="color:var(--navy)">Break the equal grids:</b> "Pro koho" as a short list with one sentence each, not 4 identical cards; "Osobní a online" as two columns (online / Ostrava) instead of 4 benefit cards.</li>
-      <li><b style="color:var(--navy)">Keep the portrait plain:</b> the morphing blob is the one decorative loop left; a still rounded frame is calmer (and was already tried in variant B).</li>
+      <li><b style="color:var(--navy)">Portrait:</b> the blob shape stays as the one exception, but it no longer morphs (no decorative loop).</li>
     </ul>
   </div>
 </section>
@@ -427,7 +431,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
         <p style="margin-top:16px"><span class="quote-x">Pomáhám lidem v různých životních situacích</span></p>
         <p style="color:var(--navy)">(no subtitle — the four groups below say it)</p>
         <p style="margin-top:16px"><span class="quote-x">Přečtěte si zkušenosti těch, kteří už cestu terapií prošli</span></p>
-        <p style="color:var(--navy)">(no subtitle — or "Recenze z Google a ZnámýLékař.cz", if true)</p>
+        <p style="color:var(--navy)">(no subtitle; the sources are one line under the cards)</p>
       </div>
     </div>
   </div>
@@ -441,8 +445,7 @@ code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius:
       <div class="card">
         <h3>Add</h3>
         <ul class="list">
-          <li>Crisis note in the footer: "Web nenahrazuje akutní pomoc." with Linka první psychické pomoci 116 123, Linka bezpečí 116 111, 155 / 112 (please verify).</li>
-          <li>Source on every review, link to the profiles next to them.</li>
+          <li>Review sources as one line under the cards, linking to the profiles. (A footer crisis note was tried and removed by the owner, 12 Nov.)</li>
           <li>Method in one sentence (daseinsanalýza) — what a session actually feels like.</li>
         </ul>
       </div>
