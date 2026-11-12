@@ -163,7 +163,7 @@ page = page[:start] + "".join(chunks[k] for k in order) + page[end:]
 HEART_D = (here / "icons" / "heart.d").read_text().strip()
 HEART_VB = (here / "icons" / "heart.vb").read_text().strip()
 LOGO_IMG = '<img src="/images/logo.webp" width="381" height="96" alt="" class="logo-img">'
-BRAND_TEXT = '<span class="brand-text"><span class="brand-name">Kristýna Hriciková Glattová</span><span class="brand-role">Psycholog a terapeut</span></span>'
+BRAND_TEXT = '<span class="brand-text"><span class="brand-name">Kristýna Hriciková Glattová</span> <span class="brand-role">Psycholog a terapeut</span></span>'
 LOGO_F = ('<span class="brand brand-f"><svg class="brand-heart" viewBox="' + HEART_VB + '" width="24" height="24" aria-hidden="true" focusable="false"><path d="' + HEART_D + '"/></svg>' + BRAND_TEXT + '</span>')
 BRAND_CSS = """
     <style id="brand">
@@ -180,6 +180,7 @@ BRAND_CSS = """
     </style>"""
 FAVICON_OLD = '<link rel="icon" type="image/webp" href="images/favicon.webp">'
 FAV_F = ('<link rel="icon" href="ui-lab/proposal/icons/heart.svg" type="image/svg+xml">\n    <link rel="icon" href="ui-lab/proposal/icons/heart-32.png" sizes="32x32" type="image/png">\n'
+         '    <link rel="icon" href="ui-lab/proposal/icons/heart-96.png" sizes="96x96" type="image/png">\n'
          '    <link rel="apple-touch-icon" href="ui-lab/proposal/icons/heart-180.png">')
 
 def brand(html, logo, fav):
@@ -343,7 +344,8 @@ def build_page(name, layer):
         # author box: two short sentences, the credentials a reader checks first; the rest is one tap away on "O mně"
         p, n = re.subn(r'<p><strong>Mgr\. Kristýna Hriciková Glattová</strong> je psycholog.*?</p>',
                        '<p><strong>Mgr. Kristýna Hriciková Glattová</strong> je psycholog ve zdravotnictví ve Fakultní nemocnici Ostrava '
-                       'a terapeut pro děti a dospělé. Je členkou Asociace klinických psychologů a kandidátní členkou České asociace pro psychoterapii.</p>',
+                       'a terapeut pro děti a dospělé. Je ve specializačním vzdělávání v oboru klinická psychologie, je členkou Asociace klinických psychologů '
+                       'a kandidátní členkou České asociace pro psychoterapii.</p>',
                        p, flags=re.S)
         assert n == 1, name
 
