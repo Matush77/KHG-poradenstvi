@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI lab: options</title>
+<style>
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; }
+@font-face { font-family: 'Playfair Display'; src: url('/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2'); font-weight: 600 700; }
+:root {
+  --primary: #2D5A7B; --accent: #E8927C; --text-dark: #2C3E50; --text: #5A6C7D; --text-light: #66727F;
+  --cream: #FAF8F5; --sand: #F6F2EC; --line: #E9E4DD;
+  --shadow-sm: 0 1px 2px hsl(205 40% 25% / .05), 0 4px 14px hsl(205 40% 25% / .05);
+  --serif: 'Playfair Display', Georgia, serif; --sans: Inter, system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 16px/1.6 var(--sans); color: var(--text-dark); background: #EFEBE5; padding: 28px 16px 80px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+.page-title { font: 700 clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem)/1.15 var(--serif); }
+.intro { color: var(--text); max-width: 62ch; margin: 10px 0 8px; }
+.area { margin-top: 44px; }
+.area > h2 { font: 700 1.5rem/1.2 var(--serif); color: var(--primary); }
+.area > p { color: var(--text); margin: 4px 0 16px; max-width: 70ch; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+.opt { display: flex; flex-direction: column; gap: 10px; }
+.opt-head { display: flex; gap: 10px; align-items: baseline; }
+.opt-head b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--text-dark); color: #fff; font-size: 13px; flex: none; }
+.opt-head span { font-weight: 600; }
+.opt-note { color: var(--text); font-size: 14px; line-height: 1.5; }
+.phone { width: 100%; max-width: 375px; background: #fff; border-radius: 22px; padding: 28px 16px; box-shadow: 0 2px 4px rgba(0,0,0,.04), 0 18px 40px rgba(44,62,80,.12); }
+.phone.cream { background: var(--cream); }
+.cur { opacity: .9 }
+
+/* ---------- shared bits ---------- */
+.card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); padding: 24px; }
+.stack > * + * { margin-top: 14px; }
+h3.t { font: 700 1.25rem/1.3 var(--sans); color: var(--primary); margin-bottom: 6px; }
+p.d { font-size: 1.0625rem; line-height: 1.65; color: var(--text); text-wrap: pretty; }
+
+/* A1 numbered */
+.a1 .num { font: 600 0.9375rem/1 var(--sans); color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.a1 .num::after { content: ''; width: 24px; height: 1px; background: var(--accent); }
+/* A2 accent rule (existing motif from the credential cards) */
+.a2 .card::before { content: ''; display: block; width: 40px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--accent)); margin-bottom: 16px; }
+/* A3 one panel list */
+.a3 { background: #fff; border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow-sm); padding: 4px 24px; }
+.a3 > div { padding: 20px 0; }
+.a3 > div + div { border-top: 1px solid var(--line); }
+.a3 h3.t { display: flex; align-items: baseline; gap: 10px; }
+.a3 h3.t::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; transform: translateY(-2px); }
+.a3 p.d { padding-left: 17px; }
+
+/* contact: current */
+.c0 .row { padding: 8px 0; }
+.c0 .ic { color: var(--primary); width: 24px; height: 24px; margin-bottom: 8px; }
+.c0 .lab { font-weight: 600; font-size: 15px; color: var(--text-dark); display: block; margin-bottom: 8px; }
+.c0 a { color: var(--primary); font-size: 15px; }
+/* B1 compact rows with icons */
+.b1 .row { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: center; padding: 12px 0; }
+.b1 .row + .row { border-top: 1px solid var(--line); }
+.b1 .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--sand); color: var(--primary); display: grid; place-items: center; }
+.b1 .ic svg { width: 20px; height: 20px; }
+.lab2 { display: block; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-light); line-height: 1.3; }
+.val { color: var(--primary); font-size: 1.0625rem; font-weight: 500; text-decoration: none; line-height: 1.4; }
+/* B2 labels, no icons */
+.b2 .row { padding: 16px 0; }
+.b2 .row + .row { border-top: 1px solid var(--line); }
+.b2 .lab2 { margin-bottom: 4px; }
+/* B3 tap rows */
+.b3 a.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 14px 16px; background: var(--cream); border: 1px solid var(--line); border-radius: 14px; text-decoration: none; min-height: 64px; }
+.b3 a.row + a.row { margin-top: 10px; }
+.b3 .act { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.btn { display: block; text-align: center; margin-top: 22px; background: var(--accent); color: #fff; font-weight: 600; border-radius: 999px; padding: 15px 28px; text-decoration: none; }
+
+/* stats: current */
+.s0 { display: flex; justify-content: center; gap: 24px; align-items: center; color: var(--primary); font-weight: 600; font-size: 15px; }
+.s0 span { display: inline-flex; gap: 10px; align-items: center; }
+/* C1 number first */
+.c1 { display: flex; justify-content: center; }
+.c1 > div { padding: 0 24px; text-align: center; }
+.c1 > div + div { border-left: 1px solid var(--line); }
+.big { display: block; font: 700 2rem/1.05 var(--serif); color: var(--primary); }
+.small { display: block; font-size: 14px; color: var(--text); margin-top: 4px; }
+/* C2 quiet line */
+.c2 { text-align: center; font-size: 15px; color: var(--text); }
+.c2 strong { color: var(--primary); font-weight: 700; }
+.c2 .dot { color: var(--accent); margin: 0 10px; }
+/* C3 soft pills */
+.c3 { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.c3 span { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; font-size: 14px; color: var(--text); }
+.c3 strong { color: var(--primary); font-weight: 700; margin-right: 4px; }
+.hero-mini { text-align: center; }
+.hero-mini h1 { font: 700 2.5rem/1.08 var(--serif); letter-spacing: -.02em; margin-bottom: 14px; }
+.hero-mini p { font-size: 1.0625rem; color: var(--text); margin-bottom: 22px; }
+.hero-mini .stats { margin-bottom: 24px; }
+.hero-btn { display: inline-block; background: var(--primary); color: #fff; font-weight: 600; border-radius: 999px; padding: 15px 34px; }
+.tag-cur { display: inline-block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-light); border: 1px dashed var(--line); border-radius: 6px; padding: 1px 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="page-title">Options for three spots</h1>
+  <p class="intro">Each option is shown at phone width with the site's real fonts, colours and text. Tell me a letter per area (for example "A2, B2, C1"), or mix them.</p>
+
+  <!-- ================= A ================= -->
+  <section class="area">
+    <h2>A · "Osobní a online terapie" cards</h2>
+    <p>The icons in grey circles read as generic. All three options drop the pictograms entirely and let the typography carry the cards.</p>
+    <div class="opts">
+      <div class="opt">
+        <div class="opt-head"><b>A1</b><span>Numbered</span></div>
+        <div class="phone cream a1 stack">
+          <div class="card"><span class="num">01</span><h3 class="t">Pohodlí a soukromí</h3><p class="d">Zvolte si prostředí, ve kterém se můžete cítit bezpečně – klidnou poradnu nebo soukromé místo pro online hovor.</p></div>
+          <div class="card"><span class="num">02</span><h3 class="t">Forma podle Vašich potřeb</h3><p class="d">Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.</p></div>
+          <div class="card"><span class="num">03</span><h3 class="t">Online odkudkoliv</h3><p class="d">Připojit se můžete z domova nebo jiného klidného a soukromého místa v Česku i v zahraničí.</p></div>
+        </div>
+        <p class="opt-note">Small coral numbers with a short line, like chapter marks in a book. Editorial and calm. It is also the same idea as the numbered steps in "Jak probíhá terapie".</p>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><b>A2</b><span>Accent line</span></div>
+        <div class="phone cream a2 stack">
+          <div class="card"><h3 class="t">Pohodlí a soukromí</h3><p class="d">Zvolte si prostředí, ve kterém se můžete cítit bezpečně – klidnou poradnu nebo soukromé místo pro online hovor.</p></div>
+          <div class="card"><h3 class="t">Forma podle Vašich potřeb</h3><p class="d">Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.</p></div>
+          <div class="card"><h3 class="t">Online odkudkoliv</h3><p class="d">Připojit se můžete z domova nebo jiného klidného a soukromého místa v Česku i v zahraničí.</p></div>
+        </div>
+        <p class="opt-note">A short blue-to-coral line above each title. This is the motif the site already uses on the Vzdělání / Praxe / Supervize cards, so it ties the page together. The quietest option.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><b>A3</b><span>One panel, four rows</span></div>
+        <div class="phone cream">
+          <div class="a3">
+            <div><h3 class="t">Pohodlí a soukromí</h3><p class="d">Zvolte si prostředí, ve kterém se můžete cítit bezpečně – klidnou poradnu nebo soukromé místo pro online hovor.</p></div>
+            <div><h3 class="t">Forma podle Vašich potřeb</h3><p class="d">Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.</p></div>
+            <div><h3 class="t">Online odkudkoliv</h3><p class="d">Připojit se můžete z domova nebo jiného klidného a soukromého místa v Česku i v zahraničí.</p></div>
+            <div><h3 class="t">Osobně v Ostravě</h3><p class="d">Setkání tváří v tvář v klidném prostoru poradny pro ty, kterým osobní kontakt vyhovuje více.</p></div>
+          </div>
+        </div>
+        <p class="opt-note">No separate boxes: one white panel split by thin lines, with a small coral dot per item. It is the shortest option on a phone (about 40 % less scrolling) and reads like a list rather than four "features".</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= B ================= -->
+  <section class="area">
+    <h2>B · Contact block</h2>
+    <p>Now: icon, then label, then value, each on its own line with gaps between them, so the three items take a whole screen on a phone.</p>
+    <div class="opts">
+      <div class="opt">
+        <div class="opt-head"><b>B1</b><span>Compact rows</span></div>
+        <div class="phone b1">
+          <div class="row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><div><span class="lab2">E-mail</span><a class="val" href="#">kristyna@khgporadenstvi.cz</a></div></div>
+          <div class="row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><div><span class="lab2">Telefon</span><a class="val" href="#">+420 605 990 980</a></div></div>
+          <div class="row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12s-8-7-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span><div><span class="lab2">Osobní setkání</span><a class="val" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></div></div>
+          <a class="btn" href="#">Objednat se</a>
+        </div>
+        <p class="opt-note">Keeps small icons, but beside the text in soft squares, with the label above the value. Half the height of the current block.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><b>B2</b><span>Labels only</span></div>
+        <div class="phone b2">
+          <div class="row"><span class="lab2">E-mail</span><a class="val" href="#">kristyna@khgporadenstvi.cz</a></div>
+          <div class="row"><span class="lab2">Telefon</span><a class="val" href="#">+420 605 990 980</a></div>
+          <div class="row"><span class="lab2">Osobní setkání</span><a class="val" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></div>
+          <a class="btn" href="#">Objednat se</a>
+        </div>
+        <p class="opt-note">No icons. Small uppercase labels (the same style as "VZDĚLÁNÍ" and "DÉLKA SETKÁNÍ" elsewhere) above clear values, split by thin lines. The cleanest option, like a business card.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><b>B3</b><span>Tap-to-act rows</span></div>
+        <div class="phone b3">
+          <a class="row" href="#"><div><span class="lab2">E-mail</span><span class="val">kristyna@khgporadenstvi.cz</span></div><span class="act">Napsat →</span></a>
+          <a class="row" href="#"><div><span class="lab2">Telefon</span><span class="val">+420 605 990 980</span></div><span class="act">Zavolat →</span></a>
+          <a class="row" href="#"><div><span class="lab2">Osobní setkání</span><span class="val">Vítkovická 3299/3a, Ostrava</span></div><span class="act">Mapa →</span></a>
+          <a class="btn" href="#">Objednat se</a>
+        </div>
+        <p class="opt-note">Each row is one big tappable area that says what it does (write, call, map). The most practical on a phone, but a little busier. On desktop the action words could be hidden.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= C ================= -->
+  <section class="area">
+    <h2>C · "hodin praxe / doporučení" under the hero title</h2>
+    <p>Now: <span class="s0" style="display:inline-flex;font-size:14px;gap:14px"><span>🕒 +4000 hodin praxe</span><span>★ +100 doporučení</span></span>. The star reads like a review rating. Also "+4000" is unusual in Czech; "4 000+" (with a space) is the normal way to write it.</p>
+    <div class="opts">
+      <div class="opt">
+        <div class="opt-head"><b>C1</b><span>Number first</span></div>
+        <div class="phone cream hero-mini">
+          <h1>Terapie pro děti a dospělé</h1>
+          <p>Individuální psychoterapie online nebo osobně v Ostravě.</p>
+          <div class="stats c1"><div><span class="big">4 000+</span><span class="small">hodin praxe</span></div><div><span class="big">100+</span><span class="small">doporučení</span></div></div>
+          <span class="hero-btn">Objednat se</span>
+        </div>
+        <p class="opt-note">Big serif numbers with a small label underneath and a thin divider between them. Confident and easy to scan at a glance. No icons.</p>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><b>C2</b><span>One quiet line</span></div>
+        <div class="phone cream hero-mini">
+          <h1>Terapie pro děti a dospělé</h1>
+          <p>Individuální psychoterapie online nebo osobně v Ostravě.</p>
+          <div class="stats c2"><strong>4 000+</strong> hodin praxe<span class="dot">·</span><strong>100+</strong> doporučení</div>
+          <span class="hero-btn">Objednat se</span>
+        </div>
+        <p class="opt-note">A single understated line with a coral dot between the two facts. The most modest option, and it fits a therapy site that is already fully booked: the facts are there without "selling".</p>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><b>C3</b><span>Soft pills</span></div>
+        <div class="phone cream hero-mini">
+          <h1>Terapie pro děti a dospělé</h1>
+          <p>Individuální psychoterapie online nebo osobně v Ostravě.</p>
+          <div class="stats c3"><span><strong>4 000+</strong>hodin praxe</span><span><strong>100+</strong>doporučení</span></div>
+          <span class="hero-btn">Objednat se</span>
+        </div>
+        <p class="opt-note">Two small white badges with a hairline border. A middle ground: more visible than C2, lighter than C1.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

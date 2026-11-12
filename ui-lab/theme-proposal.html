@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>KHG theme proposal</title>
+<style>
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: 'Playfair Display'; src: url('/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2'); font-weight: 600 700; font-display: swap; }
+
+/* ===== PROPOSED TOKENS (this page is built with them) ===== */
+:root {
+  /* colour: taken from the blog illustrations */
+  --navy: #163A55;      /* ink: headings, strong text, footer */
+  --blue: #2D5A7B;      /* brand blue: links, small accents, hero button */
+  --slate: #44576A;     /* body text */
+  --mute: #5E6E7C;      /* meta, captions (4.5:1 on paper and sky) */
+  --coral: #E8927C;     /* the sun: buttons and one accent per view */
+  --coral-ink: #B5573F; /* coral when it must be readable text */
+  --paper: #FBF8F3;     /* warm page ground from the art */
+  --sky: #E8EFF4;       /* pale sky band from the art */
+  --white: #FFFFFF;     /* cards on sky/paper */
+  --line: #E3E0DA;      /* one hairline */
+  /* type: Inter only, 7 sizes, 3 weights */
+  --f: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --t-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);   /* 36 → 52 */
+  --t-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);   /* 28 → 36 */
+  --t-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);   /* 20 → 24 */
+  --t-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem); /* 18 → 20 */
+  --t-body: 1.0625rem;  /* 17 */
+  --t-small: 0.9375rem; /* 15 */
+  --t-tiny: 0.8125rem;  /* 13, only for counters and legal */
+  /* shape */
+  --r: 12px; --r-lg: 24px; --pill: 999px;
+  --gap: clamp(16px, 1rem + 1vw, 32px);
+  --sec: clamp(56px, 2.4rem + 4vw, 96px);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--slate); font: 400 var(--t-body)/1.65 var(--f); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 769px) { .wrap { padding: 0 32px; } }
+h1, h2, h3 { color: var(--navy); font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h1 { font-size: var(--t-h1); line-height: 1.08; }
+h2 { font-size: var(--t-h2); line-height: 1.15; }
+h3 { font-size: var(--t-h3); line-height: 1.3; letter-spacing: -0.01em; }
+p { margin: 0; text-wrap: pretty; }
+a { color: var(--blue); text-underline-offset: 3px; }
+code { font-size: .9em; background: var(--sky); padding: 1px 5px; border-radius: 6px; color: var(--navy); }
+.lead { font-size: var(--t-lead); line-height: 1.55; max-width: 60ch; }
+.small { font-size: var(--t-small); }
+.mute { color: var(--mute); }
+
+.band { padding-block: var(--sec); }
+.band.sky { background: var(--sky); }
+.band.white { background: var(--white); }
+.band.navy { background: var(--navy); color: #C9D8E3; }
+.band.navy h2, .band.navy h3 { color: #fff; }
+.head { margin-bottom: clamp(24px, 1rem + 2vw, 48px); max-width: 64ch; }
+.head h2 + p { margin-top: 12px; }
+.kicker { font-size: var(--t-small); font-weight: 500; color: var(--coral-ink); margin-bottom: 8px; }
+
+.grid { display: grid; gap: var(--gap); }
+@media (min-width: 760px) { .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g12 { grid-template-columns: 1fr 2fr; } }
+.card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(20px, 1rem + 1vw, 32px); }
+.sky .card, .paper .card { border-color: transparent; }
+.card h3 { margin-bottom: 8px; }
+.card p + p { margin-top: 10px; }
+
+/* scorecard */
+.score { width: 100%; border-collapse: collapse; font-size: var(--t-small); line-height: 1.55; }
+.score th, .score td { text-align: left; vertical-align: top; padding: 14px 12px 14px 0; border-top: 1px solid var(--line); }
+.score th { color: var(--navy); font-weight: 600; white-space: nowrap; }
+.score thead th { border-top: 0; color: var(--mute); font-weight: 500; }
+.v { display: inline-block; font-weight: 600; font-size: var(--t-tiny); padding: 3px 9px; border-radius: var(--pill); white-space: nowrap; }
+.v.more { background: #F6DCD3; color: #7A3422; }
+.v.less { background: #DCE7F0; color: #1D4566; }
+.v.ok { background: #E1ECE3; color: #2D5137; }
+@media (max-width: 759px) {
+  .score thead { display: none; }
+  .score tr { display: block; border-top: 1px solid var(--line); padding: 12px 0; }
+  .score th, .score td { display: block; border: 0; padding: 2px 0; }
+  .score td:nth-child(2)::before { content: 'Research: '; font-weight: 600; color: var(--navy); }
+  .score td:nth-child(3)::before { content: 'Us: '; font-weight: 600; color: var(--navy); }
+}
+
+/* type specimen */
+.spec { display: grid; grid-template-columns: 150px 1fr; gap: 4px 24px; align-items: baseline; padding: 16px 0; border-top: 1px solid var(--line); }
+.spec:first-child { border-top: 0; padding-top: 0; }
+.spec .m { font-size: var(--t-tiny); line-height: 1.5; color: var(--mute); font-variant-numeric: tabular-nums; }
+.spec .m b { display: block; color: var(--navy); font-size: var(--t-small); font-weight: 600; }
+@media (max-width: 640px) { .spec { grid-template-columns: 1fr; } }
+
+/* colour */
+.swatches { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.sw { border-radius: var(--r); overflow: hidden; background: var(--white); }
+.sw i { display: block; height: 72px; }
+.sw div { padding: 10px 12px 12px; font-size: var(--t-small); line-height: 1.45; }
+.sw b { display: block; color: var(--navy); font-weight: 600; }
+.sw span { color: var(--mute); font-size: var(--t-tiny); }
+.ratio { display: flex; height: 44px; border-radius: var(--r); overflow: hidden; margin-top: 20px; font-size: var(--t-tiny); font-weight: 600; }
+.ratio div { display: grid; place-items: center; }
+
+/* components */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; border-radius: var(--pill);
+       font: 600 var(--t-body)/1 var(--f); text-decoration: none; border: 0; }
+.btn.coral { background: var(--coral); color: #fff; }
+.btn.coral.navytext { color: var(--navy); }
+.btn.ghost { background: transparent; color: var(--navy); box-shadow: inset 0 0 0 1px var(--navy); }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.facts { display: flex; flex-wrap: wrap; gap: 12px 0; }
+.facts div { padding: 0 20px; border-left: 1px solid var(--line); }
+.facts dd { white-space: nowrap; }
+.facts div:first-child { padding-left: 0; border-left: 0; }
+.facts dt { font-size: var(--t-small); color: var(--mute); }
+.facts dd { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--navy); letter-spacing: -0.01em; }
+@media (max-width: 520px) { .facts { flex-direction: column; } .facts div { padding: 0; border: 0; } }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2.5rem 1fr; gap: 4px 12px; padding: 16px 0; border-top: 1px solid var(--line); }
+.steps li:first-child { border-top: 0; }
+.steps li::before { content: counter(s) '.'; font-weight: 600; color: var(--coral-ink); font-size: var(--t-h3); line-height: 1.3; }
+.steps b { color: var(--navy); font-weight: 600; display: block; }
+.review { border-radius: var(--r-lg); padding: 28px; background: var(--blue); color: rgba(255,255,255,.9); }
+.review p.who { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.22); font-size: var(--t-small); font-weight: 600; color: #fff; }
+.review p.who span { font-weight: 400; opacity: .8; }
+.faq { border-top: 1px solid var(--line); }
+.faq div { padding: 16px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; color: var(--navy); font-weight: 600; }
+.faq div span { color: var(--mute); font-weight: 400; }
+.cmp { display: grid; gap: 12px; }
+.cmp > div { padding: 20px; border-radius: var(--r); background: var(--white); }
+.tagline { font-size: var(--t-tiny); color: var(--mute); margin-bottom: 6px; display: block; }
+
+.list { margin: 0; padding-left: 1.1em; }
+.list li { margin: 6px 0; }
+.list li::marker { color: var(--coral); }
+.quote-x { text-decoration: line-through; text-decoration-color: var(--coral); color: var(--mute); }
+.src { columns: 2 300px; column-gap: 32px; font-size: var(--t-small); line-height: 1.5; padding-left: 1.1em; margin: 0; }
+.src li { margin: 0 0 8px; break-inside: avoid; }
+.band.navy a { color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="band">
+  <div class="wrap">
+    <p class="kicker">Návrh vizuálního stylu · 12. 11. 2026</p>
+    <h1>Méně ozdob, víc Kristýny</h1>
+    <p class="lead" style="margin-top:16px">A proposal for the next theme of khgporadenstvi.cz, built from about 20 sources on good web design, AI-generated "tells" and therapist websites — and checked against what the live site measures today. This page is itself set in the proposed theme.</p>
+    <div class="row" style="margin-top:28px">
+      <a class="btn coral" href="#score">See the scorecard</a>
+      <a class="btn ghost" href="#tokens">Jump to the theme</a>
+    </div>
+  </div>
+</section>
+
+<!-- KEY FINDING -->
+<section class="band sky">
+  <div class="wrap grid g12">
+    <div class="head" style="margin:0">
+      <h2>The one finding that matters most</h2>
+    </div>
+    <div>
+      <p class="lead">In 2026 the purple gradient is no longer the main AI look. Critics now name <b style="color:var(--navy)">serif headings + warm cream + terracotta</b> as the new default that models reach for. Our site is Playfair Display + cream #FAF8F5 + coral #E8927C — exactly that cluster — on top of Inter, which is the other most-cited default.</p>
+      <p style="margin-top:14px">None of that is wrong by itself; the problem is when all of them stack with no reason. The fix is not to chase another trend, but to take every choice from something true about this practice. We have one: <b style="color:var(--navy)">the blog illustrations</b> you like — paper, three blues, a coral sun. This proposal takes the palette from them, drops the serif, and removes decoration that carries no meaning.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SCORECARD -->
+<section class="band white" id="score">
+  <div class="wrap">
+    <div class="head">
+      <h2>Scorecard: too much, too little, good</h2>
+      <p class="mute" style="margin-top:12px">Measured on the live homepage, blog, an article, a quiz and the price list.</p>
+    </div>
+    <table class="score">
+      <thead><tr><th>Area</th><th>What the sources say</th><th>Us today</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><th>Text styles</th><td>A small role-based set — roughly 7–12 sizes, 2–3 weights.</td><td>40 different text styles on the homepage; headings in 20, 21, 22, 30, 32, 36, 44, 48, 52, 64.</td><td><span class="v more">too many</span></td></tr>
+        <tr><th>Font weights</th><td>2–3 weights per site.</td><td>400, 500, 600, 700 + stray 650 and 900.</td><td><span class="v more">too many</span></td></tr>
+        <tr><th>Font pairing</th><td>Serif headings on cream is the 2026 AI default; Playfair is "the default for wedding, lifestyle and boutique sites". Inter alone signals "no choice made".</td><td>Playfair + Inter on cream.</td><td><span class="v more">too generic</span></td></tr>
+        <tr><th>Body size, line length</th><td>16–18 px body (Butterick: 15–25); 45–90 characters per line.</td><td>17 px, max 66 characters.</td><td><span class="v ok">good</span></td></tr>
+        <tr><th>Colours</th><td>One dominant neutral, one secondary, one accent (60/30/10); palette from the brand, not the tool.</td><td>12 core colours + 6 off-palette leftovers (cool grey, ice blue, pale cyan, gradient, extra navy, gold logo).</td><td><span class="v more">too many</span></td></tr>
+        <tr><th>Gradients</th><td>Gradients "everywhere" and coloured glows are a top tell.</td><td>7 gradients: hero, title underline, step circles, CTA panel, footer, portrait blob, publication glow.</td><td><span class="v more">too many</span></td></tr>
+        <tr><th>Coloured side borders</th><td>"Almost as reliable a sign of AI as em-dashes."</td><td>2 boxes with a coloured left bar.</td><td><span class="v more">remove</span></td></tr>
+        <tr><th>Shadows, cards</th><td>"Cards on cards"; equal soft-shadow cards are a tell. Use borders or tone instead.</td><td>Almost every block is a white card with shadow; 4 shadow recipes.</td><td><span class="v more">too many</span></td></tr>
+        <tr><th>Section headers</th><td>Repeated identical sections; centred everything.</td><td>9× centred serif title + gradient underline + vague subtitle.</td><td><span class="v more">too uniform</span></td></tr>
+        <tr><th>Equal card grids</th><td>"Three equal cards… nothing is prioritised." Break the pattern.</td><td>Benefits 4 equal cards, target groups 4 equal cards.</td><td><span class="v more">too uniform</span></td></tr>
+        <tr><th>Uppercase labels</th><td>All-caps section labels are a listed tell.</td><td>Uppercase tracked labels in 6 places (service, facts, contact, credentials, price).</td><td><span class="v more">too many</span></td></tr>
+        <tr><th>Numbered steps, stat lines</th><td>"1-2-3" step rows and stat banners are listed tells.</td><td>4 steps in gradient circles; "4 000+ · 100+" line.</td><td><span class="v ok">ok if plain</span></td></tr>
+        <tr><th>Copy</th><td>"If another therapist could sign the page, it's not specific enough." Cut "safe space", filler, invented numbers.</td><td>Mixed: strong personal About (horses, IVF group, hospital), but filler subtitles and "Připraveni začít?". "Vám/vám" and "já/my" mixed.</td><td><span class="v more">too generic in places</span></td></tr>
+        <tr><th>Real photos</th><td>A real headshot is the strongest visual trust signal; real place photos help.</td><td>Real portrait + real room photo.</td><td><span class="v ok">good</span></td></tr>
+        <tr><th>Up-front facts</th><td>NN/g: show prices, terms and contact before asking for anything.</td><td>50 min, 1 100 Kč, 36 h cancellation, address — all visible.</td><td><span class="v ok">good</span></td></tr>
+        <tr><th>Credentials</th><td>Show licences, supervision, memberships accurately.</td><td>ČAP, AKP, hospital, supervisors named.</td><td><span class="v ok">good</span></td></tr>
+        <tr><th>Reviews</th><td>Name the source; external reviews (Google, directories) are trusted more than on-site quotes.</td><td>6 quotes, no source shown; links to Terapie.cz / ZnámýLékař exist but sit apart.</td><td><span class="v less">too little</span></td></tr>
+        <tr><th>Crisis information</th><td>Every therapy site should say it isn't emergency care and list crisis lines.</td><td>None.</td><td><span class="v less">missing</span></td></tr>
+        <tr><th>Speed, privacy</th><td>Fast, mobile-first, no trackers.</td><td>No third parties, CLS 0, self-hosted fonts.</td><td><span class="v ok">good</span></td></tr>
+        <tr><th>Motion</th><td>Decorative scroll fade-ins are a tell; use motion for feedback.</td><td>Calm; the morphing blob is the only decorative loop.</td><td><span class="v ok">mostly good</span></td></tr>
+        <tr><th>Icons, emoji</th><td>Generic icons and emoji are tells.</td><td>Removed yesterday.</td><td><span class="v ok">good</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="band">
+  <div class="wrap">
+    <div class="head"><h2>Five rules for the new theme</h2></div>
+    <div class="grid g2">
+      <div class="card"><h3>1. Take it from the illustrations</h3><p>Every colour on the site comes from the blog art: warm paper, pale sky, two blues, navy, and the coral sun. Nothing else.</p></div>
+      <div class="card"><h3>2. Two families, each with one job</h3><p>Headings in Fraunces (soft, 500), everything else in Inter at 400 / 500 / 600. Owner, 12 Nov: Inter alone had no character. Buttons, menu, labels and FAQ stay Inter. Logo: the owner&#8217;s coral heart + name in Fraunces + role in Inter caps, as text, no image.</p></div>
+      <div class="card"><h3>3. Tone, not boxes</h3><p>Group things with a background band or a hairline. A white card only where something really is a separate object (a review, a price, a booking option). No shadows on cards.</p></div>
+      <div class="card"><h3>4. Coral means "act"</h3><p>Coral is for booking buttons and at most one small accent per screen. No coral underlines, bars or gradients.</p></div>
+      <div class="card"><h3>5. Kristýna's words, not a template's</h3><p>Cut sentences any therapist could sign. Prefer one concrete fact (price, place, method, who it's for) over a reassuring phrase.</p></div>
+      <div class="card"><h3>And: keep what already works</h3><p>Real portrait and room, up-front prices, credentials, 17 px text, 66-character lines, no trackers, coral booking buttons.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOKENS: TYPE -->
+<section class="band white" id="tokens">
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Typography</p>
+      <h2>7 sizes, 3 weights (headings now Fraunces 500, see rule 2)</h2>
+      <p class="mute" style="margin-top:12px">Down from 40 styles and 6 weights. Headings are 600 with slightly tight spacing, sentence case, no underline. The Playfair file (about 40 kB) goes away, which also removes one font swap.</p>
+    </div>
+    <div>
+      <div class="spec"><div class="m"><b>H1 · page title</b>600 · 52 → 36 · lh 1.08</div><h1>Terapie pro děti a dospělé</h1></div>
+      <div class="spec"><div class="m"><b>H2 · section</b>600 · 36 → 28 · lh 1.15</div><h2>Jak probíhá první setkání</h2></div>
+      <div class="spec"><div class="m"><b>H3 · card, panel</b>600 · 24 → 20 · lh 1.3</div><h3>Rodiče a budoucí rodiče</h3></div>
+      <div class="spec"><div class="m"><b>Lead</b>400 · 20 → 18 · lh 1.55</div><p class="lead">Individuální psychoterapie online nebo osobně v Ostravě.</p></div>
+      <div class="spec"><div class="m"><b>Body</b>400 · 17 · lh 1.65</div><p>Nemusíte se nijak zvlášť připravovat ani mít předem jasno v tom, co přesně chcete řešit. Začneme tím, co je pro vás právě důležité.</p></div>
+      <div class="spec"><div class="m"><b>Small · label</b>400 / 500 · 15</div><p class="small mute">Délka setkání · <span style="font-weight:500;color:var(--coral-ink)">Online i osobně</span></p></div>
+      <div class="spec"><div class="m"><b>Tiny</b>400 · 13 · counters, legal only</div><p style="font-size:var(--t-tiny)" class="mute">Recenze 1 / 6 · © 2026</p></div>
+    </div>
+    <div class="cmp grid g2" style="margin-top:32px">
+      <div style="background:var(--paper)"><span class="tagline">Today</span><p style="font-family:'Playfair Display',serif;font-weight:700;font-size:var(--t-h2);line-height:1.15;color:#2C3E50">Co říkají klienti</p><p class="small mute" style="margin-top:6px">Serif + cream + coral: the 2026 default.</p></div>
+      <div style="background:var(--sky)"><span class="tagline">Proposed</span><h2>Co říkají klienti</h2><p class="small mute" style="margin-top:6px">Inter 600, navy. You already preferred this in variant B.</p></div>
+    </div>
+    <p class="small mute" style="margin-top:16px">Option to test later: one character face for H1/H2 only, chosen to fit the illustrations' hand-drawn feel. It would cost one font file and must be measured for layout shift, so it's not part of this proposal.</p>
+  </div>
+</section>
+
+<!-- TOKENS: COLOUR -->
+<section class="band">
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Colour</p>
+      <h2>Ten colours, all from the illustrations</h2>
+      <p class="mute" style="margin-top:12px">Sampled from the 10 blog images: they are 60 % paper, then mid blue and navy, pale sky, and a small coral sun. No green, no grey, no gold in the CSS.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)"></i><div><b>Paper</b>#FBF8F3<br><span>page ground (60 %)</span></div></div>
+      <div class="sw"><i style="background:var(--sky)"></i><div><b>Sky</b>#E8EFF4<br><span>alternate bands</span></div></div>
+      <div class="sw"><i style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"></i><div><b>White</b>#FFFFFF<br><span>objects: reviews, prices</span></div></div>
+      <div class="sw"><i style="background:#F6E6DC"></i><div><b>Peach</b>#F6E6DC<br><span>in-person tint (warm halo in the illustrations)</span></div></div>
+      <div class="sw"><i style="background:var(--navy)"></i><div><b>Navy</b>#163A55<br><span>headings, footer · 11.2 : 1</span></div></div>
+      <div class="sw"><i style="background:var(--blue)"></i><div><b>Blue</b>#2D5A7B<br><span>links, hero button · 7.3 : 1</span></div></div>
+      <div class="sw"><i style="background:var(--slate)"></i><div><b>Slate</b>#44576A<br><span>body text · 7.0 : 1</span></div></div>
+      <div class="sw"><i style="background:var(--mute)"></i><div><b>Mute</b>#5E6E7C<br><span>meta · 4.5–5.0 : 1</span></div></div>
+      <div class="sw"><i style="background:var(--coral)"></i><div><b>Coral</b>#E8927C<br><span>booking buttons (10 %)</span></div></div>
+      <div class="sw"><i style="background:var(--coral-ink)"></i><div><b>Coral ink</b>#B5573F<br><span>coral as text · 4.5 : 1</span></div></div>
+    </div>
+    <div class="ratio" aria-label="Proportion of colour on a typical screen">
+      <div style="flex:60;background:var(--paper);color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)">paper + white 60 %</div>
+      <div style="flex:30;background:var(--sky);color:var(--navy)">sky + blues 30 %</div>
+      <div style="flex:10;background:var(--coral);color:var(--navy)">10 %</div>
+    </div>
+    <p class="small mute" style="margin-top:16px">Removed: cream #FAF8F5 (replaced by paper), cool grey #F8F9FB, ice blue #E8F4FD, pale cyan gradient, slate-grey #2C3E50 text (replaced by navy from the art), blue→coral gradient.</p>
+  </div>
+</section>
+
+<!-- COMPONENTS -->
+<section class="band sky">
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Shape and parts</p>
+      <h2>Two radii, one line, no gradients</h2>
+      <p class="mute" style="margin-top:12px">Radius 12 (cards, images) and 24 (big panels, review cards), pill for buttons. One 1 px hairline. No shadows except the booking window. No coloured side bars.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Buttons</h3>
+        <div class="row" style="margin-top:16px">
+          <a class="btn coral" href="#">Objednat se</a>
+          <a class="btn coral navytext" href="#">Objednat se</a>
+          <a class="btn ghost" href="#">Ceník</a>
+        </div>
+        <p class="small mute" style="margin-top:14px">Coral stays, with navy text: 5.0 : 1 instead of 2.4 : 1 with white — same colour, readable for everyone. The first button above is the old version, shown for comparison.</p>
+      </div>
+      <div class="card">
+        <h3>Facts instead of label boxes</h3>
+        <dl class="facts" style="margin:16px 0 0">
+          <div><dt>Délka</dt><dd>50 minut</dd></div>
+          <div><dt>Cena</dt><dd>1 100 Kč</dd></div>
+          <div><dt>Kde</dt><dd>Online · Ostrava</dd></div>
+        </dl>
+        <p class="small mute" style="margin-top:14px">Sentence-case label above a bold value. No uppercase, no boxes.</p>
+      </div>
+      <div class="card">
+        <h3>Steps without circles</h3>
+        <ol class="steps" style="margin-top:8px">
+          <li><span><b>Rezervace</b><span class="small">Termín si vyberete online.</span></span></li>
+          <li><span><b>První sezení</b><span class="small">50 minut na zmapování situace.</span></span></li>
+          <li><span><b>Pravidelná setkání</b><span class="small">Obvykle jednou týdně nebo za 14 dní.</span></span></li>
+        </ol>
+      </div>
+      <div class="review">
+        <p>S Kristýnou spolupracuji už více než rok a mohu ji s čistým svědomím doporučit. Kristýna je velmi empatická a trpělivá…</p>
+        <p class="who">Ivana <span>· [zdroj recenze]</span></p>
+        <p class="small" style="margin-top:10px;opacity:.75">Review cards from the lab, plus the source of each review (fill in the real source).</p>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>FAQ as plain rows</h3>
+        <div class="faq" style="margin-top:12px">
+          <div>Kolik stojí terapie? <span>+</span></div>
+          <div>Pracujete s pojišťovnami? <span>+</span></div>
+        </div>
+        <p class="small mute" style="margin-top:14px">No card, no gradient, no left bar — hairlines and space do the grouping.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM (added 12 Nov, after measuring every part of the lab homepage) -->
+<section class="band" id="system">
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Layout system</p>
+      <h2>Every part is one of six things</h2>
+      <p class="mute" style="margin-top:12px">Measured on the lab homepage at 375 px and 1157 px. Before this, section titles started at the left edge while the blocks under them were centred at five different widths (700, 800, 900, 1000, 1078 px), gaps between blocks ranged 32–96 px, and card padding was 36 px, off the spacing scale. These rules replace that.</p>
+    </div>
+
+    <h3>1. Parts</h3>
+    <div class="spec"><div class="m"><b>Band</b>whole section</div><div>Paper or sky, alternating. Navy only for the footer and the one booking panel. <span class="mute">All 10 homepage sections.</span></div></div>
+    <div class="spec"><div class="m"><b>Rows</b>hairline list</div><div>No box; a 1 px line between items. For lists of like things. <span class="mute">Výhody online, Pro koho, FAQ, kontakty, profily online.</span></div></div>
+    <div class="spec"><div class="m"><b>Card</b>white, r12</div><div>A separate object: white, 1 px line on paper (none on sky), radius 12, no shadow. <span class="mute">Vzdělání a praxe, Služba, Praktické informace, Nejčastější témata, ČAP, Kontakt.</span></div></div>
+    <div class="spec"><div class="m"><b>Panel</b>r24</div><div>The few large, coloured or featured blocks. <span class="mute">Kniha, booking panel (navy), review cards.</span></div></div>
+    <div class="spec"><div class="m"><b>Photo</b>r12</div><div>Real photos only, radius 12, sized to fit the layout. <span class="mute">Ordinace (large + 3 on desktop, swipe row on phones). The portrait keeps its rounded blob shape as the one exception.</span></div></div>
+    <div class="spec"><div class="m"><b>Action</b>button / link</div><div>One button style for booking (below). Everything else is a text link: underline or ↗ for external. <span class="mute">No ghost or second-colour buttons.</span></div></div>
+
+    <h3 style="margin-top:40px">2. Type roles: 7 sizes</h3>
+    <div class="spec"><div class="m"><b>H1</b>52 → 36 · 600</div><div>Hero title only.</div></div>
+    <div class="spec"><div class="m"><b>H2</b>36 → 28 · 600</div><div>Section titles, including Recenze.</div></div>
+    <div class="spec"><div class="m"><b>H3</b>24 → 20 · 600</div><div>Card and panel headings.</div></div>
+    <div class="spec"><div class="m"><b>Lead / row</b>20 → 18 · 400 / 600</div><div>Lead paragraphs (400); row headings, fact values, sub-headings (600).</div></div>
+    <div class="spec"><div class="m"><b>Body</b>17 · 400 / 500 / 600</div><div>All running text, lists, FAQ questions, body buttons, review text, in-text links.</div></div>
+    <div class="spec"><div class="m"><b>Small</b>15 · 400 / 500</div><div>Labels, navigation, header button, captions, review author, counters, footer text.</div></div>
+    <div class="spec"><div class="m"><b>Tiny</b>13 · 400</div><div>Legal line and company ID only.</div></div>
+
+    <h3 style="margin-top:40px">3. Space: an 8 px scale, phone → desktop</h3>
+    <div class="spec"><div class="m"><b>Section</b>56 → 96</div><div>Top and bottom padding of every band.</div></div>
+    <div class="spec"><div class="m"><b>Title → content</b>40 → 64</div><div>Same in every section, Recenze included.</div></div>
+    <div class="spec"><div class="m"><b>Block → block</b>32 → 48</div><div>Between different blocks in one section (steps → info card → photos).</div></div>
+    <div class="spec"><div class="m"><b>Card → card</b>24 → 32</div><div>Between sibling cards in a grid or row.</div></div>
+    <div class="spec"><div class="m"><b>Card padding</b>24 → 32</div><div>All cards.</div></div>
+    <div class="spec"><div class="m"><b>Panel padding</b>32 → 48</div><div>Booking panel, book panel.</div></div>
+    <div class="spec"><div class="m"><b>Row padding</b>24 · 16</div><div>24 for a row with heading + text; 16 for one-line rows. Inner padding is always smaller than the space around a group.</div></div>
+
+    <h3 style="margin-top:40px">4. Width and alignment</h3>
+    <ul class="list">
+      <li>Everything in a section starts at the same left edge as its title. Only the hero and the section titles centre, and only on phones; paragraphs, cards, panels and buttons inside sections are always left-aligned (centred multi-line text is harder to read).</li>
+      <li><b>Blocks are always full width</b> on every screen; a narrow block next to an empty half reads as unfinished. On desktop a block uses its own columns instead: the service card splits into description + facts and "Co nabízím", topics run in 4 columns, contacts in 3. <b>Long text stops at 66 characters</b> per line (the reading measure), wherever it sits.</li>
+    </ul>
+
+    <h3 style="margin-top:40px">5. Order: the questions a first-time client asks</h3>
+    <p class="mute">Czech research names price, waiting and shame as the reasons people don't start; clients check fit, credentials and reviews before booking. The homepage answers in that order: <b>Hero</b> (who, online or Ostrava, price and booking) → <b>Pro koho</b> (is this for me?) → <b>Recenze</b> (do others trust her?) → <b>O mně</b> (who is she?) → <b>Služby</b> (what, how much) → <b>Jak probíhá</b> → <b>Osobní a online</b> → <b>FAQ</b> → <b>Členství</b> → <b>Kontakt</b>. Bands alternate paper / sky in this order.</p>
+
+    <h3 style="margin-top:40px">6. Button, review colours, motion</h3>
+    <ul class="list">
+      <li><b>One booking button:</b> coral with navy text (4.99 : 1; white on this coral is 2.38 : 1 and fails WCAG even for large text), pill, 18 px / 600. Two sizes: compact 44 px in the header; 56 px / 18 px text in the page, full column width on phones (measured 12 Nov: Hedepy hero button 335×76 on a 375 px phone, Terapie.cz 311×38, live site 168×55; ours at 156×52 read as too small). Repeating the same primary action is allowed; a different-looking button for it is not. Hover darkens nothing and moves nothing: it switches to the light coral.</li>
+      <li><b>Phone menu and booking window use the same parts.</b> Menu: paper, full height, links as hairline rows at lead size, the page-size booking button last; it slides in with transform only (200 ms, none with reduced motion). Booking window: a paper panel (r24, panel padding, the one allowed shadow), title left at h3, options stacked in one column; the title leads with the format ("Online", "Osobně v Ostravě"), then one line and a navy "→", no separate labels. <b>Format tints:</b> online is always sky, in person always peach, here and on the Ceník cards. Both are tinted and of equal weight: one white card beside a tinted one reads as "already selected". On tints, meta text is slate (mute is only 4.3 : 1 on peach).</li>
+      <li><b>Facts inside a card are rows, not a box.</b> Hairline above and below, hairlines between columns (rows on phones), no fill or radius; label 15 / 500 mute, value navy 600, detail 15 / 400 slate. A coral-ink label above a card title is 15 / 500. Round arrow controls: white, hairline, navy glyph, sky on hover.</li>
+      <li><b>Footer is a navy band.</b> Band spacing (56 → 96 above, 32 → 48 below), blocks 32 → 48 apart. Two text colours, as in the navy panel: white for the name (17 / 600) and headings, #C9D8E3 for everything else (8.1 : 1). Every text link is a 44 px target. Left aligned; on desktop the bottom line has © on the left and the privacy link on the right.</li>
+      <li><b>Ceník uses the same parts</b> (lab: <code>ui-lab/proposal/cenik.html</code>). Hero on paper; the two prices are cards in the format tints, sky and peach (title names the format: "Online", "Osobně v Ostravě", h3; price at h2 size, facts as one-line rows, full-width button); Praktické informace is its own sky band with rows (three columns from 769 px); První setkání is the navy panel from the homepage. No uppercase labels, tick marks, shadows or cards on cards.</li>
+      <li><b>Review cards</b> cycle through three palette colours only: blue (white text), sky, white with a hairline. No mixed tints.</li>
+      <li><b>No entrance or scroll animations.</b> Motion only as feedback (FAQ opening, menu, hover colour), at most 200 ms, and none when the visitor asks for reduced motion.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- RHYTHM -->
+<section class="band white">
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Page rhythm</p>
+      <h2>Bands of paper and sky, not white and beige</h2>
+      <p class="mute" style="margin-top:12px">Same spacing tokens as today (they work). Section headers left-aligned on desktop, centred on phones (your earlier call), no subtitle unless it says something specific.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card" style="background:var(--paper)"><b style="color:var(--navy)">Paper</b><p class="small mute">Hero, Recenze, Služby, Osobní a online, Členství</p></div>
+      <div class="card" style="background:var(--sky)"><b style="color:var(--navy)">Sky</b><p class="small mute">Pro koho, O mně, Jak probíhá, FAQ, Kontakt</p></div>
+      <div class="card" style="background:var(--navy);color:#C9D8E3"><b style="color:#fff">Navy</b><p class="small">Footer and the booking panel, solid — no gradient</p></div>
+    </div>
+    <ul class="list" style="margin-top:28px">
+      <li><b style="color:var(--navy)">Break the equal grids:</b> "Pro koho" as a short list with one sentence each, not 4 identical cards; "Osobní a online" as two columns (online / Ostrava) instead of 4 benefit cards.</li>
+      <li><b style="color:var(--navy)">Keep the portrait plain:</b> the morphing blob is the one decorative loop left; a still rounded frame is calmer (and was already tried in variant B).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- LANGUAGE -->
+<section class="band">
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Language</p>
+      <h2>Kristýna's voice, consistently</h2>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Rules</h3>
+        <ul class="list">
+          <li><b style="color:var(--navy)">"vy" in lowercase</b> everywhere (vám, vaše). Today 9× capital, 12× lowercase on the homepage alone.</li>
+          <li><b style="color:var(--navy)">"já", not "my"</b> — it's a one-person practice. "společně najdeme" → "najdeme spolu" is fine, "upravujeme" → "upravím".</li>
+          <li><b style="color:var(--navy)">One fact beats one adjective.</b> Price, length, place, method (daseinsanalýza), who it's for.</li>
+          <li><b style="color:var(--navy)">No subtitle by default</b> under section titles.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Examples</h3>
+        <p><span class="quote-x">Připraveni začít? Objednejte si první setkání a společně najdeme cestu k vašim cílům.</span></p>
+        <p style="color:var(--navy)">První setkání: 50 minut, 1 100 Kč, online nebo na Vítkovické v Ostravě.</p>
+        <p style="margin-top:16px"><span class="quote-x">Pomáhám lidem v různých životních situacích</span></p>
+        <p style="color:var(--navy)">(no subtitle — the four groups below say it)</p>
+        <p style="margin-top:16px"><span class="quote-x">Přečtěte si zkušenosti těch, kteří už cestu terapií prošli</span></p>
+        <p style="color:var(--navy)">(no subtitle — or "Recenze z Google a ZnámýLékař.cz", if true)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADD -->
+<section class="band sky">
+  <div class="wrap">
+    <div class="head"><h2>Add, remove, keep</h2></div>
+    <div class="grid g3">
+      <div class="card">
+        <h3>Add</h3>
+        <ul class="list">
+          <li>Crisis note in the footer: "Web nenahrazuje akutní pomoc." with Linka první psychické pomoci 116 123, Linka bezpečí 116 111, 155 / 112 (please verify).</li>
+          <li>Source on every review, link to the profiles next to them.</li>
+          <li>Method in one sentence (daseinsanalýza) — what a session actually feels like.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Remove</h3>
+        <ul class="list">
+          <li>Playfair Display.</li>
+          <li>All 7 gradients.</li>
+          <li>Title underline, coloured side bars.</li>
+          <li>Card shadows; most uppercase labels.</li>
+          <li>6 off-palette colours.</li>
+          <li>Filler subtitles; italic reviews.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Keep</h3>
+        <ul class="list">
+          <li>Coral booking buttons.</li>
+          <li>Blog and quiz illustrations.</li>
+          <li>Real portrait and room photo.</li>
+          <li>Prices and terms up front.</li>
+          <li>Credentials and supervisors.</li>
+          <li>17 px text, 66-char lines, spacing tokens, no trackers.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section class="band navy">
+  <div class="wrap">
+    <div class="head"><h2>Sources</h2><p style="margin-top:12px">Most are designer and agency blogs, not studies; the patterns repeat across them, the numbers in them are not reliable.</p></div>
+    <ol class="src">
+      <li><a href="https://adriankrebs.ch/blog/design-slop/">Scoring 500 Show HN pages for AI design patterns</a></li>
+      <li><a href="https://www.utsubo.com/blog/built-with-ai-trust-signals-2026">12 signals that drop trust (Utsubo)</a></li>
+      <li><a href="https://pages.thefountaininstitute.com/posts/7-tells-that-a-ui-is-ai-generated">7 tells that a UI is AI-generated (Fountain Institute)</a></li>
+      <li><a href="https://www.925studios.co/blog/ai-slop-design-tells">AI slop fonts and gradients (925 Studios)</a></li>
+      <li><a href="https://www.925studios.co/blog/ai-slop-web-design-guide">AI slop web design guide (925 Studios)</a></li>
+      <li><a href="https://uxdesign.cc/how-to-de-slopify-your-designs-4c40c57c1dc9">How to de-slopify your designs (UX Collective)</a></li>
+      <li><a href="https://github.com/Laith0003/ux-skill/wiki/Anti-AI-slop-ban-list">Anti AI slop ban list</a></li>
+      <li><a href="https://www.creativebloq.com/design/fonts-typography/why-ai-brands-are-obsessed-with-serif-fonts">Why AI brands are obsessed with serif fonts (Creative Bloq)</a></li>
+      <li><a href="https://agtechdata.uga.edu/ai-has-come-for-serif-fonts/">AI has come for serif fonts</a></li>
+      <li><a href="https://madegooddesigns.com/playfair-display-font/">Playfair Display review and pairings</a></li>
+      <li><a href="https://nngroup.com/articles/trustworthy-design/">Trustworthy design (Nielsen Norman Group)</a></li>
+      <li><a href="https://practicaltypography.com/summary-of-key-rules.html">Butterick's Practical Typography</a></li>
+      <li><a href="https://cieden.com/book/sub-atomic/typography/establishing-a-type-scale">Establishing a type scale (Cieden)</a></li>
+      <li><a href="https://bootcamp.uxdesign.cc/5-common-mistakes-to-avoid-while-creating-a-typographic-scale-in-2021-5a409647758">Mistakes in typographic scales</a></li>
+      <li><a href="https://bootcamp.uxdesign.cc/the-60-30-10-color-rule-for-ui-design-32695d04a7c2">The 60-30-10 colour rule for UI</a></li>
+      <li><a href="https://www.beaconmm.com/7-crucial-elements-missing-from-most-ai-generated-therapy-websites/">7 elements missing from AI therapy websites (Beacon)</a></li>
+      <li><a href="https://www.beaconmm.com/real-staff-photos-vs-stock-behavioral-health/">Real staff photos vs stock (Beacon)</a></li>
+      <li><a href="https://www.simplepractice.com/blog/how-to-establish-trust-with-good-design-kat-love/">Establishing trust with good design (SimplePractice)</a></li>
+      <li><a href="https://highfivedesignco.squarespace.com/blog/therapist-website-copy-that-doesnt-say-much">Therapist website copy that doesn't say much (High Five)</a></li>
+      <li><a href="https://www.thrizer.com/post/designing-your-therapy-website">Designing your therapy website (Thrizer)</a></li>
+      <li><a href="https://eightshapes.com/articles/buttons-in-design-systems/">Buttons in design systems: one primary, unless repeating it (EightShapes)</a></li>
+      <li><a href="https://design.redcross.org.uk/components/buttons">Buttons: one primary per page (British Red Cross design system)</a></li>
+      <li><a href="https://www.w3.org/WAI/WCAG20/Understanding/contrast-minimum">Contrast minimum 4.5 : 1, large text 3 : 1 (W3C)</a></li>
+      <li><a href="https://webaim.org/articles/contrast/">Contrast and large-text thresholds (WebAIM)</a></li>
+      <li><a href="https://www.nngroup.com/articles/scroll-fading-101/">Scroll fading 101 (Nielsen Norman Group)</a></li>
+      <li><a href="https://trevorcalabro.substack.com/p/most-ui-animations-shouldnt-exist">Most UI animations shouldn't exist</a></li>
+      <li><a href="https://cieden.com/book/sub-atomic/spacing/spacing-best-practices">Spacing: 8 pt grid, inner ≤ outer (Cieden)</a></li>
+      <li><a href="https://www.designsystem.qld.gov.au/styles/spacing">Spacing that scales by screen size (Queensland design system)</a></li>
+      <li><a href="https://designproject.io/resources/guides/create-ui-type-scale/">A UI type scale assigns sizes to roles (Design Project)</a></li>
+    </ol>
+  </div>
+</section>
+
+</body>
+</html>

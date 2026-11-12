@@ -1,0 +1,199 @@
+    <!-- LAB: Phantom-style review cards (ui-lab/reviews). Not on the live site. -->
+    <style>
+    .rv { --rv-gap: clamp(12px, 1.2vw + 6px, 20px); --rv-gutter: calc((100vw - 100cqw) / 2); /* first card lines up with the title at every width */
+          background: var(--bg-cream); padding-block: var(--section-y); overflow-x: clip; }
+    .rv-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: calc(var(--section-head-gap, 40px) - 4px); } /* the track has 4px top padding for focus rings */
+    .rv .container { container-type: inline-size; }
+    .rv-title { font-family: var(--font-heading); font-weight: 700;
+          font-size: var(--fs-h2); line-height: 1.2; color: var(--text-dark); margin: 0; }
+    .rv-count { font-size: var(--fs-small); color: var(--text-light); margin: 8px 0 0; font-variant-numeric: tabular-nums; }
+    .rv-nav { display: flex; gap: 8px; flex-shrink: 0; }
+    .rv-btn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-light); background: #fff;
+          color: var(--text-dark); font: 500 18px/1 var(--font-primary); cursor: pointer;
+          display: grid; place-items: center; transition: background-color .2s, opacity .2s; -webkit-tap-highlight-color: transparent; }
+    @media (hover: hover) { .rv-btn:hover { background: var(--bg-sand); } }
+    .rv-btn:disabled { opacity: .35; cursor: default; background: #fff; }
+    .rv-btn:focus-visible, .rv-track:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+    .rv-track { display: flex; align-items: flex-start; gap: var(--rv-gap); list-style: none; margin: 0; padding: 4px var(--rv-gutter);
+          margin-inline: calc(50% - 50vw); overflow-x: auto; overscroll-behavior-x: contain;
+          scroll-snap-type: x mandatory; scroll-padding-inline: var(--rv-gutter); scrollbar-width: none; scroll-behavior: smooth; }
+    .rv-track::-webkit-scrollbar { display: none; }
+    .rv-card { flex: 0 0 min(84vw, 440px); scroll-snap-align: start; border-radius: 24px;
+          padding: clamp(24px, 1.3rem + .8vw, 32px); display: flex; flex-direction: column; gap: 20px; }
+    /* phones and tablets: one card centred, the neighbours peek in on both sides */
+    @media (max-width: 1023px) {
+        .rv { --rv-gap: 12px; --rv-peek: clamp(20px, 5vw, 40px); --rv-card: min(100vw - 2 * (var(--rv-peek) + var(--rv-gap)), 540px); }
+        .rv-track { padding-inline: calc((100vw - var(--rv-card)) / 2); scroll-padding-inline: 0; }
+        .rv-card { flex-basis: var(--rv-card); scroll-snap-align: center; }
+    }
+    /* desktop: the row stays inside the content grid, three whole cards */
+    @media (min-width: 1024px) {
+        .rv-track { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; }
+        .rv-card { flex-basis: calc((100% - 2 * var(--rv-gap)) / 3); }
+    }
+    .rv-who { color: inherit; }
+    /* every card shows the same 13 lines; longer reviews open in place */
+    .rv-track { --rv-lines: 12; }
+    .rv-full { font-size: var(--fs-body); line-height: 1.6; margin: 0;
+          min-height: calc(var(--rv-lines) * 1.6em); display: -webkit-box; -webkit-box-orient: vertical;
+          -webkit-line-clamp: var(--rv-lines); overflow: hidden; }
+    .rv-card.is-open .rv-full { -webkit-line-clamp: unset; display: block; }
+    .rv-card { position: relative; }
+    .rv-more { position: absolute; right: clamp(24px, 1.3rem + .8vw, 32px); bottom: calc(clamp(24px, 1.3rem + .8vw, 32px) - 12px); padding: 12px 0; min-height: 44px; background: none; border: 0;
+          color: inherit; font: 600 var(--fs-small)/1.2 var(--font-primary); text-decoration: underline;
+          text-underline-offset: 4px; text-decoration-thickness: 1px; cursor: pointer; }
+    .rv-more[hidden] { display: none; }
+    .rv-card:has(.rv-more:not([hidden])) .rv-who { padding-right: 76px; }
+    .rv-who { margin: auto 0 0; padding-top: 16px; line-height: 1.4; border-top: 1px solid currentColor; border-top-color: color-mix(in srgb, currentColor 22%, transparent);
+          font-size: var(--fs-small); font-weight: 600; min-height: 1.5em; }
+
+    /* three fills from the palette only (theme guide, 12 Nov): blue, sky, white with a hairline */
+    .rv-card:nth-child(3n+1) { background: var(--primary); color: #fff; }
+    .rv-card:nth-child(3n+1) .rv-full { color: rgba(255,255,255,.9); }
+    .rv-card:nth-child(3n+2) { background: #E8EFF4; color: #163A55; }
+    .rv-card:nth-child(3n+2) .rv-full { color: #44576A; }
+    .rv-card:nth-child(3n+3) { background: #fff; color: #163A55; box-shadow: inset 0 0 0 1px var(--border-light); }
+    .rv-card:nth-child(3n+3) .rv-full { color: #44576A; }
+
+    /* where the reviews come from: one meta line under the track, links as 44 px targets */
+    .rv-source { margin: 24px 0 0; font-size: var(--fs-small); color: var(--text-light); }
+    .rv-source a { display: inline-block; padding: 12px 0; margin-block: -12px; color: var(--text-dark); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+    @media (prefers-reduced-motion: reduce) { .rv-track { scroll-behavior: auto; } }
+    </style>
+
+    <section class="rv" aria-labelledby="rv-title">
+        <div class="container">
+            <div class="rv-head">
+                <div>
+                    <h2 class="rv-title" id="rv-title">Co říkají klienti</h2>
+                    <p class="rv-count" aria-live="polite"><span data-rv-pos>1</span> / <span data-rv-total>12</span></p>
+                </div>
+                <div class="rv-nav">
+                    <button type="button" class="rv-btn" data-rv-dir="-1" aria-label="Předchozí recenze">←</button>
+                    <button type="button" class="rv-btn" data-rv-dir="1" aria-label="Další recenze">→</button>
+                </div>
+            </div>
+
+            <ul class="rv-track" tabindex="0" aria-label="Recenze klientů">
+                <li class="rv-card">
+                    <p class="rv-full">Online terapie se účastním již přes rok a půl a jsem nanejvýš spokojena. Paní psycholožka je nesmírně vnímavý člověk, naslouchá všem problémům a tématům, které do terapie pokaždé přináším. Líbí se mi způsob vedení sezení a její lidský přístup. Vždy se cítím bezpečně a ráda se do terapie vracím. Za tuto dobu jsme řešili nepřeberné množství životních kotrmelců a paní psycholožka tu pro mě vždy byla, podporovala mě a šla touto cestou se mnou. Je pro mě oporou, na kterou se můžu vždy spolehnout, ať se děje cokoliv. Rozhodně doporučuji!</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Karolína</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Paní psycholožka s obrovskou empatií a velmi rozumným vhledem do naší situace. Dceru vzala k terapii v nejbližším možném termínu dle toho, co si z mého pohledu poměrně těžká situace žádala. Dcera se k ní vždy těšila, což se nedalo říci o předchozích zkušenostech. Děkujeme moc za celkový přístup.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Ondra</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Na terapii jsem přišla v období, kdy jsem si říkala, že už mám většinu věcí v životě odžitých a pojmenovaných. Člověk kolem šedesátky si často myslí, že už se zná. O to větší překvapení pro mě bylo, kolik nového pochopení a klidu mi tahle terapie přinesla. Kristýna na mě od začátku působila velmi přirozeně. Měla jsem pocit, že mě bere jako rovnocenného partnera v rozhovoru, ne jako někoho, koho je potřeba opravovat. Sezení probíhala v klidné atmosféře, kde byl prostor mluvit otevřeně a jít i do hlubších témat, ale bez nátlaku. Kristýna má dar trefit se otázkou přesně tam, kde to dává smysl. Nešla po povrchu a zároveň mě nikdy netlačila za hranice, kam jsem sama nechtěla. Často stačila jedna věta, která ve mně pak ještě dlouho pracovala. Velmi jsem ocenila její nadhled a schopnost vidět věci v širších souvislostech. Díky tomu jsem si spoustu věcí srovnala, některé staré pocity pustila a jiné přijala. Kristýnu bych s čistým svědomím doporučila každému, kdo hledá lidský a respektující přístup.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Jani</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Paní Kristýna je člověk na svém místě. Je velmi empatická a lidská. Celé naše setkání vedla velmi citlivě a na konci jsem odcházela s pocitem úlevy a vnitřní podpory, že se dá na všem pracovat. Ještě jednou vám velmi děkuji!</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Nikola</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Paní terapeutka je úžasná. Ať už se vidíme osobně, nebo online, vždy je atmosféra velmi příjemná, vždy se cítím pochopená, přijatá a v bezpečí. Oceňuji hlavně, že mě nechá volně mluvit, když mám co říct, ale také mě pak skvěle nasměruje otázkami nebo úvahami, když už sama nevím, jak dál pokračovat.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Aneta</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">S paní Kristýnou jsem absolvoval několik terapií a musím říct, že mě provázela velmi citlivě a s respektem v těžším období mého života. Řešili jsme témata jako coming out, vztahy, i závislosti. Vždy jsem se cítil pochopený a v bezpečném prostoru. Její empatický přístup mi pomohl vidět věci z nové perspektivy a udělat konkrétní kroky v praxi. Za mě můžu doporučit!</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">KS</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Paní magistra je velice příjemná a skvěle se s ní spolupracuje. Byť jsem s ní měla jen 4 sezení, protože jsem potřebovala akutně pomoci, opravdu se tak stalo. Děkuji.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Ivča</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Chtěla bych v prvé řadě poděkovat za pomoc s překonáním těžkých chvil a vyrovnáním se se smrtí našich dětí. Přístup v průběhu sezení byl empatický a lidský. Velice mi pomohlo být konečně vyslyšena. Napsání dopisu pro mé děti a jak s ním naložit byl posledním krokem pro uzdravení mého srdce a mysli. Ještě jednou moc děkuji, byla jste mi neskutečnou pomoci.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Pavla</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Cením si empatického a pragmatického přístupu od paní Kristýny. Díky skvělé komunikaci si dokázala získat mého syna, který se na další schůzku, k mému překvapení, těší.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Ondřej K.</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Hledala jsem terapii, kde se mi dostane nejen profesionální pomoci, ale také lidského pochopení a empatie, a po pár neúspěšných pokusech s jinými terapeuty jsem našla Kristýnu. Pracujeme spolu již dva roky a naše sezení mi pomáhají překonat své zdánlivé limity, posouvat se v životě a lépe porozumět sama sobě i ostatním. Vždy se k vám, Kristýno, ráda vracím a děkuji za vaši profesionalitu, vřelý přístup, trpělivost a přijetí.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Ester B.</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">S Kristýnou spolupracuji už více než rok a mohu ji s čistým svědomím doporučit. Kristýna je velmi empatická a trpělivá. Během terapií se cítím bezpečně, což mi umožňuje se plně otevřít, aniž bych se musela bát posuzování. Když jsou mé myšlenky příliš chaotické, dokáže přesně shrnout to, co jsem sama chtěla vyjádřit. Velkým bonusem je pro mě také možnost online terapií.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Ivana</p>
+                </li>
+                <li class="rv-card">
+                    <p class="rv-full">Kristýnu mohu jen doporučit. Jsem moc ráda, ze jsem narazila právě na ni. Celkem rychle jsem si k ní našla důvěru. Není to terapeut, který jen vyslechne, ale i dodá názor na věc a případný směr. Mám pocit, že mi rozumí. Nebojím se otevřít. Je empatická, lidská a pro slova nejde daleko, což mi vyhovuje.</p>
+                    <button type="button" class="rv-more" aria-expanded="false">Číst dál</button>
+                    <p class="rv-who">Ilona</p>
+                </li>
+            </ul>
+            <p class="rv-source">Všechna hodnocení: <span style="white-space:nowrap"><a href="https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut" target="_blank" rel="noopener noreferrer">Známý lékař</a> ·</span> <a href="https://maps.google.com/?cid=17834043374417315194" target="_blank" rel="noopener noreferrer">Google</a></p>
+        </div>
+    </section>
+    <script>
+    (function () {
+        var track = document.querySelector('.rv-track');
+        if (!track) return;
+        var cards = track.children, pos = document.querySelector('[data-rv-pos]');
+        document.querySelector('[data-rv-total]').textContent = cards.length; /* total follows the cards; the HTML value is only the no-JS fallback */
+        var prev = document.querySelector('[data-rv-dir="-1"]'), next = document.querySelector('[data-rv-dir="1"]');
+        function step() { return cards[0].getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || 0); }
+        function update() {
+            var max = track.scrollWidth - track.clientWidth;
+            var i = Math.round(track.scrollLeft / step());
+            if (track.scrollLeft >= max - 2) i = cards.length - 1;
+            pos.textContent = Math.min(i + 1, cards.length);
+            prev.disabled = track.scrollLeft <= 2;
+            next.disabled = track.scrollLeft >= max - 2;
+        }
+        document.querySelectorAll('[data-rv-dir]').forEach(function (b) {
+            b.addEventListener('click', function () { track.scrollBy({ left: step() * +b.dataset.rvDir }); });
+        });
+        track.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); track.scrollBy({ left: step() * (e.key === 'ArrowRight' ? 1 : -1) }); }
+        });
+        var t; track.addEventListener('scroll', function () { cancelAnimationFrame(t); t = requestAnimationFrame(update); }, { passive: true });
+        window.addEventListener('resize', update);
+        // Card height = the second-longest review, capped at 12 lines.
+        // The first pass can run on the fallback font, which may wrap one line differently from Inter.
+        // So that pass reserves one spare line, and the pass after the font loads never shrinks the cards:
+        // no layout shift when the font swaps in. A resize measures afresh.
+        var lines = 0;
+        function fit(mode) {
+            var counts = [].map.call(cards, function (c) {
+                var t = c.querySelector('.rv-full'), lh = parseFloat(getComputedStyle(t).lineHeight);
+                t.style.cssText = 'display:block;-webkit-line-clamp:unset;min-height:0';
+                var n = Math.round(t.scrollHeight / lh); t.style.cssText = ''; return n;
+            }).sort(function (a, b) { return b - a; });
+            var n = counts[1] || counts[0];
+            if (mode === 'early' && document.fonts && document.fonts.status !== 'loaded') n += 1;
+            if (mode === 'fonts') n = Math.max(n, lines);
+            lines = Math.min(n, 12); /* at most 12 lines: longer reviews open in place */
+            track.style.setProperty('--rv-lines', lines);
+            [].forEach.call(cards, function (c) {
+                if (c.classList.contains('is-open')) return;
+                var t = c.querySelector('.rv-full'), b = c.querySelector('.rv-more');
+                b.hidden = t.scrollHeight <= t.clientHeight + 2;
+            });
+        }
+        track.addEventListener('click', function (e) {
+            var b = e.target.closest('.rv-more'); if (!b) return;
+            var c = b.closest('.rv-card'), open = c.classList.toggle('is-open');
+            b.setAttribute('aria-expanded', open); b.textContent = open ? 'Sbalit' : 'Číst dál';
+        });
+        fit('early');
+        var rw = innerWidth; window.addEventListener('resize', function () { if (innerWidth !== rw) { rw = innerWidth; fit(); } }); /* phones fire resize on scroll (URL bar); only a width change re-measures */
+        if (document.fonts) document.fonts.ready.then(function () { fit('fonts'); });
+        update();
+    })();
+    </script>

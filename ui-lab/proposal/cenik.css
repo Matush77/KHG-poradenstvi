@@ -1,0 +1,54 @@
+/* LAB: Ceník page in the 12 Nov theme. Layered after proposal.css (same tokens, type roles, parts).
+   Bands: hero + prices on paper -> Praktické informace on sky (rows) -> První setkání as the navy panel on paper. */
+
+/* hero: paper, centred on phones only, same top space as the homepage hero */
+.pricing-hero { background: var(--paper) !important; padding-bottom: 0 !important; text-align: center; }
+.pricing-hero-content { max-width: 1200px !important; margin: 0 auto !important; }  /* same edge as the cards below */
+.pricing-title { font-size: var(--fs-h1) !important; line-height: 1.08 !important; margin: 0 0 16px !important; }
+.pricing-intro { font-size: var(--fs-lead) !important; color: var(--slate) !important; max-width: 66ch !important; margin: 0 auto !important; }
+@media (min-width: 769px) {
+  .pricing-hero { text-align: left !important; }
+  .pricing-intro { margin: 0 !important; }
+}
+
+/* prices: two white cards (a price is a separate object), r12, hairline, no shadow */
+.pricing-main { background: var(--paper) !important; padding: var(--section-head-gap) 0 var(--section-y) !important; }
+.pricing-grid { max-width: none !important; margin: 0 !important; gap: var(--card-gap) !important; }
+.pricing-card { background: #fff !important; border: 1px solid var(--line) !important; border-radius: var(--r) !important; box-shadow: none !important; padding: var(--card-pad) !important; }
+/* format tints, as in the booking window: online = sky, in person = peach; no border, hairlines in the tint's own line colour */
+.pricing-card#online { background: var(--sky) !important; border-color: var(--sky) !important; }
+.pricing-card#osobne { background: var(--peach) !important; border-color: var(--peach) !important; }
+.pricing-card#online .pricing-facts, .pricing-card#online .pricing-facts li { border-color: var(--sky-line) !important; }
+.pricing-card#osobne .pricing-facts, .pricing-card#osobne .pricing-facts li { border-color: var(--peach-line) !important; }
+.pricing-card .pricing-price span { color: var(--slate) !important; }
+.pricing-card h2 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; letter-spacing: -0.01em !important; color: var(--navy) !important; margin: 0 0 8px !important; }
+.pricing-price { align-items: baseline !important; gap: 8px !important; margin: 0 0 24px !important; }
+.pricing-price strong { font-family: var(--font-heading) !important; font-size: var(--fs-h2) !important; font-weight: 600 !important; letter-spacing: -0.02em; line-height: 1.1 !important; color: var(--navy) !important; }
+.pricing-price span { font-size: .9375rem !important; font-weight: 400 !important; color: var(--mute) !important; }
+/* facts: one-line rows, no tick marks */
+.pricing-facts { margin: 0 0 var(--card-pad) !important; border-top: 1px solid var(--line); }
+.pricing-facts li { padding: 16px 0 !important; border-bottom: 1px solid var(--line) !important; color: var(--slate) !important; font-size: var(--fs-body, 1.0625rem) !important; }
+.pricing-facts li::before { display: none !important; }
+.pricing-card .btn { width: 100% !important; margin-top: auto !important; }
+
+/* Praktické informace: its own sky band, title like every section title, items as rows (columns from 769 px) */
+.pricing-info-band { background: var(--sky); padding-block: var(--section-y); }
+.pricing-information { max-width: none !important; margin: 0 !important; padding: 0 !important; background: none !important; border-radius: 0 !important; }
+.pricing-information > h2 { font-size: var(--fs-h2) !important; line-height: 1.15 !important; text-align: center !important; margin: 0 0 var(--section-head-gap) !important; }
+.pricing-info-grid { gap: 0 !important; border-top: 1px solid #CCD8E2; }
+.pricing-info-item { background: none !important; border: 0 !important; border-bottom: 1px solid #CCD8E2 !important; border-radius: 0 !important; box-shadow: none !important; padding: 24px 0 !important; }
+.pricing-info-item h3 { font-family: var(--font-heading) !important; font-size: var(--fs-lead) !important; font-weight: 600 !important; letter-spacing: -0.01em; color: var(--navy) !important; margin: 0 0 8px !important; }
+.pricing-info-item p { font-size: var(--fs-body, 1.0625rem) !important; color: var(--slate) !important; max-width: 66ch; }
+@media (min-width: 769px) {
+  .pricing-information > h2 { text-align: left !important; }
+  .pricing-info-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; column-gap: var(--card-gap) !important; }
+  .pricing-info-item { border-bottom: 0 !important; padding-bottom: 0 !important; }
+}
+
+/* První setkání: the same navy panel as on the homepage */
+.pricing-cta-band { background: var(--paper); padding-block: var(--section-y); }
+.pricing-first-session { max-width: none !important; margin: 0 !important; text-align: left !important; background: var(--navy); border-radius: var(--r-lg); padding: var(--panel-pad) !important; }
+.pricing-first-session h2 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; letter-spacing: -0.01em; color: #fff !important; margin: 0 0 8px !important; }
+.pricing-first-session p { font-size: var(--fs-body, 1.0625rem) !important; color: #C9D8E3 !important; max-width: 66ch; margin: 0 0 24px !important; }
+.pricing-first-session .btn { margin: 0 !important; }
+@media (max-width: 480px) { .pricing-first-session .btn { width: 100% !important; } }

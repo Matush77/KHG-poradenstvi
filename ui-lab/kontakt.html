@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kontakt — varianty (lab)</title>
+<!-- LAB ONLY (ui-lab/ is never deployed). Six ways to lay out the Kontakt section, in the theme of 12 Nov. -->
+<style>
+@font-face { font-family: Inter; src: url("/fonts/Inter/Inter-LatinExt-var.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: Fraunces; src: url("/ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+:root {
+  --navy: #163A55; --primary: #2D5A7B; --slate: #44576A; --mute: #5E6E7C; --coral: #E8927C; --coral-ink: #B5573F;
+  --paper: #FBF8F3; --sky: #E8EFF4; --sky-line: #CCD8E2; --line: #E3E0DA; --peach: #F6E6DC;
+  --fs-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem); --fs-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem); --fs-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --gap: 32px; --pad: 24px; --panel: 32px;
+}
+@media (min-width: 769px) { :root { --gap: 48px; --pad: 32px; --panel: 48px; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--slate); font: 400 1.0625rem/1.65 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 769px) { .wrap { padding: 0 32px; } }
+a { color: inherit; }
+h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 500; letter-spacing: -0.01em; color: var(--navy); }
+
+/* page chrome */
+header.intro { padding-block: 40px 24px; }
+header.intro h1 { font: 600 var(--fs-h2)/1.15 Inter, sans-serif; letter-spacing: -0.02em; color: var(--navy); margin: 0 0 12px; }
+header.intro p { max-width: 66ch; margin: 0 0 8px; }
+nav.jump { position: sticky; top: 0; z-index: 2; background: var(--paper); border-bottom: 1px solid var(--line); }
+nav.jump .wrap { display: flex; gap: 8px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+nav.jump a { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px; background: #fff; border: 1px solid var(--line); color: var(--navy); text-decoration: none; font-size: .9375rem; font-weight: 500; }
+.variant { scroll-margin-top: 64px; }
+.meta { padding-block: 40px 16px; }
+.meta .num { font-size: .9375rem; font-weight: 600; color: var(--coral-ink); margin: 0 0 4px; }
+.meta .name { font-size: 1.25rem; font-weight: 600; color: var(--navy); margin: 0 0 8px; }
+.meta .note { max-width: 66ch; margin: 0; }
+.meta .note b { color: var(--navy); font-weight: 600; }
+
+/* shared parts */
+.band { background: var(--sky); padding-block: 64px; }
+@media (min-width: 769px) { .band { padding-block: 96px; } }
+.title { font-size: var(--fs-h2); line-height: 1.15; margin: 0 0 var(--gap); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 32px; border-radius: 999px; background: var(--coral); color: var(--navy); font: 600 1.125rem Inter, sans-serif; text-decoration: none; }
+@media (max-width: 480px) { .btn.full { width: 100%; } }
+.label { display: block; font-size: .9375rem; font-weight: 500; color: var(--slate); }
+.val { font-size: var(--fs-lead); font-weight: 500; color: var(--navy); text-decoration: underline; text-decoration-color: var(--sky-line); text-underline-offset: 4px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+.val.blue { color: var(--primary); text-decoration: none; font-size: 1.0625rem; }
+
+/* 1 current: white card, three columns, button */
+.v1 .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: var(--pad); }
+.v1 .grid { display: grid; gap: 16px; margin-bottom: 32px; }
+.v1 .grid > div { padding-top: 16px; border-top: 1px solid var(--sky-line); }
+@media (min-width: 769px) { .v1 .grid { grid-template-columns: repeat(3, 1fr); column-gap: 32px; } .v1 .grid > div { border: 0; padding: 0; } }
+
+/* 2 split */
+.v2 .split { display: grid; gap: var(--gap); }
+.v2 .lead .title { margin-bottom: 12px; }
+.v2 .lead p { font-size: var(--fs-lead); line-height: 1.55; margin: 0 0 24px; max-width: 34ch; }
+.rows { margin: 0; border-top: 1px solid var(--sky-line); }
+.rows > div { padding: 16px 0; border-bottom: 1px solid var(--sky-line); }
+.rows dd { margin: 0; }
+@media (min-width: 769px) {
+  .v2 .split { grid-template-columns: 5fr 7fr; column-gap: 96px; align-items: start; }
+  .rows > div { display: grid; grid-template-columns: 10rem 1fr; align-items: baseline; padding: 20px 0; }
+}
+
+/* 3 no card: the facts as one line between hairlines (as the service facts), button under them */
+.v3 .facts { display: grid; margin: 0 0 32px; border-block: 1px solid var(--sky-line); }
+.v3 .facts > div { padding: 16px 0; }
+.v3 .facts > div + div { border-top: 1px solid var(--sky-line); }
+@media (min-width: 769px) {
+  .v3 .facts { grid-template-columns: repeat(3, 1fr); }
+  .v3 .facts > div { padding: 24px 0; }
+  .v3 .facts > div + div { border-top: 0; border-left: 1px solid var(--sky-line); padding-left: 32px; }
+}
+
+/* 4 personal: her photo and name, then the rows and the button */
+.v4 .person { display: flex; align-items: center; gap: 16px; margin: 0 0 24px; }
+.v4 .person img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex: none; background: var(--peach); }
+.v4 .person p { margin: 0; line-height: 1.4; }
+.v4 .person strong { display: block; font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: var(--fs-lead); color: var(--navy); }
+.v4 .split { display: grid; gap: var(--gap); }
+.v4 .rows { margin-bottom: 0; }
+@media (min-width: 769px) {
+  .v4 .split { grid-template-columns: 5fr 7fr; column-gap: 96px; align-items: start; }
+  .v4 .person img { width: 96px; height: 96px; }
+}
+
+/* 5 booking first: a peach panel for booking; the other ways as one quiet line under it */
+.v5 .panel { background: var(--peach); border-radius: 24px; padding: var(--panel); }
+.v5 .panel h3 { font-size: var(--fs-h3); line-height: 1.25; margin: 0 0 8px; }
+.v5 .panel p { margin: 0 0 24px; max-width: 52ch; }
+.v5 .other { margin: 24px 0 0; display: flex; flex-wrap: wrap; gap: 8px 32px; }
+.v5 .other a { display: inline-flex; flex-direction: column; padding: 8px 0; text-decoration: none; }
+.v5 .other .val { font-size: 1.0625rem; }
+
+/* 6 no section: the footer already lists the same three contacts; "Kontakt" in the menu leads there */
+.v6 .gone { padding-block: 32px; border-block: 1px dashed var(--line); text-align: center; color: var(--mute); font-size: .9375rem; }
+.footer { background: var(--navy); color: #C9D8E3; padding-block: 48px; }
+.footer .cols { display: grid; gap: 32px; }
+.footer h4 { margin: 0 0 12px; font: 600 1rem Inter, sans-serif; color: #fff; }
+.footer p { margin: 0 0 4px; font-size: .9375rem; }
+.footer .name { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 1.1875rem; color: #fff; }
+.footer .contact a { display: block; padding: 8px 0; color: #fff; font-size: 1.0625rem; text-decoration: underline; text-decoration-color: rgba(255,255,255,.3); text-underline-offset: 4px; }
+.footer .btn { margin-top: 16px; min-height: 48px; font-size: 1rem; padding: 0 24px; }
+.footer .contact a.btn { display: inline-flex; padding: 0 24px; text-decoration: none; }
+@media (min-width: 769px) { .footer .cols { grid-template-columns: 1fr 1fr; } }
+/* no booking button (owner, 12 Nov): drop the space it left */
+.v1 .grid, .v3 .facts, .v4 .person, .v2 .lead p, .v5 .panel p { margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<header class="intro wrap">
+  <h1>Kontakt: šest variant</h1>
+  <p>Stejný obsah, šest rozložení. Č. 1 je současný stav. Vše v barvách a písmech nového tématu, na modrém pásu jako na webu.</p>
+  <p>Podívejte se na telefonu i na počítači.</p>
+</header>
+
+<nav class="jump" aria-label="Varianty">
+  <div class="wrap">
+    <a href="/ui-lab/kontakt.html#v1">1 Současná</a>
+    <a href="/ui-lab/kontakt.html#v2">2 Dva sloupce</a>
+    <a href="/ui-lab/kontakt.html#v3">3 Bez karty</a>
+    <a href="/ui-lab/kontakt.html#v4">4 Osobní</a>
+    <a href="/ui-lab/kontakt.html#v5">5 Objednání první</a>
+    <a href="/ui-lab/kontakt.html#v6">6 Jen v patičce</a>
+  </div>
+</nav>
+
+<!-- 1 -->
+<section class="variant v1" id="v1">
+  <div class="meta wrap"><p class="num">1</p><p class="name">Současná: bílá karta</p>
+    <p class="note">Tři údaje vedle sebe v bílé kartě. Funguje, ale je to krabice kolem něčeho, co samostatný objekt není, a pod nadpisem je velká mezera.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="card">
+      <div class="grid">
+        <div><span class="label">E-mail</span><a class="val blue" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></div>
+        <div><span class="label">Telefon</span><a class="val blue" href="tel:+420605990980">+420 605 990 980</a></div>
+        <div><span class="label">Osobní setkání</span><a class="val blue" href="#v1">Vítkovická 3299/3a, 702 00 Ostrava</a></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 2 -->
+<section class="variant v2" id="v2">
+  <div class="meta wrap"><p class="num">2</p><p class="name">Dva sloupce</p>
+    <p class="note">Vlevo nadpis a jedna věta, vpravo tři kontakty jako řádky s linkou (jako Praktické informace). <b>Bez karty.</b> Na telefonu pod sebou.</p></div>
+  <div class="band"><div class="wrap split">
+    <div class="lead">
+      <h2 class="title">Kontakt</h2>
+      <p>Termín si vyberete online. S dotazem mi napište nebo zavolejte.</p>
+    </div>
+    <dl class="rows">
+      <div><dt class="label">E-mail</dt><dd><a class="val" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></dd></div>
+      <div><dt class="label">Telefon</dt><dd><a class="val" href="tel:+420605990980">+420 605 990 980</a></dd></div>
+      <div><dt class="label">Osobní setkání</dt><dd><a class="val" href="#v2">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
+    </dl>
+  </div></div>
+</section>
+
+<!-- 3 -->
+<section class="variant v3" id="v3">
+  <div class="meta wrap"><p class="num">3</p><p class="name">Bez karty, jeden řádek</p>
+    <p class="note">Nejmenší změna: stejné rozložení jako dnes, jen bez bílé karty. Údaje oddělené linkami jako fakta u služby (Délka / Cena / Forma).</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="facts">
+      <div><span class="label">E-mail</span><a class="val" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></div>
+      <div><span class="label">Telefon</span><a class="val" href="tel:+420605990980">+420 605 990 980</a></div>
+      <div><span class="label">Osobní setkání</span><a class="val" href="#v3">Vítkovická 3299/3a, Ostrava</a></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 4 -->
+<section class="variant v4" id="v4">
+  <div class="meta wrap"><p class="num">4</p><p class="name">Osobní: s fotkou</p>
+    <p class="note">Jako 2, ale vlevo malá fotka a jméno: na konci stránky je jasné, komu píšete. Skutečná fotka je podle průzkumu nejsilnější signál důvěry. Fotka je ta z úvodu, takže je už načtená (žádný nový soubor).</p></div>
+  <div class="band"><div class="wrap split">
+    <div>
+      <h2 class="title" style="margin-bottom:24px">Kontakt</h2>
+      <div class="person">
+        <img src="/images/photo.webp" width="96" height="96" alt="" decoding="async">
+        <p><strong>Kristýna Hriciková Glattová</strong>Psycholog ve zdravotnictví a terapeut</p>
+      </div>
+    </div>
+    <dl class="rows">
+      <div><dt class="label">E-mail</dt><dd><a class="val" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></dd></div>
+      <div><dt class="label">Telefon</dt><dd><a class="val" href="tel:+420605990980">+420 605 990 980</a></dd></div>
+      <div><dt class="label">Osobní setkání</dt><dd><a class="val" href="#v4">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
+    </dl>
+  </div></div>
+</section>
+
+<!-- 5 -->
+<section class="variant v5" id="v5">
+  <div class="meta wrap"><p class="num">5</p><p class="name">Objednání první</p>
+    <p class="note">Většina lidí sem přijde objednat se. Proto broskvový panel nahoře a ostatní cesty jako jeden tichý řádek pod ním. Broskvová už značí „osobně“ a teplé panely na blogu.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="panel">
+      <h3>Objednání online</h3>
+      <p>Termín si vyberete v kalendáři, online nebo osobně v Ostravě.</p>
+    </div>
+    <div class="other">
+      <a href="mailto:kristyna@khgporadenstvi.cz"><span class="label">E-mail</span><span class="val">kristyna@khgporadenstvi.cz</span></a>
+      <a href="tel:+420605990980"><span class="label">Telefon</span><span class="val">+420 605 990 980</span></a>
+      <a href="#v5"><span class="label">Osobní setkání</span><span class="val">Vítkovická 3299/3a, Ostrava</span></a>
+    </div>
+  </div></div>
+</section>
+
+<!-- 6 -->
+<section class="variant v6" id="v6">
+  <div class="meta wrap"><p class="num">6</p><p class="name">Bez sekce: kontakt jen v patičce</p>
+    <p class="note">Patička hned pod Kontaktem dnes ukazuje <b>přesně ty samé tři údaje</b>. Sekci lze vypustit, patičku o kousek posílit (větší odkazy) a „Kontakt“ v menu povede do ní. Stránka je kratší a nic se neopakuje. Riziko: méně viditelné pro někoho, kdo kontakt hledá jako sekci.</p></div>
+  <div class="wrap"><p class="gone">(sekce Kontakt zde není; po Členství rovnou patička)</p></div>
+  <footer class="footer" id="kontakt-paticka"><div class="wrap cols">
+    <div>
+      <p class="name">Mgr. Kristýna Hriciková Glattová</p>
+      <p>Psycholog ve zdravotnictví a terapeut</p>
+    </div>
+    <div class="contact">
+      <h4>Kontakt</h4>
+      <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>
+      <a href="tel:+420605990980">+420 605 990 980</a>
+      <a href="#v6">Vítkovická 3299/3a, 702 00 Ostrava</a>
+    </div>
+  </div></footer>
+</section>
+
+<div style="height:48px"></div>
+</body>
+</html>

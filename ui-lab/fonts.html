@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Heading fonts — lab</title>
+<!-- LAB ONLY (ui-lab/ is never deployed): fonts come from Google Fonts here just to compare them.
+     The chosen face would ship self-hosted as one subset WOFF2 with a metric-matched fallback. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&family=Fraunces:opsz,wght,SOFT,WONK@9..144,500,100,0&family=Young+Serif&family=Newsreader:opsz,wght@6..72,500&family=Familjen+Grotesk:wght@600&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: Inter; src: url("/fonts/Inter/Inter-VariableFont_opsz,wght.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+  --navy: #163A55; --slate: #44576A; --mute: #5E6E7C; --coral: #E8927C; --coral-ink: #B5573F;
+  --paper: #FBF8F3; --sky: #E8EFF4; --line: #E3E0DA; --peach: #F6E6DC;
+  --fs-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
+  --fs-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+  --fs-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --fs-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--slate); font: 400 1.0625rem/1.65 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+header.intro { padding-block: 48px 32px; }
+header.intro h1 { font: 600 var(--fs-h2)/1.15 Inter, sans-serif; letter-spacing: -0.02em; color: var(--navy); margin: 0 0 12px; }
+header.intro p { max-width: 66ch; margin: 0 0 12px; }
+
+nav.jump { position: sticky; top: 0; z-index: 2; background: var(--paper); border-bottom: 1px solid var(--line); }
+nav.jump .wrap { display: flex; gap: 8px; overflow-x: auto; padding-block: 8px; }
+nav.jump a { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 999px; background: #fff; border: 1px solid var(--line); color: var(--navy); text-decoration: none; font-size: .9375rem; font-weight: 500; }
+
+section.font { padding-block: 56px; border-bottom: 1px solid var(--line); scroll-margin-top: 64px; }
+.meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 24px; }
+.meta .num { font-size: .9375rem; font-weight: 600; color: var(--coral-ink); }
+.meta .name { font-size: 1.25rem; font-weight: 600; color: var(--navy); }
+.meta .tags { font-size: .9375rem; color: var(--mute); }
+.note { max-width: 66ch; margin: 0 0 32px; }
+
+.sample { display: grid; gap: 16px; }
+.hero { background: var(--paper); border: 1px solid var(--line); border-radius: 24px; padding: 40px 24px; text-align: center; }
+.hero h2 { font-size: var(--fs-h1); line-height: 1.08; margin: 0 0 16px; color: var(--navy); }
+.hero p { font-size: var(--fs-lead); max-width: 34ch; margin: 0 auto 24px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 32px; border-radius: 999px; background: var(--coral); color: var(--navy); font: 600 1.125rem Inter, sans-serif; }
+.band { background: var(--sky); border-radius: 24px; padding: 40px 24px; display: grid; gap: 24px; align-items: center; }
+.band h3 { font-size: var(--fs-h2); line-height: 1.15; margin: 0 0 16px; color: var(--navy); text-align: center; }
+.band h4 { font-size: var(--fs-h3); line-height: 1.3; margin: 0 0 8px; color: var(--navy); }
+.band p { margin: 0; }
+.band img { width: 100%; height: auto; border-radius: 12px; display: block; }
+.card { background: #fff; border-radius: 12px; padding: 24px; }
+.card + .card { margin-top: 0; }
+.cards { display: grid; gap: 16px; }
+.alpha { font-size: 1.5rem; line-height: 1.4; color: var(--navy); margin: 0; overflow-wrap: anywhere; }
+@media (min-width: 769px) {
+  .wrap { padding: 0 32px; }
+  .hero { padding: 64px 48px; text-align: left; }
+  .hero p { margin-left: 0; }
+  .band { grid-template-columns: 1.4fr 1fr; padding: 48px; }
+  .band h3 { text-align: left; }
+  .cards { grid-template-columns: 1fr 1fr; }
+}
+
+/* each candidate sets only the heading face; body stays Inter */
+#inter .hd       { font-family: Inter, sans-serif; font-weight: 600; letter-spacing: -0.02em; }
+#fraunces .hd    { font-family: Fraunces, serif; font-weight: 500; font-variation-settings: "SOFT" 100, "WONK" 0; letter-spacing: -0.01em; }
+#young .hd       { font-family: "Young Serif", serif; font-weight: 400; letter-spacing: -0.01em; }
+#newsreader .hd  { font-family: Newsreader, serif; font-weight: 500; letter-spacing: -0.01em; }
+#bricolage .hd   { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; letter-spacing: -0.02em; }
+#familjen .hd    { font-family: "Familjen Grotesk", sans-serif; font-weight: 600; letter-spacing: -0.015em; }
+
+.paid { padding-block: 56px 80px; }
+.paid h2 { font: 600 var(--fs-h2)/1.15 Inter, sans-serif; letter-spacing: -0.02em; color: var(--navy); margin: 0 0 16px; }
+.paid ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.paid li { padding: 16px 0; border-bottom: 1px solid var(--line); max-width: 72ch; }
+.paid strong { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<header class="intro wrap">
+  <h1>Písmo nadpisů: šest kandidátů</h1>
+  <p>Mění se jen nadpisy (hlavní titulek, nadpisy sekcí, nadpisy karet). Text, tlačítka a menu zůstávají v Inter, který se na telefonu čte nejlíp.</p>
+  <p>* Velikost písma tak, jak ho dnes posílá Google (latinka + čeština). Na webu by šel jeden řez jen se znaky, které web používá, takže soubor bude menší; změří se před nasazením.</p>
+  <p>Každý vzorek používá skutečné texty webu, barvy tématu a jednu z ilustrací z blogu, aby šlo posoudit, jestli k nim písmo sedí. Č. 1 je současný stav.</p>
+</header>
+
+<nav class="jump" aria-label="Kandidáti">
+  <div class="wrap">
+    <a href="/ui-lab/fonts.html#inter">1 Inter</a>
+    <a href="/ui-lab/fonts.html#fraunces">2 Fraunces</a>
+    <a href="/ui-lab/fonts.html#young">3 Young Serif</a>
+    <a href="/ui-lab/fonts.html#newsreader">4 Newsreader</a>
+    <a href="/ui-lab/fonts.html#bricolage">5 Bricolage</a>
+    <a href="/ui-lab/fonts.html#familjen">6 Familjen</a>
+    <a href="/ui-lab/fonts.html#placene">Placená písma</a>
+  </div>
+</nav>
+
+<main class="wrap" id="samples"></main>
+
+<section class="paid wrap" id="placene">
+  <h2>Placená písma</h2>
+  <p class="note">Tady je zobrazit nejde: zkušební verze se stahují po registraci u každé písmolijny a pro web je potřeba koupit webovou licenci. Pokud se vám líbí směr některého vzorku výše, tohle jsou placené protějšky.</p>
+  <ul>
+    <li><strong>Recoleta</strong> (Latinotype). Měkký, kulatý serif ze 70. let, vřelý a hravý. Nejblíž mu je vzorek 2 (Fraunces).</li>
+    <li><strong>GT Alpina</strong> (Grilli Type). Klidný knižní serif s jemným charakterem. Nejblíž mu je vzorek 4 (Newsreader).</li>
+    <li><strong>Söhne Breit</strong> (Klim). Široké, sebevědomé bezpatkové písmo. Nejblíž mu je vzorek 6 (Familjen Grotesk), ale je výraznější.</li>
+    <li><strong>Reckless</strong> (Displaay). Doporučuji vynechat: používá ho Hedepy, web by vypadal jako jejich.</li>
+  </ul>
+</section>
+
+<template id="tpl">
+  <section class="font">
+    <div class="meta"><span class="num"></span><span class="name"></span><span class="tags"></span></div>
+    <p class="note"></p>
+    <div class="sample">
+      <div class="hero">
+        <h2 class="hd">Terapie pro děti a dospělé</h2>
+        <p>Individuální psychoterapie online nebo osobně v Ostravě. Pro děti, dospívající i dospělé.</p>
+        <span class="btn">Objednat se</span>
+      </div>
+      <div class="band">
+        <div>
+          <h3 class="hd">Pro koho je terapie vhodná?</h3>
+          <div class="cards">
+            <div class="card"><h4 class="hd">Rodiče a budoucí rodiče</h4><p>Náročné období těhotenství, porodu nebo výchovy.</p></div>
+            <div class="card"><h4 class="hd">Individuální psychoterapie pro děti a dospělé</h4><p>50 minut, 1 100 Kč, online i osobně.</p></div>
+          </div>
+        </div>
+        <img src="/images/editorial/blog-hranice-640.webp" width="640" height="336" alt="" loading="lazy" decoding="async">
+      </div>
+      <p class="alpha hd">Příliš žluťoučký kůň úpěl ďábelské ódy · 1 100 Kč · 4 000+</p>
+    </div>
+  </section>
+</template>
+
+<script>
+const fonts = [
+  ["inter", "Inter", "současný stav · bezpatkové · zdarma",
+   "Čisté a dobře čitelné, ale bez osobnosti: stejné písmo používá velká část internetu. Vzorek pro srovnání."],
+  ["fraunces", "Fraunces (měkká varianta)", "serif · zdarma (OFL) · 60 kB*",
+   "Měkké, zaoblené patky, vřelé a trochu staromódní. Nejvíc „lidské“ ze všech a nejlépe ladí s ručně kreslenými ilustracemi. Pozor, ať nepůsobí moc dekorativně v malých nadpisech karet."],
+  ["young", "Young Serif", "serif · zdarma (OFL) · 30 kB*",
+   "Pevný, přátelský serif s výraznými tvary. Silný charakter i v malé velikosti. Má jen jeden řez, takže nadpisy nemohou být tučnější ani slabší."],
+  ["newsreader", "Newsreader", "serif · zdarma (OFL) · 97 kB*",
+   "Klidný, knižní a důvěryhodný, jako dobře vysázený časopis. Méně hravý než 2 a 3, ale nejvíc „odborný“."],
+  ["bricolage", "Bricolage Grotesque", "bezpatkové s charakterem · zdarma (OFL) · 56 kB*",
+   "Bezpatkové, ale s neobvyklými tvary písmen. Moderní a sebevědomé. Podobné písmo ale používá Terapie.cz, takže odlišení je menší."],
+  ["familjen", "Familjen Grotesk", "bezpatkové s charakterem · zdarma (OFL) · 22 kB*",
+   "Bezpatkové s jemnými zvláštnostmi (g, a, k). Nejmenší skok od Inter: web zůstane střídmý, jen nadpisy dostanou vlastní hlas."],
+];
+const tpl = document.getElementById("tpl"), main = document.getElementById("samples");
+fonts.forEach(([id, name, tags, note], i) => {
+  const n = tpl.content.cloneNode(true), s = n.querySelector("section");
+  s.id = id;
+  n.querySelector(".num").textContent = (i + 1);
+  n.querySelector(".name").textContent = name;
+  n.querySelector(".tags").textContent = tags;
+  n.querySelector(".note").textContent = note;
+  main.appendChild(n);
+});
+</script>
+</body>
+</html>

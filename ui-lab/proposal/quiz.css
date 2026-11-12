@@ -1,0 +1,114 @@
+/* LAB: quiz pages in the 12 Nov theme. Same reading column as an article (--doc-w), left aligned.
+   No card around the question or the result: the page is the surface; the answers are the cards.
+   Forward steps are navy, booking stays coral. */
+
+.quiz-intro, .quiz-section, .quiz-results-section { background: var(--paper) !important; }
+.quiz-intro { padding: var(--page-top) 0 var(--section-y) !important; }
+.quiz-section, .quiz-results-section { padding: var(--page-top) 0 var(--section-y) !important; min-height: 70vh; }
+.quiz-intro .container, .quiz-section .container, .quiz-results-section .container { max-width: var(--doc-w) !important; }
+
+/* intro */
+.quiz-intro-title { font-size: var(--fs-doc-title) !important; line-height: 1.12 !important; color: var(--navy) !important; text-align: left !important; margin: 0 0 8px !important; text-wrap: balance; }
+.quiz-intro-subtitle { font-size: var(--fs-lead) !important; line-height: 1.5 !important; color: var(--slate) !important; text-align: left !important; margin: 0 0 16px !important; }
+.quiz-intro-byline { font-size: .9375rem !important; font-weight: 500 !important; color: var(--slate) !important; text-align: left !important; margin: 0 0 var(--block-gap) !important; }
+.quiz-intro-byline a { color: var(--navy) !important; }
+.quiz-intro-image { max-width: none !important; margin: 0 0 var(--block-gap) !important; border-radius: var(--r) !important; box-shadow: none !important; background: var(--sky) !important; }
+.quiz-intro-content, .quiz-intro-text { max-width: none !important; margin: 0 !important; }
+.quiz-intro-text p { font-size: 1.0625rem !important; line-height: 1.7 !important; color: var(--slate) !important; margin: 0 0 24px !important; }
+.quiz-info-boxes { justify-content: flex-start !important; align-items: flex-start !important; margin: 0 0 24px !important; }
+.quiz-info-box { justify-content: flex-start !important; font-size: .9375rem !important; font-weight: 500 !important; color: var(--mute) !important; }
+.quiz-info-box strong { color: inherit !important; font-weight: 500 !important; }
+.quiz-start-section { text-align: left !important; margin: 0 !important; }
+
+/* progress: a label line and a thin bar, no box */
+.quiz-progress-wrapper { max-width: none !important; margin: 0 0 var(--block-gap) !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+.quiz-progress-info { margin-bottom: 12px !important; }
+.quiz-progress-text, .quiz-progress-percent { font-size: .9375rem !important; font-weight: 500 !important; color: var(--mute) !important; font-variant-numeric: tabular-nums; }
+.quiz-progress-bar { height: 8px !important; background: var(--sky) !important; box-shadow: none !important; border-radius: 999px !important; }
+.quiz-progress-fill { background: var(--primary) !important; box-shadow: none !important; border-radius: 999px !important; }
+@media (prefers-reduced-motion: reduce) { .quiz-progress-fill { transition: none !important; } }
+
+/* question */
+.quiz-card { max-width: none !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+.quiz-question { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; text-align: left !important; margin: 0 0 24px !important;
+  min-height: 2.6em; /* two lines reserved, so the answers stay put from question to question */ }
+.quiz-options { gap: 12px !important; margin: 0 0 var(--block-gap) !important; }
+.quiz-option { min-height: 56px; padding: 16px !important; gap: 16px !important; background: #fff !important; border: 1px solid var(--line) !important; border-radius: var(--r) !important;
+  box-shadow: none !important; transform: none !important; transition: border-color .15s ease, background-color .15s ease !important; }
+.quiz-option.selected { background: var(--sky) !important; border-color: var(--navy) !important; box-shadow: inset 0 0 0 1px var(--navy) !important; }
+@media (hover: hover) { .quiz-option:not(.selected):hover { border-color: var(--navy) !important; background: #fff !important; } }
+.quiz-option input[type="radio"] { border-color: var(--navy) !important; transition: none !important; }
+.quiz-option input[type="radio"]:checked::after { background: var(--navy) !important; }
+.quiz-option input[type="radio"]:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px !important; }
+.quiz-option-label { font-size: 1.0625rem !important; line-height: 1.4 !important; color: var(--slate) !important; }
+.quiz-option.selected .quiz-option-label { color: var(--navy) !important; font-weight: 500 !important; }
+.quiz-navigation { margin: 0 !important; gap: 12px !important; }
+.quiz-btn-prev, .quiz-btn-next { flex: 0 1 auto !important; max-width: none !important; }
+@media (max-width: 768px) { .quiz-btn-prev, .quiz-btn-next { width: 100% !important; } }
+
+/* result */
+.quiz-results-card { max-width: none !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+.quiz-results-header { text-align: left !important; padding: 0 0 24px !important; margin: 0 0 24px !important; border-bottom: 1px solid var(--line) !important; }
+.quiz-results-label { margin: 0 0 8px !important; font-size: .9375rem !important; font-weight: 500 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--mute) !important; }
+.quiz-results-title { font-size: var(--fs-h2) !important; line-height: 1.15 !important; color: var(--navy) !important; margin: 0 !important; text-wrap: balance; }
+.quiz-results-content { max-width: none !important; margin: 0 !important; }
+.quiz-results-description { max-width: none !important; margin: 0 0 var(--block-gap) !important; text-align: left !important; font-size: 1.0625rem !important; line-height: 1.7 !important; color: var(--slate) !important; }
+.quiz-results-description p { margin: 0 0 16px !important; }
+.quiz-results-description p:last-child { margin: 0 !important; }
+
+/* recommendations: hairline rows */
+.quiz-results-recommendations { margin: 0 0 var(--block-gap) !important; padding: 0 !important; background: none !important; border-radius: 0 !important; }
+.quiz-results-recommendations h3 { font-size: var(--fs-lead) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 12px !important; }
+.quiz-results-recommendations ul { border-top: 1px solid var(--line); }
+.quiz-results-recommendations li { padding: 16px 0 16px 28px !important; border-bottom: 1px solid var(--line); font-size: 1.0625rem !important; line-height: 1.6 !important; color: var(--slate) !important; }
+.quiz-results-recommendations li::before { top: 16px; color: var(--mute) !important; font-weight: 400 !important; }
+
+/* booking panel, urgent help, reading tip */
+.quiz-results-cta { background: var(--navy) !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad) !important; margin: 0 0 var(--block-gap) !important; text-align: left !important; }
+.quiz-results-cta h3 { font-size: var(--fs-h3) !important; line-height: 1.25 !important; color: #fff !important; margin: 0 0 8px !important; }
+.quiz-results-cta p { font-size: 1.0625rem !important; line-height: 1.65 !important; color: #C9D8E3 !important; margin: 0 0 24px !important; }
+@media (max-width: 480px) { .quiz-results-cta .btn { width: 100% !important; max-width: none !important; } }
+.quiz-crisis-help, .quiz-related-article { margin: 0 0 var(--block-gap) !important; padding: var(--card-pad) !important; border: 0 !important; border-radius: var(--r) !important; }
+.quiz-crisis-help { background: var(--peach) !important; }
+.quiz-related-article { background: var(--sky) !important; }
+.quiz-crisis-help h3, .quiz-related-article h3 { font-size: var(--fs-lead) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 8px !important; }
+.quiz-crisis-help p, .quiz-related-article p { font-size: 1.0625rem !important; line-height: 1.65 !important; color: var(--slate) !important; margin: 0 0 8px !important; }
+.quiz-crisis-help p:last-child { margin: 0 !important; }
+.quiz-crisis-help a { color: var(--navy) !important; font-weight: 600 !important; }
+.quiz-related-article .btn { margin-top: 8px !important; }
+
+/* small print, sharing, restart */
+.quiz-result-disclaimer { margin: 0 0 24px !important; padding: 0 !important; background: none !important; border-radius: 0 !important; font-size: .9375rem !important; line-height: 1.6; color: var(--mute) !important; }
+.quiz-social-share { text-align: left !important; padding: 24px 0 0 !important; border-top: 1px solid var(--line) !important; }
+.quiz-social-share > p:not(.share-message) { font-size: .9375rem !important; font-weight: 500; color: var(--slate) !important; margin: 0 0 12px !important; }
+.share-buttons { justify-content: flex-start !important; gap: 12px !important; }
+.share-btn, .share-btn.facebook, .share-btn.copy { min-height: 44px; padding: 0 20px !important; gap: 8px !important; background: transparent !important; border: 0 !important; border-radius: 999px !important;
+  box-shadow: inset 0 0 0 1px var(--navy) !important; font-family: var(--font-ui) !important; font-size: .9375rem !important; font-weight: 600 !important; color: var(--navy) !important;
+  transform: none !important; transition: background-color .15s ease !important; }
+@media (hover: hover) { .share-btn:hover, .share-btn.facebook:hover, .share-btn.copy:hover { background: var(--sky) !important; color: var(--navy) !important; } }
+@media (max-width: 768px) { .share-btn { justify-content: center; } }
+.share-message { margin: 12px 0 0 !important; font-size: .9375rem !important; font-weight: 500 !important; color: var(--navy) !important; }
+.quiz-restart { text-align: left !important; margin: 24px 0 0 !important; }
+
+/* the script hides "Předchozí" on the first question with an inline display: none; keep that stronger than the button's own display */
+.quiz-btn-prev[style*="none"] { display: none !important; }
+
+/* ==== Owner, 12 Nov: "hard to read what is the result" and "too monochromatic with blue" ====
+   The result is one peach panel (label, title, description); the chosen answer is peach; tracks and labels turn warm. */
+.quiz-results-header { background: var(--peach) !important; border: 0 !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad) !important; margin: 0 0 var(--block-gap) !important; }
+.quiz-results-label { color: var(--coral-ink) !important; font-weight: 600 !important; }
+.quiz-results-title { margin: 0 0 16px !important; }
+.quiz-results-header .quiz-results-description { margin: 0 !important; color: var(--slate) !important; }
+.quiz-option.selected { background: var(--peach) !important; }
+.quiz-progress-bar { background: var(--line) !important; }
+.quiz-progress-fill { background: var(--navy) !important; }
+.quiz-related-article { background: #fff !important; border: 1px solid var(--line) !important; }
+/* urgent help: white with a coral-ink outline, so it is not mistaken for the result panel */
+.quiz-crisis-help { background: #fff !important; border: 1px solid var(--coral-ink) !important; }
+.quiz-crisis-help h3 { color: var(--coral-ink) !important; }
+
+/* ==== Visual audit, 12 Nov: three tips as a plain list, no arrows, no rows ==== */
+.quiz-results-recommendations ul { border-top: 0 !important; padding-left: 22px !important; list-style: disc !important; }
+.quiz-results-recommendations li { padding: 0 0 0 4px !important; margin: 0 0 8px !important; border-bottom: 0 !important; }
+.quiz-results-recommendations li::before { content: none !important; display: none !important; }
+.quiz-results-recommendations li::marker { color: var(--primary); }

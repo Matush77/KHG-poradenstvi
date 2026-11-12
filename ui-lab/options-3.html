@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI lab: options 3</title>
+<style>
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; }
+@font-face { font-family: 'Playfair Display'; src: url('/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2'); font-weight: 600 700; }
+:root {
+  --primary: #2D5A7B; --accent: #E8927C; --text-dark: #2C3E50; --text: #5A6C7D; --text-light: #66727F;
+  --cream: #FAF8F5; --sand: #F6F2EC; --line: #E9E4DD;
+  --shadow-sm: 0 1px 2px hsl(205 40% 25% / .05), 0 4px 14px hsl(205 40% 25% / .05);
+  --serif: 'Playfair Display', Georgia, serif; --sans: Inter, system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 16px/1.6 var(--sans); color: var(--text-dark); background: #EFEBE5; padding: 28px 16px 80px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+.page-title { font: 700 clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem)/1.15 var(--serif); }
+.intro { color: var(--text); max-width: 62ch; margin: 10px 0 8px; }
+.area { margin-top: 44px; }
+.area > h2 { font: 700 1.5rem/1.2 var(--serif); color: var(--primary); }
+.area > p { color: var(--text); margin: 4px 0 16px; max-width: 70ch; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+.opt { display: flex; flex-direction: column; gap: 10px; }
+.opt-head { display: flex; gap: 10px; align-items: baseline; }
+.opt-head b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--text-dark); color: #fff; font-size: 13px; flex: none; }
+.opt-head span { font-weight: 600; }
+.opt-note { color: var(--text); font-size: 14px; line-height: 1.5; }
+.phone { width: 100%; max-width: 375px; background: #fff; border-radius: 22px; padding: 28px 16px; box-shadow: 0 2px 4px rgba(0,0,0,.04), 0 18px 40px rgba(44,62,80,.12); }
+.phone.cream { background: var(--cream); }
+.cur { opacity: .9 }
+
+/* ---------- shared bits ---------- */
+.card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); padding: 24px; }
+.stack > * + * { margin-top: 14px; }
+h3.t { font: 700 1.25rem/1.3 var(--sans); color: var(--primary); margin-bottom: 6px; }
+p.d { font-size: 1.0625rem; line-height: 1.65; color: var(--text); text-wrap: pretty; }
+
+/* A1 numbered */
+.a1 .num { font: 600 0.9375rem/1 var(--sans); color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.a1 .num::after { content: ''; width: 24px; height: 1px; background: var(--accent); }
+/* A2 accent rule (existing motif from the credential cards) */
+.a2 .card::before { content: ''; display: block; width: 40px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--accent)); margin-bottom: 16px; }
+/* A3 one panel list */
+.a3 { background: #fff; border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow-sm); padding: 4px 24px; }
+.a3 > div { padding: 20px 0; }
+.a3 > div + div { border-top: 1px solid var(--line); }
+.a3 h3.t { display: flex; align-items: baseline; gap: 10px; }
+.a3 h3.t::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; transform: translateY(-2px); }
+.a3 p.d { padding-left: 17px; }
+
+/* contact: current */
+.c0 .row { padding: 8px 0; }
+.c0 .ic { color: var(--primary); width: 24px; height: 24px; margin-bottom: 8px; }
+.c0 .lab { font-weight: 600; font-size: 15px; color: var(--text-dark); display: block; margin-bottom: 8px; }
+.c0 a { color: var(--primary); font-size: 15px; }
+/* B1 compact rows with icons */
+.b1 .row { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: center; padding: 12px 0; }
+.b1 .row + .row { border-top: 1px solid var(--line); }
+.b1 .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--sand); color: var(--primary); display: grid; place-items: center; }
+.b1 .ic svg { width: 20px; height: 20px; }
+.lab2 { display: block; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-light); line-height: 1.3; }
+.val { color: var(--primary); font-size: 1.0625rem; font-weight: 500; text-decoration: none; line-height: 1.4; }
+/* B2 labels, no icons */
+.b2 .row { padding: 16px 0; }
+.b2 .row + .row { border-top: 1px solid var(--line); }
+.b2 .lab2 { margin-bottom: 4px; }
+/* B3 tap rows */
+.b3 a.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 14px 16px; background: var(--cream); border: 1px solid var(--line); border-radius: 14px; text-decoration: none; min-height: 64px; }
+.b3 a.row + a.row { margin-top: 10px; }
+.b3 .act { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.btn { display: block; text-align: center; margin-top: 22px; background: var(--accent); color: #fff; font-weight: 600; border-radius: 999px; padding: 15px 28px; text-decoration: none; }
+
+/* stats: current */
+.s0 { display: flex; justify-content: center; gap: 24px; align-items: center; color: var(--primary); font-weight: 600; font-size: 15px; }
+.s0 span { display: inline-flex; gap: 10px; align-items: center; }
+/* C1 number first */
+.c1 { display: flex; justify-content: center; }
+.c1 > div { padding: 0 24px; text-align: center; }
+.c1 > div + div { border-left: 1px solid var(--line); }
+.big { display: block; font: 700 2rem/1.05 var(--serif); color: var(--primary); }
+.small { display: block; font-size: 14px; color: var(--text); margin-top: 4px; }
+/* C2 quiet line */
+.c2 { text-align: center; font-size: 15px; color: var(--text); }
+.c2 strong { color: var(--primary); font-weight: 700; }
+.c2 .dot { color: var(--accent); margin: 0 10px; }
+/* C3 soft pills */
+.c3 { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.c3 span { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; font-size: 14px; color: var(--text); }
+.c3 strong { color: var(--primary); font-weight: 700; margin-right: 4px; }
+.hero-mini { text-align: center; }
+.hero-mini h1 { font: 700 2.5rem/1.08 var(--serif); letter-spacing: -.02em; margin-bottom: 14px; }
+.hero-mini p { font-size: 1.0625rem; color: var(--text); margin-bottom: 22px; }
+.hero-mini .stats { margin-bottom: 24px; }
+.hero-btn { display: inline-block; background: var(--primary); color: #fff; font-weight: 600; border-radius: 999px; padding: 15px 34px; }
+.tag-cur { display: inline-block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-light); border: 1px dashed var(--line); border-radius: 6px; padding: 1px 6px; }
+
+.rv { background:#fff; border:1px solid var(--line); border-radius:24px; box-shadow:var(--shadow-sm); padding:28px 22px; text-align:center; }
+.rq { font-style:italic; font-size:1rem; line-height:1.7; color:var(--text-dark); }
+.ra { margin-top:16px; font-weight:600; color:var(--primary); }
+.ctl { margin-top:24px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.dots { display:flex; gap:6px; align-items:center; }
+.dots i { width:10px; height:10px; border-radius:50%; border:2px solid var(--primary); }
+.dots i.on { width:24px; border-radius:6px; background:var(--primary); }
+.k0 .arr { width:40px; height:40px; border-radius:50%; border:1px solid rgba(45,90,123,.35); display:grid; place-items:center; color:var(--primary); font-weight:700; font-size:18px; margin:0 14px; }
+.k1 .dots i { width:7px; height:7px; border:0; background:#C9D3DB; }
+.k1 .dots i.on { width:20px; border-radius:4px; background:var(--primary); }
+.k1 .dots { gap:8px; }
+.swipe { display:block; text-align:center; margin-top:10px; font-size:13px; color:var(--text-light); }
+.k2 { justify-content:space-between; font-size:15px; }
+.k2 a { color:var(--primary); font-weight:600; text-decoration:none; padding:12px 4px; }
+.k2 .cnt { color:var(--text-light); font-variant-numeric:tabular-nums; font-size:14px; letter-spacing:.04em; }
+.k3 { gap:18px; }
+.k3 .t { color:var(--primary); font-size:22px; line-height:1; padding:10px 8px; }
+.k3 .dots i { width:7px; height:7px; border:0; background:#C9D3DB; }
+.k3 .dots i.on { width:20px; border-radius:4px; background:var(--primary); }
+.k3 .dots { gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="page-title">Options for the review controls</h1>
+  <p class="intro">The empty gap under the review is already fixed in the lab (every card is now as tall as the longest review, with the text centred). This page is only about the controls under the card. All three options also add finger swipe on phones, which the site doesn't support today.</p>
+  <section class="area">
+    <h2>K · Controls under "Co říkají klienti"</h2>
+    <p>Now: two outlined circles with heavy block arrows around six outlined dots. The arrows are hand-cut shapes in CSS, and the circles are the "icon in a circle" pattern again.</p>
+    <div class="opts">
+      <div class="opt"><div class="opt-head"><b>·</b><span>Now</span></div>
+        <div class="phone cream"><div class="rv"><p class="rq">"Paní psycholožka s obrovskou empatií a velmi rozumným vhledem do naší situace. Dceru vzala k terapii v nejbližším možném termínu…"</p><p class="ra">— Ondra</p></div><div class="ctl k0"><span class="arr">←</span><span class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i></span><span class="arr">→</span></div></div></div>
+      <div class="opt"><div class="opt-head"><b>K1</b><span>Dots only + swipe</span></div>
+        <div class="phone cream"><div class="rv"><p class="rq">"Paní psycholožka s obrovskou empatií a velmi rozumným vhledem do naší situace. Dceru vzala k terapii v nejbližším možném termínu…"</p><p class="ra">— Ondra</p></div><div class="ctl k1"><span class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i></span></div><span class="swipe">Swipe for the next review</span></div>
+        <p class="opt-note">No arrows. Small filled dots (grey, active one a blue bar), each still a 24 px tap target. On phones you swipe the card; on desktop you click a dot or use the keyboard arrows. The "swipe" hint here is only an explanation for you, not part of the design. The quietest option, and what most editorial sites do.</p></div>
+      <div class="opt"><div class="opt-head"><b>K2</b><span>Words + counter</span></div>
+        <div class="phone cream"><div class="rv"><p class="rq">"Paní psycholožka s obrovskou empatií a velmi rozumným vhledem do naší situace. Dceru vzala k terapii v nejbližším možném termínu…"</p><p class="ra">— Ondra</p></div><div class="ctl k2"><a>← Předchozí</a><span class="cnt">2 / 6</span><a>Další →</a></div></div>
+        <p class="opt-note">No dots, no circles: text links and a small "2 / 6" counter, like turning pages in a book. Uses the same arrows as "Zpět na blog" and "Další →" in the quizzes, so it matches the rest of the site.</p></div>
+      <div class="opt"><div class="opt-head"><b>K3</b><span>Light arrows, no circles</span></div>
+        <div class="phone cream"><div class="rv"><p class="rq">"Paní psycholožka s obrovskou empatií a velmi rozumným vhledem do naší situace. Dceru vzala k terapii v nejbližším možném termínu…"</p><p class="ra">— Ondra</p></div><div class="ctl k3"><span class="t">←</span><span class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i></span><span class="t">→</span></div></div>
+        <p class="opt-note">The current layout kept, but the circles removed and the arrows thin text arrows. The dots become small filled ones as in K1. The smallest change from today.</p></div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

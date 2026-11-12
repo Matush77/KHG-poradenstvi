@@ -1,0 +1,134 @@
+/* LAB: Blog and Kvízy overview pages (blog.html, kviz.html) in the 12 Nov theme.
+   Bands: title on paper -> cards on sky (white cards, no hairline on sky) -> První setkání, the navy panel, on paper. */
+
+/* title band: as on Ceník — centred on phones, left on desktop */
+.blog-hero { background: var(--paper) !important; color: var(--slate) !important; padding: var(--page-top) 0 var(--section-head-gap) !important; text-align: center; }
+.blog-hero-title { font-size: var(--fs-h1) !important; line-height: 1.08 !important; color: var(--navy) !important; margin: 0 0 16px !important; }
+.blog-hero-subtitle { font-size: var(--fs-lead) !important; line-height: 1.6 !important; color: var(--slate) !important; max-width: 66ch !important; margin: 0 auto !important; }
+.blog-hero-subtitle br { display: none; }
+@media (min-width: 769px) {
+  .blog-hero { text-align: left; }
+  .blog-hero-subtitle { margin: 0 !important; }
+}
+
+/* cards band */
+.blog-section { background: var(--sky) !important; padding: var(--section-y) 0 !important; }
+
+/* filter: white pills, the chosen one navy (coral is for booking) */
+.blog-categories { justify-content: flex-start !important; gap: 8px !important; margin: 0 0 var(--block-gap) !important; }
+.category-btn { min-height: 44px; padding: 0 20px !important; background: #fff !important; border: 0 !important; border-radius: 999px !important;
+  font-family: var(--font-ui) !important; font-size: .9375rem !important; font-weight: 500 !important; color: var(--navy) !important;
+  transform: none !important; transition: background-color .15s ease, color .15s ease !important; }
+.category-btn.active { background: var(--navy) !important; color: #fff !important; }
+@media (hover: hover) { .category-btn:not(.active):hover { box-shadow: inset 0 0 0 1px var(--navy); } }
+@media (max-width: 400px) { .category-btn { padding: 0 16px !important; } }
+
+/* grid: full width; articles 1 / 2 / 3 columns, the four quizzes 1 / 2 */
+.blog-grid { max-width: none !important; margin: 0 !important; gap: var(--card-gap) !important; grid-template-columns: 1fr !important; }
+@media (min-width: 640px) { .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 1024px) { #blogGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+
+/* card: a white object, r12, no shadow, no lift; the whole card is the link */
+.blog-card { position: relative; background: #fff !important; border: 0 !important; border-radius: var(--r) !important; box-shadow: none !important;
+  transform: none !important; animation: none !important; }
+.blog-card-image { background: var(--sky) !important; border-radius: 0 !important; }
+.blog-card-image img, .blog-card:hover .blog-card-image img { transform: none !important; }
+.blog-card-content { padding: var(--card-pad) !important; }
+.blog-meta { margin: 0 0 8px; font-size: .9375rem; font-weight: 500; line-height: 1.4; color: var(--mute); }
+.blog-card-title { font-size: var(--fs-lead) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 8px !important; text-wrap: balance; }
+.blog-card-excerpt { font-size: 1.0625rem !important; line-height: 1.6 !important; color: var(--slate) !important; margin: 0 0 16px !important; }
+.quiz-card-meta { margin: 0 0 4px !important; }
+.quiz-card-meta-item { background: none !important; padding: 0 !important; border-radius: 0 !important; font-size: .9375rem !important; font-weight: 500; color: var(--mute) !important; }
+.blog-read-more { display: inline-flex; align-items: center; min-height: 44px; margin: 0 0 -12px; font-size: 1.0625rem !important; font-weight: 600 !important;
+  color: var(--primary) !important; transform: none !important; }
+.blog-read-more::after { content: ''; position: absolute; inset: 0; border-radius: var(--r); }
+.blog-read-more:focus-visible { outline: none; }
+.blog-read-more:focus-visible::after { outline: 2px solid var(--navy); outline-offset: 3px; }
+@media (hover: hover) { .blog-card:hover .blog-card-title { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; } }
+
+/* empty filter result */
+.blog-empty { text-align: left !important; padding: 0 !important; }
+.blog-empty h3 { font-size: var(--fs-h3) !important; color: var(--navy) !important; margin: 0 0 8px !important; }
+.blog-empty p { font-size: 1.0625rem !important; color: var(--slate) !important; }
+.blog-empty-link { padding: 12px 0 !important; margin: 0 !important; font-size: 1.0625rem; color: var(--primary) !important; text-decoration: underline; text-underline-offset: 3px; }
+
+/* "O kvízech": one white card across the band, list as dots, the disclaimer as small print under a hairline */
+.quiz-overview-note { max-width: none !important; margin: var(--block-gap) 0 0 !important; padding: var(--card-pad) !important;
+  background: #fff !important; border: 0 !important; border-radius: var(--r) !important; box-shadow: none !important; }
+.quiz-overview-note h2 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 12px !important; }
+.quiz-overview-note p, .quiz-overview-list { font-size: 1.0625rem !important; line-height: 1.65 !important; color: var(--slate) !important; max-width: 66ch; }
+.quiz-overview-list { gap: 8px !important; margin: 16px 0 0 !important; }
+.quiz-overview-list li::before { background: var(--primary) !important; }
+.quiz-overview-note .quiz-overview-disclaimer { margin-top: 24px !important; padding-top: 16px !important; border-top: 1px solid var(--line) !important;
+  font-size: .9375rem !important; color: var(--mute) !important; max-width: none; }
+
+/* První setkání: the homepage panel (.cta-section from proposal.css) on a paper band */
+.blog-cta { background: var(--paper) !important; padding: var(--section-y) 0 !important; text-align: left !important; }
+.blog-cta .cta-section p { max-width: 66ch !important; }
+
+/* ==== Owner, 12 Nov: "too monochromatic with blue" ====
+   The cards stay on the warm paper (no sky band), as hairline cards; the topic is coral ink; "O kvízech" is a peach card. */
+.blog-hero { padding-bottom: var(--block-gap) !important; }
+.blog-section { background: var(--paper) !important; padding: 0 0 var(--section-y) !important; }
+.blog-card { box-shadow: inset 0 0 0 1px var(--line) !important; }
+.blog-card-image { background: var(--peach) !important; }
+.blog-meta-topic { color: var(--coral-ink); }
+.category-btn:not(.active) { box-shadow: inset 0 0 0 1px var(--line); }
+.quiz-overview-note { background: var(--peach) !important; }
+.quiz-overview-note .quiz-overview-disclaimer { border-top-color: var(--peach-line) !important; color: var(--slate) !important; }
+.blog-cta { padding-top: 0 !important; }
+
+/* ==== Visual audit, 12 Nov: one lead article, the rest quieter; no "Číst více" (the title is the link, the whole card clicks) ==== */
+.blog-card-link { color: inherit !important; text-decoration: none !important; }
+.blog-card-link::after { content: ''; position: absolute; inset: 0; border-radius: var(--r); }
+.blog-card-link:focus-visible { outline: none; }
+.blog-card-link:focus-visible::after { outline: 2px solid var(--navy); outline-offset: 3px; }
+#blogGrid .blog-card-excerpt { margin-bottom: 0 !important; }
+
+/* the rest: no card surface, the illustration is the object */
+#blogGrid .blog-card:not(:first-child) { background: none !important; box-shadow: none !important; }
+#blogGrid .blog-card:not(:first-child) .blog-card-image { border-radius: var(--r) !important; overflow: hidden; }
+#blogGrid .blog-card:not(:first-child) .blog-card-content { padding: 16px 0 0 !important; }
+#blogGrid .blog-card:not(:first-child) .blog-card-excerpt { display: none; }
+
+/* phone: the rest are rows, a small illustration beside the title, hairlines between */
+@media (max-width: 639px) {
+  #blogGrid { gap: 0 !important; }
+  #blogGrid .blog-card:first-child { margin-bottom: 24px; }
+  #blogGrid .blog-card:not(:first-child) { display: grid !important; grid-template-columns: 104px minmax(0, 1fr); gap: 16px; align-items: start;
+    padding: 20px 0 !important; border-top: 1px solid var(--line) !important; border-radius: 0 !important; }
+  #blogGrid .blog-card:not(:first-child) .blog-card-image { aspect-ratio: 1; height: auto !important; }
+  #blogGrid .blog-card:not(:first-child) .blog-card-image img { width: 100% !important; height: 100% !important; object-fit: cover; }
+  #blogGrid .blog-card:not(:first-child) .blog-card-content { padding: 0 !important; }
+  #blogGrid .blog-card:not(:first-child) .blog-meta { font-size: .875rem; margin-bottom: 4px; }
+  #blogGrid .blog-card:not(:first-child) .blog-card-title { font-size: 1.0625rem !important; margin: 0 !important; }
+  #blogGrid .blog-card:not(:first-child) .blog-card-link::after { border-radius: 0; }
+}
+
+/* desktop: the lead article spans the row, illustration left, text right */
+@media (min-width: 640px) {
+  #blogGrid { row-gap: 48px !important; }
+  #blogGrid .blog-card:first-child { grid-column: 1 / -1; display: grid !important; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; }
+  #blogGrid .blog-card:first-child .blog-card-image { height: 100% !important; }
+  #blogGrid .blog-card:first-child .blog-card-image img { width: 100% !important; height: 100% !important; object-fit: cover; }
+  #blogGrid .blog-card:first-child .blog-card-content { padding: 40px !important; }
+  #blogGrid .blog-card:first-child .blog-card-title { font-size: var(--fs-h2) !important; line-height: 1.15 !important; margin-bottom: 16px !important; }
+}
+
+/* the booking panel sits right above the navy footer here: peach, so the two do not merge into one navy block */
+.blog-cta .cta-section { background: var(--peach) !important; }
+.blog-cta .cta-section .cta-heading { color: var(--navy) !important; }
+.blog-cta .cta-section p { color: var(--slate) !important; }
+
+/* phone: the four filters on one line (owner, 12 Nov: "Osobní růst" fell to a second line); a very narrow phone scrolls them sideways */
+@media (max-width: 639px) {
+  .blog-categories { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter, 16px)) !important; padding-inline: var(--gutter, 16px); gap: 6px !important; }
+  .blog-categories::-webkit-scrollbar { display: none; }
+  .category-btn { flex: none; padding: 0 14px !important; }
+}
+/* a hairline just inside every illustration's edge: pale artwork no longer melts into the paper background
+   (drawn on top of the image, so no layout change; the lead card's own hairline sits under its image) */
+.blog-card-image::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(22, 58, 85, .12); }
+/* the filter hides cards with .hide; the row and lead layouts above must not bring them back */
+#blogGrid .blog-card.hide { display: none !important; }

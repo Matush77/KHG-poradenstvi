@@ -1,0 +1,106 @@
+/* LAB: blog article in the 12 Nov theme. One reading column (--doc-w), everything from the same left edge.
+   Parts: summary / quiz tip / author = sky cards; note = white card; "pomoc hned" = peach card; related = rows; booking = navy panel. */
+
+.blog-post { background: var(--paper) !important; padding: var(--page-top) 0 var(--section-y) !important; }
+.blog-post .container { max-width: var(--doc-w) !important; }
+
+/* header */
+.blog-post-header { margin: 0 0 var(--block-gap) !important; }
+.blog-post-header .back-link { display: flex !important; width: fit-content; }
+.blog-post-category { display: block !important; background: none !important; padding: 0 !important; border-radius: 0 !important; margin: 0 0 8px !important;
+  font-size: .9375rem !important; font-weight: 500 !important; line-height: 1.4; color: var(--mute) !important; }
+.blog-post-title { font-size: var(--fs-doc-title) !important; line-height: 1.12 !important; color: var(--navy) !important; margin: 0 0 16px !important; text-wrap: balance; }
+.blog-post-byline { font-size: .9375rem !important; font-weight: 500 !important; color: var(--slate) !important; margin: 0 0 4px !important; }
+.blog-post-byline a { color: var(--navy) !important; }
+.blog-post-date { font-size: .9375rem !important; font-weight: 400 !important; color: var(--mute) !important; margin: 0 !important; }
+
+/* illustration: an image like the others — r12, no shadow, sky while it loads */
+.blog-post-image { border-radius: var(--r) !important; box-shadow: none !important; background: var(--sky) !important; margin: 0 0 var(--block-gap) !important; }
+
+/* running text */
+.blog-post-content { padding: 0 !important; }
+.blog-post-content > * { max-width: none !important; }
+.blog-post-content p, .blog-post-content li { font-size: 1.0625rem !important; line-height: 1.7 !important; color: var(--slate) !important; }
+.blog-post-content p { margin: 0 0 24px !important; }
+.blog-post-content .lead { font-size: var(--fs-lead) !important; line-height: 1.6 !important; font-weight: 400 !important; color: var(--navy) !important; }
+.blog-post-content h2 { font-size: var(--fs-h3) !important; line-height: 1.25 !important; color: var(--navy) !important; margin: 48px 0 16px !important; text-wrap: balance; }
+.blog-post-content h3 { font-size: var(--fs-lead) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 32px 0 8px !important; }
+.blog-post-content ul, .blog-post-content ol { margin: 0 0 24px !important; padding-left: 24px !important; }
+.blog-post-content li { margin: 0 0 8px !important; padding-left: 4px !important; }
+.blog-post-content li::marker { color: var(--primary); }
+.blog-post-content strong { color: var(--navy) !important; }
+@media (max-width: 768px) { .blog-post-content h2 { margin-top: 40px !important; } }
+
+/* cards inside the text */
+.article-summary, .article-callout, .article-safety-note, .related-resource, .article-author-box {
+  margin: var(--block-gap) 0 !important; padding: var(--card-pad) !important; border: 0 !important; border-radius: var(--r) !important; box-shadow: none !important;
+}
+.article-summary, .related-resource, .article-author-box { background: var(--sky) !important; }
+.article-callout { background: #fff !important; border: 1px solid var(--line) !important; }
+.article-safety-note { background: var(--peach) !important; }
+.article-summary h2, .article-author-box h2, .related-articles h2 { font-size: var(--fs-lead) !important; line-height: 1.3 !important; margin: 0 0 12px !important; }
+.article-summary ul { margin-bottom: 0 !important; }
+.article-summary li:last-child { margin-bottom: 0 !important; }
+.article-callout p, .article-safety-note p, .related-resource p { margin: 0 !important; }
+.article-callout p + p, .article-safety-note p + p, .related-resource p + p { margin-top: 8px !important; }
+.article-safety-note a[href^="tel:"] { color: var(--navy) !important; font-weight: 600 !important; }
+.related-resource .btn { margin-top: 16px !important; }
+
+/* example sentences: white cards */
+.article-examples { gap: 12px !important; margin: 0 0 24px !important; }
+.article-examples p { margin: 0 !important; padding: 16px !important; background: #fff !important; border: 1px solid var(--line); border-radius: var(--r) !important;
+  font-weight: 500 !important; color: var(--navy) !important; }
+
+/* related articles: hairline rows with an arrow, as "Kde mě najdete online" */
+.related-articles { margin: var(--block-gap) 0 !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; }
+.related-articles-list { grid-template-columns: 1fr !important; gap: 0 !important; padding: 0 !important; margin: 0 !important; border-top: 1px solid var(--line); }
+.related-articles-list li { margin: 0 !important; padding: 0 !important; }
+.doc .related-articles-list a { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 56px; padding: 16px 0 !important;
+  background: none !important; border: 0 !important; border-bottom: 1px solid var(--line) !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important;
+  font-size: 1.0625rem; font-weight: 500 !important; line-height: 1.4 !important; color: var(--navy) !important; text-decoration: none !important; }
+.related-articles-list a::after { content: '\2192'; flex: none; color: var(--mute); }
+@media (hover: hover) { .doc .related-articles-list a:hover { text-decoration: underline !important; text-underline-offset: 3px; text-decoration-thickness: 1px; } }
+
+/* author */
+.article-author-box { grid-template-columns: 72px minmax(0, 1fr) !important; gap: 16px 24px !important; }
+.article-author-box img { width: 72px !important; height: 72px !important; }
+.article-author-box p { margin: 0 0 8px !important; }
+.article-author-box a { display: inline-block; padding: 12px 0; margin: -4px 0 -12px; font-weight: 600; }
+@media (max-width: 480px) {
+  .article-author-box { grid-template-columns: 1fr !important; }
+  .article-author-box img { width: 56px !important; height: 56px !important; }
+}
+
+/* booking: the navy panel */
+.blog-post-cta { background: var(--navy) !important; border-radius: var(--r-lg) !important; box-shadow: none !important; padding: var(--panel-pad) !important;
+  margin: var(--block-gap) 0 0 !important; text-align: left !important; align-items: flex-start !important; }
+.blog-post-cta::before { display: none !important; }
+.blog-post-cta .cta-heading { font-size: var(--fs-h3) !important; line-height: 1.25 !important; color: #fff !important; margin: 0 0 8px !important; text-align: left !important; }
+.blog-post-cta p { font-size: 1.0625rem !important; line-height: 1.65 !important; color: #C9D8E3 !important; margin: 0 0 24px !important; max-width: 66ch !important; text-align: left !important; }
+.blog-post-cta .btn { box-shadow: none !important; }
+@media (max-width: 480px) { .blog-post-cta .btn { width: 100% !important; max-width: none !important; } }
+
+.blog-post-footer { margin: var(--block-gap) 0 0 !important; text-align: left !important; }
+.blog-post-footer .back-link { margin: 0 !important; }
+
+/* ==== Owner, 12 Nov: "too monochromatic with blue" — topic in coral ink, author on a white hairline card, quiz tip on peach ==== */
+.blog-post-category { color: var(--coral-ink) !important; }
+.article-author-box { background: #fff !important; border: 1px solid var(--line) !important; }
+.related-resource { background: var(--peach) !important; }
+.related-resource .btn.btn-secondary:hover { background: #fff !important; }
+.blog-post-image { background: var(--peach) !important; }
+
+/* ==== Visual audit, 12 Nov: "box soup". Boxes only where they mean something:
+   the safety note (peach), the quiz tip (white hairline card), booking (peach panel). The rest is text with hairlines. ==== */
+.article-summary { background: none !important; padding: 24px 0 0 !important; border-top: 1px solid var(--line) !important; border-radius: 0 !important; }
+.article-summary h2 { font-family: var(--font-ui) !important; font-size: .9375rem !important; font-weight: 600 !important; letter-spacing: 0 !important; color: var(--coral-ink) !important; margin: 0 0 8px !important; }
+.article-callout { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 24px 0 !important;
+  border-top: 1px solid var(--line) !important; border-bottom: 1px solid var(--line) !important; }
+.article-callout p { font-size: var(--fs-lead) !important; line-height: 1.55 !important; color: var(--navy) !important; }
+.article-examples { gap: 0 !important; border-top: 1px solid var(--line); }
+.article-examples p { padding: 14px 0 !important; background: none !important; border: 0 !important; border-bottom: 1px solid var(--line) !important; border-radius: 0 !important; }
+.related-resource { background: #fff !important; border: 1px solid var(--line) !important; }
+.article-author-box { background: none !important; border: 0 !important; border-top: 1px solid var(--line) !important; border-radius: 0 !important; padding: 24px 0 0 !important; }
+.blog-post-cta { background: var(--peach) !important; }
+.blog-post-cta .cta-heading { color: var(--navy) !important; }
+.blog-post-cta p { color: var(--slate) !important; }

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mgr. Kristýna Hriciková Glattová - Terapie pro děti a dospělé</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Psycholog ve zdravotnictví a terapeut pro děti a dospělé. Terapie online i osobně v Ostravě. Osobní přístup, specializace na klinickou psychologii.">
+    <meta name="keywords" content="psycholog Ostrava, online terapie, terapie pro děti, terapie pro dospělé, klinický psycholog, psychoterapie online">
+    <meta name="author" content="Mgr. Kristýna Hriciková Glattová">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Mgr. Kristýna Hriciková Glattová - Terapie pro děti a dospělé">
+    <meta property="og:description" content="Psycholog ve zdravotnictví a terapeut pro děti a dospělé. Online i osobně v Ostravě.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://khgporadenstvi.cz/">
+    <meta property="og:image" content="https://khgporadenstvi.cz/images/og-home.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Mgr. Kristýna Hriciková Glattová – terapie pro děti a dospělé online i osobně v Ostravě">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mgr. Kristýna Hriciková Glattová - Terapie pro děti a dospělé">
+    <meta name="twitter:description" content="Psycholog ve zdravotnictví a terapeut pro děti a dospělé. Online i osobně v Ostravě.">
+    <meta name="twitter:image" content="https://khgporadenstvi.cz/images/og-home.jpg">
+    <meta name="twitter:image:alt" content="Mgr. Kristýna Hriciková Glattová – terapie pro děti a dospělé online i osobně v Ostravě">
+
+    <!-- Canonical Tag -->
+    <link rel="canonical" href="https://khgporadenstvi.cz/">
+
+
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="/images/favicon.webp">
+
+    <!-- Preload Critical Fonts -->
+    <link rel="preload" href="/fonts/Inter/Inter-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Preload Hero Image -->
+    <link rel="preload" as="image" href="/images/photo-800.webp" type="image/webp" imagesrcset="/images/photo-400.webp 400w, /images/photo.webp 734w, /images/photo-800.webp 800w" imagesizes="(max-width: 768px) 90vw, 500px" fetchpriority="high">
+
+    <!-- Critical above-the-fold CSS for faster mobile first paint. -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box}
+      *{margin:0;padding:0}
+      @font-face{font-family:'Inter';src:url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}
+      @font-face{font-family:'Playfair Display';src:url('/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+      @font-face{font-family:'Inter Fallback';src:local('Arial'),local('ArialMT');font-weight:300 500;size-adjust:106.44%;ascent-override:91.01%;descent-override:22.66%;line-gap-override:0%}
+      @font-face{font-family:'Inter Fallback';src:local('Arial Bold'),local('Arial-BoldMT');font-weight:600 700;size-adjust:106.44%;ascent-override:91.01%;descent-override:22.66%;line-gap-override:0%}
+      @font-face{font-family:'Inter Fallback Android';src:local('Roboto'),local('Roboto-Regular');font-weight:300 500;size-adjust:107.27%;ascent-override:90.31%;descent-override:22.49%;line-gap-override:0%}
+      @font-face{font-family:'Inter Fallback Android';src:local('Roboto Bold'),local('Roboto-Bold');font-weight:600 700;size-adjust:107.27%;ascent-override:90.31%;descent-override:22.49%;line-gap-override:0%}
+      @font-face{font-family:'Playfair Display Fallback';src:local('Georgia Bold'),local('Georgia-Bold');font-weight:600 700;size-adjust:89.48%;ascent-override:120.92%;descent-override:28.05%;line-gap-override:0%}
+      @font-face{font-family:'Playfair Display Fallback Android';src:local('Noto Serif Bold'),local('NotoSerif-Bold');font-weight:600 700;size-adjust:90.52%;ascent-override:119.53%;descent-override:27.73%;line-gap-override:0%}
+      :root{--primary:#2D5A7B;--primary-dark:#1e3d52;--primary-light:#4A7B9D;--accent:#E8927C;--accent-light:#F5B5A5;--text-dark:#2C3E50;--text-medium:#5A6C7D;--bg-cream:#FAF8F5;--bg-light:#fff;--space-xs:.5rem;--space-sm:1rem;--space-md:1.5rem;--space-lg:2rem;--space-xl:3rem;--space-2xl:4rem;--space-3xl:6rem;--transition:all .3s cubic-bezier(.4,0,.2,1)}
+      html{scroll-behavior:smooth;font-size:16px}
+      body{font-family:Inter,"Inter Fallback","Inter Fallback Android",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:400;color:var(--text-dark);background:var(--bg-light);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+      .container{max-width:1200px;margin:0 auto;padding:0 var(--space-lg)}
+      a{color:var(--primary);text-decoration:none}
+      p{margin-bottom:var(--space-md);color:var(--text-medium);font-size:1.0625rem;font-weight:400;line-height:1.7}
+      .btn{display:inline-block;padding:.875rem 2rem;font-family:Inter,"Inter Fallback","Inter Fallback Android",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:1rem;font-weight:600;text-align:center;border-radius:50px;cursor:pointer;border:0;text-decoration:none;white-space:nowrap}
+      .btn-primary{background:var(--accent);color:var(--bg-light)}
+      .btn-hero{background:var(--primary);color:var(--bg-light)!important;padding:1.125rem 2.5rem;font-size:1.125rem;-webkit-text-fill-color:var(--bg-light)}
+      .header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.98);box-shadow:0 2px 20px rgba(0,0,0,.05);z-index:1000}
+      .nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem var(--space-lg)}
+      .nav-logo{flex-shrink:0}.nav-logo a{display:block;line-height:0}.logo-img{height:65px;width:auto;display:block}
+      .nav-menu{display:flex;list-style:none;align-items:center;gap:clamp(var(--space-sm),2.5vw,var(--space-xl))}
+      .nav-link{font-size:1rem;font-weight:500;color:var(--text-dark);position:relative}
+      img{max-width:100%;height:auto}.office-gallery-open{display:block;width:100%}
+      .nav-toggle{display:none;flex-direction:column;align-items:center;justify-content:center;min-width:44px;min-height:44px;background:transparent;border:0;cursor:pointer;padding:0;gap:5px}
+      .nav-toggle span{width:25px;height:3px;background:var(--text-dark);border-radius:3px}
+      .hero{padding:140px 0 var(--space-3xl);background:linear-gradient(135deg,var(--bg-cream) 0%,var(--bg-light) 100%);overflow:hidden}
+      .hero-container{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3xl);align-items:center}
+      .hero-title{font-family:"Playfair Display","Playfair Display Fallback","Playfair Display Fallback Android",Georgia,serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:700;color:var(--text-dark);margin-bottom:var(--space-lg);line-height:1.1}
+      .hero-subtitle{font-size:clamp(1.125rem,2vw,1.375rem);color:var(--text-medium);margin-bottom:var(--space-xl);line-height:1.6}
+      .hero-stats{display:flex;gap:var(--space-lg);margin-bottom:var(--space-xl)}
+      .hero-stat{display:flex;align-items:center;gap:var(--space-sm)}
+      .hero-stat-icon{flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+      .hero-stat-text{font-size:.9375rem;font-weight:600;color:var(--primary)}
+      .hero-image{position:relative;display:flex;justify-content:center;align-items:center}
+      .blob-shape{position:relative;width:100%;max-width:500px;aspect-ratio:1;overflow:hidden;border-radius:30% 70% 70% 30%/30% 30% 70% 70%;background:linear-gradient(135deg,var(--primary-light) 0%,var(--accent-light) 100%);box-shadow:0 20px 60px rgba(45,90,123,.2)}
+      .profile-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+      .booking-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;visibility:hidden;padding:var(--space-md)}
+      .booking-modal-overlay.active{opacity:1;visibility:visible}
+      .booking-modal{background:var(--bg-light);border-radius:24px;padding:var(--space-2xl);max-width:600px;width:100%;position:relative;transform:translateY(20px);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+      @media (max-width:968px){.nav-toggle{display:flex}.nav-menu{position:fixed;top:80px;left:-100%;flex-direction:column;background:var(--bg-light);width:100%;max-height:calc(100dvh - 80px);padding:var(--space-xl) var(--space-lg);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 10px 30px rgba(0,0,0,.1);gap:var(--space-lg);align-items:flex-start}.nav-menu.active{left:0}.hero{padding:100px 0 var(--space-2xl)}.hero-container{grid-template-columns:1fr;gap:var(--space-xl);max-width:600px;margin:0 auto}.hero-content{text-align:center}.hero-stats{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:var(--space-md)}.blob-shape{max-width:350px;margin:0 auto}}
+      @media (max-width:768px){.container{padding:0 var(--space-sm)}.nav{padding:.75rem var(--space-lg)}}
+      @media (max-height:560px) and (orientation:landscape){.booking-modal-overlay{align-items:flex-start;overflow-y:auto;padding:.5rem 1rem}.booking-modal{max-height:calc(100dvh - 1rem);padding:1.25rem 1.5rem;overflow-y:auto;border-radius:18px}}
+      /* Polished hero (/css/polish.css P1, P2, P8, P15): kept identical here so nothing shifts when the full CSS arrives */
+      :root{--text-light:#66727F;--fs-small:.9375rem;--fs-lead:clamp(1.0625rem,1rem + .35vw,1.25rem);--fs-h1:clamp(2.5rem,1.8rem + 2.9vw,4rem);--lh-body:1.65;--section-y:clamp(3.5rem,2.4rem + 4.4vw,6rem)}
+      body{line-height:var(--lh-body)}p{line-height:var(--lh-body);text-wrap:pretty}
+      h1,.hero-title{text-wrap:balance;line-height:1.08;letter-spacing:-.02em}
+      .hero-title{font-size:var(--fs-h1)}.hero-subtitle{font-size:var(--fs-lead);max-width:34rem}
+      .hero-stats{display:block}.hero-stats-line{margin:0;font-size:var(--fs-small);line-height:1.5;color:var(--text-medium)}.hero-stats-line strong{color:var(--primary);font-weight:700}.stats-dot{color:var(--accent);margin:0 .625rem;font-weight:700}
+      .btn{padding:.8125rem 1.75rem;font-size:1rem;line-height:1.375;letter-spacing:.005em;border-radius:999px}.btn-hero{padding:1rem 2.125rem;font-size:1.0625rem}
+      .header{box-shadow:0 1px 0 #E9E4DD,0 6px 20px hsl(205 40% 25% / .04)}
+      @media (max-width:968px){.hero-subtitle{margin-inline:auto}.hero{padding-bottom:var(--section-y)}}
+    </style>
+
+    <!-- Full stylesheets are loaded asynchronously after matching critical CSS.
+         Both switch on together, so the page restyles once (after two frames on mobile). -->
+    <script>window.khgCss=function(l){var q=window.khgCssQ=window.khgCssQ||[];q.push(l);if(q.length<2)return;var go=function(){q.forEach(function(x){x.rel='stylesheet'})};var mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(go)})}else{go()}}</script>
+    <link rel="preload" href="/css/styles.css?v=20261110-3" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
+    <link rel="preload" href="/css/polish.css?v=20261111-3" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
+    <noscript><link rel="stylesheet" href="/css/styles.css?v=20261110-3"><link rel="stylesheet" href="/css/polish.css?v=20261111-3"></noscript>
+
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://khgporadenstvi.cz/#practice",
+      "name": "KHG Poradenství",
+      "legalName": "Kristýna Hriciková Glattová",
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "IČO",
+        "value": "11702711"
+      },
+      "image": "https://khgporadenstvi.cz/images/photo.webp",
+      "description": "Psycholog ve zdravotnictví a psychoterapeutka pro děti a dospělé. Terapie online i osobně v Ostravě. Kandidátní členka ČAP a členka AKP.",
+      "url": "https://khgporadenstvi.cz",
+      "telephone": "+420605990980",
+      "email": "kristyna@khgporadenstvi.cz",
+      "founder": {
+        "@id": "https://khgporadenstvi.cz/#person"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Vítkovická 3299/3a",
+        "postalCode": "702 00",
+        "addressLocality": "Ostrava",
+        "addressCountry": "CZ"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "49.8358",
+        "longitude": "18.2928"
+      },
+      "hasMap": "https://share.google/GunHQdaRB3wMknJMA",
+      "priceRange": "1 100 Kč",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "09:00",
+          "closes": "18:00"
+        }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/terapieglattova",
+        "https://www.instagram.com/sitmyslenek/",
+        "https://app.terapie.cz/profile/589-Kristyna-Glattova",
+        "https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut",
+        "https://share.google/GunHQdaRB3wMknJMA"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Služby psychoterapie",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Online terapie",
+              "description": "Individuální online terapie pro děti, dospívající a dospělé"
+            },
+            "price": "1100",
+            "priceCurrency": "CZK"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Osobní terapie v Ostravě",
+              "description": "Osobní setkání v soukromé ordinaci, Vítkovická 3299/3a, Ostrava"
+            },
+            "price": "1100",
+            "priceCurrency": "CZK"
+          }
+        ]
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": "https://khgporadenstvi.cz/#person",
+      "name": "Kristýna Hriciková Glattová",
+      "honorificPrefix": "Mgr.",
+      "jobTitle": "Psycholog ve zdravotnictví a psychoterapeutka",
+      "image": "https://khgporadenstvi.cz/images/photo.webp",
+      "url": "https://khgporadenstvi.cz/#o-mne",
+      "email": "kristyna@khgporadenstvi.cz",
+      "telephone": "+420605990980",
+      "worksFor": [
+        {
+          "@type": "Hospital",
+          "name": "Fakultní nemocnice Ostrava",
+          "url": "https://www.fno.cz/klinika-detskeho-lekarstvi"
+        },
+        {
+          "@id": "https://khgporadenstvi.cz/#practice"
+        }
+      ],
+      "memberOf": [
+        {
+          "@type": "Organization",
+          "name": "Česká asociace pro psychoterapii (ČAP)"
+        },
+        {
+          "@type": "Organization",
+          "name": "Asociace klinických psychologů (AKP)"
+        }
+      ],
+      "alumniOf": {
+        "@type": "EducationalOrganization",
+        "name": "PVŠPS Praha"
+      },
+      "knowsAbout": [
+        "Psychologie",
+        "Psychoterapie",
+        "Klinická psychologie",
+        "Daseinsanalýza",
+        "Dětská psychologie",
+        "Online terapie"
+      ],
+      "sameAs": [
+        "https://czap.cz/Sys/PublicProfile/78959097",
+        "https://www.facebook.com/terapieglattova",
+        "https://www.instagram.com/sitmyslenek/"
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Book",
+      "name": "Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě",
+      "datePublished": "2026",
+      "inLanguage": "cs",
+      "image": "https://khgporadenstvi.cz/images/terapie-do-kapsy.webp",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Grada"
+      },
+      "contributor": {
+        "@type": "Person",
+        "@id": "https://khgporadenstvi.cz/#person",
+        "name": "Kristýna Hriciková Glattová",
+        "honorificPrefix": "Mgr.",
+        "url": "https://khgporadenstvi.cz/#o-mne"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": "https://khgporadenstvi.cz/#faq",
+      "url": "https://khgporadenstvi.cz/#faq",
+      "inLanguage": "cs-CZ",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Jak dlouho trvá jedno sezení?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Standardní terapeutické sezení trvá 50 minut."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kolik stojí terapie?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cena jednoho individuálního terapeutického setkání je 1 100 Kč, a to jak pro online terapii, tak pro osobní setkání v Ostravě. Podrobnosti jsou uvedeny v ceníku."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Jak často bychom se měli vídat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Na začátku terapie doporučuji setkávání jednou týdně, abychom mohli efektivně pracovat na vašich cílech. Postupem času, když se začnete cítit lépe, můžeme přejít na setkávání jednou za 14 dní. Frekvenci vždy upravujeme podle vašich potřeb a pokroku."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Pracujete s pojišťovnami?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Momentálně nepracuji přímo s pojišťovnami a terapie je plně hrazená klientem. Některé pojišťovny ale poskytují příspěvek na psychoterapii v rámci preventivních programů - doporučuji se informovat přímo u vaší pojišťovny. Ráda vám vystavím fakturu či potvrzení o absolvování terapie, které můžete předložit pojišťovně."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Mohu přijít osobně i využít online terapii?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ano. Nabízím osobní setkání v Ostravě i online terapii. Formu si zvolíte při rezervaci a v průběhu spolupráce ji můžeme podle potřeby změnit."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Jak mohu termín zrušit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Pokud se na domluvený termín nemůžete dostavit, zrušte jej prosím nejpozději 36 hodin před začátkem sezení. Při pozdějším zrušení nebo nedostavení se na termín je sezení účtováno v plné výši."
+          }
+        }
+      ]
+    }
+    </script>
+    <link rel="stylesheet" href="/ui-lab/impeccable/impeccable.css">
+    <meta name="robots" content="noindex">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
+        <nav class="nav container" aria-label="Hlavní navigace">
+            <div class="nav-logo">
+                <a href="/" aria-label="KHG Poradenství – úvodní stránka">
+                    <img src="/images/logo.png" width="458" height="154" alt="" class="logo-img">
+                </a>
+            </div>
+
+            <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false" aria-controls="primary-navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="primary-navigation">
+                <li><a href="#o-mne" class="nav-link">O mně</a></li>
+                <li><a href="#sluzby" class="nav-link">Služby</a></li>
+                <li><a href="/cenik.html" class="nav-link">Ceník</a></li>
+                <li><a href="/blog.html" class="nav-link">Blog</a></li>
+                <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
+                <li><a href="#kontakt" class="nav-link">Kontakt</a></li>
+                <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
+            </ul>
+        </nav>
+    </header>
+
+<main id="main" class="k-main">
+    <section class="k-hero">
+        <div class="container k-hero-grid">
+            <div class="k-hero-copy">
+                <h1>Terapie pro děti a&nbsp;dospělé</h1>
+                <p class="k-hero-lead">
+                    Individuální psychoterapie <strong>online</strong> nebo osobně v <strong>Ostravě</strong>. Pro děti, dospívající i dospělé. Pracuji s tématy jako rodičovství, vztahy, úzkost, deprese a osobní růst.
+                </p>
+                <div class="k-hero-actions">
+                    <a href="#" class="btn btn-primary btn-large" onclick="openBookingModal(); return false;">Objednat se</a>
+                    <p class="k-hero-stats"><strong>4&nbsp;000+</strong> hodin praxe <span aria-hidden="true">·</span> <strong>100+</strong> doporučení</p>
+                </div>
+            </div>
+            <figure class="k-hero-photo">
+                <span class="k-sun" aria-hidden="true"></span>
+                <img src="/images/photo-800.webp"
+                     srcset="/images/photo-400.webp 400w, /images/photo.webp 734w, /images/photo-800.webp 800w"
+                     sizes="(max-width: 900px) 100vw, 520px"
+                     alt="Mgr. Kristýna Hriciková Glattová - Psycholog a terapeut"
+                     width="800" height="836" loading="eager" fetchpriority="high" decoding="async">
+            </figure>
+        </div>
+        <svg class="k-hills" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path class="k-hill-1" d="M0 120 C 220 40 420 60 640 110 S 1080 190 1440 70 V220 H0 Z"/>
+            <path class="k-hill-2" d="M0 170 C 260 90 520 150 760 150 S 1200 80 1440 140 V220 H0 Z"/>
+            <path class="k-hill-3" d="M0 200 C 300 150 560 210 860 185 S 1260 150 1440 190 V220 H0 Z"/>
+        </svg>
+    </section>
+
+    <section id="o-mne" class="k-section k-section--first k-s-about">
+        <div class="container"><div class="k-grid">
+            <h2>O mně</h2>
+            <div class="k-body">
+                <p class="k-name">Mgr. Kristýna Hriciková Glattová</p>
+                <p class="k-role">Psycholog ve zdravotnictví a terapeut pro děti a dospělé</p>
+
+                <div class="k-prose">
+                    <p>Jsem psycholožka a psychoterapeutka působící ve zdravotnictví ve Fakultní nemocnici Ostrava, kandidátní členka České asociace pro psychoterapii (ČAP) a členka Asociace klinických psychologů (AKP). Ve své práci propojuji odborné znalosti s citlivým a respektujícím přístupem.</p>
+                    <p>Věřím, že každý člověk v sobě nese schopnost růstu, porozumění i proměny – jen někdy potřebuje prostor, kde se může zastavit a znovu nalézt rovnováhu.</p>
+                    <p>Volný čas trávím nejraději v přírodě s našimi koňmi a psem, kteří mi připomínají jednoduchost přítomného okamžiku. Jsem také manželkou a mámou, a právě mateřství pro mě představuje nejhlubší zkušenost s opravdovou blízkostí a trpělivostí.</p>
+                    <p>Ve spolupráci s pacientskou organizací IVFka z. s. jsem založila podpůrnou skupinu pro ženy, muže a páry procházející IVF procesem, kterou můžete najít <a href="https://www.facebook.com/groups/1472251740565204/?ref=share" target="_blank" rel="noopener">zde</a>. Skupina vznikla z potřeby nabídnout prostor sdílení, porozumění a podpory lidem, kteří se na cestě k rodičovství potýkají s náročnými emocemi, nejistotou i nadějí.</p>
+                    <p>Terapeuticky pracuji pod supervizí (PhDr. Marek Hošek / individuál MUDr. Michal Kryl). V rámci specializačního vzdělávání v oboru klinické psychologie pracuji pod vedením Mgr. Marcely Kvardové.</p>
+                </div>
+
+                <div class="k-aside">
+                <dl class="k-cols3">
+                    <div>
+                        <dt>Vzdělání</dt>
+                        <dd>Mgr. psychologie, PVŠPS Praha</dd>
+                        <dd>Pětiletý výcvik v daseinsanalýze</dd>
+                    </div>
+                    <div>
+                        <dt>Praxe</dt>
+                        <dd>Fakultní nemocnice Ostrava</dd>
+                        <dd>Klinika dětského lékařství</dd>
+                    </div>
+                    <div>
+                        <dt>Supervize</dt>
+                        <dd>PhDr. Marek Hošek</dd>
+                        <dd>MUDr. Michal Kryl</dd>
+                    </div>
+                </dl>
+
+                <article class="k-book" aria-labelledby="publication-title">
+                    <img src="/images/terapie-do-kapsy.webp" alt="Obálka knihy Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě" width="590" height="834" loading="lazy" decoding="async">
+                    <div>
+                        <h3 id="publication-title">Publikační činnost</h3>
+                        <p>Podílela jsem se autorským textem na knize <cite>Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě</cite>, která vyšla v roce 2026 v nakladatelství Grada. Kniha přibližuje témata duševního zdraví, vztahů a psychoterapie srozumitelnou a praktickou formou.</p>
+                    </div>
+                </article>
+                </div>
+            </div>
+        </div></div>
+    </section>
+
+    <section id="sluzby" class="k-section k-f-sky k-s-services">
+        <div class="container"><div class="k-grid">
+            <h2>Služby</h2>
+            <div class="k-body">
+                <h3 class="k-lead-title">Individuální psychoterapie pro děti a dospělé</h3>
+                <div class="k-prose">
+                    <p>Nabízím individuální terapeutickou podporu online i osobně, podle toho, co vám vyhovuje v soukromé ordinaci v Ostravě. Pracuji s dětmi, adolescenty i dospělými v bezpečném a respektujícím prostředí.</p>
+                </div>
+
+                <dl class="k-rows k-rows--facts">
+                    <div><dt>Délka setkání</dt><dd>50 minut</dd></div>
+                    <div><dt>Cena</dt><dd>1 100 Kč <a href="/cenik.html">Podrobný ceník <span aria-hidden="true">→</span></a></dd></div>
+                    <div><dt>Forma</dt><dd>Online i osobně v Ostravě</dd></div>
+                    <div><dt>Termíny</dt><dd>Flexibilně podle vašich potřeb</dd></div>
+                </dl>
+
+                <a href="#" class="btn btn-primary btn-large" onclick="openBookingModal(); return false;">Objednat se</a>
+            </div>
+        </div></div>
+    </section>
+
+    <section class="k-section k-s-format">
+        <div class="container"><div class="k-grid">
+            <h2>Osobně i&nbsp;online</h2>
+            <div class="k-body">
+                <p class="k-lead">Terapeutická setkání nabízím <strong>osobně v Ostravě</strong> i <strong>online</strong>. Můžete si zvolit formu, ve které se cítíte bezpečně a která odpovídá Vašim možnostem.</p>
+
+                <figure class="office-gallery" id="ordinace" aria-labelledby="office-gallery-caption">
+                    <div class="office-gallery-grid">
+                        <div class="office-gallery-image office-gallery-image--main">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="/images/office-gallery/1200/ordinace1.webp" aria-label="Zvětšit fotografii: celkový pohled do terapeutické ordinace v Ostravě">
+                                <picture>
+                                    <source media="(max-width: 768px)" srcset="/images/office-gallery/640/ordinace1.webp" type="image/webp">
+                                    <img src="/images/office-gallery/1200/ordinace1.webp" alt="Celkový pohled do terapeutické ordinace v Ostravě" width="1200" height="900" loading="lazy" decoding="async">
+                                </picture>
+                            </button>
+                        </div>
+                        <div class="office-gallery-image">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="/images/office-gallery/1200/ordinace2.webp" aria-label="Zvětšit fotografii: pohovka a křeslo v terapeutické ordinaci">
+                                <img src="/images/office-gallery/640/ordinace2.webp" alt="Pohovka a křeslo v terapeutické ordinaci" width="640" height="480" loading="lazy" decoding="async">
+                            </button>
+                        </div>
+                        <div class="office-gallery-image">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="/images/office-gallery/1200/ordinace3.webp?v=20260815-2" aria-label="Zvětšit fotografii: klidné posezení v ordinaci u oken">
+                                <img src="/images/office-gallery/640/ordinace3.webp?v=20260815-2" alt="Klidné posezení v ordinaci u oken" width="640" height="480" loading="lazy" decoding="async">
+                            </button>
+                        </div>
+                        <div class="office-gallery-image">
+                            <button type="button" class="office-gallery-open" data-lightbox-src="/images/office-gallery/1200/ordinace4.webp" aria-label="Zvětšit fotografii: detail prostoru pro osobní terapeutické setkání">
+                                <img src="/images/office-gallery/640/ordinace4.webp" alt="Detail prostoru pro osobní terapeutické setkání" width="640" height="480" loading="lazy" decoding="async">
+                            </button>
+                        </div>
+                    </div>
+                    <figcaption id="office-gallery-caption">Prostor pro osobní terapii na Vítkovické ulici v Ostravě.</figcaption>
+                </figure>
+
+                <div class="k-pairs">
+                    <div>
+                        <h3>Osobně v Ostravě</h3>
+                        <p>Setkání tváří v tvář v klidném prostoru poradny pro ty, kterým osobní kontakt vyhovuje více.</p>
+                    </div>
+                    <div>
+                        <h3>Online odkudkoliv</h3>
+                        <p>Připojit se můžete z domova nebo jiného klidného a soukromého místa v Česku i v zahraničí.</p>
+                    </div>
+                    <div>
+                        <h3>Pohodlí a soukromí</h3>
+                        <p>Zvolte si prostředí, ve kterém se můžete cítit bezpečně – klidnou poradnu nebo soukromé místo pro online hovor.</p>
+                    </div>
+                    <div>
+                        <h3>Forma podle Vašich potřeb</h3>
+                        <p>Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.</p>
+                    </div>
+                </div>
+            </div>
+        </div></div>
+    </section>
+
+    <section class="k-section k-f-peach k-s-steps">
+        <div class="container"><div class="k-grid">
+            <h2>Jak probíhá terapie?</h2>
+            <div class="k-body">
+                <ol class="k-steps">
+                    <li>
+                        <h3>Objednání termínu</h3>
+                        <p>Termín si můžete vybrat přímo v online rezervačním systému. Při rezervaci zvolíte osobní setkání v Ostravě, nebo online terapii.</p>
+                    </li>
+                    <li>
+                        <h3>Před prvním setkáním</h3>
+                        <p>Nemusíte se nijak zvlášť připravovat ani mít předem jasno v tom, co přesně chcete řešit. Začneme tím, co je pro Vás právě důležité.</p>
+                    </li>
+                    <li>
+                        <h3>První sezení</h3>
+                        <p>Během 50 minut společně zmapujeme Vaši situaci a očekávání. Setkání Vám také umožní zjistit, zda Vám můj způsob práce vyhovuje.</p>
+                    </li>
+                    <li>
+                        <h3>Pravidelná setkávání</h3>
+                        <p>Pokud se rozhodneme pokračovat, domluvíme si frekvenci podle Vašich potřeb. Terapie obvykle probíhá jednou týdně nebo jednou za 14 dní.</p>
+                    </li>
+                </ol>
+
+                <h3 class="k-subhead">Praktické informace</h3>
+                <dl class="k-rows">
+                    <div><dt>Osobní setkání</dt><dd>Přicházejte a zvoňte prosím až v čase Vašeho objednaného sezení. V prostorách poradny není čekárna.</dd></div>
+                    <div><dt>Online setkání</dt><dd>Odkaz na videohovor obdržíte automaticky v e-mailu s potvrzením rezervace. Potřebujete stabilní připojení a klidné, soukromé místo.</dd></div>
+                    <div><dt>Délka setkání</dt><dd>Jedno terapeutické setkání trvá 50 minut.</dd></div>
+                    <div><dt>Zrušení termínu</dt><dd>Termín prosím zrušte nejpozději 36 hodin před začátkem. Při pozdějším zrušení nebo nedostavení se je sezení účtováno v plné výši.</dd></div>
+                    <div><dt>Když si nejste jistí</dt><dd>Nemusíte se předem rozhodnout pro dlouhodobou terapii. První setkání může sloužit i ke společnému zmapování toho, zda a jak by Vám psychoterapie mohla být užitečná.</dd></div>
+                </dl>
+            </div>
+        </div></div>
+    </section>
+
+    <section class="k-section k-s-who">
+        <div class="container"><div class="k-grid">
+            <h2>Pro koho je terapie vhodná?</h2>
+            <div class="k-body">
+                <ul class="k-topics" aria-label="Nejčastější témata, se kterými pracuji">
+                    <li>Úzkostné a depresivní stavy</li>
+                    <li>Rodičovství a mateřství</li>
+                    <li>Vztahové problémy a partnerské krize</li>
+                    <li>Hledání smyslu a existenciální otázky</li>
+                    <li>Psychosomatické obtíže</li>
+                    <li>Poruchy příjmu potravy</li>
+                    <li>Životní přechody a změny</li>
+                    <li>Ztráta a zármutek</li>
+                </ul>
+
+                <dl class="k-rows k-rows--wide">
+                    <div><dt>Rodiče a budoucí rodiče</dt><dd>Pokud procházíte náročným obdobím těhotenství, po porodu, nebo řešíte výzvy rodičovství. Zabývám se tématy jako vyčerpanost, pochybnosti, vztah s partnerem po příchodu dítěte.</dd></div>
+                    <div><dt>Děti a dospívající</dt><dd>Pracuji s dětmi a teenagery, kteří se potýkají s úzkostí, školními problémy, vztahovými obtížemi nebo hledají podporu v období dospívání.</dd></div>
+                    <div><dt>Dospělí v osobní krizi</dt><dd>Pokud prožíváte úzkost, depresi, ztrátu smyslu, vztahové problémy, nebo procházíte náročnou životní změnou a hledáte podporu.</dd></div>
+                    <div><dt>Lidé s psychosomatickými obtížemi</dt><dd>Pokud se u vás projevují tělesné příznaky spojené s psychickou zátěží, jako bolesti hlavy, žaludku, chronická únava nebo jiné obtíže bez jasné fyzické příčiny.</dd></div>
+                </dl>
+            </div>
+        </div></div>
+    </section>
+
+    <section class="k-quotes" aria-labelledby="k-quotes-title">
+        <div class="container">
+            <h2 id="k-quotes-title">Co říkají klienti</h2>
+            <div class="testimonials-carousel">
+                <div class="testimonials-track">
+                    <div class="testimonial-card active"><div class="testimonial-content">
+                        <p class="testimonial-text">„Paní psycholožka s obrovskou empatií a velmi rozumným vhledem do naší situace. Dceru vzala k terapii v nejbližším možném termínu dle toho, co si z mého pohledu poměrně těžká situace žádala. Dcera se k ní vždy těšila, což se nedalo říci o předchozích zkušenostech. Děkujeme moc za celkový přístup.“</p>
+                        <p class="testimonial-author">Ondra</p>
+                    </div></div>
+                    <div class="testimonial-card"><div class="testimonial-content">
+                        <p class="testimonial-text">„Chtěla bych v prvé řadě poděkovat za pomoc s překonáním těžkých chvil a vyrovnáním se se smrtí našich dětí. Přístup v průběhu sezení byl empatický a lidský. Velice mi pomohlo být konečně vyslyšena. Napsání dopisu pro mé děti a jak s ním naložit byl posledním krokem pro uzdravení mého srdce a mysli. Ještě jednou moc děkuji, byla jste mi neskutečnou pomoci.“</p>
+                        <p class="testimonial-author">Pavla</p>
+                    </div></div>
+                    <div class="testimonial-card"><div class="testimonial-content">
+                        <p class="testimonial-text">„Online terapie se účastním již přes rok a půl a jsem nanejvýš spokojena. Paní psycholožka je nesmírně vnímavý člověk, naslouchá všem problémům a tématům, které do terapie pokaždé přináším. Líbí se mi způsob vedení sezení a její lidský přístup. Vždy se cítím bezpečně a ráda se do terapie vracím. Za tuto dobu jsme řešili nepřeberné množství životních kotrmelců a paní psycholožka tu pro mě vždy byla, podporovala mě a šla touto cestou se mnou. Je pro mě oporou, na kterou se můžu vždy spolehnout, ať se děje cokoliv. Rozhodně doporučuji!“</p>
+                        <p class="testimonial-author">Karolína</p>
+                    </div></div>
+                    <div class="testimonial-card"><div class="testimonial-content">
+                        <p class="testimonial-text">„S paní Kristýnou jsem absolvoval několik terapií a musím říct, že mě provázela velmi citlivě a s respektem v těžším období mého života. Řešili jsme témata jako coming out, vztahy, i závislosti. Vždy jsem se cítil pochopený a v bezpečném prostoru. Její empatický přístup mi pomohl vidět věci z nové perspektivy a udělat konkrétní kroky v praxi. Za mě můžu doporučit!“</p>
+                        <p class="testimonial-author">KS</p>
+                    </div></div>
+                    <div class="testimonial-card"><div class="testimonial-content">
+                        <p class="testimonial-text">„S Kristýnou spolupracuji už více než rok a mohu ji s čistým svědomím doporučit. Kristýna je velmi empatická a trpělivá. Během terapií se cítím bezpečně, což mi umožňuje se plně otevřít, aniž bych se musela bát posuzování. Když jsou mé myšlenky příliš chaotické, dokáže přesně shrnout to, co jsem sama chtěla vyjádřit. Velkým bonusem je pro mě také možnost online terapií.“</p>
+                        <p class="testimonial-author">Ivana</p>
+                    </div></div>
+                    <div class="testimonial-card"><div class="testimonial-content">
+                        <p class="testimonial-text">„Kristýnu mohu jen doporučit. Jsem moc ráda, ze jsem narazila právě na ni. Celkem rychle jsem si k ní našla důvěru. Není to terapeut, který jen vyslechne, ale i dodá názor na věc a případný směr. Mám pocit, že mi rozumí. Nebojím se otevřít. Je empatická, lidská a pro slova nejde daleko, což mi vyhovuje.“</p>
+                        <p class="testimonial-author">Ilona</p>
+                    </div></div>
+                </div>
+                <div class="carousel-dots">
+                    <div class="carousel-indicators">
+                        <button type="button" class="carousel-dot active" data-index="0" aria-label="Recenze 1" aria-current="true"></button>
+                        <button type="button" class="carousel-dot" data-index="1" aria-label="Recenze 2"></button>
+                        <button type="button" class="carousel-dot" data-index="2" aria-label="Recenze 3"></button>
+                        <button type="button" class="carousel-dot" data-index="3" aria-label="Recenze 4"></button>
+                        <button type="button" class="carousel-dot" data-index="4" aria-label="Recenze 5"></button>
+                        <button type="button" class="carousel-dot" data-index="5" aria-label="Recenze 6"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="k-section k-section--first k-s-faq">
+        <div class="container"><div class="k-grid">
+            <h2>Časté dotazy</h2>
+            <div class="k-body">
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <h3 class="faq-heading"><button type="button" class="faq-question" id="faq-question-1" aria-expanded="true" aria-controls="faq-answer-1">Jak dlouho trvá jedno sezení?</button></h3>
+                        <div class="faq-answer" id="faq-answer-1" role="region" aria-labelledby="faq-question-1">
+                            <p>Standardní terapeutické sezení trvá <strong>50 minut</strong>. </p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-heading"><button type="button" class="faq-question" id="faq-question-2" aria-expanded="true" aria-controls="faq-answer-2">Kolik stojí terapie?</button></h3>
+                        <div class="faq-answer" id="faq-answer-2" role="region" aria-labelledby="faq-question-2">
+                            <p>Cena jednoho individuálního terapeutického setkání je <strong>1 100 Kč</strong>, a to jak pro online terapii, tak pro osobní setkání v Ostravě. <a href="/cenik.html">Podrobnosti najdete v ceníku.</a></p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-heading"><button type="button" class="faq-question" id="faq-question-3" aria-expanded="true" aria-controls="faq-answer-3">Jak často bychom se měli vídat?</button></h3>
+                        <div class="faq-answer" id="faq-answer-3" role="region" aria-labelledby="faq-question-3">
+                            <p>Na začátku terapie doporučuji <strong>setkávání jednou týdně</strong>, abychom mohli efektivně pracovat na vašich cílech. Postupem času, když se začnete cítit lépe, můžeme přejít na setkávání jednou za 14 dní. Frekvenci vždy upravujeme podle vašich potřeb a pokroku.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-heading"><button type="button" class="faq-question" id="faq-question-4" aria-expanded="true" aria-controls="faq-answer-4">Pracujete s pojišťovnami?</button></h3>
+                        <div class="faq-answer" id="faq-answer-4" role="region" aria-labelledby="faq-question-4">
+                            <p>Momentálně <strong>nepracuji přímo s pojišťovnami</strong> a terapie je plně hrazená klientem. Některé pojišťovny ale poskytují příspěvek na psychoterapii v rámci preventivních programů - doporučuji se informovat přímo u vaší pojišťovny. Ráda vám vystavím fakturu či potvrzení o absolvování terapie, které můžete předložit pojišťovně.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-heading"><button type="button" class="faq-question" id="faq-question-5" aria-expanded="true" aria-controls="faq-answer-5">Mohu přijít osobně i využít online terapii?</button></h3>
+                        <div class="faq-answer" id="faq-answer-5" role="region" aria-labelledby="faq-question-5">
+                            <p>Ano. Nabízím <strong>osobní setkání v Ostravě</strong> i <strong>online terapii</strong>. Formu si zvolíte při rezervaci a v průběhu spolupráce ji můžeme podle potřeby změnit.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-heading"><button type="button" class="faq-question" id="faq-question-6" aria-expanded="true" aria-controls="faq-answer-6">Jak mohu termín zrušit?</button></h3>
+                        <div class="faq-answer" id="faq-answer-6" role="region" aria-labelledby="faq-question-6">
+                            <p>Pokud se na domluvený termín nemůžete dostavit, zrušte jej prosím nejpozději <strong>36 hodin před začátkem sezení</strong>. Při pozdějším zrušení nebo nedostavení se na termín je sezení účtováno v plné výši.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div></div>
+    </section>
+
+    <section class="k-section k-s-member">
+        <div class="container"><div class="k-grid">
+            <h2>Profesní členství a&nbsp;reference</h2>
+            <div class="k-body">
+                <div class="k-cap">
+                    <a href="https://czap.cz/Sys/PublicProfile/78959097" target="_blank" rel="noopener noreferrer" aria-label="Můj veřejný profil v České asociaci pro psychoterapii">
+                        <img src="/images/ceska-asociace-pro-psychoterapii.webp" alt="Česká asociace pro psychoterapii (ČAP)" width="120" height="120" loading="lazy">
+                    </a>
+                    <div>
+                        <h3>Kandidátní členka České asociace pro psychoterapii (ČAP)</h3>
+                        <p>Jsem hrdou kandidátní členkou České asociace pro psychoterapii (ČAP), která sdružuje odborníky v oblasti psychoterapie a dbá na vysoké etické i profesní standardy. Členství v ČAP je pro mě závazkem k dalšímu vzdělávání, odbornému růstu a poskytování kvalitní péče svým klientům.</p>
+                        <a href="https://czap.cz/Sys/PublicProfile/78959097" target="_blank" rel="noopener noreferrer" class="k-link">Můj profil v ČAP <span aria-hidden="true">↗</span></a>
+                    </div>
+                </div>
+
+                <h3 class="k-subhead">Kde mě najdete online</h3>
+                <ul class="k-profiles">
+                    <li><a href="https://app.terapie.cz/profile/589-Kristyna-Glattova" target="_blank" rel="noopener"><img src="/images/terapie-cz-logo.webp" alt="" width="150" height="50" loading="lazy"><span>Terapie.cz</span> <span aria-hidden="true">↗</span></a></li>
+                    <li><a href="https://www.znamylekar.cz/mgr-kristyna-hricikova-glattova/psycholog-terapeut" target="_blank" rel="noopener"><img src="/images/znamy-lekar-logo.webp" alt="" width="150" height="50" loading="lazy"><span>ZnámýLékař.cz</span> <span aria-hidden="true">↗</span></a></li>
+                    <li><a href="https://www.denproskolu.cz/cs/komunita-dobrovolniku#/dobrovolnik/807" target="_blank" rel="noopener"><img src="/images/den-pro-skolu-logo.webp" alt="" width="150" height="50" loading="lazy"><span>Den pro školu</span> <span aria-hidden="true">↗</span></a></li>
+                </ul>
+            </div>
+        </div></div>
+    </section>
+
+    <section class="k-section k-s-blog">
+        <div class="container"><div class="k-grid">
+            <h2>Z blogu</h2>
+            <div class="k-body">
+                <ul class="k-posts">
+                    <li><a href="/blog-jak-poznam-ze-jsem-dobry-rodic.html">
+                        <img src="/images/editorial/blog-dobry-rodic-640.webp" alt="" width="640" height="336" loading="lazy" decoding="async">
+                        <span>Jak poznám, že jsem dobrý rodič?</span></a></li>
+                    <li><a href="/blog-jak-nastavit-hranice-bez-pocitu-viny.html">
+                        <img src="/images/editorial/blog-hranice-640.webp" alt="" width="640" height="336" loading="lazy" decoding="async">
+                        <span>Jak nastavit hranice bez pocitu viny</span></a></li>
+                    <li><a href="/blog-overthinking-proc-vznika-a-jak-ho-zastavit.html">
+                        <img src="/images/editorial/blog-overthinking-640.webp" alt="" width="640" height="336" loading="lazy" decoding="async">
+                        <span>Overthinking: proč vzniká a jak ho zastavit</span></a></li>
+                </ul>
+                <a href="/blog.html" class="k-link">Všechny články <span aria-hidden="true">→</span></a>
+            </div>
+        </div></div>
+    </section>
+
+    <section id="kontakt" class="k-section k-contact k-f-sky">
+        <div class="container"><div class="k-grid">
+            <h2>Kontakt</h2>
+            <div class="k-body">
+                <dl class="k-contact-list">
+                    <div><dt>E-mail</dt><dd><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></dd></div>
+                    <div><dt>Telefon</dt><dd><a href="tel:+420605990980">+420 605 990 980</a></dd></div>
+                    <div><dt>Osobní setkání</dt><dd><a href="https://www.google.com/maps/dir/?api=1&amp;destination=V%C3%ADtkovick%C3%A1+3299%2F3a%2C+702+00+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
+                </dl>
+                <a href="#" class="btn btn-primary btn-large" onclick="openBookingModal(); return false;">Objednat se</a>
+            </div>
+        </div></div>
+    </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <!-- Generated from partials/footer.html by scripts/sync-footer.ps1. -->
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="/images/logo.webp" width="381" height="96" alt="KHG Poradenství" class="footer-logo" loading="lazy">
+                    <p>Mgr. Kristýna Hriciková Glattová</p>
+                    <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
+                    <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>
+                </div>
+
+                <div class="footer-links">
+                    <p class="footer-heading"><strong>Navigace</strong></p>
+                    <ul>
+                        <li><a href="#o-mne">O mně</a></li>
+                        <li><a href="#sluzby">Služby</a></li>
+                        <li><a href="/cenik.html">Ceník</a></li>
+                        <li><a href="/blog.html">Blog</a></li>
+                        <li><a href="/kviz.html">Kvízy</a></li>
+                        <li><a href="#kontakt">Kontakt</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact">
+                    <p class="footer-heading"><strong>Kontakt</strong></p>
+                    <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
+                    <p><a href="tel:+420605990980">+420&nbsp;605&nbsp;990&nbsp;980</a></p>
+                    <p><a href="https://www.google.com/maps/dir/?api=1&amp;destination=V%C3%ADtkovick%C3%A1+3299%2F3a%2C+702+00+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                            <img src="/images/facebook-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
+                        </a>
+                        <a href="https://www.instagram.com/sitmyslenek/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <img src="/images/instagram-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span data-current-year>2026</span> Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
+                <div class="footer-legal">
+                    <a href="/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Generated from partials/booking-modal.html by scripts/sync-header.ps1. -->
+    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1" inert>
+        <div class="booking-modal">
+            <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
+            <div class="booking-modal-options">
+                <a href="#" class="booking-option" onclick="bookOnline(); return false;">
+                    <span class="booking-option-label">Online</span>
+                    <span class="booking-option-title">Terapie online</span>
+                    <p class="booking-option-desc">Pondělí až pátek</p>
+                </a>
+                <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
+                    <span class="booking-option-label">Ostrava</span>
+                    <span class="booking-option-title">Terapie osobně</span>
+                    <p class="booking-option-desc">Pondělí a úterý</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Office Gallery Lightbox -->
+    <div id="officeLightbox" class="office-lightbox" role="dialog" aria-modal="true" aria-label="Zvětšená fotografie ordinace" aria-describedby="officeLightboxCaption officeLightboxCounter" aria-hidden="true" tabindex="-1" hidden>
+        <div class="office-lightbox-dialog">
+            <button type="button" class="office-lightbox-close" aria-label="Zavřít zvětšenou fotografii">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <button type="button" class="office-lightbox-nav office-lightbox-prev" aria-label="Předchozí fotografie">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+            </button>
+            <figure>
+                <img id="officeLightboxImage" class="office-lightbox-image" alt="" draggable="false">
+                <figcaption class="office-lightbox-caption">
+                    <span id="officeLightboxCaption"></span>
+                    <span id="officeLightboxCounter" class="office-lightbox-counter" aria-live="polite"></span>
+                </figcaption>
+            </figure>
+            <button type="button" class="office-lightbox-nav office-lightbox-next" aria-label="Další fotografie">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+<script src="/js/privacy-consent.js?v=20261016-2"></script>
+<script src="/js/script.js?v=20261111-5"></script>
+</body>
+</html>

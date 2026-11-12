@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>KHG theme sheet</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/polish.css">
+<style>
+  body { background: var(--bg-cream); color: var(--text-dark); }
+  .ts { max-width: 1080px; margin: 0 auto; padding: 48px 16px 96px; }
+  .ts h1 { font-family: var(--font-heading); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.1; margin: 0 0 12px; color: var(--text-dark); }
+  .ts > p.lead { font-size: var(--fs-lead); color: var(--text-medium); max-width: 62ch; margin: 0 0 8px; }
+  .ts section { margin-top: 56px; }
+  .ts h2.t { font: 700 13px/1.3 var(--font-primary); text-transform: uppercase; letter-spacing: .1em; color: var(--text-light);
+     margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+  .ts h2.t::after { display: none; }
+  .ts h3.s { font: 700 20px/1.3 var(--font-primary); color: var(--primary); margin: 0 0 8px; }
+  .panel { background: #fff; border: 1px solid var(--border-light); border-radius: 16px; padding: clamp(16px, 2vw, 28px); }
+  .grid2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .muted { color: var(--text-medium); font-size: 15px; line-height: 1.6; margin: 4px 0 0; }
+  .note { font-size: 15px; line-height: 1.6; color: var(--text-medium); margin: 12px 0 0; }
+  .tag { display: inline-block; font: 600 12px/1 var(--font-primary); padding: 5px 9px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+  .ok { background: #E3EFE6; color: #2F5D3A; } .warn { background: #FBE9D9; color: #8A4A17; } .bad { background: #F7DEDE; color: #8B2C2C; }
+
+  /* type rows */
+  .row { display: grid; grid-template-columns: 170px 1fr; gap: 6px 20px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--border-light); }
+  .row:first-of-type { border-top: 0; }
+  .spec { font-size: 13px; line-height: 1.5; color: var(--text-light); font-variant-numeric: tabular-nums; }
+  .spec b { color: var(--text-dark); font-weight: 600; display: block; font-size: 14px; }
+  .sample { color: var(--text-dark); overflow-wrap: anywhere; margin: 0; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+
+  /* swatches */
+  .sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .chip { border-radius: 16px; overflow: hidden; background: #fff; border: 1px solid var(--border-light); }
+  .chip i { display: block; height: 64px; }
+  .chip div { padding: 10px 12px; font-size: 13px; line-height: 1.45; color: var(--text-medium); }
+  .chip div b { display: block; color: var(--text-dark); font-size: 14px; }
+
+  /* shape */
+  .shapes { display: flex; flex-wrap: wrap; gap: 16px; }
+  .shape { width: 96px; height: 72px; background: #fff; border: 1px solid var(--border-light); display: grid; place-items: center;
+     font-size: 13px; color: var(--text-medium); text-align: center; line-height: 1.3; }
+  .list { margin: 0; padding-left: 18px; font-size: 16px; line-height: 1.6; color: var(--text-medium); }
+  .list li { margin: 4px 0; }
+  .list b { color: var(--text-dark); }
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .rhythm { display: grid; gap: 4px; }
+  .rhythm div { padding: 8px 12px; border-radius: 10px; font-size: 14px; color: var(--text-medium); display: flex; justify-content: space-between; gap: 12px; }
+  table.t { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.t th, table.t td { text-align: left; padding: 10px 8px; border-top: 1px solid var(--border-light); vertical-align: top; color: var(--text-medium); }
+  table.t th { color: var(--text-dark); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<main class="ts">
+  <h1>KHG theme sheet</h1>
+  <p class="lead">What the live site actually uses today, measured in the browser on 12 Nov 2026 on the homepage, blog, one article, a quiz and the price list, at 1440 px and 375 px. Everything below renders with the site's own CSS and fonts.</p>
+  <p class="note">The older guide <code>ui-lab/VISUAL-LANGUAGE.md</code> describes the site <em>before</em> the polish layer went live (commit 8bcf379), so its §1–§9 numbers are outdated. §10 there is close to what is live now.</p>
+
+  <!-- FONTS -->
+  <section>
+    <h2 class="t">1 · Fonts: 2 families</h2>
+    <div class="grid2">
+      <div class="panel">
+        <p class="sample" style="font-family: var(--font-heading); font-weight:700; font-size: 44px; line-height:1.1">Playfair Display</p>
+        <p class="muted">Serif, self-hosted variable file, weights 600–700. Used for <b>page and section titles, panel titles, blog card titles, prices</b>. Only weight 700 is actually used. Digits are old-style (uneven heights) — use Inter for numbers that must line up.</p>
+      </div>
+      <div class="panel">
+        <p class="sample" style="font-weight:600; font-size: 44px; line-height:1.1; letter-spacing:-.01em">Inter</p>
+        <p class="muted">Sans-serif, self-hosted variable file, weights 300–700. Used for <b>everything else</b>: body, card titles, labels, buttons, navigation, FAQ.</p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h3 class="s">Weights in use</h3>
+      <div class="rhythm">
+        <div style="background:var(--bg-cream)"><span style="font-weight:400">400 Regular — body, leads</span><span>most text</span></div>
+        <div style="background:var(--bg-cream)"><span style="font-weight:500">500 Medium — navigation, dates, byline</span><span>common</span></div>
+        <div style="background:var(--bg-cream)"><span style="font-weight:600">600 Semibold — buttons, links, author names</span><span>common</span></div>
+        <div style="background:var(--bg-cream)"><span style="font-weight:700">700 Bold — card titles, labels, FAQ, all Playfair</span><span>common</span></div>
+        <div style="background:#FBE9D9"><span style="font-weight:700">650 and 900 — asked for in CSS on a few <code>strong</code>/links</span><span>stray</span></div>
+      </div>
+      <p class="note">900 can't render (the font stops at 700), so it shows as 700. 650 shows as an in-between weight on 2 places only. Both should be 600 or 700.</p>
+    </div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <h2 class="t">2 · Type scale (desktop → phone)</h2>
+    <div class="panel">
+      <h3 class="s">The system <span class="tag ok">consistent</span></h3>
+      <div class="row"><div class="spec"><b>H1 · page title</b>Playfair 700 · 64 → 40 · lh 1.08</div><p class="sample" style="font-family:var(--font-heading);font-weight:700;font-size:var(--fs-h1);line-height:1.08">Terapie pro děti</p></div>
+      <div class="row"><div class="spec"><b>H2 · section title</b>Playfair 700 · 44 → 32 · lh 1.15</div><p class="sample" style="font-family:var(--font-heading);font-weight:700;font-size:var(--fs-h2);line-height:1.15">Jak probíhá terapie?</p></div>
+      <div class="row"><div class="spec"><b>H3 · panel title (serif)</b>Playfair 700 · 30 → 24 · lh 1.25</div><p class="sample" style="font-family:var(--font-heading);font-weight:700;font-size:var(--fs-h3);line-height:1.25">Mgr. Kristýna Hriciková Glattová</p></div>
+      <div class="row"><div class="spec"><b>H4 · card title</b>Inter 700 · 20 · lh 1.3 · blue</div><p class="sample" style="font-weight:700;font-size:20px;line-height:1.3;color:var(--primary)">Rodiče a budoucí rodiče</p></div>
+      <div class="row"><div class="spec"><b>Lead / subtitle</b>Inter 400 · 20 → 17 · lh 1.6</div><p class="sample" style="font-size:var(--fs-lead);line-height:1.6;color:var(--text-medium)">Individuální psychoterapie online nebo osobně v Ostravě.</p></div>
+      <div class="row"><div class="spec"><b>Body</b>Inter 400 · 17 · lh 1.65</div><p class="sample" style="font-size:17px;line-height:1.65;color:var(--text-medium)">Nemusíte se nijak zvlášť připravovat ani mít předem jasno v tom, co přesně chcete řešit.</p></div>
+      <div class="row"><div class="spec"><b>Small / meta</b>Inter 400 · 15 · lh 1.65</div><p class="sample" style="font-size:15px;line-height:1.65;color:var(--text-medium)">Jedno terapeutické setkání trvá 50 minut.</p></div>
+      <div class="row"><div class="spec"><b>Label</b>Inter 700 · 13 · UPPER · +0.1em</div><p class="sample" style="font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light)">Délka setkání</p></div>
+      <div class="row"><div class="spec"><b>Navigation</b>Inter 500 · 16</div><p class="sample" style="font-weight:500;font-size:16px">O mně &nbsp; Služby &nbsp; Ceník &nbsp; Blog</p></div>
+      <div class="row"><div class="spec"><b>Button</b>Inter 600 · 17 (large) / 16 (header)</div><p class="sample" style="font-weight:600;font-size:17px">Objednat se</p></div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h3 class="s">Outside the system <span class="tag warn">drift</span></h3>
+      <div class="scroll"><table class="t">
+        <tr><th>Where</th><th>Measured</th><th>Should be</th></tr>
+        <tr><td>Article body</td><td>Inter 18 / lh 1.7</td><td>OK on purpose (long reading), but different from body 17</td></tr>
+        <tr><td>Article H1</td><td>Playfair 48</td><td>H1 64→40</td></tr>
+        <tr><td>Article H2</td><td>Playfair 30 and 22 (two sizes)</td><td>one size</td></tr>
+        <tr><td>Article H3, blog card title</td><td>Playfair 20 / 21</td><td>Inter 20 card title, or H3 serif 24</td></tr>
+        <tr><td>Article / blog CTA heading</td><td>Playfair 36 (article), 30 regular 400 (homepage CTA)</td><td>H3 30→24, weight 700</td></tr>
+        <tr><td>Quiz H1</td><td>Playfair 52</td><td>H1 64→40</td></tr>
+        <tr><td>Price list H2</td><td>Playfair 36 and 30</td><td>H2 44→32</td></tr>
+        <tr><td>Price list H3</td><td>Inter 18</td><td>card title 20</td></tr>
+        <tr><td>FAQ question</td><td>Inter 19 → 17</td><td>card title 20</td></tr>
+        <tr><td>Reviews text</td><td>Inter 18 <i>italic</i> / lh 1.8</td><td>body 17, no italic</td></tr>
+        <tr><td>Bylines</td><td>Inter 15.2</td><td>small 15</td></tr>
+        <tr><td>Body on homepage</td><td>15, 16 and 17 all used as "paragraph"</td><td>17 body, 15 small</td></tr>
+      </table></div>
+      <p class="note">Count: the homepage alone has <b>40 different text styles</b> (family × size × weight × line-height). A tidy site of this size needs about 10–12.</p>
+    </div>
+  </section>
+
+  <!-- COLOUR -->
+  <section>
+    <h2 class="t">3 · Colour</h2>
+    <h3 class="s">Core palette <span class="tag ok">consistent</span></h3>
+    <div class="sw">
+      <div class="chip"><i style="background:#2D5A7B"></i><div><b>Primary blue</b>#2D5A7B · headings in cards, links, hero button, CTA panel</div></div>
+      <div class="chip"><i style="background:#1E3D52"></i><div><b>Primary dark</b>#1E3D52 · footer, blog hero gradient</div></div>
+      <div class="chip"><i style="background:#4A7B9D"></i><div><b>Primary light</b>#4A7B9D · portrait blob</div></div>
+      <div class="chip"><i style="background:#E8927C"></i><div><b>Coral accent</b>#E8927C · "Objednat se", active filters, accent lines, dots</div></div>
+      <div class="chip"><i style="background:#F5B5A5"></i><div><b>Coral light</b>#F5B5A5 · hovers, portrait blob</div></div>
+      <div class="chip"><i style="background:#2C3E50"></i><div><b>Text dark</b>#2C3E50 · headings, nav</div></div>
+      <div class="chip"><i style="background:#5A6C7D"></i><div><b>Text medium</b>#5A6C7D · body text</div></div>
+      <div class="chip"><i style="background:#66727F"></i><div><b>Text light</b>#66727F · labels, dates (4.5 : 1)</div></div>
+      <div class="chip"><i style="background:#FAF8F5"></i><div><b>Cream</b>#FAF8F5 · every second section</div></div>
+      <div class="chip"><i style="background:#FFFFFF"></i><div><b>White</b>#FFFFFF · sections, cards</div></div>
+      <div class="chip"><i style="background:#F6F2EC"></i><div><b>Sand</b>#F6F2EC · blog image backdrop</div></div>
+      <div class="chip"><i style="background:#E9E4DD"></i><div><b>Warm hairline</b>#E9E4DD · all 1 px borders</div></div>
+    </div>
+    <h3 class="s" style="margin-top:24px">Off-palette leftovers <span class="tag warn">drift</span></h3>
+    <div class="sw">
+      <div class="chip"><i style="background:#C9A55A"></i><div><b>Gold (logo only)</b>the logo image and favicon heart; never used in CSS. ≈ value</div></div>
+      <div class="chip"><i style="background:linear-gradient(135deg,#F8F9FB,#fff)"></i><div><b>Cool grey #F8F9FB</b>FAQ item gradient</div></div>
+      <div class="chip"><i style="background:#E8F4FD"></i><div><b>Ice blue #E8F4FD</b>article and quiz image backdrop</div></div>
+      <div class="chip"><i style="background:linear-gradient(135deg,rgba(45,90,123,.07),rgba(184,224,237,.2))"></i><div><b>Pale cyan gradient</b>"related articles" box</div></div>
+      <div class="chip"><i style="background:linear-gradient(135deg,#2D5A7B,#E8927C)"></i><div><b>Blue→coral gradient</b>step numbers, title underline</div></div>
+      <div class="chip"><i style="background:#1E3D52"></i><div><b>Article H2 in #1E3D52</b>other pages use text-dark</div></div>
+    </div>
+    <p class="note">White text on coral buttons is 2.4 : 1 (below the 4.5 : 1 guideline). Kept on purpose — owner decision of 11 Nov.</p>
+  </section>
+
+  <!-- SHAPE -->
+  <section>
+    <h2 class="t">4 · Shape, lines, depth</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3 class="s">Corner radius <span class="tag ok">consistent</span></h3>
+        <div class="shapes">
+          <div class="shape" style="border-radius:10px">10<br>small, images</div>
+          <div class="shape" style="border-radius:16px">16<br>cards</div>
+          <div class="shape" style="border-radius:24px">24<br>panels</div>
+          <div class="shape" style="border-radius:999px">pill<br>buttons</div>
+          <div class="shape" style="border-radius:50%;width:72px">circle</div>
+        </div>
+        <p class="note">Plus the morphing blob around the portrait (the one free shape).</p>
+      </div>
+      <div class="panel">
+        <h3 class="s">Borders and shadows <span class="tag ok">mostly</span></h3>
+        <ul class="list">
+          <li><b>1 px warm hairline</b> on cards, filters, contact rows.</li>
+          <li><b>3–4 px left bar</b> on 2 boxes (highlight text coral, technical info blue). <span class="tag warn">2 widths</span></li>
+          <li><b>Shadows:</b> soft two-layer blue-tinted <code>sm / md / lg</code>; 3 one-offs (header, step numbers, hero photo).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section>
+    <h2 class="t">5 · Buttons</h2>
+    <div class="panel">
+      <div class="btns">
+        <a class="btn btn-primary btn-hero" style="pointer-events:none">Objednat se</a>
+        <a class="btn btn-primary" style="pointer-events:none">Objednat se</a>
+      </div>
+      <ul class="list" style="margin-top:16px">
+        <li><b>Coral pill</b> 55 px (in content) and 48 px (header), Inter 600, white text. Used on every page.</li>
+        <li><b>Blue pill</b> 55 px, once: the hero on the homepage.</li>
+        <li><b>Filter pills</b> on the blog: 44 px, white with hairline, coral when active.</li>
+        <li>Links: blue 600 with "→" or "↗". No icons anywhere else (owner choice).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- RHYTHM -->
+  <section>
+    <h2 class="t">6 · Page rhythm</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3 class="s">Homepage section order <span class="tag ok">consistent</span></h3>
+        <div class="rhythm">
+          <div style="background:linear-gradient(135deg,#FAF8F5,#fff);border:1px solid var(--border-light)"><span>Hero</span><span>cream → white</span></div>
+          <div style="background:#fff;border:1px solid var(--border-light)"><span>O mně</span><span>white</span></div>
+          <div style="background:var(--bg-cream);border:1px solid var(--border-light)"><span>Služby</span><span>cream</span></div>
+          <div style="background:#fff;border:1px solid var(--border-light)"><span>Osobní a online</span><span>white</span></div>
+          <div style="background:var(--bg-cream);border:1px solid var(--border-light)"><span>Jak probíhá</span><span>cream</span></div>
+          <div style="background:#fff;border:1px solid var(--border-light)"><span>Pro koho</span><span>white</span></div>
+          <div style="background:var(--bg-cream);border:1px solid var(--border-light)"><span>FAQ</span><span>cream</span></div>
+          <div style="background:#fff;border:1px solid var(--border-light)"><span>Reference</span><span>white</span></div>
+          <div style="background:var(--bg-cream);border:1px solid var(--border-light)"><span>Recenze</span><span>cream</span></div>
+          <div style="background:#fff;border:1px solid var(--border-light)"><span>Kontakt</span><span>white</span></div>
+          <div style="background:linear-gradient(135deg,#1E3D52,#2D5A7B);color:#fff"><span>Footer</span><span>dark blue</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 class="s">Spacing</h3>
+        <ul class="list">
+          <li><b>Section padding</b> 96 px desktop → 56 px phone (fluid). Reviews 72 → 42.</li>
+          <li><b>Header → content</b> 64 → 40.</li>
+          <li><b>Card padding</b> 40 → 24. <b>Grid gap</b> 32 → 16.</li>
+          <li><b>Text width</b> max 66 characters per line.</li>
+          <li><b>Container</b> 1200 px, side gutter 32 → 16.</li>
+          <li>Blog list section is 48 px — tighter than the rest. <span class="tag warn">drift</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- LANGUAGE -->
+  <section>
+    <h2 class="t">7 · Language and voice</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3 class="s">What it is</h3>
+        <ul class="list">
+          <li><b>Czech, formal "vykání"</b>, first person singular from Kristýna ("Pracuji…", "Nabízím…").</li>
+          <li><b>Calm, reassuring, plain</b> — short sentences, no jargon, no pressure ("Nemusíte se nijak zvlášť připravovat").</li>
+          <li><b>Practical facts stated plainly</b>: 50 minut, 1 100 Kč, 36 hodin storno.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3 class="s">Where it wobbles <span class="tag warn">drift</span></h3>
+        <ul class="list">
+          <li><b>"Vám / vám" both used.</b> Homepage: 9× capital "Vám, Vaše", 12× lowercase "vám, vašich". Price list only capital, blog only lowercase. Pick one (lowercase is the modern web norm).</li>
+          <li><b>Generic filler next to personal text</b>: "Připraveni začít?", "Pomáhám lidem v různých životních situacích", one subtitle under every section title.</li>
+          <li><b>"I" vs "we"</b>: mostly "já", but "společně najdeme", "upravujeme", "abychom mohli" switch to "my".</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section>
+    <h2 class="t">8 · Summary</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3 class="s">Consistent now <span class="tag ok">keep</span></h3>
+        <ul class="list">
+          <li>2 font families with clear roles.</li>
+          <li>Core palette: blue + coral + warm neutrals.</li>
+          <li>Homepage type scale H1–label.</li>
+          <li>Radii 10 / 16 / 24 / pill.</li>
+          <li>White / cream section alternation, fluid spacing.</li>
+          <li>Coral pill buttons, 2 sizes.</li>
+          <li>No pictograms; arrows only.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3 class="s">Not consistent yet <span class="tag bad">fix</span></h3>
+        <ul class="list">
+          <li>Blog, article, quiz and price-list headings use their own sizes (20, 21, 22, 30, 36, 48, 52).</li>
+          <li>Body text 15 / 16 / 17 / 18 used interchangeably.</li>
+          <li>Weights 650 / 900 in CSS.</li>
+          <li>3 cool tints left (FAQ, image backdrops, related articles).</li>
+          <li>Italic centred reviews (being replaced in the lab).</li>
+          <li>"Vám" vs "vám"; "já" vs "my".</li>
+          <li>Gold logo isn't part of the palette at all.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

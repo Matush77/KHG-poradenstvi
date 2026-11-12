@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kontakt č. 1 — varianty (lab)</title>
+<!-- LAB ONLY (ui-lab/ is never deployed). Variations of Kontakt variant 1 (white card), no booking button. -->
+<style>
+@font-face { font-family: Inter; src: url("/fonts/Inter/Inter-LatinExt-var.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: Fraunces; src: url("/ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+:root {
+  --navy: #163A55; --primary: #2D5A7B; --slate: #44576A; --mute: #5E6E7C; --coral: #E8927C; --coral-ink: #B5573F;
+  --paper: #FBF8F3; --sky: #E8EFF4; --sky-line: #CCD8E2; --line: #E3E0DA; --peach: #F6E6DC;
+  --fs-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem); --fs-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem); --fs-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --gap: 32px; --pad: 24px; --panel: 32px;
+}
+@media (min-width: 769px) { :root { --gap: 48px; --pad: 32px; --panel: 48px; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--slate); font: 400 1.0625rem/1.65 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 769px) { .wrap { padding: 0 32px; } }
+a { color: inherit; }
+h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 500; letter-spacing: -0.01em; color: var(--navy); }
+
+/* page chrome */
+header.intro { padding-block: 40px 24px; }
+header.intro h1 { font: 600 var(--fs-h2)/1.15 Inter, sans-serif; letter-spacing: -0.02em; color: var(--navy); margin: 0 0 12px; }
+header.intro p { max-width: 66ch; margin: 0 0 8px; }
+nav.jump { position: sticky; top: 0; z-index: 2; background: var(--paper); border-bottom: 1px solid var(--line); }
+nav.jump .wrap { display: flex; gap: 8px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+nav.jump a { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px; background: #fff; border: 1px solid var(--line); color: var(--navy); text-decoration: none; font-size: .9375rem; font-weight: 500; }
+.variant { scroll-margin-top: 64px; }
+.meta { padding-block: 40px 16px; }
+.meta .num { font-size: .9375rem; font-weight: 600; color: var(--coral-ink); margin: 0 0 4px; }
+.meta .name { font-size: 1.25rem; font-weight: 600; color: var(--navy); margin: 0 0 8px; }
+.meta .note { max-width: 66ch; margin: 0; }
+.meta .note b { color: var(--navy); font-weight: 600; }
+
+/* shared parts */
+.band { background: var(--sky); padding-block: 64px; }
+@media (min-width: 769px) { .band { padding-block: 96px; } }
+.title { font-size: var(--fs-h2); line-height: 1.15; margin: 0 0 var(--gap); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 32px; border-radius: 999px; background: var(--coral); color: var(--navy); font: 600 1.125rem Inter, sans-serif; text-decoration: none; }
+@media (max-width: 480px) { .btn.full { width: 100%; } }
+.label { display: block; font-size: .9375rem; font-weight: 500; color: var(--slate); }
+.val { font-size: var(--fs-lead); font-weight: 500; color: var(--navy); text-decoration: underline; text-decoration-color: var(--sky-line); text-underline-offset: 4px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+.val.blue { color: var(--primary); text-decoration: none; font-size: 1.0625rem; }
+
+
+.card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: var(--pad); }
+.card.narrow { max-width: 760px; }
+.grid { display: grid; gap: 16px; }
+.grid > div { padding-top: 16px; border-top: 1px solid var(--sky-line); }
+.grid > div:first-child { border-top: 0; padding-top: 0; }
+@media (min-width: 769px) { .grid { grid-template-columns: repeat(3, 1fr); column-gap: 32px; } .grid > div { border: 0; padding: 0; } }
+.title.in { margin-bottom: 24px; }
+.rows { margin: 0; }
+.rows > div { padding: 16px 0; border-bottom: 1px solid var(--sky-line); }
+.rows > div:first-child { padding-top: 0; }
+.rows > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.rows dd { margin: 0; }
+@media (min-width: 769px) { .rows > div { display: grid; grid-template-columns: 10rem 1fr; align-items: baseline; padding: 20px 0; } }
+.tiles { display: grid; gap: 16px; }
+.tile { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: var(--pad); text-decoration: none; min-height: 44px; }
+.tile:hover { border-color: var(--sky-line); }
+@media (min-width: 769px) { .tiles { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
+.lead { font-size: var(--fs-lead); line-height: 1.5; color: var(--navy); margin: 0 0 24px; padding-bottom: 24px; border-bottom: 1px solid var(--sky-line); }
+.person { display: flex; align-items: center; gap: 16px; margin: 0 0 24px; padding-bottom: 24px; border-bottom: 1px solid var(--sky-line); }
+.person img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex: none; background: var(--peach); }
+.person p { margin: 0; line-height: 1.4; }
+.person strong { display: block; font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: var(--fs-lead); color: var(--navy); }
+@media (min-width: 769px) {
+  .grid.ruled > div + div { border-left: 1px solid var(--sky-line); padding-left: 32px; }
+}
+
+/* no white cards: same layouts straight on the sky band */
+.nocard .card, .nocard .tile { background: none; border: 0; border-radius: 0; padding: 0; }
+.nocard .tile { border-top: 1px solid var(--sky-line); padding-top: 16px; }
+@media (min-width: 769px) { .nocard .tile { padding-top: 24px; } }
+.nocard .card .rows, .nocard .card .grid:not(.ruled) { border-top: 1px solid var(--sky-line); padding-top: 16px; }
+.nocard .card .rows > div:first-child { padding-top: 0; }
+@media (min-width: 769px) { .nocard .card .grid:not(.ruled), .nocard .card .rows { padding-top: 24px; } }
+.toggle { display: inline-flex; gap: 0; border: 1px solid var(--line); border-radius: 999px; background: #fff; padding: 4px; margin-top: 8px; }
+.toggle button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: none; font: 500 .9375rem Inter, sans-serif; color: var(--navy); cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+
+/* 1G: the theme's own row pattern (proposal.css §18 .info-row): full width, hairline above and below each row,
+   20px row padding, 14rem label column on desktop, navy values; no card in either toggle state */
+.rows.theme { border-top: 1px solid var(--sky-line); }
+.rows.theme > div, .rows.theme > div:first-child, .rows.theme > div:last-child { padding: 20px 0; border-bottom: 1px solid var(--sky-line); }
+@media (min-width: 769px) { .rows.theme > div { grid-template-columns: 14rem minmax(0, 1fr); column-gap: var(--gap); } }
+.rows.theme .val { font-size: var(--fs-lead); }
+</style>
+</head>
+<body class="nocard">
+
+<header class="intro wrap">
+  <h1>Kontakt: varianty č. 1</h1>
+  <p>Rozložení č. 1 bez tlačítka „Objednat se“. Teď bez bílých karet, rovnou na modrém pásu, oddělené jen linkami. Přepínačem uvidíte stejné varianty s kartou.</p>
+  <div class="toggle" role="group" aria-label="Karta"><button type="button" data-v="nocard" aria-pressed="true">Bez karty</button><button type="button" data-v="" aria-pressed="false">S bílou kartou</button></div>
+  <p><a href="/ui-lab/kontakt.html">← Všech šest rozložení</a></p>
+</header>
+
+<nav class="jump" aria-label="Varianty">
+  <div class="wrap">
+    <a href="/ui-lab/kontakt-1.html#1a">1A Současná</a>
+    <a href="/ui-lab/kontakt-1.html#1b">1B Nadpis v kartě</a>
+    <a href="/ui-lab/kontakt-1.html#1c">1C Řádky v kartě</a>
+    <a href="/ui-lab/kontakt-1.html#1d">1D Tři karty</a>
+    <a href="/ui-lab/kontakt-1.html#1e">1E S větou nahoře</a>
+    <a href="/ui-lab/kontakt-1.html#1f">1F S fotkou</a>
+    <a href="/ui-lab/kontakt-1.html#1g">1G Řádky (doporučená)</a>
+  </div>
+</nav>
+
+<section class="variant" id="1a">
+  <div class="meta wrap"><p class="num">1A</p><p class="name">Současná</p>
+    <p class="note">Výchozí stav bez tlačítka: nadpis nad kartou, tři údaje vedle sebe.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="card">
+      <div class="grid">
+        <div><span class="label">E-mail</span><a class="val blue" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></div>
+        <div><span class="label">Telefon</span><a class="val blue" href="tel:+420605990980">+420 605 990 980</a></div>
+        <div><span class="label">Osobní setkání</span><a class="val blue" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<section class="variant" id="1b">
+  <div class="meta wrap"><p class="num">1B</p><p class="name">Nadpis v kartě</p>
+    <p class="note">Nadpis je uvnitř karty, takže zmizí velká mezera mezi nadpisem a kartou. Karta je jeden celek: „tady je kontakt“.</p></div>
+  <div class="band"><div class="wrap">
+    <div class="card">
+      <h2 class="title in">Kontakt</h2>
+      <div class="grid">
+        <div><span class="label">E-mail</span><a class="val blue" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></div>
+        <div><span class="label">Telefon</span><a class="val blue" href="tel:+420605990980">+420 605 990 980</a></div>
+        <div><span class="label">Osobní setkání</span><a class="val blue" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<section class="variant" id="1c">
+  <div class="meta wrap"><p class="num">1C</p><p class="name">Řádky v kartě</p>
+    <p class="note">Údaje pod sebou jako řádky s linkou (jako Praktické informace), i na počítači. Klidnější, dobře se čte; karta je užší, max. 66 znaků textu.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="card narrow">
+      <dl class="rows">
+        <div><dt class="label">E-mail</dt><dd><a class="val blue" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></dd></div>
+        <div><dt class="label">Telefon</dt><dd><a class="val blue" href="tel:+420605990980">+420 605 990 980</a></dd></div>
+        <div><dt class="label">Osobní setkání</dt><dd><a class="val blue" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
+      </dl>
+    </div>
+  </div></div>
+</section>
+
+<section class="variant" id="1d">
+  <div class="meta wrap"><p class="num">1D</p><p class="name">Tři karty</p>
+    <p class="note">Každý údaj má vlastní malou bílou kartu a celá karta je odkaz (větší plocha na klepnutí). Na telefonu pod sebou.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="tiles">
+      <a class="tile" href="mailto:kristyna@khgporadenstvi.cz"><span class="label">E-mail</span><span class="val blue">kristyna@khgporadenstvi.cz</span></a>
+      <a class="tile" href="tel:+420605990980"><span class="label">Telefon</span><span class="val blue">+420 605 990 980</span></a>
+      <a class="tile" href="#"><span class="label">Osobní setkání</span><span class="val blue">Vítkovická 3299/3a, 702 00 Ostrava</span></a>
+    </div>
+  </div></div>
+</section>
+
+<section class="variant" id="1e">
+  <div class="meta wrap"><p class="num">1E</p><p class="name">S větou nahoře</p>
+    <p class="note">Jedna věta v kartě říká, k čemu kontakt slouží, pod linkou tři údaje. Na počítači oddělené svislými linkami.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="card">
+      <p class="lead">S dotazem mi napište nebo zavolejte.</p>
+      <div class="grid ruled">
+        <div><span class="label">E-mail</span><a class="val blue" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></div>
+        <div><span class="label">Telefon</span><a class="val blue" href="tel:+420605990980">+420 605 990 980</a></div>
+        <div><span class="label">Osobní setkání</span><a class="val blue" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<section class="variant" id="1f">
+  <div class="meta wrap"><p class="num">1F</p><p class="name">S fotkou</p>
+    <p class="note">Nahoře v kartě malá fotka a jméno, pod linkou tři údaje. Na konci stránky je jasné, komu píšete. Fotka je ta z úvodu, už načtená.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <div class="card">
+      <div class="person"><img src="/images/photo.webp" width="72" height="72" alt="" decoding="async"><p><strong>Kristýna Hriciková Glattová</strong>Psycholog ve zdravotnictví a terapeut</p></div>
+      <div class="grid ruled">
+        <div><span class="label">E-mail</span><a class="val blue" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></div>
+        <div><span class="label">Telefon</span><a class="val blue" href="tel:+420605990980">+420 605 990 980</a></div>
+        <div><span class="label">Osobní setkání</span><a class="val blue" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<section class="variant" id="1g">
+  <div class="meta wrap"><p class="num">1G · doporučená</p><p class="name">Řádky jako Praktické informace</p>
+    <p class="note">Nová varianta podle pravidel tématu: <b>žádná krabice, celá šířka, řádky s linkou</b> se stejnými mírami jako Praktické informace na hlavní stránce (20 px řádek, sloupec popisku 14rem, modrá linka). Na pásu je tak jen jeden druh prvku a Kontakt vypadá jako zbytek stránky, ne jako vložená karta.</p></div>
+  <div class="band"><div class="wrap">
+    <h2 class="title">Kontakt</h2>
+    <dl class="rows theme">
+      <div><dt class="label">E-mail</dt><dd><a class="val" href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></dd></div>
+      <div><dt class="label">Telefon</dt><dd><a class="val" href="tel:+420605990980">+420 605 990 980</a></dd></div>
+      <div><dt class="label">Osobní setkání</dt><dd><a class="val" href="#">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
+    </dl>
+  </div></div>
+</section>
+
+<div style="height:48px"></div>
+<script>
+document.querySelectorAll('.toggle button').forEach(b => b.addEventListener('click', () => {
+  document.body.className = b.dataset.v;
+  document.querySelectorAll('.toggle button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+</body>
+</html>

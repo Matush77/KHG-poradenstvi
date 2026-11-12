@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Logo options — lab</title>
+<style>
+@font-face { font-family: Fraunces; src: url("/ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: Inter; src: url("/fonts/Inter/Inter-LatinExt-var.woff2") format("woff2"); font-weight: 300 700; font-display: swap; }
+:root { --navy: #163A55; --slate: #44576A; --mute: #5E6E7C; --coral: #E8927C; --coral-ink: #B5573F; --paper: #FBF8F3; --sky: #E8EFF4; --line: #E3E0DA; --peach: #F6E6DC; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #fff; color: var(--slate); font: 400 1.0625rem/1.65 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+h1 { font: 500 clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem)/1.15 Fraunces, serif; letter-spacing: -.01em; color: var(--navy); margin: 48px 0 12px; font-synthesis: none; }
+.intro { max-width: 66ch; margin: 0 0 8px; }
+section.opt { padding-block: 48px; border-bottom: 1px solid var(--line); }
+.opt h2 { font: 600 1.25rem/1.3 Inter, sans-serif; color: var(--navy); margin: 0 0 4px; }
+.opt h2 span { color: var(--coral-ink); margin-right: 8px; }
+.opt > p { max-width: 66ch; margin: 0 0 24px; }
+.frames { display: grid; gap: 24px; align-items: start; }
+.frames > div:first-child { max-width: 375px; } .frames > div { min-width: 0; }
+@media (min-width: 900px) { .wrap { padding: 0 32px; } }
+.cap { font-size: .9375rem; color: var(--mute); margin: 0 0 8px; }
+.frame { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--paper); }
+.bar { height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--paper); }
+.desk .bar { padding: 0 32px; }
+.burger { width: 44px; height: 44px; display: grid; place-content: center; gap: 5px; flex: none; }
+.burger i { display: block; width: 22px; height: 2px; background: var(--navy); border-radius: 2px; }
+.nav { display: flex; align-items: center; gap: 24px; font-size: .9375rem; font-weight: 500; color: var(--navy); white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; background: var(--coral); color: var(--navy); font-weight: 600; font-size: .9375rem; }
+.desk .nav { display: none; }
+@media (min-width: 900px) { .desk .nav { display: flex; } }
+.under { padding: 24px 16px 28px; text-align: center; }
+.under b { display: block; font: 500 2.25rem/1.1 Fraunces, serif; color: var(--navy); font-synthesis: none; letter-spacing: -.01em; }
+.desk .under { text-align: left; padding: 32px; }
+.fav { display: flex; gap: 16px; align-items: center; margin-top: 16px; font-size: .9375rem; color: var(--mute); }
+
+/* logo A: Fraunces wordmark */
+.la { display: block; text-decoration: none; line-height: 1; }
+.la .n { display: block; font: 500 19px/1.1 Fraunces, serif; color: var(--navy); letter-spacing: -.005em; font-synthesis: none; white-space: nowrap; }
+.la .r { display: block; margin-top: 6px; font: 500 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+
+/* logo B: monogram + name */
+.lb { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.mono { flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--peach); display: grid; place-items: center; font: 500 20px/1 Fraunces, serif; color: var(--navy); letter-spacing: -.02em; font-synthesis: none; }
+.lb .n { display: block; font: 500 17px/1.15 Fraunces, serif; color: var(--navy); font-synthesis: none; white-space: nowrap; }
+.lb .r { display: block; margin-top: 4px; font: 500 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+
+/* logo C: today's layout (rule + dotted line), new type and colours */
+.lc { display: grid; grid-template-columns: 2px auto; column-gap: 10px; text-decoration: none; }
+.lc::before { content: ''; grid-row: 1 / span 2; background: var(--coral); border-radius: 2px; }
+.lc .n { font: 500 19px/1.15 Fraunces, serif; color: var(--navy); font-synthesis: none; white-space: nowrap; padding-bottom: 5px; border-bottom: 1.5px dotted var(--coral); }
+.lc .r { margin-top: 5px; font: 500 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.today img { height: 48px; width: auto; display: block; }
+
+/* heart: the current favicon used as a mask, so it can take any theme colour (lab only; the real file would be recoloured) */
+.heart { display: inline-block; flex: none; -webkit-mask: url("/images/favicon.webp") center / contain no-repeat; mask: url("/images/favicon.webp") center / contain no-repeat; background: var(--coral); }
+.lh { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.lh .tile { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; }
+.lh .tile .heart { width: 30px; height: 30px; }
+.lh .n { display: block; font: 500 17px/1.15 Fraunces, serif; color: var(--navy); font-synthesis: none; white-space: nowrap; }
+.lh .r { display: block; margin-top: 4px; font: 500 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.lh.coral .tile { background: var(--peach); } .lh.coral .heart { background: var(--coral); }
+.lh.navy .tile { background: var(--sky); } .lh.navy .heart { background: var(--navy); }
+.lh.bare .tile { width: 28px; background: none; } .lh.bare .heart { background: var(--coral); width: 26px; height: 26px; }
+.icons { display: grid; gap: 16px; margin-top: 24px; }
+@media (min-width: 700px) { .icons { grid-template-columns: repeat(4, 1fr); } }
+.ic { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #fff; }
+.ic h3 { font: 600 .9375rem/1.3 Inter, sans-serif; color: var(--navy); margin: 0 0 12px; }
+.tab { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 8px 8px 0 0; background: #DEE1E6; font-size: 13px; color: #202124; white-space: nowrap; overflow: hidden; }
+.tab.dark { background: #35363A; color: #E8EAED; }
+.sizes { display: flex; align-items: end; gap: 16px; margin-top: 12px; }
+.app { width: 60px; height: 60px; border-radius: 14px; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Logo: směry</h1>
+  <p class="intro">Všechny tři používají jen nová písma webu (Fraunces + Inter) a barvy tématu. Logo jako text nepotřebuje žádný obrázek, je ostré na každém displeji a zvětší se s písmem prohlížeče. Pro sociální sítě a e-maily by se z vybraného udělal i obrázek (SVG/PNG).</p>
+  <p class="intro">Vlevo telefon (375 px), vpravo počítač, pod lištou nadpis stránky pro porovnání s ním.</p>
+</div>
+
+<template id="t">
+  <div class="frames">
+    <div><p class="cap">Telefon</p><div class="frame"><div class="bar"><span class="slot"></span><span class="burger"><i></i><i></i><i></i></span></div><div class="under"><b>Terapie pro děti a dospělé</b></div></div></div>
+    <div class="desk"><p class="cap">Počítač</p><div class="frame"><div class="bar"><span class="slot"></span><span class="nav">O mně · Služby · Ceník · Blog · Kvízy · Kontakt <span class="btn">Objednat se</span></span><span class="burger" style="display:none"></span></div><div class="under"><b>Terapie pro děti a dospělé</b></div></div></div>
+  </div>
+</template>
+
+<section class="opt wrap" data-logo="today">
+  <h2><span>0</span>Dnešní logo</h2>
+  <p>Pro srovnání. Zlatá barva ani úzké písmo nejsou nikde jinde na webu a vedle Fraunces působí cize.</p>
+</section>
+<section class="opt wrap" data-logo="a">
+  <h2><span>A</span>Jméno ve Fraunces</h2>
+  <p>Nejjednodušší a nejklidnější: jméno stejným písmem jako nadpisy, profese drobně pod ním. Web působí jako jeden celek. Doporučuji.</p>
+</section>
+<section class="opt wrap" data-logo="b">
+  <h2><span>B</span>Monogram a jméno</h2>
+  <p>Malá broskvová značka „khg“ (jako doména) vedle jména. Stejná značka může sloužit jako ikona v záložce prohlížeče a profilová fotka na sítích.</p>
+</section>
+<section class="opt wrap" data-logo="c">
+  <h2><span>C</span>Dnešní rozvržení, nová písma</h2>
+  <p>Zachová svislou a tečkovanou linku z dnešního loga, aby ho stálí klienti poznali, jen v korálové a navy. Nejmenší změna.</p>
+</section>
+
+<section class="opt wrap" data-logo="h1">
+  <h2><span>D</span>Srdíčko a jméno: korálová</h2>
+  <p>Dnešní ručně kreslené srdíčko, jen v barvě tlačítka, na broskvovém čtverečku. Logo, ikona v záložce i profilovka na sítích jsou jedna značka.</p>
+</section>
+<section class="opt wrap" data-logo="h2">
+  <h2><span>E</span>Srdíčko a jméno: navy</h2>
+  <p>Totéž v tmavě modré na světle modrém čtverečku. Klidnější, korálová zůstane jen pro objednání.</p>
+</section>
+<section class="opt wrap" data-logo="h3">
+  <h2><span>F</span>Srdíčko bez čtverečku</h2>
+  <p>Jen korálové srdíčko před jménem, nejlehčí varianta.</p>
+</section>
+<section class="opt wrap" id="ikona">
+  <h2><span>·</span>Srdíčko jako ikona</h2>
+  <p>Jak by vypadalo v záložce prohlížeče (světlý i tmavý režim) a jako ikona webu uloženého na ploše telefonu.</p>
+  <div class="icons">
+    <div class="ic"><h3>Dnes: zlatá</h3><div class="tab"><span class="heart" style="width:16px;height:16px;background:#C0A742"></span>Mgr. Kristýna Hriciková…</div><div class="tab dark"><span class="heart" style="width:16px;height:16px;background:#C0A742"></span>Mgr. Kristýna Hriciková…</div><div class="sizes"><span class="app" style="background:#fff;border:1px solid var(--line)"><span class="heart" style="width:38px;height:38px;background:#C0A742"></span></span></div></div>
+    <div class="ic"><h3>Korálová</h3><div class="tab"><span class="heart" style="width:16px;height:16px;background:var(--coral)"></span>Mgr. Kristýna Hriciková…</div><div class="tab dark"><span class="heart" style="width:16px;height:16px;background:var(--coral)"></span>Mgr. Kristýna Hriciková…</div><div class="sizes"><span class="app" style="background:var(--peach)"><span class="heart" style="width:38px;height:38px;background:var(--coral)"></span></span></div></div>
+    <div class="ic"><h3>Navy</h3><div class="tab"><span class="heart" style="width:16px;height:16px;background:var(--navy)"></span>Mgr. Kristýna Hriciková…</div><div class="tab dark"><span class="heart" style="width:16px;height:16px;background:var(--navy)"></span>Mgr. Kristýna Hriciková…</div><div class="sizes"><span class="app" style="background:var(--sky)"><span class="heart" style="width:38px;height:38px;background:var(--navy)"></span></span></div></div>
+    <div class="ic"><h3>Korálová na navy</h3><div class="tab"><span class="app" style="width:16px;height:16px;border-radius:4px;background:var(--navy)"><span class="heart" style="width:11px;height:11px;background:var(--coral)"></span></span>Mgr. Kristýna Hriciková…</div><div class="tab dark"><span class="app" style="width:16px;height:16px;border-radius:4px;background:var(--navy)"><span class="heart" style="width:11px;height:11px;background:var(--coral)"></span></span>Mgr. Kristýna Hriciková…</div><div class="sizes"><span class="app" style="background:var(--navy)"><span class="heart" style="width:38px;height:38px;background:var(--coral)"></span></span></div></div>
+  </div>
+</section>
+
+<script>
+const logos = {
+  today: '<a class="today" href="#"><img src="/images/logo.webp" width="381" height="96" alt=""></a>',
+  a: '<a class="la" href="#"><span class="n">Kristýna Hriciková Glattová</span><span class="r">Psycholog a terapeut</span></a>',
+  b: '<a class="lb" href="#"><span class="mono">khg</span><span><span class="n">Kristýna Hriciková Glattová</span><span class="r">Psycholog a terapeut</span></span></a>',
+  h1: '<a class="lh coral" href="#"><span class="tile"><span class="heart"></span></span><span><span class="n">Kristýna Hriciková Glattová</span><span class="r">Psycholog a terapeut</span></span></a>',
+  h2: '<a class="lh navy" href="#"><span class="tile"><span class="heart"></span></span><span><span class="n">Kristýna Hriciková Glattová</span><span class="r">Psycholog a terapeut</span></span></a>',
+  h3: '<a class="lh bare" href="#"><span class="tile"><span class="heart"></span></span><span><span class="n">Kristýna Hriciková Glattová</span><span class="r">Psycholog a terapeut</span></span></a>',
+  c: '<a class="lc" href="#"><span class="n">Kristýna Hriciková Glattová</span><span class="r">Psycholog a terapeut</span></a>',
+};
+const t = document.getElementById("t");
+document.querySelectorAll("[data-logo]").forEach(s => {
+  const n = t.content.cloneNode(true);
+  n.querySelectorAll(".slot").forEach(x => x.outerHTML = logos[s.dataset.logo]);
+  s.appendChild(n);
+  if (s.dataset.logo === "b") s.insertAdjacentHTML("beforeend", '<div class="fav"><span class="mono" style="width:32px;height:32px;font-size:15px;border-radius:8px">khg</span> ikona v záložce a na sítích</div>');
+});
+</script>
+</body>
+</html>

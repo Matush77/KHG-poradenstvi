@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI lab: what changed</title>
+<style>
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; }
+@font-face { font-family: 'Playfair Display'; src: url('/fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2'); font-weight: 600 700; }
+:root {
+  --bg: #FAF8F5; --card: #fff; --text: #2C3E50; --muted: #5A6C7D; --line: #E9E4DD;
+  --primary: #2D5A7B; --accent: #E8927C; --before: #F7EDEA; --after: #EAF1F5;
+}
+* { box-sizing: border-box; margin: 0; }
+body { font: 15px/1.55 Inter, system-ui, sans-serif; color: var(--text); background: var(--bg); padding: 32px 16px 96px; }
+.wrap { max-width: 1120px; margin: 0 auto; }
+h1 { font: 700 clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem)/1.15 'Playfair Display', Georgia, serif; letter-spacing: -0.01em; }
+.intro { color: var(--muted); max-width: 62ch; margin: 12px 0 24px; text-wrap: pretty; }
+.nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+.nav a { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--primary); text-decoration: none; }
+h2 { font: 700 1.375rem/1.25 'Playfair Display', Georgia, serif; margin: 40px 0 6px; color: var(--primary); scroll-margin-top: 16px; }
+h2 small { font: 700 12px Inter, sans-serif; letter-spacing: .1em; color: var(--muted); margin-right: 8px; vertical-align: middle; }
+.lede { color: var(--muted); margin-bottom: 14px; max-width: 70ch; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+  box-shadow: 0 1px 2px hsl(205 40% 25% / .05), 0 4px 14px hsl(205 40% 25% / .05); }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: #FCFBF9; }
+td:nth-child(1) { font-weight: 600; width: 20%; }
+td:nth-child(2) { background: var(--before); width: 25%; }
+td:nth-child(3) { background: var(--after); width: 25%; }
+td:nth-child(4) { color: var(--muted); }
+code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(45,90,123,.07); padding: 1px 5px; border-radius: 5px; white-space: nowrap; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1px solid rgba(0,0,0,.1); }
+.kept { background: #fff; border: 1px dashed var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 40px; }
+.kept h2 { margin-top: 0; }
+.kept li { margin: 4px 0 4px 18px; }
+/* Phone: each row becomes a card with labelled cells */
+@media (max-width: 720px) {
+  table, tbody, tr, td { display: block; width: 100% !important; }
+  thead { display: none; }
+  table { background: transparent; border: 0; box-shadow: none; border-radius: 0; }
+  tr { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+  td { border-bottom: 1px solid var(--line); }
+  td::before { content: attr(data-l); display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  td:nth-child(1)::before { content: none; }
+  td:nth-child(1) { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>What the polish layer changes</h1>
+  <p class="intro">Every change in <code>ui-lab/polish.css</code>, with the value before and after. All numbers are rendered sizes in px: the first is a 375 px phone and the second is desktop. "→" inside a cell means the value scales smoothly between the two.</p>
+  <nav class="nav" id="nav"></nav>
+
+  <section>
+  <h2 id="p2"><small>P2</small>Typography</h2>
+  <p class="lede">Fewer type sizes, a consistent line height and better line breaks.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Hero title (h1)</td><td data-l="Before">40 / 64, line-height 1.10</td><td data-l="After">40 → 64, line-height 1.08, letter-spacing −0.02em</td><td data-l="Why">Large serif type looks looser than it is, so slightly tighter tracking reads as more refined.</td></tr>
+    <tr><td>Section titles (h2)</td><td data-l="Before">32 / 48, line-height 1.20</td><td data-l="After">32 → 44, line-height 1.15</td><td data-l="Why">48 px was louder than the rest of the type scale. Steps of 1.25 between sizes feel calmer.</td></tr>
+    <tr><td>Section title underline</td><td data-l="Before">80 × 4 px, 10 px below</td><td data-l="After">56 × 3 px, 12 px below</td><td data-l="Why">A thinner, shorter line is quieter and works as an accent rather than a bar.</td></tr>
+    <tr><td>Serif sub-headings (name, service, publication, ČAP, CTA, "Kde mě najdete")</td><td data-l="Before">Four different sizes: 24 / 28 / 32 / 36</td><td data-l="After">One size: 24 → 30</td><td data-l="Why">The same role should have the same size. On phones the name (32) was as big as the section titles (32).</td></tr>
+    <tr><td>Card titles (benefits, steps, who-for)</td><td data-l="Before">Inter 20, line-height 1.2, 24 px gap to text</td><td data-l="After">Inter 20, line-height 1.3, 10 px gap to text</td><td data-l="Why">A title belongs to its text, so the gap inside the group should be smaller than the gaps between groups.</td></tr>
+    <tr><td>Body paragraphs (homepage)</td><td data-l="Before">Mix of 15 / 16 / 17 / 18 px, line-height 1.55 / 1.6 / 1.7 / 1.8</td><td data-l="After">17 px, line-height 1.65 everywhere</td><td data-l="Why">One body style is the single biggest consistency gain.</td></tr>
+    <tr><td>Lead and section subtitles</td><td data-l="Before">18–22 px, line-height 1.6–1.7</td><td data-l="After">17 → 20, line-height 1.6, max 40rem wide</td><td data-l="Why">Subtitles were nearly heading-sized on phones.</td></tr>
+    <tr><td>Uppercase labels (Vzdělání, Délka setkání…)</td><td data-l="Before">13 px, tracking 0.08 / 0.09 / 0.12em</td><td data-l="After">13 px, tracking 0.1em, weight 700</td><td data-l="Why">There were three recipes for the same element.</td></tr>
+    <tr><td>Label grey (<code>--text-light</code>)</td><td data-l="Before"><span class="sw" style="background:#7F8C9A"></span>#7F8C9A (contrast 3.2:1)</td><td data-l="After"><span class="sw" style="background:#66727F"></span>#66727F (contrast 4.5:1)</td><td data-l="Why">Easier to read and passes accessibility contrast. It barely looks different.</td></tr>
+    <tr><td>Line breaks</td><td data-l="Before">Browser default</td><td data-l="After">Headings: <code>text-wrap: balance</code>. Paragraphs: <code>pretty</code></td><td data-l="Why">Avoids a single word left alone on the last line.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p3"><small>P3</small>Line length</h2>
+  <p class="lede">The number of characters per line on desktop. The comfortable range is 45–75.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>About (O mně) paragraphs</td><td data-l="Before">≈ 82 characters</td><td data-l="After">≤ 66 characters</td><td data-l="Why">Long lines make the eye lose its place when it returns to the next line.</td></tr>
+    <tr><td>Publication text</td><td data-l="Before">≈ 81</td><td data-l="After">≤ 66</td><td data-l="Why">Same reason.</td></tr>
+    <tr><td>"Osobní a online terapie" intro</td><td data-l="Before">≈ 111, full width</td><td data-l="After">Centred block, max 42rem</td><td data-l="Why">Centred text with very long lines is the hardest to read.</td></tr>
+    <tr><td>Service description, CTA text</td><td data-l="Before">≈ 79</td><td data-l="After">Max 42rem, centred</td><td data-l="Why">Same reason.</td></tr>
+    <tr><td>ČAP membership text</td><td data-l="Before">≈ 102</td><td data-l="After">≤ 66</td><td data-l="Why">Same reason.</td></tr>
+    <tr><td>Testimonials</td><td data-l="Before">≈ 89, italic</td><td data-l="After">Max 40rem, centred</td><td data-l="Why">Italic text is especially tiring on long lines.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p4"><small>P4</small>Vertical spacing</h2>
+  <p class="lede">The space between sections and inside them. The phone homepage got about 15 % shorter, from about 19,900 px to 16,900 px.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Section padding (top and bottom)</td><td data-l="Before">96 / 96. The same on phone and desktop</td><td data-l="After">56 → 96</td><td data-l="Why">Desktop spacing on a small screen feels empty and makes the page scroll forever.</td></tr>
+    <tr><td>Testimonials padding</td><td data-l="Before">48 / 64</td><td data-l="After">42 → 72 (¾ of the other sections)</td><td data-l="Why">Now tied to the same rhythm as the other sections.</td></tr>
+    <tr><td>Section header to content</td><td data-l="Before">96 px</td><td data-l="After">40 → 64</td><td data-l="Why">The header gap equalled the gap between sections, so headings floated away from their own content.</td></tr>
+    <tr><td>Hero bottom (phone)</td><td data-l="Before">64</td><td data-l="After">56 (same token as sections)</td><td data-l="Why">Consistency.</td></tr>
+    <tr><td>Gaps between cards</td><td data-l="Before">24 / 32 / 48 (mixed)</td><td data-l="After">16 → 32 (one token)</td><td data-l="Why">Consistency.</td></tr>
+    <tr><td>About name → role</td><td data-l="Before">8 px</td><td data-l="After">4 px</td><td data-l="Why">The name and title read as one unit.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p5"><small>P5</small>Section backgrounds</h2>
+  <p class="lede">Sections now strictly alternate between white and warm cream.</p>
+  <table><thead><tr><th>Section</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Osobní a online terapie</td><td data-l="Before"><span class="sw" style="background:#F8F9FB"></span>Cool grey-blue gradient</td><td data-l="After"><span class="sw" style="background:#fff"></span>White</td><td data-l="Why">Cool tints clashed with the warm cream used elsewhere.</td></tr>
+    <tr><td>Jak probíhá terapie</td><td data-l="Before"><span class="sw" style="background:#fff"></span>White</td><td data-l="After"><span class="sw" style="background:#FAF8F5"></span>Cream</td><td data-l="Why">Keeps the alternation.</td></tr>
+    <tr><td>Pro koho je terapie</td><td data-l="Before"><span class="sw" style="background:#F8F9FB"></span>Cool gradient</td><td data-l="After"><span class="sw" style="background:#fff"></span>White</td><td data-l="Why">Same as above.</td></tr>
+    <tr><td>Časté dotazy</td><td data-l="Before"><span class="sw" style="background:#fff"></span>White</td><td data-l="After"><span class="sw" style="background:#FAF8F5"></span>Cream</td><td data-l="Why">Before, the FAQ and References sections were both white, with no separation.</td></tr>
+    <tr><td>Co říkají klienti</td><td data-l="Before"><span class="sw" style="background:#F0F7FA"></span>White → light blue</td><td data-l="After"><span class="sw" style="background:#FAF8F5"></span>Cream</td><td data-l="Why">Same as above.</td></tr>
+    <tr><td>Kontakt</td><td data-l="Before"><span class="sw" style="background:#FAF8F5"></span>Cream</td><td data-l="After"><span class="sw" style="background:#fff"></span>White</td><td data-l="Why">Keeps the alternation.</td></tr>
+    <tr><td>ČAP card, "online" link cards</td><td data-l="Before">Cream → white gradient</td><td data-l="After">Flat cream</td><td data-l="Why">The gradients were too subtle to notice and only looked uneven.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p6"><small>P6</small>Cards and layout</h2>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Card padding</td><td data-l="Before">48 (even on phones), 32, 28 (mixed)</td><td data-l="After">24 → 40 (cards). 20 → 28 (small cards)</td><td data-l="Why">With 48 px on a phone, text was squeezed to about 29 characters per line.</td></tr>
+    <tr><td>Card borders</td><td data-l="Before">None, 1 px or 2 px grey (mixed)</td><td data-l="After">1 px warm hairline <span class="sw" style="background:#E9E4DD"></span>#E9E4DD on all</td><td data-l="Why">Thin, warm lines feel softer, and 2 px grey looked heavy.</td></tr>
+    <tr><td>Shadows</td><td data-l="Before">13 different one-layer black shadows</td><td data-l="After">3 levels (sm, md, lg), two layers each, tinted brand blue</td><td data-l="Why">A tinted, layered shadow looks like real soft light. Black shadows look grey and dirty.</td></tr>
+    <tr><td>"Osobní a online" cards (desktop)</td><td data-l="Before">4 columns, ≈130 px of centred text, icon above</td><td data-l="After">2 × 2, left-aligned, icon on the left</td><td data-l="Why">The text wrapped every 2–3 words.</td></tr>
+    <tr><td>"Pro koho" cards (desktop)</td><td data-l="Before">4 columns, ≈196 px of text</td><td data-l="After">2 × 2</td><td data-l="Why">Same reason.</td></tr>
+    <tr><td>Process steps</td><td data-l="Before">48 px padding, ≈164 px of text</td><td data-l="After">20–28 px top and bottom, 12 px sides</td><td data-l="Why">More width for the text in the same four columns.</td></tr>
+    <tr><td>Step number circles</td><td data-l="Before">60 px, 28 px number, off-brand blue glow</td><td data-l="After">56 px, 24 px number, brand-blue glow</td><td data-l="Why">The glow used #4A90E2, which is not one of the site's colours.</td></tr>
+    <tr><td>Benefit icon circles</td><td data-l="Before">80 px, blue → #4A90E2 gradient</td><td data-l="After">64 px (desktop), flat 8 % brand blue</td><td data-l="Why">Calmer and on-palette.</td></tr>
+    <tr><td>Practical info box</td><td data-l="Before">Cool grey gradient</td><td data-l="After">White with a small shadow</td><td data-l="Why">It now sits on a cream section.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p7"><small>P7</small>Corner rounding</h2>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Radius values in use</td><td data-l="Before">3, 8, 10, 12, 14, 16, 18, 20, 24, 28 px</td><td data-l="After">10 (small and images), 16 (cards), 24 (big panels), pill</td><td data-l="Why">Ten nearly identical values read as "assembled". Three read as "designed".</td></tr>
+    <tr><td>Examples</td><td data-l="Before">Testimonial 20, ČAP 20, CTA 28, pricing info 18, article boxes 14</td><td data-l="After">Testimonial 24, ČAP 24, CTA 24, pricing info 16, article boxes 16</td><td data-l="Why">Same reason.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p8"><small>P8</small>Buttons and motion</h2>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Button colour (Objednat se)</td><td data-l="Before"><span class="sw" style="background:#E8927C"></span>Coral #E8927C</td><td data-l="After"><span class="sw" style="background:#E8927C"></span>Unchanged, coral kept</td><td data-l="Why">Your choice. For reference, white text on coral has a contrast of 2.4:1 (the accessibility minimum is 4.5:1). Dark text on coral would be 4.6:1.</td></tr>
+    <tr><td>Button sizes</td><td data-l="Before">3 heights: 54 / 65 / 69 px</td><td data-l="After">2 heights: ≈48 (normal) / ≈56 (large)</td><td data-l="Why">Fewer variants, and still well above the 44 px minimum tap size.</td></tr>
+    <tr><td>Button padding</td><td data-l="Before">14×32, 18×40, 20×48</td><td data-l="After">13×28, 16×34</td><td data-l="Why">A side-to-top padding ratio of about 2:1 to 2.2:1 is the classic proportion.</td></tr>
+    <tr><td>Hover lift</td><td data-l="Before">2–5 px jump, also triggered on touch screens</td><td data-l="After">1–2 px, only on devices with a mouse</td><td data-l="Why">A calm site should not have bouncy buttons.</td></tr>
+    <tr><td>Transitions</td><td data-l="Before"><code>all 0.3s</code></td><td data-l="After">Only colour, shadow, transform and opacity, 0.2–0.25s ease-out</td><td data-l="Why">Faster and smoother. Animating <code>all</code> can make layout jump.</td></tr>
+    <tr><td>Keyboard focus</td><td data-l="Before">Default or coral, inconsistent</td><td data-l="After">2 px blue outline with a 3 px gap, everywhere</td><td data-l="Why">Visible and consistent for keyboard users.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p9"><small>P9</small>Small details</h2>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>IVFka highlight box (About)</td><td data-l="Before"><span class="sw" style="background:#FFEDD5"></span>Yellow-peach gradient, 4 px bar, extra coral smudge at the bottom</td><td data-l="After"><span class="sw" style="background:#FAF8F5"></span>Flat cream, 3 px coral bar</td><td data-l="Why">The yellow was the only one on the site, and the smudge looked like a rendering glitch.</td></tr>
+    <tr><td>FAQ questions</td><td data-l="Before">20 px, padding 32 / 48 (24 / 32 on phone)</td><td data-l="After">17 → 19 px, padding 24 / 20 → 32</td><td data-l="Why">Lighter rows that are easier to scan.</td></tr>
+    <tr><td>Header shadow</td><td data-l="Before">Soft black glow</td><td data-l="After">1 px warm line plus a faint blue shadow</td><td data-l="Why">A crisper edge.</td></tr>
+    <tr><td>Tick marks (✓) in lists</td><td data-l="Before">20 px, sitting slightly low</td><td data-l="After">16 px, aligned to the first line</td><td data-l="Why">Optical alignment.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p10"><small>P10</small>Blog articles</h2>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Text column</td><td data-l="Before">1000 px container, ≈95 characters per line</td><td data-l="After">832 px container, max 68 characters</td><td data-l="Why">Articles are long reads, so line length matters most here.</td></tr>
+    <tr><td>Body text</td><td data-l="Before">p 16 px, list items 15 px, line-height 1.8</td><td data-l="After">p and li both 17 → 18 px, line-height 1.7</td><td data-l="Why">Bigger, consistent text for reading, and list items no longer shrink.</td></tr>
+    <tr><td>Article h2</td><td data-l="Before">26 px (and 23.2 in boxes)</td><td data-l="After">24 → 30, with 40 px space above</td><td data-l="Why">The same serif h3 token as the homepage.</td></tr>
+    <tr><td>Box headings (summary, author, related)</td><td data-l="Before">23.2 px</td><td data-l="After">22 px</td><td data-l="Why">One size for all box headings.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p12"><small>P12</small>Blog and quiz overview</h2>
+  <p class="lede">Changes to <code>blog.html</code> and <code>kviz.html</code>, which share one layout.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Card grid (desktop)</td><td data-l="Before">4 columns, ≈196 px of text per card, titles wrapping to 3–4 lines</td><td data-l="After">Blog: 3 columns. Quizzes: 2 × 2 (there are exactly 4)</td><td data-l="Why">Narrow cards made every title and excerpt wrap after 2–3 words.</td></tr>
+    <tr><td>Page title "Blog" / "Psychologické kvízy"</td><td data-l="Before">48 → 80 px</td><td data-l="After">40 → 64 px (same as the homepage h1)</td><td data-l="Why">80 px was the largest text on the whole site.</td></tr>
+    <tr><td>Category buttons</td><td data-l="Before">2 px border, 16 px text, lift on hover</td><td data-l="After">1 px border, 15 px text, 44 px tall, no lift</td><td data-l="Why">Lighter, and a comfortable tap size.</td></tr>
+    <tr><td>Card text</td><td data-l="Before">Excerpt 15 px / 1.5, date 13 px</td><td data-l="After">Excerpt 16 px / 1.6, date 13 px with slight tracking, balanced titles</td><td data-l="Why">Easier to read.</td></tr>
+    <tr><td>Card hover</td><td data-l="Before">4 px lift, image zoom 5 %</td><td data-l="After">2 px lift, image zoom 3 %, only with a mouse</td><td data-l="Why">Calmer.</td></tr>
+    <tr><td>Spacing</td><td data-l="Before">Fixed 48 / 96 / 64 px</td><td data-l="After">Fluid, same tokens as the homepage</td><td data-l="Why">Shorter on phones, the same rhythm everywhere.</td></tr>
+    <tr><td>Bottom "Potřebujete podporu?" block</td><td data-l="Before">h2 40 px, text 20 px</td><td data-l="After">h2 32 → 44, text 17 → 20, max 38rem wide</td><td data-l="Why">The same type scale as the homepage.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p13"><small>P13</small>Quiz pages</h2>
+  <p class="lede">Intro, question and results screens of all four quizzes.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td><strong>Bug:</strong> progress bar on phones</td><td data-l="Before">Hidden under the fixed header after "Začít test" (bar at 32–116 px, header 89 px)</td><td data-l="After">Always visible below the header</td><td data-l="Why">The quiz section starts at the top of the page once the intro hides, so it needs room for the header.</td></tr>
+    <tr><td>Quiz title</td><td data-l="Before">56 px desktop, but only 28 px on phones</td><td data-l="After">32 → 52 px</td><td data-l="Why">On phones it was smaller than the section titles on the homepage.</td></tr>
+    <tr><td>Intro text</td><td data-l="Before">≈85 characters per line</td><td data-l="After">≤ 66 characters</td><td data-l="Why">Line length.</td></tr>
+    <tr><td>Progress bar</td><td data-l="Before">Grey 12 px bar on desktop. On phones a blue → coral gradient with inner shadows and a different colour</td><td data-l="After">One 8 px pill: warm grey track, solid blue fill</td><td data-l="Why">The bar looked like two different designs depending on the screen.</td></tr>
+    <tr><td>Answer options</td><td data-l="Before">2 px border, 15 px text on phones, slides right on hover</td><td data-l="After">1 px border, 16 px text, the selected option gets a 2 px ring without moving</td><td data-l="Why">A calmer, more readable feel with no jumping.</td></tr>
+    <tr><td>Results card</td><td data-l="Before">96 px padding on desktop</td><td data-l="After">≈ 56 px desktop, 24 px phone</td><td data-l="Why">The padding left little room for the text.</td></tr>
+    <tr><td>Result title and icon colour</td><td data-l="Before">Bright Material colours: green #4CAF50, yellow #FFC107 (contrast 1.6:1), red #F44336, light orange #E8A87C</td><td data-l="After">Muted set already used in the "Zdravé hranice" quiz: sage #3F7652, blue #2D5A7B, ochre #9A712B, rose #A65F55</td><td data-l="Why">The yellow title was barely readable, and the traffic-light colours felt alarming for a therapy site.</td></tr>
+    <tr><td>Result description</td><td data-l="Before">18 px, centred, line-height 1.8</td><td data-l="After">17 px, left-aligned, max 66 characters</td><td data-l="Why">Centred paragraphs are hard to read.</td></tr>
+    <tr><td>Recommendations and related article boxes</td><td data-l="Before">48 px padding on phones, cool blue gradient</td><td data-l="After">Fluid padding, warm cream with a hairline border</td><td data-l="Why">More room for the text, and the warm palette.</td></tr>
+    <tr><td>Share buttons, dividers</td><td data-l="Before">2 px borders</td><td data-l="After">1 px</td><td data-l="Why">Consistent with the rest of the site.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p14"><small>P14</small>Pricing</h2>
+  <p class="lede"><code>cenik.html</code> was already in good shape, so these are small adjustments.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Card labels (ONLINE / OSTRAVA)</td><td data-l="Before">14 px, tracking 0.06em</td><td data-l="After">13 px, tracking 0.1em</td><td data-l="Why">The same label recipe as everywhere else.</td></tr>
+    <tr><td>Info boxes</td><td data-l="Before">No border, 18 px radius</td><td data-l="After">Hairline border, 16 px radius, fluid padding</td><td data-l="Why">Consistency.</td></tr>
+    <tr><td>Section headings "Dobré vědět", "První setkání"</td><td data-l="Before">40 px</td><td data-l="After">24 → 30 px (serif sub-heading token)</td><td data-l="Why">These are sub-sections, not page titles.</td></tr>
+    <tr><td>Spacing</td><td data-l="Before">Fixed padding with a separate phone breakpoint</td><td data-l="After">Fluid tokens</td><td data-l="Why">The same rhythm as the other pages.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p15"><small>P15</small>Benefit cards, contact, hero stats</h2>
+  <p class="lede">The owner picked options A2, B2 and C2 from <code>options.html</code>. Generic pictograms are replaced with typography. These are the only changes that touch markup: <code>polish.js</code> makes them, and the Original toggle reverts them.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Benefit cards "Osobní a online terapie" (A2)</td><td data-l="Before">Composite line icon in an 80 px tinted circle, centred text</td><td data-l="After">No icon. A 40×3 px blue-to-coral accent line above the title, left-aligned text</td><td data-l="Why">The icons stacked two ideas into one glyph and read as template art. A small brand accent gives the card a start point without saying anything generic.</td></tr>
+    <tr><td>Contact block (B2)</td><td data-l="Before">Icon, label and value each on their own line, labels with colons ("Email:")</td><td data-l="After">No icons. Small uppercase label ("E-MAIL", "TELEFON") above a 17 px value, hairlines between rows</td><td data-l="Why">The same label recipe as the rest of the site. Easier to scan, and half as tall.</td></tr>
+    <tr><td>Hero stats (C2)</td><td data-l="Before">Clock and star icons, "+4000 hodin praxe" and "+100 doporučení" as two blocks, count-up animation on desktop</td><td data-l="After">One quiet line: <b>4 000+</b> hodin praxe · <b>100+</b> doporučení. 15 px, numbers bold in blue, coral dot</td><td data-l="Why">Czech number format ("4 000+"), no "rating star" cliché, and the hero stays calm around the main button.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p16"><small>P16</small>Quiz symbols, booking window, empty state, list ticks</h2>
+  <p class="lede">The owner picked D1, E1, F1 (centred), G2 and H1 from <code>options-2.html</code>. These are the last generic pictograms and emoji on the site. Labels and links are added by <code>polish.js</code>; Original reverts them.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Quiz result symbol (D1)</td><td data-l="Before">64 px ⚠ / ✓ / ○ / ! / ↔ above every result</td><td data-l="After">Small uppercase "VÁŠ VÝSLEDEK" label in grey; the coloured heading still shows the level</td><td data-l="Why">The symbol repeated the heading, and a warning sign is a harsh first thing to see. ⚠ also turns into a yellow emoji on some phones.</td></tr>
+    <tr><td>Quiz start "10 otázek" (E1)</td><td data-l="Before">Pill with a hand-drawn clipboard icon</td><td data-l="After">One quiet line: <b>10</b> otázek · výsledek ihned</td><td data-l="Why">Same "·" line as the hero stats. "Výsledek ihned" comes from the page's own intro text.</td></tr>
+    <tr><td>Booking window (F1)</td><td data-l="Before">Monitor and two-people icons in white circles, 2 px card borders. The building icon in the code was hidden and swapped for a separate image by CSS</td><td data-l="After">Centred cards with an "ONLINE" / "OSTRAVA" label above the title, 1 px border, less padding</td><td data-l="Why">Matches the pricing page labels. Both choices now fit on a phone screen more easily.</td></tr>
+    <tr><td>Empty blog category (G2)</td><td data-l="Before">📝 emoji, 64 px padding on each side (the heading wrapped one word per line on phones)</td><td data-l="After">No emoji, full stop added, "Zobrazit všechny články →" link back to Vše, fluid padding</td><td data-l="Why">The only real emoji on the site, and a dead end without a way out.</td></tr>
+    <tr><td>List ticks (H1): "Co nabízím", pricing details, common issues, quiz overview</td><td data-l="Before">✓ in coral (blue on the quiz overview)</td><td data-l="After">6 px coral dot, centred on the first line</td><td data-l="Why">Softer and matches the dot in the hero line and the result label. Ticks are a landing-page habit.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p17"><small>P17</small>Reviews gap, FAQ motion, tap flash</h2>
+  <p class="lede">Fixes for things the owner noticed on a phone. CSS only.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Gap under reviews</td><td data-l="Before">The track reserved the longest review's height (567 px on a phone), so shorter reviews (377–431 px) left up to 190 px of empty space above the controls</td><td data-l="After">All cards share one grid cell: every card is as tall as the longest review, text centred inside, controls 32 px below</td><td data-l="Why">No floating gap, and the page below never jumps when the review changes every 7 s.</td></tr>
+    <tr><td>FAQ open / close</td><td data-l="Before">Instant (display: none ↔ block)</td><td data-l="After">220 ms height animation with a short fade; the + shrinks into a −. Off for "reduce motion"</td><td data-l="Why">Instant jumps feel abrupt. Closed answers stay hidden from screen readers.</td></tr>
+    <tr><td>Blue flash on tap (phones)</td><td data-l="Before">Android paints a 40 % light-blue box over any tapped link or button, which looked like the whole question was selected</td><td data-l="After">Removed site-wide; FAQ questions get a faint pressed tint instead</td><td data-l="Why">The flash is a browser default, not part of the design.</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p18"><small>P18</small>Review controls (K1)</h2>
+  <p class="lede">The owner picked K1 from <code>options-3.html</code>. Swipe and the auto-advance stop live in <code>polish.js</code>; on the real site they belong in the carousel code in <code>js/script.js</code>.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Arrows</td><td data-l="Before">Two outlined circles with heavy CSS-cut arrows</td><td data-l="After">Removed</td><td data-l="Why">Another "icon in a circle". The dots and swipe cover navigation.</td></tr>
+    <tr><td>Dots</td><td data-l="Before">Outlined 10–12 px rings, 24 × 24 px tap area</td><td data-l="After">Filled 7 px dots in #7E8E9C (3.2 : 1), active one a 20 px blue bar, each a 44 × 44 px tap area</td><td data-l="Why">Quieter look, but easier to hit than before: meets Apple's 44 pt and WCAG 2.5.5. The grey passes the 3 : 1 contrast rule for controls.</td></tr>
+    <tr><td>Swipe</td><td data-l="Before">Not supported</td><td data-l="After">Swipe left / right on the card (40 px threshold, vertical scrolling unaffected)</td><td data-l="Why">The natural gesture on a phone. Dots stay as the tap alternative (WCAG 2.5.1).</td></tr>
+    <tr><td>Auto-advance</td><td data-l="Before">Every 7 s; on phones there was no way to pause it</td><td data-l="After">Stops for good after the first swipe, dot tap or arrow key; never starts with "reduce motion"</td><td data-l="Why">A review shouldn't change while someone is reading it (WCAG 2.2.2).</td></tr>
+  </tbody></table>
+  </section>
+
+  <section>
+  <h2 id="p19"><small>P19</small>Hero blob on phones</h2>
+  <p class="lede">Owner's request. CSS plus a small observer in <code>polish.js</code>.</p>
+  <table><thead><tr><th>What</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Portrait shape animation (phones)</td><td data-l="Before">2 rounds (16 s), then still</td><td data-l="After">Endless, like desktop, but paused while the portrait is scrolled off-screen. Still a fixed shape with "reduce motion"</td><td data-l="Why">The hero feels alive on phones too. Pausing off-screen avoids redrawing the photo and its blurred glow for nothing (battery). No effect on the Lighthouse score: its test window is shorter than the old 16 s anyway.</td></tr>
+  </tbody></table>
+  </section>
+
+  <div class="kept">
+    <h2>Deliberately not changed</h2>
+    <ul>
+      <li>Brand colours: blue #2D5A7B and coral #E8927C (buttons, ticks, underlines)</li>
+      <li>Fonts: Playfair Display and Inter</li>
+      <li>Hero layout, portrait blob and its animation</li>
+      <li>Header, navigation and footer layout</li>
+      <li>Any HTML or text, except the P15 and P16 spots (contact labels, hero stats line, quiz info line, booking labels, empty-state link; all done in <code>polish.js</code>). Everything else is CSS.</li>
+    </ul>
+  </div>
+</div>
+<script>
+  document.getElementById('nav').innerHTML = [...document.querySelectorAll('h2[id]')]
+    .map(h => `<a href="#${h.id}">${h.textContent.replace(/^P\d+/, '')}</a>`).join('');
+</script>
+</body>
+</html>
