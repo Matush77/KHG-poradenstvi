@@ -47,7 +47,7 @@ const quizConfig = {
         },
         {
             id: 5,
-            text: "Máte pocit, že Vám myšlenky běží i ve chvíli, kdy chcete odpočívat?",
+            text: "Máte pocit, že vám myšlenky běží i ve chvíli, kdy chcete odpočívat?",
             options: [
                 { text: "Ne, dokážu se dobře uvolnit", score: 0 },
                 { text: "Občas mi myšlenky bloudí", score: 1 },
@@ -115,10 +115,10 @@ const resultInterpretations = {
         title: "Málo známek nadměrného přemýšlení",
         icon: "✓",
         color: "#3F7652",
-        description: "Ve Vašich odpovědích se objevilo jen málo situací spojených s nadměrným přemýšlením. Výsledek ale nepředstavuje celkové hodnocení Vašeho duševního zdraví.",
+        description: "Ve vašich odpovědích se objevilo jen málo situací spojených s nadměrným přemýšlením. Výsledek ale nepředstavuje celkové hodnocení vašeho duševního zdraví.",
         recommendations: [
             "Pokračujte ve svých osvědčených strategiích",
-            "Všímejte si, které postupy Vám pomáhají vracet pozornost k přítomnosti",
+            "Všímejte si, které postupy vám pomáhají vracet pozornost k přítomnosti",
             "Nezapomínejte na preventivní péči o duševní zdraví",
             "Buďte k sobě laskaví i v případech, kdy se přece jen přistíhnete při přemýšlení"
         ],
@@ -135,7 +135,7 @@ const resultInterpretations = {
         title: "Občasné nadměrné přemýšlení",
         icon: "○",
         color: "#2D5A7B",
-        description: "Ve Vašich odpovědích se objevují některé situace, ve kterých přemýšlíte déle nebo intenzivněji, než byste chtěli. Můžete vyzkoušet několik postupů a sledovat, co Vám pomáhá.",
+        description: "Ve vašich odpovědích se objevují některé situace, ve kterých přemýšlíte déle nebo intenzivněji, než byste chtěli. Můžete vyzkoušet několik postupů a sledovat, co vám pomáhá.",
         recommendations: [
             "Zjistěte, zda nejste vyčerpaní – můžete potřebovat odpočinek, ne disciplínu",
             "Vytvořte si podporu – mluvte o tom s důvěryhodnými lidmi",
@@ -146,7 +146,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Chcete tématu lépe porozumět?",
-            description: "Pokud Vás opakované přemýšlení zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné způsoby práce s ním.",
+            description: "Pokud vás opakované přemýšlení zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné způsoby práce s ním.",
             button: "Promluvit si o tom"
         },
         showCrisis: false
@@ -156,7 +156,7 @@ const resultInterpretations = {
         title: "Častější nadměrné přemýšlení",
         icon: "!",
         color: "#9A712B",
-        description: "Vaše odpovědi naznačují častější výskyt nadměrného přemýšlení. Pokud Vám zasahuje do odpočinku, rozhodování nebo každodenního fungování, může být užitečné začít s ním cíleně pracovat.",
+        description: "Vaše odpovědi naznačují častější výskyt nadměrného přemýšlení. Pokud vám zasahuje do odpočinku, rozhodování nebo každodenního fungování, může být užitečné začít s ním cíleně pracovat.",
         recommendations: [
             "Uvědomte si, že myšlenky nejsou fakta",
             "Pojmenujte si, že se znovu vracíte ke stejné obavě, a zaměřte pozornost na konkrétní činnost nebo na své okolí",
@@ -167,7 +167,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Je čas aktivně pracovat s overthinkingem",
-            description: "V terapii můžete prozkoumat souvislosti nadměrného přemýšlení a hledat způsoby, které budou odpovídat Vaší situaci.",
+            description: "V terapii můžete prozkoumat souvislosti nadměrného přemýšlení a hledat způsoby, které budou odpovídat vaší situaci.",
             button: "Objednat konzultaci"
         },
         showCrisis: false
@@ -177,9 +177,9 @@ const resultInterpretations = {
         title: "Výrazné nadměrné přemýšlení",
         icon: "⚠",
         color: "#A65F55",
-        description: "Ve Vašich odpovědích se objevují výrazné projevy nadměrného přemýšlení. Pokud Vám narušují spánek, vztahy nebo každodenní fungování, může být užitečné probrat obtíže s psychologem nebo psychoterapeutem.",
+        description: "Ve vašich odpovědích se objevují výrazné projevy nadměrného přemýšlení. Pokud vám narušují spánek, vztahy nebo každodenní fungování, může být užitečné probrat obtíže s psychologem nebo psychoterapeutem.",
         recommendations: [
-            "Zvažte odbornou konzultaci, při které můžete prozkoumat souvislosti obtíží ve Vaší konkrétní situaci",
+            "Zvažte odbornou konzultaci, při které můžete prozkoumat souvislosti obtíží ve vaší konkrétní situaci",
             "Začněte s malými kroky – zlepšení je proces",
             "Buďte k sobě laskaví – overthinking není vaše chyba",
             "Omezte stresory tam, kde to je možné",
@@ -188,7 +188,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Nadměrné přemýšlení nemusíte řešit sami",
-            description: "V terapii můžete hledat souvislosti svých obtíží a postupy, které Vám pomohou lépe zvládat zatěžující myšlenky.",
+            description: "V terapii můžete hledat souvislosti svých obtíží a postupy, které vám pomohou lépe zvládat zatěžující myšlenky.",
             button: "Vyhledat pomoc"
         },
         showCrisis: false
@@ -543,7 +543,7 @@ class QuizController {
 
         // Populate recommendations
         this.recommendationsList.innerHTML = '';
-        result.recommendations.forEach(rec => {
+        result.recommendations.slice(0, 3).forEach(rec => {
             const li = document.createElement('li');
             li.textContent = rec;
             this.recommendationsList.appendChild(li);

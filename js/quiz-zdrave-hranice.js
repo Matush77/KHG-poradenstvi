@@ -30,13 +30,13 @@ const resultInterpretations = [
         icon: '✓',
         color: '#3f7652',
         paragraphs: [
-            'Zdá se, že dokážete vnímat své potřeby a zároveň zůstávat v kontaktu s potřebami druhých. Umíte říct „ne“, vyjádřit, co Vám není příjemné, a poměrně dobře nesete i situace, kdy s Vaším rozhodnutím někdo nesouhlasí.',
-            'To neznamená, že nikdy neustoupíte nebo nepochybujete. Zdravé hranice nejsou neprůstřelná zeď. Mohou se měnit podle situace, vztahu i toho, co právě potřebujete. Důležité je, že máte možnost volby – Vaše „ano“ i Vaše „ne“ mohou být skutečně Vaše.'
+            'Zdá se, že dokážete vnímat své potřeby a zároveň zůstávat v kontaktu s potřebami druhých. Umíte říct „ne“, vyjádřit, co vám není příjemné, a poměrně dobře nesete i situace, kdy s vaším rozhodnutím někdo nesouhlasí.',
+            'To neznamená, že nikdy neustoupíte nebo nepochybujete. Zdravé hranice nejsou neprůstřelná zeď. Mohou se měnit podle situace, vztahu i toho, co právě potřebujete. Důležité je, že máte možnost volby – Vaše „ano“ i vaše „ne“ mohou být skutečně vaše.'
         ],
         recommendations: [
-            'Všímejte si, ve kterých vztazích se Vám hranice drží snadno a kde je to obtížnější.',
+            'Všímejte si, ve kterých vztazích se vám hranice drží snadno a kde je to obtížnější.',
             'Rozlišujte mezi vědomým kompromisem a automatickým ustoupením.',
-            'Dovolte svým hranicím měnit se podle situace a Vaší aktuální kapacity.'
+            'Dovolte svým hranicím měnit se podle situace a vaší aktuální kapacity.'
         ]
     },
     {
@@ -46,8 +46,8 @@ const resultInterpretations = [
         icon: '○',
         color: '#2d5a7b',
         paragraphs: [
-            'Pravděpodobně poměrně dobře poznáte, kdy Vám něco nevyhovuje nebo kdy už je toho na Vás příliš. Obtížnější může být hranici vyslovit nebo u ní zůstat ve chvíli, kdy druhý reaguje zklamáním, nesouhlasem nebo tlakem.',
-            'Možná řeknete „ne“, ale vzápětí začnete pochybovat, vysvětlovat nebo hledat způsob, jak nepříjemný pocit rychle napravit. Nespokojenost druhého však automaticky neznamená, že Vaše hranice byla špatná.'
+            'Pravděpodobně poměrně dobře poznáte, kdy vám něco nevyhovuje nebo kdy už je toho na vás příliš. Obtížnější může být hranici vyslovit nebo u ní zůstat ve chvíli, kdy druhý reaguje zklamáním, nesouhlasem nebo tlakem.',
+            'Možná řeknete „ne“, ale vzápětí začnete pochybovat, vysvětlovat nebo hledat způsob, jak nepříjemný pocit rychle napravit. Nespokojenost druhého však automaticky neznamená, že vaše hranice byla špatná.'
         ],
         recommendations: [
             'Předem si připravte jednu krátkou větu, kterou můžete v náročné situaci použít.',
@@ -67,8 +67,8 @@ const resultInterpretations = [
         ],
         recommendations: [
             'Položte si otázku: „Říkám ano, protože opravdu chci, nebo protože se bojím říct ne?“',
-            'Začněte jednou malou hranicí v situaci, která pro Vás není příliš ohrožující.',
-            'Zkuste odmítnutí vyslovit bez dlouhého obhajování a všimněte si, co ve Vás následuje.'
+            'Začněte jednou malou hranicí v situaci, která pro vás není příliš ohrožující.',
+            'Zkuste odmítnutí vyslovit bez dlouhého obhajování a všimněte si, co ve vás následuje.'
         ]
     },
     {
@@ -78,13 +78,13 @@ const resultInterpretations = [
         icon: '•',
         color: '#a65f55',
         paragraphs: [
-            'Možná jste si zvykli být tím, kdo vydrží, pomůže, přizpůsobí se nebo ustoupí. Může být pro Vás obtížné poznat, co vlastně potřebujete Vy, natož to vyslovit před druhými. Představa, že někoho odmítnete nebo zklamete, může přinášet výrazné napětí či pocit viny.',
-            'Dlouhodobě může takové fungování vést k vyčerpání, frustraci nebo pocitu, že ve vztazích není dost prostoru také pro Vás. Nemusíte začínat velkým „ne“. Prvním krokem může být všimnout si okamžiků, kdy automaticky souhlasíte, přestože uvnitř cítíte něco jiného.'
+            'Možná jste si zvykli být tím, kdo vydrží, pomůže, přizpůsobí se nebo ustoupí. Může být pro vás obtížné poznat, co vlastně potřebujete vy, natož to vyslovit před druhými. Představa, že někoho odmítnete nebo zklamete, může přinášet výrazné napětí či pocit viny.',
+            'Dlouhodobě může takové fungování vést k vyčerpání, frustraci nebo pocitu, že ve vztazích není dost prostoru také pro vás. Nemusíte začínat velkým „ne“. Prvním krokem může být všimnout si okamžiků, kdy automaticky souhlasíte, přestože uvnitř cítíte něco jiného.'
         ],
         recommendations: [
-            'Jednou denně se zastavte a pojmenujte, co právě potřebujete Vy.',
-            'Místo okamžitého souhlasu používejte větu: „Dám Vám vědět později.“',
-            'Pokud je pro Vás nastavování hranic dlouhodobě velmi náročné, zvažte podporu terapeuta nebo jiné důvěryhodné osoby.'
+            'Jednou denně se zastavte a pojmenujte, co právě potřebujete vy.',
+            'Místo okamžitého souhlasu používejte větu: „Dám vám vědět později.“',
+            'Pokud je pro vás nastavování hranic dlouhodobě velmi náročné, zvažte podporu terapeuta nebo jiné důvěryhodné osoby.'
         ]
     }
 ];
@@ -249,7 +249,7 @@ class BoundariesQuiz {
         });
 
         recommendations.replaceChildren();
-        result.recommendations.forEach(recommendation => {
+        result.recommendations.slice(0, 3).forEach(recommendation => {
             const item = document.createElement('li');
             item.textContent = recommendation;
             recommendations.appendChild(item);

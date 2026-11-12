@@ -3,20 +3,13 @@
 /* Inter Font Family */
 @font-face {
     font-family: 'Inter';
-    src: url('../fonts/Inter/Inter-LatinExt-var.woff2') format('woff2');
+    src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2');
     font-weight: 300 700;
     font-style: normal;
     font-display: swap;
 }
 
-/* Playfair Display Font Family */
-@font-face {
-    font-family: 'Playfair Display';
-    src: url('../fonts/Playfair_Display/PlayfairDisplay-LatinExt-var.woff2') format('woff2');
-    font-weight: 600 700;
-    font-style: normal;
-    font-display: swap;
-}
+
 
 /* Metric-matched fallbacks: system fonts resized to take the same space as
    Inter / Playfair Display, so text does not reflow (layout shift) when the
@@ -63,25 +56,9 @@
     line-gap-override: 0%;
 }
 
-@font-face {
-    font-family: 'Playfair Display Fallback';
-    src: local('Georgia Bold'), local('Georgia-Bold');
-    font-weight: 600 700;
-    size-adjust: 89.48%;
-    ascent-override: 120.92%;
-    descent-override: 28.05%;
-    line-gap-override: 0%;
-}
 
-@font-face {
-    font-family: 'Playfair Display Fallback Android';
-    src: local('Noto Serif Bold'), local('NotoSerif-Bold');
-    font-weight: 600 700;
-    size-adjust: 90.52%;
-    ascent-override: 119.53%;
-    descent-override: 27.73%;
-    line-gap-override: 0%;
-}
+
+
 
 /* ==========================================
    MODERN THERAPY WEBSITE - PREMIUM DESIGN
@@ -2721,7 +2698,7 @@ a:hover {
 }
 
 .booking-modal-options .booking-option:last-child .booking-option-icon {
-    background-image: url("../images/personal-therapy-icon.svg");
+    background-image: url("/images/personal-therapy-icon.svg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: 32px 32px;

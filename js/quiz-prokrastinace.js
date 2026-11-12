@@ -118,7 +118,7 @@ const resultInterpretations = {
         description: "Ve svých odpovědích uvádíte jen málo obtíží spojených s odkládáním úkolů. Výsledek popisuje pouze situace zahrnuté v tomto testu.",
         recommendations: [
             "Pokračujte v tom, co děláte – vaše přístupy fungují",
-            "Všímejte si, které podmínky Vám pomáhají úkoly zahájit a dokončit",
+            "Všímejte si, které podmínky vám pomáhají úkoly zahájit a dokončit",
             "Buďte k sobě laskavý/-á i v případech, kdy něco přece jen odložíte",
             "Věnujte pozornost preventivní péči o duševní zdraví"
         ],
@@ -135,7 +135,7 @@ const resultInterpretations = {
         title: "Mírná prokrastinace",
         icon: "○",
         color: "#2D5A7B",
-        description: "Ve Vašich odpovědích se objevuje občasné odkládání úkolů. Můžete vyzkoušet několik praktických postupů a sledovat, které Vám pomáhají.",
+        description: "Ve vašich odpovědích se objevuje občasné odkládání úkolů. Můžete vyzkoušet několik praktických postupů a sledovat, které vám pomáhají.",
         recommendations: [
             "Zmenšete začátek na nejmenší možný krok",
             "Pracujte v krátkých časových blocích (např. 10-2-10)",
@@ -144,7 +144,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Chcete lépe porozumět svému odkládání?",
-            description: "Pokud Vás odkládání zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné strategie.",
+            description: "Pokud vás odkládání zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné strategie.",
             button: "Promluvit si o tom"
         },
         showCrisis: false
@@ -164,7 +164,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Je čas aktivně pracovat s prokrastinací",
-            description: "V terapii můžete prozkoumat různé souvislosti odkládání a hledat strategie, které budou odpovídat Vaší situaci.",
+            description: "V terapii můžete prozkoumat různé souvislosti odkládání a hledat strategie, které budou odpovídat vaší situaci.",
             button: "Objednat konzultaci"
         },
         showCrisis: false
@@ -174,7 +174,7 @@ const resultInterpretations = {
         title: "Výrazná prokrastinace",
         icon: "⚠",
         color: "#A65F55",
-        description: "Ve Vašich odpovědích se objevuje výrazné odkládání úkolů. Pokud se promítá do práce, vztahů, studia nebo každodenního fungování, může být užitečné hledat cílenou podporu.",
+        description: "Ve vašich odpovědích se objevuje výrazné odkládání úkolů. Pokud se promítá do práce, vztahů, studia nebo každodenního fungování, může být užitečné hledat cílenou podporu.",
         recommendations: [
             "Zvažte odbornou konzultaci, při které můžete prozkoumat různé souvislosti odkládání",
             "Začněte s nejmenšími možnými kroky (2 minuty)",
@@ -185,7 +185,7 @@ const resultInterpretations = {
         ],
         cta: {
             heading: "Odkládání může mít více souvislostí",
-            description: "V terapii můžete prozkoumat, zda u Vás hraje roli náročnost úkolu, perfekcionismus, obavy, únava nebo plánování, a hledat vhodné další kroky.",
+            description: "V terapii můžete prozkoumat, zda u vás hraje roli náročnost úkolu, perfekcionismus, obavy, únava nebo plánování, a hledat vhodné další kroky.",
             button: "Vyhledat pomoc"
         },
         showCrisis: false
@@ -539,7 +539,7 @@ class QuizController {
 
         // Populate recommendations
         this.recommendationsList.innerHTML = '';
-        result.recommendations.forEach(rec => {
+        result.recommendations.slice(0, 3).forEach(rec => {
             const li = document.createElement('li');
             li.textContent = rec;
             this.recommendationsList.appendChild(li);

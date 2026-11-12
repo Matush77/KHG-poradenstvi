@@ -1,5 +1,18 @@
 # Shipping the redesign
 
+**Status, 13 Nov 2026:** the port is done on the branch `redesign-ship` (from `main`, not merged).
+It passes the gate below and was checked in the browser at 375 px and desktop: all 20 pages load
+with no 404s or console errors; on the homepage, an article and a quiz CLS stays 0, the LCP element
+is unchanged and each page makes one request fewer. To ship: merge `redesign-ship` into `main`,
+push, deploy, then follow section 3.
+
+Two choices made during the port:
+- The theme CSS stays inline in each page, as in the lab where it was measured, instead of a new
+  `css/` file. A linked file would add a render-blocking request in `<head>`. Changing the theme
+  later means updating that block in every page, like the header and footer.
+- `ochrana-osobnich-udaju.html` and `404.html` were never in the lab; they got the same layers, plus
+  a few lines of their own (privacy sections as hairline rows, 404 label and buttons in the theme).
+
 The redesign lives in `ui-lab/proposal/` on the `redesign` branch. Those pages are lab copies:
 they sit at `/ui-lab/proposal/…`, and `build.py` gives each one two lines that keep it out of
 Google and make its links work from that folder:

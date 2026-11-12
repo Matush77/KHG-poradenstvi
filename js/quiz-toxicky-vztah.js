@@ -125,7 +125,7 @@ const resultInterpretations = {
         title: "Převažují znaky respektu a bezpečí",
         icon: "✓",
         color: "#3F7652",
-        description: "Ve Vašich odpovědích převažují znaky respektu, důvěry a bezpečí. Test však nemůže posoudit celý vztah ani vyloučit konkrétní problematické chování.",
+        description: "Ve vašich odpovědích převažují znaky respektu, důvěry a bezpečí. Test však nemůže posoudit celý vztah ani vyloučit konkrétní problematické chování.",
         recommendations: [
             "Pokračujte v otevřené komunikaci a vzájemném respektu",
             "Věnujte čas společným aktivitám i individuálním zájmům",
@@ -147,7 +147,7 @@ const resultInterpretations = {
         color: "#9A712B",
         description: "Některé odpovědi poukazují na chování, kterému je vhodné věnovat pozornost. Závažnost situace nelze určit pouze podle celkového skóre – důležitý je konkrétní kontext, zejména přítomnost strachu, nátlaku, kontroly, vyhrožování nebo násilí.",
         recommendations: [
-            "O tom, co Vás trápí, mluvte s partnerem pouze tehdy, pokud je to pro Vás bezpečné",
+            "O tom, co vás trápí, mluvte s partnerem pouze tehdy, pokud je to pro vás bezpečné",
             "Pokud se obáváte partnerovy reakce, svěřte se nejprve důvěryhodné osobě nebo odborné službě",
             "Zvažte individuální odbornou konzultaci pro ujasnění situace",
             "Nevzdávejte se svých přátel a osobních zájmů",
@@ -165,7 +165,7 @@ const resultInterpretations = {
         title: "Výrazné znaky nezdravého vztahu",
         icon: "!",
         color: "#A65F55",
-        description: "Některé Vaše odpovědi mohou ukazovat na opakované nerespektování hranic, kontrolu nebo manipulaci. Test nemůže určit povahu celého vztahu, ale tyto konkrétní projevy je vhodné brát vážně.",
+        description: "Některé vaše odpovědi mohou ukazovat na opakované nerespektování hranic, kontrolu nebo manipulaci. Test nemůže určit povahu celého vztahu, ale tyto konkrétní projevy je vhodné brát vážně.",
         recommendations: [
             "Vaše pocity jsou platné a důležité - věřte jim",
             "Promluvte si s důvěryhodnou osobou o vaší situaci",
@@ -186,7 +186,7 @@ const resultInterpretations = {
         title: "Vážné znaky toxického vztahu",
         icon: "⚠",
         color: "#A65F55",
-        description: "Některé z Vašich odpovědí popisují závažné varovné signály. Test nemůže určit povahu celého vztahu, ale pokud zažíváte strach, nátlak, kontrolu, vyhrožování nebo násilí, je důležité vyhledat bezpečnou podporu.",
+        description: "Některé z vašich odpovědí popisují závažné varovné signály. Test nemůže určit povahu celého vztahu, ale pokud zažíváte strach, nátlak, kontrolu, vyhrožování nebo násilí, je důležité vyhledat bezpečnou podporu.",
         recommendations: [
             "Vaše bezpečnost je absolutní prioritou",
             "Obraťte se na odbornou pomoc - psychologa nebo centrum pomoci",
@@ -573,7 +573,7 @@ class QuizController {
 
         // Populate recommendations
         this.recommendationsList.innerHTML = '';
-        result.recommendations.forEach(rec => {
+        result.recommendations.slice(0, 3).forEach(rec => {
             const li = document.createElement('li');
             li.textContent = rec;
             this.recommendationsList.appendChild(li);
