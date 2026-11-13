@@ -16,6 +16,10 @@ def sub(old, new, count=1):
     page = page.replace(old, new, count)
 
 
+# opening hours as in the Google profile (owner, 13 Nov): Mon–Fri 8–17
+sub('"opens": "09:00"', '"opens": "08:00"')
+sub('"closes": "18:00"', '"closes": "17:00"')
+
 # lab page: resolve paths from site root, keep out of search
 sub("<head>", '<head>\n    <base href="/">\n    <meta name="robots" content="noindex">')
 
