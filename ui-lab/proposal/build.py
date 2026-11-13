@@ -319,6 +319,22 @@ CTA_PANEL = """    <section class="blog-cta">
 def build_page(name, layer):
     p = (root / name).read_text(encoding="utf-8")
 
+    # one brand ending on every article and quiz title (owner, 13 Nov): "| KHG Poradenství"
+    if name.startswith(("blog-", "quiz-")):
+        p, n = re.subn(r"<title>(.*?)(?: - Blog KHG| \| KHG| - KHG Poradenství)</title>", r"<title>\1 | KHG Poradenství</title>", p, count=1)
+        assert n == 1, f"{name}: title ending not found"
+    # shorter <title> where Google would cut it (owner, 13 Nov); the heading on the page stays whole
+    SHORT_TITLES = {
+        "blog-prokrastinace-proc-odkladame-a-jak-to-zmenit.html": ("Prokrastinace: proč odkládáme důležité věci a jak to změnit", "Prokrastinace: proč odkládáme a co s tím"),
+        "blog-panicka-ataka-projevy-co-delat.html": ("Panická ataka: projevy, co dělat a kdy hledat pomoc", "Panická ataka: projevy a co dělat"),
+        "quiz-overthinking.html": ("Test overthinkingu: Jak moc přetěžujete svou hlavu?", "Test overthinkingu: Přetěžujete hlavu?"),
+        "quiz-prokrastinace.html": ("Test prokrastinace: Proč odkládáte důležité věci?", "Test prokrastinace: Proč odkládáte věci?"),
+    }
+    if name in SHORT_TITLES:
+        old, new = SHORT_TITLES[name]
+        assert f"<title>{old} | KHG Poradenství</title>" in p, f"{name}: title not found"
+        p = p.replace(f"<title>{old} | KHG Poradenství</title>", f"<title>{new} | KHG Poradenství</title>", 1)
+
     def s(old, new):
         nonlocal p
         assert old in p, f"{name}: not found: {old[:60]}"
