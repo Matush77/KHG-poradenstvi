@@ -19,6 +19,10 @@ def sub(old, new, count=1):
 # opening hours as in the Google profile (owner, 13 Nov): Mon–Fri 8–17
 sub('"opens": "09:00"', '"opens": "08:00"')
 sub('"closes": "18:00"', '"closes": "17:00"')
+# coordinates and the Maps link as in the Google profile (owner, 13 Nov); the old ones sat about 1.2 km off
+sub('"latitude": "49.8358"', '"latitude": "49.8278"')
+sub('"longitude": "18.2928"', '"longitude": "18.2799"')
+sub("https://share.google/GunHQdaRB3wMknJMA", "https://maps.google.com/?cid=17834043374417315194", count=2)
 
 # lab page: resolve paths from site root, keep out of search
 sub("<head>", '<head>\n    <base href="/">\n    <meta name="robots" content="noindex">')
