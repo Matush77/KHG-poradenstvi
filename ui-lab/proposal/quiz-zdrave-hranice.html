@@ -910,7 +910,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .quiz-results-recommendations li::marker { color: var(--primary); }
 
 /* ==== No row lines (owner, 13 Nov) ==== */
-.quiz-results-header { border-bottom: 0 !important; padding-bottom: 0 !important; }
+/* result header: no line; its padding stays (it is the peach panel since 12 Nov; padding-bottom: 0 left the text on the edge) */
+.quiz-results-header { border-bottom: 0 !important; }
 .quiz-social-share { border-top: 0 !important; padding-top: 0 !important; }
 
     </style>
