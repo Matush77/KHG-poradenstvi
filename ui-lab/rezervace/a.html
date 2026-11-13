@@ -1,0 +1,69 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace A – krok za krokem</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* A: one question per screen. Big answers, nothing else to look at. */
+.progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.progress i { height: 4px; border-radius: 2px; background: var(--line); }
+.progress i.on { background: var(--navy); }
+.opts { display: grid; gap: 12px; }
+@media (min-width: 720px) { .opts.two { grid-template-columns: 1fr 1fr; } }
+.opt { text-align: left; border: 0; border-radius: 20px; padding: 20px; display: grid; gap: 4px; cursor: pointer; min-height: 96px; position: relative; transition: background .15s; }
+.opt b { font-family: var(--f-head); font-weight: 500; font-size: 21px; }
+.opt span { color: var(--slate); font-size: 15px; }
+.opt::after { content: "→"; position: absolute; right: 20px; top: 20px; font-size: 20px; transition: transform .15s; }
+.opt:hover::after { transform: translateX(4px); }
+.opt.online { background: var(--sky); } .opt.online:hover { background: var(--sky-deep); }
+.opt.osobne { background: var(--peach); } .opt.osobne:hover { background: var(--peach-deep); }
+.times { display: grid; gap: 8px; }
+@media (min-width: 720px) { .times { grid-template-columns: 1fr 1fr; } }
+.time { display: flex; justify-content: space-between; align-items: center; min-height: 56px; padding: 0 18px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; font-size: 17px; font-variant-numeric: tabular-nums; }
+.time b { font-weight: 600; }
+.time span { color: var(--mute); font-size: 15px; }
+.time:hover { background: var(--tint); border-color: transparent; }
+.cal { max-width: 420px; }
+.chosen { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--slate); }
+.chosen b { color: var(--navy); font-weight: 600; }
+</style>
+<nav class="lab" aria-label="Varianty"><span>Varianty:</span><a href="a.html" aria-current="page">A Krok za krokem</a><a href="a2.html">A2 Bez nadpisů</a><a href="e.html">E Kalendář</a><a href="../rezervace-ukazka.html">Ranní verze</a></nav>
+<script src="site-header.js"></script>
+<p class="lab-what">Jedna otázka na obrazovku: forma → den → čas → údaje. Klepnutí na odpověď rovnou posune dál, žádné tlačítko „Pokračovat“.</p>
+<div class="wrap">
+  <section class="panel"><div id="view" aria-live="polite"></div></section>
+</div>
+<script src="availability.js"></script>
+<script src="shared.js"></script>
+<script>
+(function () {
+  var K = KHG, s = K.state, sub = 'format', month = new Date(2026, 10, 1);
+  function progress(n) { var h = '<div class="progress" aria-hidden="true">'; for (var i = 1; i <= 4; i++) h += '<i' + (i <= n ? ' class="on"' : '') + '></i>'; return h + '</div><p class="kicker">Krok ' + n + ' ze 4</p>'; }
+  function chosen() {
+    var h = '<div class="chosen"><span><b>' + K.FORMATS[s.f].name + '</b></span>';
+    if (sub === 'time') h += '<span><b>' + K.cap(K.long(s.date)) + '</b></span>';
+    return h + '</div>';
+  }
+  function pick(view) {
+    if (sub === 'format') {
+      view.innerHTML = progress(1) + '<h1>Jak se chcete potkat?</h1>' +
+        '<div class="opts two">' +
+        '<button class="opt online" data-f="online"><b>Online</b><span>Videohovor Google Meet, odkudkoli</span><span>50 minut · 1 100 Kč</span></button>' +
+        '<button class="opt osobne" data-f="osobne"><b>Osobně v Ostravě</b><span>Vítkovická 3299/3A, Ostrava</span><span>50 minut · 1 100 Kč</span></button></div>';
+      view.querySelectorAll('.opt').forEach(function (b) { b.onclick = function () { s.f = b.dataset.f; s.date = null; s.time = null; sub = 'day'; var ff = K.firstFree(K.TODAY); month = new Date(ff.getFullYear(), ff.getMonth(), 1); K.render(); }; });
+    } else if (sub === 'day') {
+      view.innerHTML = progress(2) + '<button class="back" id="b">‹ Zpět</button>' + '<h1>Který den vám vyhovuje?</h1>' + chosen() +
+        '<div class="cal">' + K.monthNav(month) + K.monthGrid(month) + '<p class="legend"><i></i>Barevné dny mají volné termíny</p></div>';
+      view.querySelector('#b').onclick = function () { sub = 'format'; K.render(); };
+      view.querySelectorAll('.nav').forEach(function (b) { b.onclick = function () { month = new Date(month.getFullYear(), month.getMonth() + +b.dataset.m, 1); K.render(); }; });
+      view.querySelectorAll('.day.free').forEach(function (b) { b.onclick = function () { s.date = K.parse(b.dataset.d); sub = 'time'; K.render(); }; });
+    } else {
+      view.innerHTML = progress(3) + '<button class="back" id="b">‹ Jiný den</button>' + '<h1>V kolik hodin?</h1>' + chosen() +
+        '<div class="times">' + K.slotsFor(s.date).map(function (t) {
+          return '<button class="time" data-t="' + t + '"><b>' + t + '</b><span>do ' + K.endTime(t) + '</span></button>';
+        }).join('') + '</div>';
+      view.querySelector('#b').onclick = function () { sub = 'day'; K.render(); };
+      view.querySelectorAll('.time').forEach(function (b) { b.onclick = function () { s.time = b.dataset.t; K.go(2); }; });
+    }
+  }
+  K.start({ pick: pick, kicker: function () { return progress(4); }, reset: function () { sub = 'format'; } });
+})();
+</script>

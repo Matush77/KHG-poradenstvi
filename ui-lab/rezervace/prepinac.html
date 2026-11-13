@@ -1,0 +1,55 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace – přepínač</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.wall { display: flex; gap: 20px; overflow-x: auto; padding: 8px 0 24px; scroll-snap-type: x mandatory; }
+.col { flex: none; display: grid; gap: 8px; scroll-snap-align: start; }
+.col h2 { font-size: 19px; }
+.col h2 a { color: var(--navy); }
+.col.google h2 a { color: var(--coral-ink); }
+.col p { font-size: 14px; color: var(--slate); min-height: 42px; }
+/* Device tabs: every frame renders at the real device width (so the page's own layout switches), then is scaled to fit. */
+.frame { width: calc(var(--w) * var(--s) * 1px); height: calc(var(--h) * var(--s) * 1px); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--paper); }
+.col.google .frame { background: #fff; }
+iframe { display: block; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); border: 0; background: transparent; transform: scale(var(--s)); transform-origin: 0 0; }
+.col p { max-width: calc(var(--w) * var(--s) * 1px); }
+body { --w: 375; --h: 740; --s: 1; }
+body[data-device="tablet"] { --w: 768; --h: 1024; --s: .62; }
+body[data-device="desktop"] { --w: 1280; --h: 860; --s: .5; }
+h1 { max-width: none; padding: 16px 0 4px; }
+.devices { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 8px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tabs { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.tab { border: 0; border-radius: 999px; min-height: 44px; padding: 0 18px; background: transparent; cursor: pointer; font-weight: 500; color: var(--slate); }
+.tab[aria-selected="true"] { background: var(--navy); color: var(--paper); font-weight: 600; }
+.tab:hover:not([aria-selected="true"]) { background: var(--sky); }
+.devices small { color: var(--mute); font-size: 13px; }
+</style>
+<h1>Přepínač Online / Osobně: 1 a 6, výraznější</h1>
+<p class="lab-what" style="margin:0 0 8px;max-width:none">Všude stejná původní verze, liší se jen přepínač. Klikejte na Online a Osobně. Starší podoby 2–5: <a href="../rezervace-ukazka.html?sw=2">2</a> <a href="../rezervace-ukazka.html?sw=3">3</a> <a href="../rezervace-ukazka.html?sw=4">4</a> <a href="../rezervace-ukazka.html?sw=5">5</a>.</p>
+<div class="devices"><div class="tabs" role="tablist" aria-label="Zařízení">
+  <button class="tab" role="tab" data-d="phone" aria-selected="true">Telefon</button>
+  <button class="tab" role="tab" data-d="tablet" aria-selected="false">Tablet</button>
+  <button class="tab" role="tab" data-d="desktop" aria-selected="false">Počítač</button>
+</div><small id="dim">375 × 740 px</small></div>
+<div class="wall">
+  <div class="col"><h2><a href="../rezervace-ukazka.html?sw=1">1 Pilulka</a></h2><p>Dosavadní 1, pro srovnání.</p><div class="frame"><iframe src="../rezervace-ukazka.html?sw=1" title="Přepínač 1"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?sw=7">7 Pilulka + rámeček</a></h2><p>Jako 1, vybraná část navíc s tmavým rámečkem.</p><div class="frame"><iframe src="../rezervace-ukazka.html?sw=7" title="Přepínač 7"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?sw=8">8 Pilulka sytější</a></h2><p>Jako 1, vybraná část v sytější barvě, druhá ztlumená.</p><div class="frame"><iframe src="../rezervace-ukazka.html?sw=8" title="Přepínač 8"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?sw=6">6 Barevná dráha</a></h2><p>Dosavadní 6, pro srovnání.</p><div class="frame"><iframe src="../rezervace-ukazka.html?sw=6" title="Přepínač 6"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?sw=9">9 Dráha + rámeček</a></h2><p>Jako 6, bílá vybraná část s tmavým rámečkem.</p><div class="frame"><iframe src="../rezervace-ukazka.html?sw=9" title="Přepínač 9"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?sw=10">10 Dráha sytější</a></h2><p>Jako 6 na sytější barvě, druhá část ztlumená.</p><div class="frame"><iframe src="../rezervace-ukazka.html?sw=10" title="Přepínač 10"></iframe></div></div>
+</div>
+<script>
+(function () {
+  var dims = { phone: '375 × 740 px, skutečná velikost', tablet: '768 × 1024 px, zmenšeno na 62 %', desktop: '1280 × 860 px, zmenšeno na 50 %' };
+  function set(d) {
+    document.body.dataset.device = d;
+    document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.d === d); });
+    document.getElementById('dim').textContent = dims[d];
+    try { localStorage.setItem('rez-device', d); } catch (e) {}
+  }
+  document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { set(b.dataset.d); }; });
+  var saved; try { saved = localStorage.getItem('rez-device'); } catch (e) {}
+  set(dims[saved] ? saved : 'phone');
+})();
+</script>

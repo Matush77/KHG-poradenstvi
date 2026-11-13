@@ -1,0 +1,56 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace E – kalendář</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* E: the morning calendar, made clearer. Format as two tinted cards, times open right under the tapped week, choice confirmed in the bar. */
+.fcards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fc { text-align: left; border: 2px solid transparent; border-radius: 18px; padding: 14px 16px; display: grid; gap: 2px; cursor: pointer; position: relative; min-height: 76px; }
+.fc b { font-family: var(--f-head); font-weight: 500; font-size: 18px; }
+.fc span { font-size: 13px; color: var(--slate); }
+.fc.online { background: var(--sky); } .fc.osobne { background: var(--peach); }
+.fc[aria-pressed="false"] { opacity: .7; }
+.fc[aria-pressed="false"]:hover { opacity: 1; }
+.fc[aria-pressed="true"] { border-color: var(--navy); }
+.fc[aria-pressed="true"]::after { content: "✓"; position: absolute; top: 10px; right: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: var(--paper); font-size: 13px; display: grid; place-items: center; font-weight: 600; }
+.facts-sm { font-size: 14px; color: var(--slate); }
+.cal { max-width: 480px; }
+.inline { grid-column: 1 / -1; background: var(--tint); border-radius: 16px; padding: 14px; text-align: left; display: grid; gap: 10px; margin: 2px 0 6px; }
+.inline b { font-weight: 600; font-size: 15px; }
+.inline .chips { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+.inline .chip { min-height: 46px; font-size: 16px; }
+.inline .chip:not([aria-pressed="true"]) { border-color: transparent; }
+.inline .chip:hover:not([aria-pressed="true"]) { background: var(--paper); }
+</style>
+<nav class="lab" aria-label="Varianty"><span>Varianty:</span><a href="a.html">A Krok za krokem</a><a href="a2.html">A2 Bez nadpisů</a><a href="e.html" aria-current="page">E Kalendář</a><a href="../rezervace-ukazka.html">Ranní verze</a></nav>
+<script src="site-header.js"></script>
+<p class="lab-what">Ranní kalendář, jen srozumitelnější: forma jako dvě barevné karty, časy se otevřou hned pod klepnutým týdnem (ne jinde na stránce), výběr se potvrdí ve spodní liště.</p>
+<div class="wrap">
+  <section class="panel"><div id="view" aria-live="polite"></div></section>
+</div>
+<script src="availability.js"></script>
+<script src="shared.js"></script>
+<script>
+(function () {
+  var K = KHG, s = K.state, month = new Date(2026, 10, 1);
+  function pick(view) {
+    var after = function (weekStart, weekEnd) {
+      if (!s.date || s.date < weekStart || s.date > weekEnd) return '';
+      return '<div class="inline" id="inline"><b>' + K.cap(K.long(s.date)) + '</b><div class="chips">' +
+        K.slotsFor(s.date).map(function (t) { return '<button class="chip" data-t="' + t + '" aria-pressed="' + (t === s.time) + '">' + t + '</button>'; }).join('') + '</div></div>';
+    };
+    view.innerHTML = '<h1>Objednat sezení</h1>' +
+      '<div class="fcards" role="group" aria-label="Forma sezení">' +
+      '<button class="fc online" data-f="online" aria-pressed="' + (s.f === 'online') + '"><b>Online</b><span>Google Meet</span></button>' +
+      '<button class="fc osobne" data-f="osobne" aria-pressed="' + (s.f === 'osobne') + '"><b>Osobně</b><span>Vítkovická, Ostrava</span></button></div>' +
+      '<p class="facts-sm"><b>50 minut · 1 100 Kč</b> · ' + K.FORMATS[s.f].where + '</p>' +
+      '<div class="cal">' + K.monthNav(month) + K.monthGrid(month, after) + '<p class="legend"><i></i>Barevné dny mají volné termíny. Klepněte na den.</p></div>';
+    view.querySelectorAll('.fc').forEach(function (b) { b.onclick = function () { s.f = b.dataset.f; s.time = null; if (s.date && !K.slotsFor(s.date).length) s.date = null; var ff = s.date || K.firstFree(K.TODAY); month = new Date(ff.getFullYear(), ff.getMonth(), 1); K.render(); }; });
+    view.querySelectorAll('.nav').forEach(function (b) { b.onclick = function () { month = new Date(month.getFullYear(), month.getMonth() + +b.dataset.m, 1); K.render(); }; });
+    view.querySelectorAll('.day.free').forEach(function (b) { b.onclick = function () {
+      var d = K.parse(b.dataset.d); s.time = null; s.date = K.same(d, s.date) ? null : d; K.render(); K.scrollTo(document.getElementById('inline'));
+    }; });
+    view.querySelectorAll('.chip').forEach(function (b) { b.onclick = function () { s.time = b.dataset.t; K.render(); }; });
+  }
+  K.start({ pick: pick, bar: true, init: function () { var ff = K.firstFree(K.TODAY); month = new Date(ff.getFullYear(), ff.getMonth(), 1); } });
+})();
+</script>

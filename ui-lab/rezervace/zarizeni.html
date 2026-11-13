@@ -1,0 +1,20 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace – 3 zařízení</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* The chosen booking version on phone, tablet and desktop at once. Each frame renders at the real width, then is scaled. */
+h1 { padding: 16px 0 4px; }
+.wall { display: flex; gap: 24px; align-items: flex-start; overflow-x: auto; padding: 8px 0 24px; }
+.col { flex: none; display: grid; gap: 8px; }
+.col h2 { font-size: 19px; }
+.col p { font-size: 14px; color: var(--slate); }
+.frame { width: calc(var(--w) * var(--s) * 1px); height: calc(var(--h) * var(--s) * 1px); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--paper); }
+iframe { display: block; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); border: 0; transform: scale(var(--s)); transform-origin: 0 0; }
+</style>
+<h1>Rezervace (původní verze, přepínač 8) na třech zařízeních</h1>
+<p class="lab-what" style="margin:0 0 8px;max-width:none">Každý náhled je klikací. Přepnutí Online / Osobně se v každém dělá zvlášť.</p>
+<div class="wall">
+  <div class="col" style="--w:375;--h:812;--s:.8"><h2>Telefon</h2><p>375 × 812 px, zmenšeno na 80 %</p><div class="frame"><iframe src="../rezervace-ukazka.html" title="Telefon"></iframe></div></div>
+  <div class="col" style="--w:768;--h:1024;--s:.55"><h2>Tablet</h2><p>768 × 1024 px, zmenšeno na 55 %</p><div class="frame"><iframe src="../rezervace-ukazka.html" title="Tablet"></iframe></div></div>
+  <div class="col" style="--w:1280;--h:860;--s:.5"><h2>Počítač</h2><p>1280 × 860 px, zmenšeno na 50 %</p><div class="frame"><iframe src="../rezervace-ukazka.html" title="Počítač"></iframe></div></div>
+</div>

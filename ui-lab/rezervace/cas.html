@@ -1,0 +1,23 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace – český čas</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+h1 { padding: 16px 0 4px; }
+.wall { display: flex; gap: 20px; overflow-x: auto; padding: 8px 0 24px; scroll-snap-type: x mandatory; }
+.col { flex: none; display: grid; gap: 8px; scroll-snap-align: start; --w: 375; --h: 812; --s: .8; }
+.col h2 { font-size: 18px; max-width: 300px; }
+.col h2 a { color: var(--navy); }
+.col p { font-size: 14px; color: var(--slate); min-height: 42px; max-width: 300px; }
+.frame { width: calc(var(--w) * var(--s) * 1px); height: calc(var(--h) * var(--s) * 1px); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--paper); }
+iframe { display: block; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); border: 0; transform: scale(var(--s)); transform-origin: 0 0; }
+</style>
+<h1>Poznámka o čase pro online klienty: 6 podob</h1>
+<p class="lab-what" style="margin:0 0 8px;max-width:none">Všude vybrané pondělí 21. 12., online. Osobně se poznámka neukazuje.</p>
+<div class="wall">
+  <div class="col"><h2><a href="../rezervace-ukazka.html?tz=1&den=2026-12-21">1 Čas v Česku</a></h2><p>Krátký popisek pod časy.</p><div class="frame"><iframe src="../rezervace-ukazka.html?tz=1&den=2026-12-21" title="Varianta 1"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?tz=2&den=2026-12-21">2 Uvedené časy platí pro Česko.</a></h2><p>Celá věta pod časy.</p><div class="frame"><iframe src="../rezervace-ukazka.html?tz=2&den=2026-12-21" title="Varianta 2"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?tz=3&den=2026-12-21">3 Časy odpovídají času v Praze.</a></h2><p>Věta s městem, jako u výběru časového pásma.</p><div class="frame"><iframe src="../rezervace-ukazka.html?tz=3&den=2026-12-21" title="Varianta 3"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?tz=4&den=2026-12-21">4 čas v Česku vedle data</a></h2><p>Malý popisek vpravo u nadpisu dne, nic pod časy.</p><div class="frame"><iframe src="../rezervace-ukazka.html?tz=4&den=2026-12-21" title="Varianta 4"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?tz=6&den=2026-12-21">6 pražský čas vedle data</a></h2><p>Jako 4, kratší slovo.</p><div class="frame"><iframe src="../rezervace-ukazka.html?tz=6&den=2026-12-21" title="Varianta 6"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?tz=5&den=2026-12-21">5 V řádku s cenou</a></h2><p>„50 min · 1 100 Kč · Google Meet · čas v Česku“, nahoře u přepínače.</p><div class="frame"><iframe src="../rezervace-ukazka.html?tz=5&den=2026-12-21" title="Varianta 5"></iframe></div></div>
+</div>

@@ -1,0 +1,568 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KHG rezervace ukázka</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="only light">
+<link rel="preload" href="/fonts/Inter/Inter-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Self-hosted fonts, same files as the site, with metric-matched fallbacks (no CDN, no reflow when they arrive) */
+@font-face { font-family: Inter; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: Fraunces; src: url('/ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Inter Fallback'; src: local('Arial'), local('ArialMT'); size-adjust: 106.44%; ascent-override: 91.01%; descent-override: 22.66%; line-gap-override: 0%; }
+@font-face { font-family: 'Inter Fallback Android'; src: local('Roboto'), local('Roboto-Regular'); size-adjust: 107.27%; ascent-override: 90.31%; descent-override: 22.49%; line-gap-override: 0%; }
+/* Layout: one short header line, then the calendar and the times get the space. Phone: stacked; desktop: calendar left, times right. */
+:root {
+  --paper: #FBF8F3;
+  --card: #FFFFFF;
+  --sky: #E8EFF4;
+  --sky-deep: #DCE6EE;
+  --peach: #F6E6DC;
+  --peach-deep: #F2DBCC;
+  --navy: #163A55;
+  --blue: #2D5A7B;
+  --slate: #44576A;
+  --mute: #5E6E7C;
+  --coral: #E8927C;
+  --coral-ink: #B5573F;
+  --line: rgba(22,58,85,.14);
+  --on-coral: #163A55;
+  --tint: var(--sky);
+  --tint-deep: var(--sky-deep);
+  --f-head: Fraunces, Georgia, "Noto Serif", serif;
+  --f-body: Inter, "Inter Fallback", "Inter Fallback Android", system-ui, sans-serif;
+}
+/* light only, like the site (dark phones showed light header over a dark booking) */
+:root { color-scheme: light; }
+body.f-osobne { --tint: var(--peach); --tint-deep: var(--peach-deep); }
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--navy);
+  font: 400 16px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 48px;
+}
+h1, h2 { font-family: var(--f-head); font-weight: 500; font-variation-settings: "SOFT" 100, "WONK" 0; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+button { font: inherit; color: inherit; }
+/* phones flash a blue box on every tap; the buttons have their own pressed look, keyboard focus still shows the outline */
+button, a, label { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 16px; }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
+.brand { display: flex; align-items: center; gap: 8px; font-family: var(--f-head); font-weight: 500; font-size: 17px; font-variation-settings: "SOFT" 100; }
+.brand svg { width: 22px; height: 22px; flex: none; }
+.demo-note { font-size: 12px; color: var(--mute); }
+/* real site header on top (rezervace/site-header.js) */
+.site-header-host { display: block; height: 68px; }
+.top .brand { display: none; }
+
+/* Phones: no card, the booking sits straight on the page and gets the full width. Card from tablet up. */
+.panel { display: grid; gap: 20px; scroll-margin-top: 84px; }
+@media (min-width: 720px) { .panel { gap: 28px; padding-top: 16px; } } /* no card at any width (owner 13 Nov): cream page everywhere */
+
+/* Header: title, one facts line, format switch */
+.head { display: grid; gap: 12px; }
+.head h1 { font-size: 26px; line-height: 1.2; }
+.facts { margin: 0; color: var(--slate); font-size: 15px; }
+.facts b { color: var(--navy); font-weight: 600; }
+/* Format switch: six looks to compare, picked with ?sw=1..10, default 8 (owner pick 13 Nov) (class on <html>; see rezervace/prepinac.html). Default 1. */
+.fmt-x, .fmt-s { display: none; }
+.switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fmt { border: 0; background: none; cursor: pointer; color: var(--navy); font-size: 16px; transition: background .15s, color .15s, border-color .15s; }
+.fmt-t { font-weight: 600; }
+.fmt[aria-pressed="true"] { cursor: default; }
+@media (min-width: 720px) { .switch { max-width: 360px; } .sw-2 .switch { max-width: 480px; } .sw-5 .switch { max-width: 420px; } }
+
+/* 1 Pilulka: white track, the chosen one in its format tint (the morning look, track white so it shows on the page) */
+.sw-1 .switch { gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.sw-1 .fmt { border-radius: 999px; min-height: 48px; color: var(--slate); }
+.sw-1 .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); }
+.sw-1 .fmt[aria-pressed="true"][data-f="online"] { background: var(--sky); color: var(--navy); }
+.sw-1 .fmt[aria-pressed="true"][data-f="osobne"] { background: var(--peach); color: var(--navy); }
+
+/* 2 Karty: two tinted cards like Ceník (sky Online, peach Osobně v Ostravě), the chosen one with a navy ring and tick */
+.sw-2 .fmt { position: relative; text-align: left; border-radius: 18px; padding: 14px 16px; min-height: 84px; display: grid; align-content: start; gap: 2px; border: 2px solid transparent; }
+.sw-2 .fmt[data-f="online"] { background: var(--sky); } .sw-2 .fmt[data-f="osobne"] { background: var(--peach); }
+.sw-2 .fmt[aria-pressed="false"]:hover[data-f="online"] { background: var(--sky-deep); } .sw-2 .fmt[aria-pressed="false"]:hover[data-f="osobne"] { background: var(--peach-deep); }
+.sw-2 .fmt-t { font-family: var(--f-head); font-weight: 500; font-size: 19px; line-height: 1.25; padding-right: 24px; }
+.sw-2 .fmt-x { display: inline; }
+.sw-2 .fmt-s { display: block; font-size: 13px; color: var(--slate); }
+.sw-2 .fmt[aria-pressed="true"] { border-color: var(--navy); }
+.sw-2 .fmt[aria-pressed="true"]::after { content: "✓"; position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: var(--paper); font-size: 13px; font-weight: 600; display: grid; place-items: center; }
+.sw-2 .facts-place { display: none; }
+
+/* 3 Záložky: two Fraunces tabs on a hairline, the chosen one navy with a coral underline */
+.sw-3 .switch { gap: 0; border-bottom: 1px solid var(--line); }
+.sw-3 .fmt { min-height: 48px; margin-bottom: -1px; border-bottom: 3px solid transparent; color: var(--mute); font-family: var(--f-head); font-size: 19px; }
+.sw-3 .fmt-t { font-weight: 500; }
+.sw-3 .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); }
+.sw-3 .fmt[aria-pressed="true"] { color: var(--navy); border-bottom-color: var(--coral); }
+
+/* 4 Dvě tlačítka: separate pills; the chosen one in its tint with a navy ring, the other white with a hairline */
+.sw-4 .fmt { border-radius: 999px; min-height: 48px; background: var(--card); border: 1.5px solid var(--line); color: var(--slate); }
+.sw-4 .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); border-color: var(--navy); }
+.sw-4 .fmt[aria-pressed="true"] { border: 2px solid var(--navy); color: var(--navy); }
+.sw-4 .fmt[aria-pressed="true"][data-f="online"] { background: var(--sky); } .sw-4 .fmt[aria-pressed="true"][data-f="osobne"] { background: var(--peach); }
+
+/* 5 Řádky: two rows with a round radio, the place under the name; the chosen row takes its tint */
+.sw-5 .switch { grid-template-columns: 1fr; }
+.sw-5 .fmt { display: grid; grid-template-columns: 22px 1fr; column-gap: 12px; align-items: center; text-align: left; padding: 12px 16px; min-height: 64px; border-radius: 16px; background: var(--card); border: 1.5px solid var(--line); }
+.sw-5 .fmt::before { content: ""; grid-row: 1 / span 2; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--mute); box-sizing: border-box; }
+.sw-5 .fmt-x { display: inline; }
+.sw-5 .fmt-s { display: block; grid-column: 2; font-size: 14px; color: var(--slate); }
+.sw-5 .fmt:hover:not([aria-pressed="true"]) { border-color: var(--navy); }
+.sw-5 .fmt[aria-pressed="true"] { background: var(--tint); border-color: transparent; }
+.sw-5 .fmt[aria-pressed="true"]::before { border: 7px solid var(--navy); }
+.sw-5 .facts-place { display: none; }
+
+/* 6 Barevná dráha: the whole track takes the format tint, the chosen one is a white pill with a hairline */
+.sw-6 .switch { gap: 4px; padding: 4px; border-radius: 999px; background: var(--tint); transition: background .2s; }
+.sw-6 .fmt { border-radius: 999px; min-height: 48px; color: var(--slate); }
+.sw-6 .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); }
+.sw-6 .fmt[aria-pressed="true"] { background: var(--card); color: var(--navy); box-shadow: 0 0 0 1px var(--line); }
+
+/* 7-10: stronger versions of 1 and 6 (owner: 1 too subtle, easy to miss which one is chosen).
+   Unchosen label goes quieter (mute 500), chosen gets a second cue that is not only colour. */
+:root { --sky-strong: #CFDEEA; --peach-strong: #F0D3C2; }
+.sw-7 .fmt:not([aria-pressed="true"]), .sw-8 .fmt:not([aria-pressed="true"]), .sw-9 .fmt:not([aria-pressed="true"]), .sw-10 .fmt:not([aria-pressed="true"]) { color: var(--mute); }
+.sw-7 .fmt:not([aria-pressed="true"]) .fmt-t, .sw-8 .fmt:not([aria-pressed="true"]) .fmt-t, .sw-9 .fmt:not([aria-pressed="true"]) .fmt-t, .sw-10 .fmt:not([aria-pressed="true"]) .fmt-t { font-weight: 500; }
+.sw-7 .fmt:hover:not([aria-pressed="true"]), .sw-8 .fmt:hover:not([aria-pressed="true"]), .sw-9 .fmt:hover:not([aria-pressed="true"]), .sw-10 .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); }
+
+/* 7 Pilulka + rámeček: as 1, the chosen side also has a navy ring */
+.sw-7 .switch { gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.sw-7 .fmt { border-radius: 999px; min-height: 48px; }
+.sw-7 .fmt[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--navy); }
+.sw-7 .fmt[aria-pressed="true"][data-f="online"] { background: var(--sky); } .sw-7 .fmt[aria-pressed="true"][data-f="osobne"] { background: var(--peach); }
+
+/* 8 Pilulka sytější: as 1, the chosen side in a deeper tint, the other side quiet */
+.sw-8 .switch { gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.sw-8 .fmt { border-radius: 999px; min-height: 48px; }
+/* the coloured pill slides to the chosen side and changes tint on the way (transform only; off with reduced motion) */
+.sw-8 .switch { position: relative; }
+.sw-8 .switch::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 6px); border-radius: 999px; background: var(--sky-strong); transition: transform .3s cubic-bezier(.3,.7,.2,1), background-color .3s; }
+.sw-8 .f-osobne .switch::before { transform: translateX(calc(100% + 4px)); background: var(--peach-strong); }
+.sw-8 .fmt { position: relative; z-index: 1; background: none; }
+
+/* 9 Dráha + rámeček: as 6, the white chosen pill has a navy ring */
+.sw-9 .switch { gap: 4px; padding: 4px; border-radius: 999px; background: var(--tint); transition: background .2s; }
+.sw-9 .fmt { border-radius: 999px; min-height: 48px; }
+.sw-9 .fmt[aria-pressed="true"] { background: var(--card); box-shadow: inset 0 0 0 2px var(--navy); }
+
+/* 10 Dráha sytější: as 6 on a deeper tint, so the white chosen pill stands out more */
+.sw-10 .switch { gap: 4px; padding: 4px; border-radius: 999px; background: var(--sky-strong); transition: background .2s; }
+.f-osobne .sw-10 .switch, html.sw-10 body.f-osobne .switch { background: var(--peach-strong); }
+.sw-10 .fmt { border-radius: 999px; min-height: 48px; }
+.sw-10 .fmt[aria-pressed="true"] { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+
+/* Picker */
+.cols { display: grid; gap: 24px; }
+@media (min-width: 720px) { .cols { grid-template-columns: 340px 1fr; gap: 40px; } }
+.cal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cal-top b { font-weight: 600; font-size: 17px; }
+.nav { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; font-size: 22px; }
+.nav:hover:not(:disabled) { background: var(--tint); }
+.nav:disabled { opacity: .25; cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-variant-numeric: tabular-nums; }
+.dow { font-size: 12px; color: var(--mute); padding-bottom: 2px; }
+.day { aspect-ratio: 1; max-width: 100%; border: 0; border-radius: 50%; background: transparent; font-size: 16px; color: var(--mute); opacity: .45; display: grid; place-items: center; }
+.day.free { background: var(--tint); color: var(--navy); opacity: 1; cursor: pointer; font-weight: 600; }
+.day.free:hover { background: var(--tint-deep); }
+.day.sel { background: var(--navy); color: var(--paper); }
+.day.out { visibility: hidden; }
+/* month change by swipe on phones: the grid lets vertical scrolling through, the new month slides in from the swipe side */
+.grid { touch-action: pan-y; }
+.grid.in-next { animation: month-in-next .22s ease-out; }
+.grid.in-prev { animation: month-in-prev .22s ease-out; }
+@keyframes month-in-next { from { transform: translateX(24px); opacity: 0; } }
+@keyframes month-in-prev { from { transform: translateX(-24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .grid.in-next, .grid.in-prev { animation: none; } }
+
+.slots { display: grid; gap: 12px; align-content: start; }
+/* phones: room for two rows of times is kept for every day, so a day with 2 times and a day with 6 do not resize the page */
+@media (max-width: 719px) { .slots { min-height: 189px; scroll-margin: 84px 0 16px; } } /* scroll clear of the fixed header */
+.slots h2 { font-size: 22px; }
+.times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (min-width: 720px) { .times { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 860px) { .times { grid-template-columns: repeat(3, 1fr); } }
+.time { min-height: 52px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; transition: background .15s, border-color .15s; }
+.time:hover { background: var(--tint); border-color: transparent; }
+.time[aria-pressed="true"] { background: var(--navy); color: var(--paper); border-color: var(--navy); }
+.slots-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.tz { margin: 0; color: var(--mute); font-size: 13px; } /* online clients abroad: whose 14:00 it is */
+.hint { margin: 0; color: var(--mute); font-size: 15px; }
+.empty { background: var(--tint); border-radius: 16px; padding: 16px; font-size: 15px; color: var(--slate); display: grid; gap: 8px; }
+.link { border: 0; background: none; padding: 0; color: var(--blue); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; justify-self: start; min-height: 32px; }
+
+.btn { min-height: 56px; border: 0; border-radius: 999px; background: var(--coral); color: var(--on-coral); font-weight: 600; font-size: 18px; line-height: 1.2; letter-spacing: .005em; padding: 0 32px; cursor: pointer; width: 100%; }
+.btn:hover { filter: brightness(1.04); }
+@media (min-width: 720px) { .btn { width: auto; } }
+.cta { display: grid; gap: 8px; justify-items: start; }
+.cta small, .note { color: var(--mute); font-size: 13px; }
+
+/* Step 2 + 3 */
+.summary { background: var(--tint); border-radius: 16px; padding: 16px 18px; display: grid; gap: 2px; }
+.summary b { font-weight: 600; font-size: 17px; }
+.summary span { color: var(--slate); font-size: 15px; }
+form { display: grid; gap: 16px; max-width: 520px; }
+label { display: grid; gap: 6px; font-size: 14px; font-weight: 500; }
+label em { font-style: normal; font-weight: 400; color: var(--mute); }
+/* 16px: smaller makes iPhones zoom into the field on tap */
+input, textarea { font: inherit; font-size: 16px; color: var(--navy); background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 48px; width: 100%; }
+textarea { resize: vertical; line-height: 1.5; }
+
+.names { display: grid; gap: 16px; } /* first and last name, side by side when there is room */
+@media (min-width: 480px) { .names { grid-template-columns: 1fr 1fr; } }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+.err { color: var(--coral-ink); font-size: 13px; font-weight: 500; }
+.err:empty { display: none; }
+input[aria-invalid="true"] { border-color: var(--coral-ink); }
+.check { grid-template-columns: 22px 1fr; align-items: start; font-weight: 400; color: var(--slate); }
+.check input { min-height: 0; width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--navy); }
+.pay { font-size: 13px; color: var(--mute); }
+.done { display: grid; gap: 16px; max-width: 560px; }
+.done p { margin: 0; color: var(--slate); }
+.step { display: grid; gap: 20px; }
+
+/* Colour themes, picked with ?c=1..6 (default 2, owner pick 13 Nov) (class c-N on <html>; see rezervace/barvy.html). All keep switch 8 and the coral button.
+   1 Současná: sky / peach free days, white times, navy for the chosen day and time. */
+body { --tint-strong: var(--sky-strong); }
+body.f-osobne { --tint-strong: var(--peach-strong); }
+.c-2 .day.sel, .c-2 .time[aria-pressed="true"] { background: var(--coral); color: var(--on-coral); border-color: var(--coral); }
+/* 3 Barevná stránka: the whole page takes the format tint, the calendar days and times are white on it */
+html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
+.c-3 .switch { border-color: transparent; }
+.c-3 input, .c-3 textarea { background: var(--card); }
+@media (max-width: 719px) {
+  .c-3 .day.free, .c-3 .empty, .c-3 .summary { background: var(--card); }
+  .c-3 .day.free:hover, .c-3 .time:hover { background: var(--tint-strong); }
+  .c-3 .day.sel { background: var(--navy); }
+  .c-3 .time { border-color: transparent; }
+}
+/* 4 Sytější: free days in the deeper tint, times are tinted chips without a border */
+.c-4 .day.free { background: var(--tint-strong); }
+.c-4 .day.free:hover { background: var(--tint-deep); }
+.c-4 .day.sel { background: var(--navy); }
+.c-4 .time { background: var(--tint); border-color: transparent; }
+.c-4 .time:hover { background: var(--tint-strong); }
+.c-4 .time[aria-pressed="true"] { background: var(--navy); }
+/* 5 Obrysy: free days are tinted rings, almost no fill, the chosen day and time navy */
+.c-5 .day.free { background: transparent; box-shadow: inset 0 0 0 2px var(--tint-strong); }
+.c-5 .day.free:hover { background: var(--tint); }
+.c-5 .day.sel { background: var(--navy); box-shadow: none; }
+.c-5 .time { border-color: var(--tint-strong); border-width: 2px; }
+/* 6 Barevný blok: calendar and times sit in one tinted block (like the peach panel on Ceník), white days and times inside */
+.c-6 .cols { background: var(--tint); border-radius: 24px; padding: 16px 12px 20px; transition: background .2s; }
+@media (min-width: 720px) { .c-6 .cols { padding: 24px; } }
+.c-6 .day.free, .c-6 .empty { background: var(--card); }
+.c-6 .day.free:hover, .c-6 .time:hover { background: var(--tint-strong); }
+.c-6 .day.sel { background: var(--navy); }
+.c-6 .time { border-color: transparent; }
+
+/* Larger screens: three ways to give the booking a clear shape, ?d=1..3 (class d-N on <html>; see rezervace/rozlozeni.html). No d = plain cream. Phones are never affected. */
+@media (min-width: 720px) {
+  /* 1 Barevný panel: the booking sits in a panel in the format tint, like the peach panel on Ceník; days and times white on it */
+  .d-1 .panel { background: var(--tint); border-radius: 28px; padding: 32px; transition: background .2s; }
+  .d-1 .switch { border-color: transparent; }
+  .d-1 .day.free, .d-1 .empty, .d-1 .summary, .d-1 input, .d-1 textarea { background: var(--card); }
+  .d-1 .day.free:hover, .d-1 .time:hover { background: var(--tint-strong); }
+  .d-1 .day.sel { background: var(--coral); }
+  .d-1 .time { border-color: transparent; }
+  /* 2 Karta pro výběr: title and switch on the page, the calendar with the times in one white card */
+  .d-2 .cols { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 28px; box-shadow: 0 12px 32px rgba(22,58,85,.06); }
+  .d-2 .time { background: var(--paper); }
+}
+
+/* Visual polish ideas, ?p=1..7; default 2,3,4,5 (owner pick 13 Nov), ?p=0 = none (several: ?p=2,3,5), compared in rezervace/vylepseni.html */
+.p-1 .slots h2::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin: 0 10px 3px 0; vertical-align: middle; }
+.p-1 .slots h2 { border-top: 2px solid var(--coral); padding-top: 14px; }
+@media (min-width: 720px) { .p-1 .slots h2 { border-top: 0; padding-top: 0; } .p-1 .slots { border-left: 2px solid var(--coral); padding-left: 24px; } }
+.p-2 .day:not(.free) { opacity: .28; font-size: 14px; }
+.p-3 .time { background: var(--tint); border-color: transparent; }
+.p-3 .time:hover { background: var(--tint-strong); }
+.p-4 .head { gap: 4px; }
+.p-4 .facts { order: 1; }
+.p-4 .switch { order: 2; margin-top: 12px; }
+.p-5 input, .p-5 textarea { background: var(--card); }
+.p-6 .done { justify-items: start; }
+.p-6 .done h2 { font-size: 30px; line-height: 1.15; }
+.p-6 .done h2::before { content: "✓"; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--tint-strong); color: var(--navy); margin-bottom: 16px; font: 600 26px/1 var(--f-body); }
+.p-6 .done .summary { justify-self: stretch; }
+.p-6 .done .summary b { font-family: var(--f-head); font-weight: 500; font-size: 21px; line-height: 1.2; font-variation-settings: "SOFT" 100; }
+@media (min-width: 720px) { .p-7 .wrap { max-width: 760px; } .p-7 .cols { grid-template-columns: 320px 1fr; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<script>(function(){var s=new URLSearchParams(location.search).get("sw");document.documentElement.classList.add("sw-"+(/^([1-9]|10)$/.test(s)?s:"8"));var d=new URLSearchParams(location.search).get("d");if(/^[1-3]$/.test(d))document.documentElement.classList.add("d-"+d);(new URLSearchParams(location.search).get("p")||"2,3,4,5").split(",").forEach(function(n){if(/^[1-7]$/.test(n))document.documentElement.classList.add("p-"+n);});var c=new URLSearchParams(location.search).get("c");document.documentElement.classList.add("c-"+(/^[1-6]$/.test(c)?c:"2"));})();</script>
+<div class="wrap">
+<script src="rezervace/site-header.js"></script>
+
+  <section class="panel">
+    <div class="head">
+      <h1 id="title" class="sr">Objednat sezení</h1><!-- kept for screen readers and the page outline, not shown (owner 13 Nov) -->
+      <div class="switch" role="group" aria-label="Forma sezení">
+        <button class="fmt" data-f="online" aria-pressed="true"><span class="fmt-t">Online</span><small class="fmt-s">Videohovor Google Meet</small></button>
+        <button class="fmt" data-f="osobne" aria-pressed="false"><span class="fmt-t">Osobně<span class="fmt-x"> v Ostravě</span></span><small class="fmt-s">Vítkovická 3299/3A</small></button>
+      </div>
+      <p class="facts" id="facts"></p>
+    </div>
+    <div id="view"></div>
+    <p class="sr" id="status" aria-live="polite"></p>
+  </section>
+</div>
+
+<script src="rezervace/availability.js"></script>
+<script>
+(function () {
+  var MONTHS = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+  var MONTHS_LOC = ['lednu','únoru','březnu','dubnu','květnu','červnu','červenci','srpnu','září','říjnu','listopadu','prosinci'];
+  var MONTHS_GEN = ['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'];
+  var DAYS = ['neděle','pondělí','úterý','středa','čtvrtek','pátek','sobota'];
+  var DOW = ['Po','Út','St','Čt','Pá','So','Ne'];
+  var AV = window.KHG_AVAIL; /* real free times from the Google booking pages, 13 Nov */
+  var TODAY = new Date(2026, 10, 13);
+  var FIRST = new Date(2026, 10, 13);
+  var BOOK_AHEAD = 70; // days ahead a session can be booked (owner, 13 Nov)
+  var LAST = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() + BOOK_AHEAD);
+  var HOLIDAYS = { '2026-11-17': 1, '2026-12-24': 1, '2026-12-25': 1, '2026-12-28': 1, '2026-12-29': 1, '2026-12-30': 1, '2026-12-31': 1 };
+  var FORMATS = {
+    online: { name: 'Online', days: [1,2,3,4], facts: '<b>50 min · 1 100 Kč</b><span class="facts-place"> · Google&nbsp;Meet</span>', after: 'Odkaz na videohovor je v potvrzení.' },
+    osobne: { name: 'Osobně v Ostravě', days: [1,2], facts: '<b>50 min · 1 100 Kč</b><span class="facts-place"> · Vítkovická&nbsp;3299/3A</span>', place: 'Vítkovická 3299/3A, Ostrava', after: 'Ordinace je na adrese Vítkovická 3299/3A, Ostrava. Prosím, zvoňte až v čase vašeho sezení.' }
+  };
+
+  var state = { f: 'online', month: new Date(2026, 10, 1), date: null, time: null, step: 1, email: '' };
+
+  function key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function hash(s) { var h = 7; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+  function slotsFor(d) {
+    if (d > LAST || d < FIRST) return []; // nothing outside the booking window, whatever the calendar data says
+    return (AV[state.f][key(d)] || []).slice();
+    if (FORMATS[state.f].days.indexOf(d.getDay()) < 0) return [];
+    return TIMES.filter(function (t) { return hash(key(d) + t) % 5 > 1; });
+  }
+  function long(d) { return DAYS[d.getDay()] + ' ' + d.getDate() + '. ' + MONTHS_GEN[d.getMonth()]; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function firstFree(from) {
+    for (var d = new Date(Math.max(from, FIRST)); d <= LAST; d.setDate(d.getDate() + 1)) if (slotsFor(d).length) return new Date(d);
+    return null;
+  }
+  function endTime(t) { var m = +t.split(':')[0] * 60 + 50; return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
+
+  // lab: wording and place of the Czech-time note for online clients, ?tz=1..6 (see rezervace/cas.html)
+  var TZ = ({ 1: { under: 'Čas v Česku' }, 2: { under: 'Uvedené časy platí pro Česko.' }, 3: { under: 'Časy odpovídají času v Praze.' },
+              4: { side: 'čas v Česku' }, 5: { facts: 'čas v Česku' }, 6: { side: 'pražský čas' } })[new URLSearchParams(location.search).get('tz')] || { under: 'Časové pásmo: Praha' }; // owner pick 13 Nov
+  if (TZ.facts) FORMATS.online.facts = FORMATS.online.facts.replace('Google&nbsp;Meet', 'Google&nbsp;Meet · ' + TZ.facts);
+
+  var view = document.getElementById('view');
+
+  // Swipe left / right on the calendar changes the month (same as the arrows, so it stops at the first and last month)
+  var slide = null, sx = 0, sy = 0, swiping = false;
+  view.addEventListener('touchstart', function (e) {
+    swiping = state.step === 1 && !!e.target.closest('.grid, .cal-top') && e.touches.length === 1;
+    if (swiping) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }
+  }, { passive: true });
+  view.addEventListener('touchend', function (e) {
+    if (!swiping) return; swiping = false;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    var btn = document.getElementById(dx < 0 ? 'next' : 'prev');
+    if (btn && !btn.disabled) btn.click();
+  }, { passive: true });
+
+  function renderHead() {
+    document.body.className = 'f-' + state.f;
+    document.getElementById('facts').innerHTML = FORMATS[state.f].facts;
+    document.querySelectorAll('.fmt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.f === state.f); });
+  }
+
+  // the calendar is redrawn on every choice: keep keyboard focus on the same control
+  function focusKey() {
+    var a = document.activeElement; if (!a || !view.contains(a)) return null;
+    return a.id ? '#' + a.id : a.dataset.d ? '.day[data-d="' + a.dataset.d + '"]' : null;
+  }
+  // no day is chosen for the visitor: the calendar opens (and changes format) with nothing selected
+  function hasFree(m) { var f = firstFree(m); return !!f && f.getMonth() === m.getMonth() && f.getFullYear() === m.getFullYear(); }
+  function plural(n) { return n === 1 ? '1 volný čas' : n < 5 ? n + ' volné časy' : n + ' volných časů'; }
+  function say(t) { var s = document.getElementById('status'); if (s.textContent !== t) s.textContent = t; }
+
+  // every month gets six week rows (empty ones invisible), so the times under the calendar never move when the month changes
+  function pad(n) { var a = []; for (var i = n; i < 7 + 42; i++) a.push('<span class="day out"></span>'); return a; }
+
+  function renderStep1() {
+    var fk = focusKey();
+    var m = state.month, y = m.getFullYear(), mo = m.getMonth();
+    var start = (new Date(y, mo, 1).getDay() + 6) % 7, len = new Date(y, mo + 1, 0).getDate();
+    var cells = DOW.map(function (d) { return '<div class="dow" aria-hidden="true">' + d + '</div>'; });
+    for (var i = 0; i < start; i++) cells.push('<span class="day out"></span>');
+    for (var n = 1; n <= len; n++) {
+      var d = new Date(y, mo, n), free = slotsFor(d).length > 0;
+      var cls = 'day' + (free ? ' free' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
+      cells.push(free
+        ? '<button class="' + cls + '" data-d="' + n + '" aria-label="' + long(d) + '" aria-pressed="' + (cls.indexOf(' sel') > 0) + '">' + n + '</button>'
+        : '<span class="' + cls + '">' + n + '</span>');
+    }
+    var slots = state.date ? slotsFor(state.date) : [];
+    var right = (state.date && slots.length)
+      ? (state.f === 'online' && TZ.side ? '<div class="slots-head"><h2>' + cap(long(state.date)) + '</h2><span class="tz">' + TZ.side + '</span></div>' : '<h2>' + cap(long(state.date)) + '</h2>') + '<div class="times">' +
+        slots.map(function (t) { return '<button class="time" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + '</button>'; }).join('') + '</div>' +
+        (state.f === 'online' && TZ.under ? '<p class="tz">' + TZ.under + '</p>' : '')
+      : !state.date && hasFree(m) ? '<p class="hint">Vyberte den v kalendáři, nebo<br><button class="link" id="jump">nejbližší volný: ' + long(firstFree(TODAY)) + ' →</button></p>'
+      : '<div class="empty">' + (state.date ? 'V tento den nejsou volné termíny.' : 'V ' + MONTHS_LOC[mo] + ' už nejsou volné termíny.') + '<button class="link" id="jump">Nejbližší volný termín</button></div>';
+
+    view.innerHTML =
+      '<div class="cols"><div><div class="cal-top"><button class="nav" id="prev" aria-label="Předchozí měsíc"' + (y * 12 + mo <= FIRST.getFullYear() * 12 + FIRST.getMonth() ? ' disabled' : '') + '>‹</button><b>' + MONTHS[mo] + ' ' + y + '</b><button class="nav" id="next" aria-label="Další měsíc"' + (y * 12 + mo >= LAST.getFullYear() * 12 + LAST.getMonth() ? ' disabled' : '') + '>›</button></div>' +
+      '<div class="grid">' + cells.concat(pad(cells.length)).join('') + '</div></div>' +
+      '<div class="slots" id="slots">' + right + '</div></div>';
+
+    view.querySelectorAll('.day.free').forEach(function (b) { b.onclick = function () { state.date = new Date(y, mo, +b.dataset.d); state.time = null; render(); scrollSlots(); }; });
+    // a time is the choice: tapping it goes straight to the details (the calendar history entry keeps the time, so back shows it chosen)
+    view.querySelectorAll('.time').forEach(function (b) { b.onclick = function () { state.time = b.dataset.t; syncUrl(); state.step = 2; render(); toTop(); }; });
+    var j = document.getElementById('jump');
+    if (j) j.onclick = function () { var d = firstFree(state.date || (hasFree(m) ? TODAY : state.month)); if (d) { state.date = d; state.month = new Date(d.getFullYear(), d.getMonth(), 1); state.time = null; render(); } };
+    // changing the month clears the day, so no times from another month stay under the calendar
+    function month(delta) {
+      state.month = new Date(y, mo + delta, 1); state.time = null; slide = delta > 0 ? 'next' : 'prev';
+      state.date = null;
+      render();
+    }
+    document.getElementById('prev').onclick = function () { month(-1); };
+    document.getElementById('next').onclick = function () { month(1); };
+    if (slide) { view.querySelector('.grid').classList.add('in-' + slide); slide = null; }
+    var back = fk && (view.querySelector(fk) || (fk.indexOf('.day') === 0 && view.querySelector('.day.sel')));
+    if (back && !back.disabled) back.focus(); else if (fk === '#prev' || fk === '#next') view.querySelector('.nav:not(:disabled)').focus();
+    say(state.date && slots.length ? cap(long(state.date)) + ', ' + plural(slots.length) : MONTHS[mo] + ' ' + y + (hasFree(m) ? ', vyberte den' : ', bez volných termínů'));
+  }
+
+  // On phones the times sit under the calendar: bring them into view after a day is picked.
+  function scrollSlots() {
+    if (window.innerWidth >= 720) return;
+    var s = document.getElementById('slots');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (s) s.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' }); // only as far as needed to show all the times
+  }
+
+  function toTop() {
+    var p = document.querySelector('.panel'); if (!p || p.getBoundingClientRect().top >= 84) return;
+    p.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function summary() {
+    return '<div class="summary"><b>' + cap(long(state.date)) + ', ' + state.time + '–' + endTime(state.time) + '</b><span>' + FORMATS[state.f].name + ' · 50 minut · 1 100 Kč</span>' + (FORMATS[state.f].place ? '<span>' + FORMATS[state.f].place + '</span>' : '') + '</div>';
+  }
+
+  /* Details. Online asks only for an e-mail (the Meet link goes there), in person only for a phone. Last, an optional free-text reason. */
+  function field(id, label, type, ac, required, value, ph) {
+    return '<label for="' + id + '"><span>' + label + (required ? '' : ' <em>(nepovinné)</em>') + '</span>' +
+      '<input id="' + id + '" type="' + type + '" autocomplete="' + ac + '" enterkeyhint="next"' +
+      (type === 'text' ? ' autocapitalize="words"' : ' autocapitalize="off" spellcheck="false"') + (required ? ' required aria-required="true"' : '') +
+      (value ? ' value="' + value + '"' : '') + (ph ? ' placeholder="' + ph + '"' : '') + ' aria-describedby="' + id + '-err">' +
+      '<span class="err" id="' + id + '-err" aria-live="polite"></span></label>';
+  }
+  function renderStep2() {
+    var online = state.f === 'online';
+    var contact = online
+      ? field('e', 'E-mail', 'email', 'email', true, 'jana.novakova@example.cz', '')
+      : field('p', 'Telefon', 'tel', 'tel', true, '+420 777 123 456', '+420');
+    var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="3"></textarea></label>';
+    view.innerHTML = '<div class="step">' +
+      '<button class="link" id="back">‹ Změnit termín</button>' + summary() +
+      '<form id="f" novalidate>' +
+      '<div class="names">' + field('fn', 'Jméno', 'text', 'given-name', true, 'Jana', '') + field('ln', 'Příjmení', 'text', 'family-name', true, 'Nováková', '') + '</div>' +
+      contact + reason +
+      '<div class="cta"><button class="btn" type="submit">Zaplatit 1 100 Kč</button></div>' +
+      '</form></div>';
+    // same as the phone's back button when the details were opened from the calendar
+    document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 1; render(); } };
+    // an error goes away as soon as the field is being fixed, it is checked again on submit
+    document.getElementById('f').addEventListener('input', function (ev) {
+      var el = ev.target, err = document.getElementById(el.id + '-err');
+      if (err && err.textContent) { err.textContent = ''; el.setAttribute('aria-invalid', 'false'); }
+    });
+    document.getElementById('f').onsubmit = function (ev) {
+      ev.preventDefault();
+      var checks = {
+        fn: function (v) { return v ? '' : 'Vyplňte prosím jméno.'; },
+        ln: function (v) { return v ? '' : 'Vyplňte prosím příjmení.'; },
+        e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, pošlu na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
+        p: function (v, req) { return !v ? (req ? 'Vyplňte prosím telefon.' : '') : (v.replace(/\D/g, '').length >= 9 ? '' : 'Telefon nevypadá správně.'); }
+      };
+      var first = null;
+      Object.keys(checks).forEach(function (id) {
+        var el = document.getElementById(id); if (!el) return;
+        var msg = checks[id](el.value.trim(), el.required);
+        el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+        document.getElementById(id + '-err').textContent = msg;
+        if (msg && !first) first = el;
+      });
+      if (first) { first.focus(); return; }
+      state.email = online ? document.getElementById('e').value.trim() : '';
+      state.phone = online ? '' : document.getElementById('p').value.trim();
+      state.step = 3; render();
+    };
+  }
+
+  function renderStep3() {
+    var sent = state.email ? 'Potvrzení přišlo na ' + state.email + '. ' : 'Termín máte zapsaný na telefon ' + state.phone + '. ';
+    view.innerHTML = '<div class="done"><h2>Termín je rezervovaný</h2>' + summary() +
+      '<p>' + sent + FORMATS[state.f].after + '</p>' +
+      '<p>Zrušit zdarma můžete nejpozději 36 hodin před sezením, vrátím celou částku.</p>' +
+      '<div><button class="btn" id="again">Zpět na kalendář</button></div></div>';
+    document.getElementById('again').onclick = function () { state.step = 1; state.time = null; render(); };
+  }
+
+  /* Browser history: the details step is its own entry, so the phone's back button returns to the calendar
+     instead of leaving the page. Format, day, time and step are kept in the address, so a refresh keeps the choice. */
+  var shownStep = null, fromHistory = false;
+  function syncUrl() {
+    var u = new URL(location.href), p = u.searchParams;
+    if (state.f === 'osobne') p.set('forma', 'osobne'); else p.delete('forma');
+    if (state.date) p.set('den', key(state.date)); else p.delete('den');
+    if (state.time) p.set('cas', state.time); else p.delete('cas');
+    if (state.step === 2) p.set('krok', '2'); else p.delete('krok');
+    p.delete('step');
+    var entry = { step: state.step };
+    if (!fromHistory && state.step === 2 && shownStep === 1) { entry.pushed = true; history.pushState(entry, '', u); }
+    else if (history.state && history.state.pushed && state.step === 2) { entry.pushed = true; history.replaceState(entry, '', u); }
+    else history.replaceState(entry, '', u);
+    shownStep = state.step; fromHistory = false;
+  }
+  function readUrl() {
+    var p = new URLSearchParams(location.search);
+    state.f = p.get('forma') === 'osobne' ? 'osobne' : 'online';
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(p.get('den') || ''), d = m && new Date(+m[1], m[2] - 1, +m[3]);
+    var slots = d ? slotsFor(d) : [];
+    state.date = slots.length ? d : null;
+    state.time = state.date && slots.indexOf(p.get('cas')) >= 0 ? p.get('cas') : null;
+    state.step = state.time && p.get('krok') === '2' ? 2 : 1; // the confirmation is never restored from an address
+    var show = state.date || firstFree(TODAY);
+    if (show) state.month = new Date(show.getFullYear(), show.getMonth(), 1);
+  }
+  window.addEventListener('popstate', function () { fromHistory = true; readUrl(); render(); });
+
+  function render() {
+    renderHead();
+    document.querySelector('.switch').hidden = state.step !== 1;
+    document.getElementById('facts').hidden = state.step !== 1;
+    document.getElementById('title').hidden = state.step === 3;
+    if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else renderStep3();
+    syncUrl();
+  }
+
+  document.querySelectorAll('.fmt').forEach(function (b) {
+    b.onclick = function () {
+      state.f = b.dataset.f; state.time = null;
+      if (state.date && !slotsFor(state.date).length) state.date = null; // the day is not free in this format: nothing chosen
+      if (!state.date && !hasFree(state.month)) { var f = firstFree(TODAY); if (f) state.month = new Date(f.getFullYear(), f.getMonth(), 1); }
+      render();
+    };
+  });
+
+  var first = firstFree(TODAY);
+  readUrl(); // a refresh or a shared link restores format, day, time and step; otherwise the first free month, no day chosen
+  // lab: open straight on step 2 or 3 (?step=2|3) for the comparisons
+  var st = +new URLSearchParams(location.search).get('step');
+  if (st === 2 || st === 3) { state.date = first; state.time = slotsFor(state.date)[0]; state.step = st; state.email = 'jana.novakova@example.cz'; }
+  render();
+})();
+</script>

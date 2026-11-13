@@ -1,0 +1,52 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace – rozložení</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.wall { display: flex; gap: 20px; overflow-x: auto; padding: 8px 0 24px; scroll-snap-type: x mandatory; }
+.col { flex: none; display: grid; gap: 8px; scroll-snap-align: start; }
+.col h2 { font-size: 19px; }
+.col h2 a { color: var(--navy); }
+.col.google h2 a { color: var(--coral-ink); }
+.col p { font-size: 14px; color: var(--slate); min-height: 42px; }
+/* Device tabs: every frame renders at the real device width (so the page's own layout switches), then is scaled to fit. */
+.frame { width: calc(var(--w) * var(--s) * 1px); height: calc(var(--h) * var(--s) * 1px); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--paper); }
+.col.google .frame { background: #fff; }
+iframe { display: block; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); border: 0; background: transparent; transform: scale(var(--s)); transform-origin: 0 0; }
+.col p { max-width: calc(var(--w) * var(--s) * 1px); }
+body { --w: 375; --h: 740; --s: 1; }
+body[data-device="tablet"] { --w: 768; --h: 1024; --s: .62; }
+body[data-device="desktop"] { --w: 1280; --h: 860; --s: .5; }
+h1 { max-width: none; padding: 16px 0 4px; }
+.devices { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 8px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tabs { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.tab { border: 0; border-radius: 999px; min-height: 44px; padding: 0 18px; background: transparent; cursor: pointer; font-weight: 500; color: var(--slate); }
+.tab[aria-selected="true"] { background: var(--navy); color: var(--paper); font-weight: 600; }
+.tab:hover:not([aria-selected="true"]) { background: var(--sky); }
+.devices small { color: var(--mute); font-size: 13px; }
+</style>
+<h1>Rezervace na tabletu a počítači: 2 způsoby, jak jí dát tvar</h1>
+<p class="lab-what" style="margin:0 0 8px;max-width:none">Na telefonu se nic nemění. Přepněte nahoře na Tablet nebo Počítač a v náhledech zkuste i Osobně.</p>
+<div class="devices"><div class="tabs" role="tablist" aria-label="Zařízení">
+  <button class="tab" role="tab" data-d="phone" aria-selected="false">Telefon</button>
+  <button class="tab" role="tab" data-d="tablet" aria-selected="false">Tablet</button>
+  <button class="tab" role="tab" data-d="desktop" aria-selected="true">Počítač</button>
+</div><small id="dim"></small></div>
+<div class="wall">
+  <div class="col"><h2><a href="../rezervace-ukazka.html?d=0">0 Jen krémová</a></h2><p>Současný stav, bez ničeho kolem.</p><div class="frame"><iframe src="../rezervace-ukazka.html?d=0" title="0 Jen krémová"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?d=1">1 Barevný panel</a></h2><p>Celá rezervace v modrém nebo broskvovém panelu, dny a časy bílé.</p><div class="frame"><iframe src="../rezervace-ukazka.html?d=1" title="1 Barevný panel"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?d=2">2 Karta pro výběr</a></h2><p>Nadpis a přepínač na stránce, kalendář s časy v bílé kartě.</p><div class="frame"><iframe src="../rezervace-ukazka.html?d=2" title="2 Karta pro výběr"></iframe></div></div>
+</div>
+<script>
+(function () {
+  var dims = { phone: '375 × 740 px, skutečná velikost', tablet: '768 × 1024 px, zmenšeno na 62 %', desktop: '1280 × 860 px, zmenšeno na 50 %' };
+  function set(d) {
+    document.body.dataset.device = d;
+    document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.d === d); });
+    document.getElementById('dim').textContent = dims[d];
+    try { localStorage.setItem('rez-device', d); } catch (e) {}
+  }
+  document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { set(b.dataset.d); }; });
+  var saved; try { saved = localStorage.getItem('rez-device'); } catch (e) {}
+  set(dims[saved] && saved !== 'phone' ? saved : 'desktop');
+})();
+</script>
