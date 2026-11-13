@@ -155,9 +155,14 @@ m = re.search(r'(<div class="about-description">\s*<p>.*?</p>)(.*?)(\n\s*</div>\
 # the IVF group stays in view, right under the first paragraph (owner, 13 Nov)
 ivf = re.search(r'\n\s*<p class="highlighted-text">.*?IVF.*?</p>', m.group(2), flags=re.S)
 assert ivf
+# closing portrait card (owner, 13 Nov): a peach card with the studio portrait and a quote, at the end of "Číst dál"
+PERSONAL_NOTE = ('\n                        <div class="about-personal-note">'
+                  '\n                            <img src="ui-lab/proposal/img/portrait-avatar-192.webp" alt="Mgr. Kristýna Hriciková Glattová" width="130" height="130" loading="lazy" decoding="async">'
+                  '\n                            <p class="about-personal-quote">„Naší největší svobodou je svoboda zvolit si svůj postoj.“<cite>Viktor E. Frankl</cite></p>'
+                  '\n                        </div>')
 page = (page[:m.start()] + m.group(1) + ivf.group(0) +
         '\n                        <details class="about-more">\n                            <summary><span class="about-more-open">Číst dál</span><span class="about-more-close">Skrýt</span></summary>' +
-        m.group(2).replace(ivf.group(0), '', 1) + '\n                        </details>' + m.group(3) + page[m.end():])
+        m.group(2).replace(ivf.group(0), '', 1) + '\n                        </details>' + PERSONAL_NOTE + m.group(3) + page[m.end():])
 # no credential summaries (owner, 13 Nov): the supervisors are in the text, the rest in the article author boxes
 page, n = re.subn(r'\n\s*<div class="credentials">.*?\n                </div>\n', '\n', page, count=1, flags=re.S)
 assert n == 1
@@ -424,6 +429,11 @@ def build_page(name, layer):
                        'a terapeut pro děti a dospělé. Je ve specializačním vzdělávání v oboru klinická psychologie, je členkou Asociace klinických psychologů '
                        'a kandidátní členkou České asociace pro psychoterapii.</p>',
                        p, flags=re.S)
+        assert n == 1, name
+        # author photo: the studio portrait (owner, 13 Nov), cropped so the face fills the small circle
+        p, n = re.subn(r'<img src="images/photo-400\.webp" alt="Mgr\. Kristýna Hriciková Glattová" width="96" height="96" loading="lazy">',
+                       '<img src="ui-lab/proposal/img/portrait-avatar-192.webp" alt="Mgr. Kristýna Hriciková Glattová" width="96" height="96" loading="lazy" decoding="async">',
+                       p, count=1)
         assert n == 1, name
 
     if layer == "quiz.css":

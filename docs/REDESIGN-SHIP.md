@@ -40,6 +40,8 @@ a careless copy.
 3. Move the assets out of the lab and fix every path:
    - `ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2` → `fonts/Fraunces/` (add the OFL licence);
    - `ui-lab/proposal/icons/heart.svg`, `heart-32.png`, `heart-96.png`, `heart-180.png` → `images/`;
+   - `ui-lab/proposal/img/portrait-256.webp`, `portrait-480.webp`, `portrait-avatar-192.webp` → `images/`
+     (O mně and the article author boxes);
    - `ui-lab/proposal/styles.css` and the inlined `proposal.css` layers → `css/`;
    - `ui-lab/proposal/js/quiz-*.js` → `js/`.
 4. Lab links (`/ui-lab/proposal/#sluzby`, `/ui-lab/proposal/blog.html`, …) go back to the real
