@@ -499,6 +499,7 @@ html { scrollbar-gutter: stable; }
 .about-more > summary { list-style: none; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer;
   font-size: 1.0625rem; font-weight: 600; color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
 .about-more > summary::-webkit-details-marker { display: none; }
+.about-more > summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; border-radius: 2px; }
 .about-more > summary::after { content: '\2193'; margin-left: 8px; text-decoration: none; display: inline-block; }
 .about-more[open] > summary::after { content: '\2191'; }
 .about-more-close, .about-more[open] .about-more-open { display: none; }
@@ -764,7 +765,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .about-personal-note { display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 18px 20px; border-radius: var(--r-lg); background: var(--peach); }
 .about-personal-note img { width: 130px; height: 130px; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; object-fit: cover; flex: none; box-shadow: 0 8px 20px rgba(181, 87, 63, .18); }
 .about-personal-quote { margin: 0; font-size: 15px; line-height: 1.5; color: var(--navy); font-style: italic; }
-.about-personal-quote cite { display: block; margin-top: 6px; font-size: 13px; font-style: normal; color: var(--coral-ink); }
+/* credit: one step darker than --coral-ink, 4.78:1 on the peach card (coral-ink is 3.93:1, under AA for 13px) */
+.about-personal-quote cite { display: block; margin-top: 6px; font-size: 13px; font-style: normal; color: #A34B35; }
 @media (max-width: 480px) {
   .about-personal-note { flex-direction: column; text-align: center; gap: 12px; }
 }
@@ -1157,5 +1159,12 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
     <script src="js/script.js?v=20261111-5"></script>
+    <script>
+    document.addEventListener('focusin', function (e) {
+        var menu = document.getElementById('primary-navigation'), toggle = document.querySelector('.nav-toggle');
+        if (!menu || !toggle || toggle.getAttribute('aria-expanded') !== 'true') return;
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) toggle.click();
+    });
+    </script>
 </body>
 </html>

@@ -98,16 +98,17 @@
       .btn{padding:.8125rem 1.75rem;font-size:1rem;line-height:1.375;letter-spacing:.005em;border-radius:999px}.btn-hero{padding:1rem 2.125rem;font-size:1.0625rem}
       .header{box-shadow:0 1px 0 #E9E4DD,0 6px 20px hsl(205 40% 25% / .04)}
       @media (max-width:968px){.hero-subtitle{margin-inline:auto}.hero{padding-bottom:var(--section-y)}}
+      .css-wait main>section:not(.hero),.css-wait footer{visibility:hidden}
     </style>
 
     <!-- Full stylesheets are loaded asynchronously after matching critical CSS.
          Both switch on together, so the page restyles once (after two frames on mobile). -->
-    <script>window.khgCss=function(l){var q=window.khgCssQ=window.khgCssQ||[];q.push(l);if(q.length<2)return;var go=function(){q.forEach(function(x){x.rel='stylesheet'})};var mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(go)})}else{go()}}</script>
+    <script>document.documentElement.classList.add('css-wait');setTimeout(function(){document.documentElement.classList.remove('css-wait')},3000);window.khgCss=function(l){var q=window.khgCssQ=window.khgCssQ||[];q.push(l);if(q.length<2)return;var go=function(){q.forEach(function(x){x.rel='stylesheet'});document.documentElement.classList.remove('css-wait')};var mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(go)})}else{go()}}</script>
     <link rel="preload" href="ui-lab/proposal/styles.css?v=lab1" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
     <link rel="preload" href="css/polish.css?v=20261111-3" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
     <!-- Reload or back/forward: the browser restores a deep scroll position on the first frame, so the
          (already cached) full CSS must apply before that frame or everything below the hero shifts. -->
-    <script>(function(){var n=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0],t=n?n.type:({1:'reload',2:'back_forward'})[performance.navigation&&performance.navigation.type];if(t!=='reload'&&t!=='back_forward')return;document.querySelectorAll('link[rel=preload][as=style]').forEach(function(l){l.onload=l.onerror=null;l.setAttribute('blocking','render');l.rel='stylesheet'})})()</script>
+    <script>(function(){var n=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0],t=n?n.type:({1:'reload',2:'back_forward'})[performance.navigation&&performance.navigation.type];if(t!=='reload'&&t!=='back_forward')return;document.querySelectorAll('link[rel=preload][as=style]').forEach(function(l){l.onload=l.onerror=null;l.setAttribute('blocking','render');l.rel='stylesheet'});document.documentElement.classList.remove('css-wait')})()</script>
     <noscript><link rel="stylesheet" href="ui-lab/proposal/styles.css?v=lab1"><link rel="stylesheet" href="css/polish.css?v=20261111-3"></noscript>
     <style id="proposal">
 /* LAB: theme proposal of 12 Nov 2026 (ui-lab/theme-proposal.html), layered over the live CSS.
@@ -498,6 +499,7 @@ html { scrollbar-gutter: stable; }
 .about-more > summary { list-style: none; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer;
   font-size: 1.0625rem; font-weight: 600; color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
 .about-more > summary::-webkit-details-marker { display: none; }
+.about-more > summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; border-radius: 2px; }
 .about-more > summary::after { content: '\2193'; margin-left: 8px; text-decoration: none; display: inline-block; }
 .about-more[open] > summary::after { content: '\2191'; }
 .about-more-close, .about-more[open] .about-more-open { display: none; }
@@ -763,7 +765,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .about-personal-note { display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 18px 20px; border-radius: var(--r-lg); background: var(--peach); }
 .about-personal-note img { width: 130px; height: 130px; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; object-fit: cover; flex: none; box-shadow: 0 8px 20px rgba(181, 87, 63, .18); }
 .about-personal-quote { margin: 0; font-size: 15px; line-height: 1.5; color: var(--navy); font-style: italic; }
-.about-personal-quote cite { display: block; margin-top: 6px; font-size: 13px; font-style: normal; color: var(--coral-ink); }
+/* credit: one step darker than --coral-ink, 4.78:1 on the peach card (coral-ink is 3.93:1, under AA for 13px) */
+.about-personal-quote cite { display: block; margin-top: 6px; font-size: 13px; font-style: normal; color: #A34B35; }
 @media (max-width: 480px) {
   .about-personal-note { flex-direction: column; text-align: center; gap: 12px; }
 }
@@ -1794,5 +1797,12 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
 <script src="js/privacy-consent.js?v=20261016-2"></script>
 <script src="js/script.js?v=20261111-5"></script>
+    <script>
+    document.addEventListener('focusin', function (e) {
+        var menu = document.getElementById('primary-navigation'), toggle = document.querySelector('.nav-toggle');
+        if (!menu || !toggle || toggle.getAttribute('aria-expanded') !== 'true') return;
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) toggle.click();
+    });
+    </script>
 </body>
 </html>

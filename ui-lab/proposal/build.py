@@ -55,6 +55,22 @@ assert "Playfair Display';" not in sheet2.split("--font-heading")[0], "Playfair 
 (here / "styles.css").write_text(sheet2, encoding="utf-8")
 page = page.replace("css/styles.css?v=20261110-3", "ui-lab/proposal/styles.css?v=lab1")
 
+# first paint before the async CSS arrives (first visit on a real network): the critical CSS only matches the hero,
+# so the sections under it moved once the full CSS landed. Measured with the CSS held back 400 ms: CLS 0.009 at
+# 1280x800, 0.023 at 1920x1080, 0.153 on iPad Pro portrait (13 Nov). Keep everything below the hero invisible (it
+# still takes its space) until both sheets are on: content that appears is not a layout shift, and the hero, which
+# is the LCP, is untouched. Shown again by the loader, by the reload path, or after 3 s if a sheet hangs.
+# Without JS the class is never set, so nothing is hidden.
+sub("<script>window.khgCss=function(l){",
+    "<script>document.documentElement.classList.add('css-wait');setTimeout(function(){document.documentElement.classList.remove('css-wait')},3000);"
+    "window.khgCss=function(l){")
+sub("var go=function(){q.forEach(function(x){x.rel='stylesheet'})};",
+    "var go=function(){q.forEach(function(x){x.rel='stylesheet'});document.documentElement.classList.remove('css-wait')};")
+sub("l.rel='stylesheet'})})()</script>", "l.rel='stylesheet'});document.documentElement.classList.remove('css-wait')})()</script>")
+sub("@media (max-width:968px){.hero-subtitle{margin-inline:auto}.hero{padding-bottom:var(--section-y)}}",
+    "@media (max-width:968px){.hero-subtitle{margin-inline:auto}.hero{padding-bottom:var(--section-y)}}\n"
+    "      .css-wait main>section:not(.hero),.css-wait footer{visibility:hidden}")
+
 # proposal layer: inline, after the async stylesheets, so it wins the cascade from first paint
 sub("</noscript>", "</noscript>\n    <style id=\"proposal\">\n" + css + "\n    .rv-title { font-weight: 500 !important; }\n    </style>")
 
@@ -253,7 +269,21 @@ def brand(html, logo, fav):
     # the old gold logo image in the footer was hidden by CSS but still in the markup; the footer name is the logo now (13 Nov)
     html, n = re.subn(r'\n\s*<img src="/images/logo\.webp"[^>]*class="footer-logo"[^>]*>', "", html, count=1)
     assert n == 1, "footer logo not found"
+    assert html.count("</body>") == 1
+    html = html.replace("</body>", MENU_FOCUS + "\n</body>", 1)
     return html.replace("</head>", BRAND_CSS + "\n</head>", 1)
+
+
+# the mobile menu covers the whole screen in the redesign, so Tab past its last item went to links hidden
+# behind it: close the menu once focus leaves it (accessibility pass, 13 Nov). Toggling by click closes it
+# without moving focus, so focus stays where the visitor tabbed to.
+MENU_FOCUS = """    <script>
+    document.addEventListener('focusin', function (e) {
+        var menu = document.getElementById('primary-navigation'), toggle = document.querySelector('.nav-toggle');
+        if (!menu || !toggle || toggle.getAttribute('aria-expanded') !== 'true') return;
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) toggle.click();
+    });
+    </script>"""
 
 page = brand(page, LOGO_F, FAV_F)
 
