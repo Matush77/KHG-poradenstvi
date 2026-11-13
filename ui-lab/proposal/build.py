@@ -157,7 +157,8 @@ ivf = re.search(r'\n\s*<p class="highlighted-text">.*?IVF.*?</p>', m.group(2), f
 assert ivf
 # closing portrait card (owner, 13 Nov): a peach card with the studio portrait and a quote, at the end of "Číst dál"
 PERSONAL_NOTE = ('\n                        <div class="about-personal-note">'
-                  '\n                            <img src="ui-lab/proposal/img/portrait-avatar-192.webp" alt="Mgr. Kristýna Hriciková Glattová" width="130" height="130" loading="lazy" decoding="async">'
+                  # shown at 130px: the 384 copy keeps it sharp on 2x/3x phones, 1x screens keep the 192
+                  '\n                            <img src="ui-lab/proposal/img/portrait-avatar-192.webp" srcset="ui-lab/proposal/img/portrait-avatar-192.webp 192w, ui-lab/proposal/img/portrait-avatar-384.webp 384w" sizes="130px" alt="Mgr. Kristýna Hriciková Glattová" width="130" height="130" loading="lazy" decoding="async">'
                   '\n                            <p class="about-personal-quote">„Naší největší svobodou je svoboda zvolit si svůj postoj.“<cite>Viktor E. Frankl</cite></p>'
                   '\n                        </div>')
 page = (page[:m.start()] + m.group(1) + ivf.group(0) +

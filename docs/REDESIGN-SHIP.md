@@ -40,8 +40,8 @@ a careless copy.
 3. Move the assets out of the lab and fix every path:
    - `ui-lab/proposal/fonts/Fraunces-500-Soft-cs.woff2` → `fonts/Fraunces/` (add the OFL licence);
    - `ui-lab/proposal/icons/heart.svg`, `heart-32.png`, `heart-96.png`, `heart-180.png` → `images/`;
-   - `ui-lab/proposal/img/portrait-256.webp`, `portrait-480.webp`, `portrait-avatar-192.webp` → `images/`
-     (O mně and the article author boxes);
+   - `ui-lab/proposal/img/portrait-avatar-192.webp` and `portrait-avatar-384.webp` → `images/`
+     (the 192 in the article author boxes; both, as `srcset`, in the O mně quote card);
    - `ui-lab/proposal/styles.css` and the inlined `proposal.css` layers → `css/`;
    - `ui-lab/proposal/js/quiz-*.js` → `js/`.
 4. Lab links (`/ui-lab/proposal/#sluzby`, `/ui-lab/proposal/blog.html`, …) go back to the real
@@ -49,8 +49,13 @@ a careless copy.
 5. Header, footer and booking window: change `partials/` and apply the same change to every page,
    including `ochrana-osobnich-udaju.html` and `404.html` (see `FOOTER-WORKFLOW.md`).
 6. Bump `?v=` on every CSS and JS file that changed, in every page that loads it.
-7. Keep titles, meta descriptions, H1s, canonicals, JSON-LD and URLs exactly as they are.
-   The SEO review of 12 Nov found none of them changed; keep it that way.
+7. Keep titles, meta descriptions, H1s, canonicals, JSON-LD and URLs as the lab pages have them,
+   and change nothing else. The lab differs from `main` only on purpose (owner, 13 Nov):
+   - article and quiz titles end with "| KHG Poradenství", and four long ones are shortened
+     (commit `f65d8f6`);
+   - `quiz-zdrave-hranice.html` meta description says "vám" instead of "Vám";
+   - homepage JSON-LD: opening hours 8–17, `geo` and the Maps link from the Google profile.
+   H1s, canonicals and URLs are unchanged.
 8. Run the gate (section 1) until it passes. Then check the rules in `.claude/CLAUDE.md`:
    both widths, CLS, LCP, request count, console and 404s.
 
