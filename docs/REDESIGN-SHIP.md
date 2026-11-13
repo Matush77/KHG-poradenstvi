@@ -47,7 +47,9 @@ a careless copy.
 4. Lab links (`/ui-lab/proposal/#sluzby`, `/ui-lab/proposal/blog.html`, …) go back to the real
    ones (`/#sluzby`, `/blog.html`, …).
 5. Header, footer and booking window: change `partials/` and apply the same change to every page,
-   including `ochrana-osobnich-udaju.html` and `404.html` (see `FOOTER-WORKFLOW.md`).
+   including `ochrana-osobnich-udaju.html` and `404.html` (see `FOOTER-WORKFLOW.md`). Those two
+   are not in the lab, so also give them `<meta name="color-scheme" content="only light">` above
+   the viewport meta, as every lab page has (it stops phones from auto-darkening the design).
 6. Bump `?v=` on every CSS and JS file that changed, in every page that loads it.
 7. Keep titles, meta descriptions, H1s, canonicals, JSON-LD and URLs as the lab pages have them,
    and change nothing else. The lab differs from `main` only on purpose (owner, 13 Nov):

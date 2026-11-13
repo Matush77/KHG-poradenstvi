@@ -271,6 +271,11 @@ def brand(html, logo, fav):
     assert n == 1, "footer logo not found"
     assert html.count("</body>") == 1
     html = html.replace("</body>", MENU_FOCUS + "\n</body>", 1)
+    # phones that darken pages on their own (Samsung Internet, Chrome auto-dark) turned the coral buttons
+    # unreadable and the peach panels brown; the design has no dark theme, so ask for light only (13 Nov)
+    vp = '<meta name="viewport"'
+    assert html.count(vp) == 1 and 'name="color-scheme"' not in html
+    html = html.replace(vp, '<meta name="color-scheme" content="only light">\n    ' + vp, 1)
     return html.replace("</head>", BRAND_CSS + "\n</head>", 1)
 
 
