@@ -66,7 +66,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   var DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
   var DAYS_ON = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu']; // after "na" (přesunout na pátek)
   var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
-  var CONTACT = '<p class="contact">Kdyby něco nesedělo, napište mi na <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a> nebo zavolejte na <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
+  var CONTACT = '<p class="contact">V případě potíží: <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>, <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
   var card = document.getElementById('card');
   var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || '';
   var data = null, flash = '';
@@ -87,9 +87,9 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   function render() {
     var d = data;
     if (d.cancelled) {
-      show('<h1>Termín je zrušený</h1>' + summary(d) +
-        '<p class="ok">' + (d.refunded ? '1 100 Kč se vrací na vaši kartu. Na účtu bývají do 5–10 pracovních dnů.' : 'Platba se nevrací, termín byl zrušený méně než 36 hodin předem.') + '</p>' +
-        '<p>Nový termín si můžete kdykoli <a href="/ui-lab/rezervace-ukazka.html">vybrat v kalendáři</a>.</p>' + CONTACT);
+      show('<h1>Termín zrušen</h1>' + summary(d) +
+        '<p class="ok">' + (d.refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.' : 'Platba se nevrací, termín byl zrušen méně než 36 hodin předem.') + '</p>' +
+        '<p>Nový termín lze kdykoli <a href="/ui-lab/rezervace-ukazka.html">vybrat v kalendáři</a>.</p>' + CONTACT);
       return;
     }
     if (d.started) {
@@ -97,8 +97,8 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
       return;
     }
     if (d.can_move && !cancelling) {
-      show('<h1>Přesunout nebo zrušit termín?</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) +
-        '<p>Termín můžete <b>přesunout</b> na jiný volný čas, bez doplácení. Přesunout i zdarma zrušit se dá nejpozději 36 hodin před sezením.</p>' +
+      show('<h1>Přesun nebo zrušení termínu</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) +
+        '<p>Přesun na jiný volný čas je <b>bez doplácení</b>. Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením.</p>' +
         '<div class="actions"><button class="btn" id="move">Přesunout termín</button><button class="btn ghost" id="cancel">Zrušit termín</button>' +
         '<a class="keep" href="/">Ponechat termín</a></div>' + CONTACT + '<div id="panel"></div>');   // last: the times load in without pushing anything
       document.getElementById('move').onclick = openMove;
@@ -106,10 +106,10 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
       return;
     }
     var money = d.refund
-      ? '<p>Rušíte víc než 36 hodin předem, takže vám vrátím <b>celých 1 100 Kč</b> na kartu, kterou jste platili.</p>'
-      : '<p>Do sezení zbývá méně než 36 hodin, <b>platba se už nevrací</b>. Termín můžete i tak zrušit, aby se uvolnil pro někoho jiného.</p>' +
-        '<p>Pokud se stalo něco vážného, zavolejte mi a domluvíme se.</p>';
-    show('<h1>Zrušit termín?</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) + money +
+      ? '<p>Do sezení zbývá víc než 36 hodin, <b>částka bude vrácena</b> na kartu použitou k platbě.</p>'
+      : '<p>Do sezení zbývá méně než 36 hodin, <b>platba se už nevrací</b>. Zrušením se termín i tak uvolní pro někoho jiného.</p>' +
+        '<p>V naléhavém případě je možná domluva po telefonu: <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
+    show('<h1>Zrušení termínu</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) + money +
       '<p class="err" id="err" role="alert" hidden></p>' +
       '<div class="actions"><button class="btn" id="go">Zrušit termín</button>' +
       (d.can_move ? '<button class="link" id="back">Zpět</button>' : '<a class="keep" href="/">Ponechat termín</a>') + '</div>' + CONTACT);
@@ -124,7 +124,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   function openMove() {
     var p = document.getElementById('panel');
     p.className = 'panel';
-    p.innerHTML = '<h2>Vyberte nový termín</h2><p>Načítám volné termíny…</p>';
+    p.innerHTML = '<h2>Nový termín</h2><p>Načítání volných termínů…</p>';
     fetch('/api/terminy?' + new URLSearchParams({ b: b, t: t }))
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) { var x = new Error(j.error || ''); x.api = true; throw x; } return j; }); })
       .then(function (j) {
@@ -136,9 +136,9 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
               return '<button class="time" data-d="' + den + '" data-c="' + c + '" aria-pressed="' + !!on + '">' + c + '</button>';
             }).join('') + '</div></div>';
           }).join('');
-          p.innerHTML = '<h2>Vyberte nový termín</h2>' +
+          p.innerHTML = '<h2>Nový termín</h2>' +
             (days.length ? '<p>' + (data.forma === 'osobne' ? 'Volné časy pro osobní sezení.' : 'Volné časy pro online sezení.') + '</p>' + list
-              : '<p>V příštích týdnech teď není nic volného. Zavolejte mi prosím a domluvíme se.</p>') +
+              : '<p>V příštích týdnech teď není nic volného. Termín je možné domluvit po telefonu: <a href="tel:+420605990980">+420 605 990 980</a>.</p>') +
             (shown < days.length ? '<button class="link" id="more">Další termíny</button>' : '') +
             '<button class="link" id="back">Zpět</button>' +
             (chosen ? '<div class="confirm"><p>Přesunout na <b>' + onDay(chosen.den, chosen.cas) + '</b>?</p>' +
@@ -149,13 +149,13 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
           var go = document.getElementById('go');
           if (go) go.onclick = function () {
             var err = document.getElementById('err');
-            go.setAttribute('aria-busy', 'true'); go.disabled = true; go.textContent = 'Přesouvám…'; err.hidden = true;
+            go.setAttribute('aria-busy', 'true'); go.disabled = true; go.textContent = 'Přesouvání…'; err.hidden = true;
             fetch('/api/presunout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ b: b, t: t, date: chosen.den, time: chosen.cas }) })
               .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Přesun se nepovedl.'); return j; }); })
               .then(function (j) {
-                data = j; flash = 'Hotovo, termín je přesunutý. Potvrzení s novým časem vám přišlo e-mailem.';
-                show('<h1>Termín je přesunutý</h1><p class="ok" role="status">' + flash + '</p>' + summary(data) +
-                  '<p>Přesunout znovu nebo zdarma zrušit můžete nejpozději 36 hodin před sezením, přes stejný odkaz z e-mailu.</p>' + CONTACT);
+                data = j; flash = 'Hotovo. Potvrzení s novým časem bylo odesláno e-mailem.';
+                show('<h1>Termín přesunut</h1><p class="ok" role="status">' + flash + '</p>' + summary(data) +
+                  '<p>Přesunout znovu nebo zdarma zrušit lze nejpozději 36 hodin před sezením, přes stejný odkaz z e-mailu.</p>' + CONTACT);
                 var h = card.querySelector('h1'); h.setAttribute('tabindex', '-1'); h.focus();
               })
               .catch(function (e) { go.removeAttribute('aria-busy'); go.disabled = false; go.textContent = 'Přesunout'; err.textContent = e.message; err.hidden = false; });
@@ -165,14 +165,14 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
         p.querySelector('h2').scrollIntoView({ block: 'nearest' });
       })
       .catch(function (e) {
-        p.innerHTML = '<h2>Vyberte nový termín</h2><p class="err">' + esc(e.api && e.message ? e.message : 'Volné termíny se teď nepodařilo načíst.') + ' Zkuste to prosím za chvíli, nebo mi zavolejte.</p><button class="link" id="back">Zpět</button>';
+        p.innerHTML = '<h2>Nový termín</h2><p class="err">' + esc(e.api && e.message ? e.message : 'Volné termíny se teď nepodařilo načíst.') + ' Stačí to zkusit za chvíli, případně zavolat na <a href="tel:+420605990980">+420 605 990 980</a>.</p><button class="link" id="back">Zpět</button>';
         document.getElementById('back').onclick = render;
       });
   }
 
   function cancel() {
     var btn = this, err = document.getElementById('err');
-    btn.setAttribute('aria-busy', 'true'); btn.disabled = true; btn.textContent = 'Ruším termín…'; err.hidden = true;
+    btn.setAttribute('aria-busy', 'true'); btn.disabled = true; btn.textContent = 'Rušení termínu…'; err.hidden = true;
     fetch('/api/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ b: b, t: t }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (r) {
@@ -182,7 +182,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
       })
       .catch(function (e) {
         btn.removeAttribute('aria-busy'); btn.disabled = false; btn.textContent = 'Zrušit termín';
-        err.textContent = e.message + ' Zkuste to prosím znovu, nebo mi zavolejte.'; err.hidden = false;
+        err.textContent = e.message + ' Stačí to zkusit znovu, případně zavolat na +420 605 990 980.'; err.hidden = false;
       });
   }
 
@@ -192,7 +192,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
       if (!r.ok) { show('<h1>Odkaz nefunguje</h1><p>' + esc(r.j.error || 'Rezervaci se nepodařilo najít.') + '</p>' + CONTACT); return; }
       data = r.j; render();
     })
-    .catch(function () { show('<h1>Teď se to nepovedlo načíst</h1><p>Zkuste stránku za chvíli obnovit.</p>' + CONTACT); });
+    .catch(function () { show('<h1>Načtení se nepovedlo</h1><p>Stačí stránku za chvíli obnovit.</p>' + CONTACT); });
 })();
 </script>
 </body></html>

@@ -50,7 +50,7 @@ function owner_signed(string $b, string $t): string
 
 function signed(string $b, string $t): string
 {
-    if (!token_ok($b, $t)) throw new ClientError('Odkaz není platný. Zkontrolujte, že jste ho zkopírovali celý.', 403);
+    if (!token_ok($b, $t)) throw new ClientError('Odkaz není platný. Nejspíš nebyl zkopírován celý.', 403);
     return $b;
 }
 

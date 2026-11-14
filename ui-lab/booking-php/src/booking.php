@@ -243,20 +243,20 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null): array
     $b = booking_get($payId);
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
     if ($b['status'] === 'cancelled') return $b;
-    if ($b['status'] !== 'booked') throw new ClientError('Rezervace se ještě zpracovává. Zkuste to prosím za pár minut, nebo mi zavolejte.', 409);
+    if ($b['status'] !== 'booked') throw new ClientError('Rezervace se ještě zpracovává. Stačí to zkusit za pár minut, případně zavolat na ' . PHONE . '.', 409);
     $now ??= new DateTimeImmutable();
     $hours = (prague($b['slot'])->getTimestamp() - $now->getTimestamp()) / 3600;
     if ($hours <= 0) throw new ClientError('Sezení už začalo nebo proběhlo, zrušit ho nejde.', 400);
     $fields = ['status' => 'cancelled', 'cancelled_by' => 'client', 'hours_before' => round($hours, 1)];
     if ($hours >= cfg()['free_cancel_hours']) {
         [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
-        if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Zrušení se teď nepovedlo. Zkuste to prosím znovu.', 502);
+        if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Zrušení se teď nepovedlo. Stačí to zkusit znovu.', 502);
         // the idempotency key makes a double click (or two tabs) refund only once
         [$code, $r] = stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
             'metadata' => ['duvod' => sprintf('zruseni klientem %.0f h predem', $hours)]], 'cancel-' . $payId);
         if ($code !== 200) {
             log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
-            throw new ClientError('Vrácení peněz se nepovedlo, termín zůstává. Zavolejte mi prosím.', 502);
+            throw new ClientError('Vrácení peněz se nepovedlo, termín zůstává. Pomůže telefon: ' . PHONE . '.', 502);
         }
         $fields += ['refund_id' => $r['id'], 'refund_status' => $r['status']];
     }
@@ -340,11 +340,11 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
     $old = prague($b['slot']);
     if ($old <= $now) throw new ClientError('Sezení už začalo nebo proběhlo.', 400);
     if ($client && ($old->getTimestamp() - $now->getTimestamp()) / 3600 < cfg()['free_cancel_hours']) {
-        throw new ClientError('Do sezení zbývá méně než 36 hodin, přesunout ho už nejde. Zavolejte mi prosím.', 409);
+        throw new ClientError('Do sezení zbývá méně než 36 hodin, přesun už není možný. Pomůže telefon: ' . PHONE . '.', 409);
     }
     $new = slot_start($den, $cas);
     if ($new == $old) throw new ClientError('To je stejný termín.', 400);
-    $taken = $client ? 'Tenhle termín už není volný. Vyberte prosím jiný.' : 'Tenhle termín už není volný. Vyber prosím jiný.';
+    $taken = $client ? 'Tenhle termín už není volný, je potřeba vybrat jiný.' : 'Tenhle termín už není volný. Vyber prosím jiný.';
     if (!in_array($new->format('G:i'), free_slots($new)[$b['forma']][$new->format('Y-m-d')] ?? [], true)) throw new ClientError($taken, 409);
     $slot = $new->format(DATE_ATOM);
     db_tx(function (PDO $pdo) use ($slot, $payId, $taken, $client) {
@@ -362,7 +362,7 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
             booking_update($payId, ['slot' => $b['slot'], 'moves' => $b['moves'], 'client_moves' => $b['client_moves'], 'mail_sent' => $b['mail_sent'],
                 'reminded' => $b['reminded'], 'moved_at' => $b['moved_at']]);
             log_line('MOVE_FAILED', ['pay' => $payId, 'by' => $by, 'error' => $e->getMessage()]);
-            throw new ClientError($client ? 'Termín se teď nepodařilo změnit, platí ten původní. Zkuste to prosím znovu.'
+            throw new ClientError($client ? 'Termín se teď nepodařilo změnit, platí ten původní. Stačí to zkusit znovu.'
                 : 'Kalendář se teď nepodařilo upravit, termín zůstává původní. Zkus to prosím znovu.', 502);
         }
     }

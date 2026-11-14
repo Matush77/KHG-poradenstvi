@@ -493,4 +493,9 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   Second send: Seznam shows the footer at body size, so the rows still wrapped; the footer is now three short
   rows (name / phone and web / e-mail). The Gmail app enlarges text about a fifth, so the heading wraps to
   two lines there; first kept, then (owner) the phone heading went to 24 px so it fits one line in Gmail too.
+  The client's move/cancel page (`ui-lab/rezervace/zruseni.html`) and the API errors it shows follow
+  the same style: no "I" or "you", nominal headings ("Přesun nebo zrušení termínu", "Zrušení termínu",
+  "Nový termín"), short passive results ("Termín zrušen", "Termín přesunut"), the refund line as in the
+  e-mails, "lze" instead of "můžete", and the phone number instead of "zavolejte mi". The owner's page
+  and her e-mails keep "ty".
 
