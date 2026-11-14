@@ -537,3 +537,7 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
     Sat 21 Nov 14:00, save, `/api/slots` offers it online only; two devices saving at once keep both changes
     (first version lost the other device's change, fixed); sign-out kills the cookie; no cookie: 401.
     Layout shift 0. Not tested: a real phone, Windows/Ubuntu browsers, the hosting's HTTPS cookie.
+- Payment step, 14 Nov: the owner chose variant 0, the redirect to Stripe Checkout (already built and tested).
+  Variants 1–3 (card fields on our page, payment as its own step, Stripe's embedded form) would each need
+  Stripe's script on the booking page (against the no-third-party-scripts rule) and a PaymentIntent flow with
+  3-D Secure on our page. Variant 2 stays the candidate if clients find the jump to Stripe off-putting.
