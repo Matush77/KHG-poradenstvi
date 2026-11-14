@@ -273,6 +273,15 @@ db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES
 throws(fn() => create_checkout(['f' => 'online', 'date' => '2027-01-12', 'time' => '10:00', 'email' => 'a@b.cz']), 409, 'another browser\'s hold still refused, even from the same IP');
 db()->exec("DELETE FROM holds WHERE slot = '$own'");
 
+// --- back from Stripe unpaid: only this browser's finished Stripe pages are released (the Stripe call itself is checked live)
+ok(release_browser_holds(null) === [], 'no cookie: nothing released');
+$hb = db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, ?, ?, ?, ?)');
+$hb->execute(['2027-01-13T10:00:00+01:00', null, time() + 600, $me, $mine]);                       // still being created
+$hb->execute(['2027-01-13T11:00:00+01:00', 'cs_test_otherbrowser', time() + 600, $me, 'otherbrowser0000']);
+$hb->execute(['2027-01-13T13:00:00+01:00', 'cs_test_gone', time() - 5, $me, $mine]);              // already run out
+ok(release_browser_holds($mine) === [] && (int)db()->query("SELECT COUNT(*) FROM holds WHERE slot LIKE '2027-01-13%'")->fetchColumn() === 3, 'a hold still being created, another browser\'s and an expired one are left alone');
+db()->exec("DELETE FROM holds WHERE slot LIKE '2027-01-13%'");
+
 // --- reminders: 24 hours and 10 minutes before
 $now = time();
 $rs = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, meet, status, reminded, created_at, updated_at) VALUES (?, ?, ?, 'r@example.com', 'R', 'https://meet.google.com/abc-defg-hij', 'booked', 0, ?, 0)");

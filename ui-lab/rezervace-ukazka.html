@@ -652,7 +652,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
   // pay=0: our details, then off to Stripe's own page; it comes back with ?paid=cs_...
   function toCheckout(btn) {
     busy(btn, true, 'Přesměrování na platbu…');
-    api('/api/checkout', { mode: 'redirect' }).then(function (j) { location.href = j.url; })
+    api('/api/checkout', { mode: 'redirect' }).then(function (j) { try { sessionStorage.setItem('khg-pay', '1'); } catch (x) {} location.href = j.url; })
       .catch(function (e) {
         // the server's message is written for the client (e.g. someone else is paying for this time right now)
         busy(btn, false, 'Zaplatit 1 100 Kč');
@@ -795,6 +795,14 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     };
   });
 
+  /* Back from Stripe's page without paying (its back arrow, or the phone's back button): end that Stripe page,
+     so the time is free for everyone at once, not after Stripe's 30 minutes. What the client typed stays. */
+  function releaseHeld() {
+    var was; try { was = sessionStorage.getItem('khg-pay'); sessionStorage.removeItem('khg-pay'); } catch (x) {}
+    if (!was) return Promise.resolve();
+    return fetch('/api/release', { method: 'POST', keepalive: true }).catch(function () {});
+  }
+
   /* Real free times from the booking back end (lab ?stripe=1: ui-lab/booking-php, the owner's hours calendars). */
   function loadSlots() {
     return fetch('/api/slots', { cache: 'no-store' })
@@ -844,7 +852,14 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     state.f = new URLSearchParams(location.search).get('forma') === 'osobne' ? 'osobne' : 'online';
     LOADING = 'Načítám volné termíny…';
     renderHead(); renderStep1();
-    loadSlots().then(function () { LOADING = ''; start(); }, function () {
+    if (new URLSearchParams(location.search).get('paid')) { try { sessionStorage.removeItem('khg-pay'); } catch (x) {} }
+    var released = releaseHeld();
+    // the phone's back button may restore this page from memory: free the time and redraw (the pay button was left spinning)
+    addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      releaseHeld().then(loadSlots).then(render, render);
+    });
+    released.then(loadSlots).then(function () { LOADING = ''; start(); }, function () {
       LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
       renderStep1();
     });
