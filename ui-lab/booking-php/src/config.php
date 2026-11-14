@@ -6,11 +6,25 @@ declare(strict_types=1);
 
 date_default_timezone_set('Europe/Prague');
 
+/* Where the secrets and the database live: next to the site folder, never inside it. The hosting runs two copies
+   from one account, so each gets its own: public_html (khgporadenstvi.cz) -> ~/.config/khg, test_html
+   (test.khgporadenstvi.cz) -> ~/.config/khg-test, and test bookings never mix with real ones. Lab and local runs:
+   ~/.config/khg, or KHG_CONFIG_DIR. */
+function config_dir(?string $site = null): string
+{
+    if ($d = getenv('KHG_CONFIG_DIR')) return $d;
+    $site ??= dirname(__DIR__, 2);                 // the folder that holds booking/
+    $name = basename($site);
+    if ($name === 'public_html') return dirname($site) . '/.config/khg';
+    if (str_starts_with($name, 'test')) return dirname($site) . '/.config/khg-test';
+    return (getenv('HOME') ?: dirname($site)) . '/.config/khg';
+}
+
 function cfg(): array
 {
     static $c = null;
     if ($c !== null) return $c;
-    $dir = getenv('KHG_CONFIG_DIR') ?: (getenv('HOME') . '/.config/khg');
+    $dir = config_dir();
     $env = [];
     foreach (['stripe-test.env', 'google-oauth.env', 'booking.env', 'smtp.env'] as $f) {
         if (!is_file("$dir/$f")) continue;
