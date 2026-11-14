@@ -44,6 +44,7 @@ a { color: var(--blue); text-underline-offset: 3px; }
 .skel.h { height: 34px; width: 60%; } .skel.s { height: 74px; border-radius: 16px; }
 @media (prefers-reduced-motion: no-preference) { .skel { background-size: 200% 100%; animation: sh 1.4s linear infinite; } @keyframes sh { to { background-position: -200% 0; } } }
 .contact { font-size: 15px; }
+a[href^="tel:"] { white-space: nowrap; }   /* the number never breaks in the middle */
 .btn.ghost { background: var(--card); border: 1.5px solid var(--line); }
 .link { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 44px; font-weight: 500; justify-self: start; }
 h2 { font-size: 17px; font-weight: 600; margin: 0; }
@@ -66,9 +67,12 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   var DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
   var DAYS_ON = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu']; // after "na" (přesunout na pátek)
   var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
-  var CONTACT = '<p class="contact">V případě potíží: <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>, <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
+  var REACH = '<a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>, <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
+  var CONTACT = '<p class="contact">V případě potíží: ' + REACH;
+  // late cancel: the same line, worded for an urgent case (the phone was listed twice before)
+  var CONTACT_URGENT = '<p class="contact">V naléhavém případě je možná domluva: ' + REACH;
   var card = document.getElementById('card');
-  var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || '';
+  var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || q.get('amp;t') || '';   // amp;t: a link whose & arrived escaped as &amp; (seen once from a phone)
   var data = null, flash = '';
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -107,12 +111,11 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
     }
     var money = d.refund
       ? '<p>Do sezení zbývá víc než 36 hodin, <b>částka bude vrácena</b> na kartu použitou k platbě.</p>'
-      : '<p>Do sezení zbývá méně než 36 hodin, <b>platba se už nevrací</b>. Zrušením se termín i tak uvolní pro někoho jiného.</p>' +
-        '<p>V naléhavém případě je možná domluva po telefonu: <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
+      : '<p>Do sezení zbývá méně než 36 hodin, <b>platba se už nevrací</b>. Zrušením se termín i tak uvolní pro někoho jiného.</p>';
     show('<h1>Zrušení termínu</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) + money +
       '<p class="err" id="err" role="alert" hidden></p>' +
       '<div class="actions"><button class="btn" id="go">Zrušit termín</button>' +
-      (d.can_move ? '<button class="link" id="back">Zpět</button>' : '<a class="keep" href="/">Ponechat termín</a>') + '</div>' + CONTACT);
+      (d.can_move ? '<button class="link" id="back">Zpět</button>' : '<a class="keep" href="/">Ponechat termín</a>') + '</div>' + (d.refund ? CONTACT : CONTACT_URGENT));
     document.getElementById('go').onclick = cancel;
     var back = document.getElementById('back'); if (back) back.onclick = function () { cancelling = false; render(); };
   }

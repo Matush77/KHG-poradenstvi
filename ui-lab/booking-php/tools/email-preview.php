@@ -1,6 +1,6 @@
 <?php
-/* Lab: builds email-preview.html, every e-mail the client gets, rendered by the real mail.php code,
-   with tabs for phone / tablet / desktop and online / in person. Nothing is sent.
+/* Lab: builds email-preview.html, every e-mail the client and Kristýna get, rendered by the real mail.php code,
+   with tabs for the client / Kristýna, phone / tablet / desktop and online / in person. Nothing is sent.
    php ui-lab/booking-php/tools/email-preview.php */
 declare(strict_types=1);
 
@@ -9,7 +9,7 @@ $tmp = sys_get_temp_dir() . '/khg-mail-preview-' . bin2hex(random_bytes(4));
 mkdir($tmp, 0700);
 file_put_contents("$tmp/stripe-test.env", "STRIPE_SECRET_KEY=sk_test_dummy\n");
 file_put_contents("$tmp/booking-secret", str_repeat('ab', 32));
-file_put_contents("$tmp/booking.env", "SITE_URL=https://khgporadenstvi.cz\nCANCEL_PAGE=/rezervace/zruseni.html\nBOOKING_PAGE=/rezervace.html\n");
+file_put_contents("$tmp/booking.env", "SITE_URL=https://khgporadenstvi.cz\nCANCEL_PAGE=/rezervace/zruseni.html\nBOOKING_PAGE=/rezervace.html\nOWNER_PAGE=/rezervace/sprava.html\n");
 putenv("KHG_CONFIG_DIR=$tmp");
 
 require __DIR__ . '/../src/config.php';
@@ -23,7 +23,16 @@ $dayBefore = slot_start('2026-11-23', '14:00')->getTimestamp();
 $sameDay = slot_start('2026-11-24', '13:50')->getTimestamp();
 $brand = 'data:image/png;base64,' . base64_encode(brand_png());
 
-$mails = [];
+$mails = ['client' => [], 'owner' => []];
+$add = function (string $who, string $forma, array $list) use (&$mails, $brand) {
+    foreach ($list as [$id, $name, $when, $m]) {
+        $mails[$who][$forma][] = ['id' => $id, 'name' => $name, 'when' => $when, 'subject' => $m['subject'], 'text' => $m['text'],
+            'to' => $m['to'] ?? null, 'ics' => !empty($m['ics']), 'html' => str_replace(
+                // the brand travels inside the e-mail; the fonts come from this checkout (the live site has no Fraunces yet)
+                ['cid:' . BRAND_CID, MAIL_FONTS . 'Inter/', MAIL_FONTS . 'Fraunces/'],
+                [$brand, '/fonts/Inter/', '/ui-lab/proposal/fonts/'], $m['html'])];
+    }
+};
 foreach (['online', 'osobne'] as $forma) {
     $b = ['pay_id' => 'cs_preview', 'forma' => $forma, 'name' => 'Jana Nováková', 'email' => 'jana.novakova@example.com',
         'phone' => '+420 777 123 456', 'meet' => 'https://meet.google.com/abc-defg-hij', 'moves' => 0];
@@ -38,13 +47,22 @@ foreach (['online', 'osobne'] as $forma) {
         ['self-late', 'Cancelled late by the client', 'Client cancels under 36 hours before; no refund', mail_client_cancelled($b, $start, false, false)],
         ['refund', 'Refund of a late cancel', 'She refunds a session the client cancelled late', mail_client_cancelled($b, $start, true)],
     ];
-    foreach ($list as [$id, $name, $when, $m]) {
-        $mails[$forma][] = ['id' => $id, 'name' => $name, 'when' => $when, 'subject' => $m['subject'], 'text' => $m['text'],
-            'ics' => !empty($m['ics']), 'html' => str_replace(
-                // the brand travels inside the e-mail; the fonts come from this checkout (the live site has no Fraunces yet)
-                ['cid:' . BRAND_CID, MAIL_FONTS . 'Inter/', MAIL_FONTS . 'Fraunces/'],
-                [$brand, '/fonts/Inter/', '/ui-lab/proposal/fonts/'], $m['html'])];
-    }
+    $add('client', $forma, $list);
+    // Kristýna's e-mails (to her own address; replying goes to the client)
+    $own = owner_url('cs_preview');
+    $note = $b + ['note' => "Poslední měsíce špatně spím a v práci mě přepadá úzkost.\nChtěla bych to zkusit řešit."];
+    $add('owner', $forma, [
+        ['new', 'New booking', 'Right after the client pays', mail_owner_new($note, $start, $own)],
+        ['new-clash', 'New booking, clash', 'She had something else in the calendar meanwhile', mail_owner_new($b + ['clash' => 1], $start, $own)],
+        ['cancelled', 'Cancelled by the client', 'Client cancels 36+ hours before; refunded automatically',
+            mail_owner_cancelled($b + ['hours_before' => 50.0, 'refund_id' => 're_preview'], $start, $own)],
+        ['cancelled-late', 'Cancelled late by the client', 'Client cancels under 36 hours before; no refund',
+            mail_owner_cancelled($b + ['hours_before' => 20.0, 'refund_id' => null], $start, $own)],
+        ['moved', 'Moved by the client', 'Client moved it from their link', mail_owner_moved($b + ['client_moves' => 1], $start, $old, $own)],
+        ['moved-2', 'Moved again by the client', 'From the second move: with the count', mail_owner_moved($b + ['client_moves' => 2], $start, $old, $own)],
+        ['deleted', 'Deleted in the calendar', 'She deleted the event in Google Calendar', mail_owner_deleted($b, $start, $own)],
+        ['declined', 'Invitation declined', 'An online client declined the calendar invitation', mail_owner_declined($b, $start, $own)],
+    ]);
 }
 
 $page = (string)file_get_contents(__DIR__ . '/email-preview.tpl.html');

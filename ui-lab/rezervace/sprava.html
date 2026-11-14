@@ -71,7 +71,7 @@ a { color: var(--blue); text-underline-offset: 3px; }
   var DAYS_ON = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu']; // after "na" (přesunout na pátek)
   var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
   var card = document.getElementById('card');
-  var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || '';
+  var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || q.get('amp;t') || '';   // amp;t: a link whose & arrived escaped as &amp; (seen once from a phone)
   var akce = q.get('akce'); // from the e-mail button: open the move or the cancel step at once
   var d = null, flash = '';
 
