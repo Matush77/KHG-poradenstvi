@@ -85,7 +85,7 @@ ok(cz_label('online', $w) === 'Sezení online · úterý 22. prosince · 13:00�
 $b = ['pay_id' => 'cs_test_abc', 'forma' => 'online', 'email' => 'jana@example.com', 'meet' => 'https://meet.google.com/abc-defg-hij'];
 $m = mail_build($b, $w, cancel_url('cs_test_abc'));
 ok($m['subject'] === 'Potvrzení: sezení v úterý 22. prosince v 13:00', 'subject');
-ok(str_contains($m['text'], 'zrušit můžete do pondělí 21. prosince 1:00. Později se platba nevrací.'), 'text: deadline');
+ok(str_contains($m['text'], 'zrušit můžete nejpozději 36 hodin před sezením. Později se platba nevrací.') && !str_contains($m['text'], 'prosince 1:00'), 'text: 36 hours, no computed date');
 ok(!preg_match('/Kdybyste|Těším se|Dobrý den/u', $m['text'] . $m['html']), 'no greetings or filler lines');
 ok(str_contains($m['html'], 'cid:' . BRAND_CID) && str_contains($m['html'], '#E8EFF4'), 'html: brand image and the online (sky) panel');
 $eml = mail_eml($m);
@@ -210,7 +210,7 @@ ok(booking_view(booking_get('cs_test_free'))['can_move'] && booking_view(booking
     && !booking_view(booking_get('cs_test_soon'))['can_move'], 'a move is offered while 36+ hours before, also after earlier moves');
 $fb = booking_get('cs_test_free');
 $mc = mail_build($fb, $w, cancel_url('cs_test_free'));
-ok(str_contains($mc['text'], 'Přesunout nebo zdarma zrušit můžete do') && str_contains($mc['text'], 'Přesunout nebo zrušit termín: '), 'confirmation offers move and cancel');
+ok(str_contains($mc['text'], 'Přesunout nebo zdarma zrušit můžete nejpozději 36 hodin') && str_contains($mc['text'], 'Přesunout nebo zrušit termín: '), 'confirmation offers move and cancel');
 $mm = mail_build(['client_moves' => 1] + $fb, $w, cancel_url('cs_test_free'), $w->modify('-1 day'), true);
 ok(str_starts_with($mm['text'], 'Termín je změněný') && str_contains($mm['text'], 'Původní termín v pondělí 21. prosince v 13:00 už neplatí.') && str_contains($mm['text'], 'Přesunout nebo zrušit termín: '), 'after the client moved: own wording, still movable');
 $om = mail_owner_moved($fb, $w, $w->modify('-1 day'), owner_url('cs_test_free'));

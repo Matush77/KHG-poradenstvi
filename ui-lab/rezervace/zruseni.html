@@ -98,7 +98,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
     }
     if (d.can_move && !cancelling) {
       show('<h1>Přesunout nebo zrušit termín?</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) +
-        '<p>Termín můžete <b>přesunout</b> na jiný volný čas, bez doplácení. Přesunout i zdarma zrušit se dá do ' + esc(d.deadline) + ' (36 hodin předem).</p>' +
+        '<p>Termín můžete <b>přesunout</b> na jiný volný čas, bez doplácení. Přesunout i zdarma zrušit se dá nejpozději 36 hodin před sezením.</p>' +
         '<div class="actions"><button class="btn" id="move">Přesunout termín</button><button class="btn ghost" id="cancel">Zrušit termín</button>' +
         '<a class="keep" href="/">Ponechat termín</a></div>' + CONTACT + '<div id="panel"></div>');   // last: the times load in without pushing anything
       document.getElementById('move').onclick = openMove;
@@ -155,7 +155,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
               .then(function (j) {
                 data = j; flash = 'Hotovo, termín je přesunutý. Potvrzení s novým časem vám přišlo e-mailem.';
                 show('<h1>Termín je přesunutý</h1><p class="ok" role="status">' + flash + '</p>' + summary(data) +
-                  '<p>Přesunout znovu nebo zdarma zrušit můžete do ' + esc(data.deadline) + ' přes stejný odkaz z e-mailu.</p>' + CONTACT);
+                  '<p>Přesunout znovu nebo zdarma zrušit můžete nejpozději 36 hodin před sezením, přes stejný odkaz z e-mailu.</p>' + CONTACT);
                 var h = card.querySelector('h1'); h.setAttribute('tabindex', '-1'); h.focus();
               })
               .catch(function (e) { go.removeAttribute('aria-busy'); go.disabled = false; go.textContent = 'Přesunout'; err.textContent = e.message; err.hidden = false; });

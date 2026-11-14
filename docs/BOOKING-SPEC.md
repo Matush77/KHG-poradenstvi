@@ -457,4 +457,11 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   web. Body text in the system font (e-mail apps don't load Inter). No "Dobrý den", "Těším se na vás", "Kdybyste…"
   lines; the reminders are only the panel (the day-before one with a plain "Zrušit termín" link).
   Her own e-mails have no footer. 104 offline checks.
+  Then (owner: "something feels off, check the theme guide"; "just keep the 36 hours, no exact date"):
+  sizes and buttons from `ui-lab/theme-proposal.html`: body 17 px, small 15, the format card radius 12
+  with 24 padding, buttons pill 56 px / 18 px / 600 at full width; coral only for booking ("Vybrat jiný
+  termín"), the Meet button and her buttons navy (solid, then outline); links blue 500; no line inside
+  her panel. The session date has no year and the facts read "Online · 50 minut · 1 100 Kč", so they
+  fit a phone. The rule says "nejpozději 36 hodin před sezením" in the e-mails and on the client page
+  instead of a computed date. 105 offline checks.
 
