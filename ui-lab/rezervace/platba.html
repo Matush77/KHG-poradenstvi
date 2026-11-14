@@ -1,0 +1,23 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace – platba</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Where the payment happens: today's redirect vs. three ways of paying inside the booking page. Mockups, nothing is charged. */
+h1 { max-width: none; padding: 16px 0 4px; }
+.wall { display: flex; gap: 24px; align-items: flex-start; overflow-x: auto; padding: 8px 0 24px; scroll-snap-type: x mandatory; }
+.col { flex: none; display: grid; gap: 8px; scroll-snap-align: start; width: calc(375px * var(--s)); }
+.col h2 { font-size: 19px; }
+.col h2 a { color: var(--navy); }
+.col p { font-size: 14px; color: var(--slate); min-height: 84px; }
+body { --s: .8; }
+.frame { width: calc(375px * var(--s)); height: calc(1180px * var(--s)); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--paper); }
+iframe { display: block; width: 375px; height: 1180px; border: 0; transform: scale(var(--s)); transform-origin: 0 0; }
+</style>
+<h1>Platba: přesměrování na Stripe, nebo přímo v rezervaci</h1>
+<p class="lab-what" style="margin:0 0 8px;max-width:none">Jen ukázky, nic se nenačítá ze Stripe a nic se neplatí. Každý náhled je klikací až do potvrzení (údaje karty jsou testovací). Otevři v telefonu přes nadpis.</p>
+<div class="wall">
+  <div class="col"><h2><a href="../rezervace-ukazka.html?pay=0&step=2">0 Dnes: přesměrování</a></h2><p>Údaje u nás, „Zaplatit“ pošle na stránku Stripe (jako ze screenshotu) a zpět na potvrzení.</p><div class="frame"><iframe src="../rezervace-ukazka.html?pay=0&step=2" title="0 Přesměrování"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?pay=1&step=2">1 Vše na jedné obrazovce</a></h2><p>Karta přímo pod údaji, v našem písmu a barvách. Google / Apple Pay nahoře. Jedno „Zaplatit“.</p><div class="frame"><iframe src="../rezervace-ukazka.html?pay=1&step=2" title="1 Jedna obrazovka"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?pay=2&step=4">2 Platba jako další krok</a></h2><p>Údaje → „Pokračovat k platbě“ → krátká obrazovka jen s platbou, v našem designu.</p><div class="frame"><iframe src="../rezervace-ukazka.html?pay=2&step=4" title="2 Další krok"></iframe></div></div>
+  <div class="col"><h2><a href="../rezervace-ukazka.html?pay=3&step=4">3 Stripe formulář vložený</a></h2><p>Údaje → platba Stripe vložená do stránky. Bez odchodu z webu, ale vzhled Stripe (modrá, zelený Link).</p><div class="frame"><iframe src="../rezervace-ukazka.html?pay=3&step=4" title="3 Vložený Stripe"></iframe></div></div>
+</div>

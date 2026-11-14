@@ -225,6 +225,47 @@ input[aria-invalid="true"] { border-color: var(--coral-ink); }
 .done p { margin: 0; color: var(--slate); }
 .step { display: grid; gap: 20px; }
 
+/* Lab: payment inside the page (?pay=1|2|3). A mockup of Stripe's fields, nothing is loaded from Stripe or charged.
+   pay=1 card fields in the details form, pay=2 their own step after the details, pay=3 Stripe's own embedded form. */
+.paybox { display: grid; gap: 14px; }
+.paybox h2 { font-size: 21px; }
+.wallet { min-height: 56px; border: 0; border-radius: 999px; background: #000; color: #fff; font-weight: 600; font-size: 18px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--mute); font-size: 14px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cardf { position: relative; }
+.cardf input { padding-right: 104px; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.brands { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; pointer-events: none; }
+.brands i { font: 700 10px/1 var(--f-body); font-style: normal; padding: 5px 5px; border-radius: 4px; background: var(--card); border: 1px solid var(--line); color: var(--navy); }
+.cardrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.secure { color: var(--mute); font-size: 13px; display: flex; gap: 6px; align-items: flex-start; }
+.secure svg { flex: none; margin-top: 2px; }
+.summary.mini { padding: 12px 16px; }
+.summary.mini b { font-size: 16px; }
+.btn[aria-busy="true"] { opacity: .75; cursor: progress; }
+.spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 10px; vertical-align: -2px; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+.bank { position: fixed; inset: 0; background: rgba(22,58,85,.45); display: grid; place-items: end center; z-index: 50; padding: 16px; animation: fade .2s; }
+.bank div { background: var(--card); border-radius: 24px; padding: 24px; max-width: 420px; width: 100%; display: grid; gap: 10px; text-align: center; box-shadow: 0 16px 48px rgba(22,58,85,.2); }
+.bank b { font-size: 18px; }
+.bank p { color: var(--slate); font-size: 15px; }
+@media (min-width: 720px) { .bank { place-items: center; } }
+@keyframes fade { from { opacity: 0; } }
+/* pay=3: how Stripe's own embedded form looks inside the page (its fonts and colours, not ours) */
+.stripe { background: #fff; border: 1px solid #e3e8ee; border-radius: 12px; padding: 20px 16px; display: grid; gap: 14px; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #30313d; }
+.stripe .link-btn { min-height: 48px; border-radius: 6px; background: #00d66f; color: #011e0f; font-weight: 600; display: grid; place-items: center; font-size: 16px; }
+.stripe .s-or { display: flex; gap: 12px; align-items: center; color: #6d6e78; font-size: 13px; font-weight: 600; }
+.stripe .s-or::before, .stripe .s-or::after { content: ""; flex: 1; height: 1px; background: #e3e8ee; }
+.stripe h3 { font: 600 16px/1.3 inherit; font-family: inherit; letter-spacing: 0; }
+.stripe label { font-size: 14px; font-weight: 400; color: #30313d; gap: 6px; }
+.stripe .s-in { border: 1px solid #e0e0e0; border-radius: 6px; min-height: 44px; padding: 10px 12px; color: #8a8b94; font-size: 16px; box-shadow: 0 1px 1px rgba(0,0,0,.03); background: #fff; }
+.stripe .s-split { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+.stripe .s-split .s-in { border: 0; border-radius: 0; box-shadow: none; }
+.stripe .s-split .s-in + .s-in { border-left: 1px solid #e0e0e0; }
+.stripe .s-split .s-in:first-child { grid-column: 1 / -1; border-bottom: 1px solid #e0e0e0; border-left: 0; }
+.stripe .s-pay { min-height: 48px; border: 0; border-radius: 6px; background: #0570de; color: #fff; font: 600 16px/1 inherit; font-family: inherit; cursor: pointer; }
+.stripe .s-foot { text-align: center; font-size: 12px; color: #6d6e78; }
+
 /* Colour themes, picked with ?c=1..6 (default 2, owner pick 13 Nov) (class c-N on <html>; see rezervace/barvy.html). All keep switch 8 and the coral button.
    1 Současná: sky / peach free days, white times, navy for the chosen day and time. */
 body { --tint-strong: var(--sky-strong); }
@@ -332,6 +373,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
   };
 
   var state = { f: 'online', month: new Date(2026, 10, 1), date: null, time: null, step: 1, email: '' };
+  var LOADING = ''; // text shown under the calendar while the real free times load (?stripe=1)
 
   function key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function hash(s) { var h = 7; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
@@ -403,7 +445,8 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
         : '<span class="' + cls + '">' + n + '</span>');
     }
     var slots = state.date ? slotsFor(state.date) : [];
-    var right = (state.date && slots.length)
+    var right = LOADING ? '<p class="hint" id="loading">' + LOADING + '</p>'
+      : (state.date && slots.length)
       ? (state.f === 'online' && TZ.side ? '<div class="slots-head"><h2>' + cap(long(state.date)) + '</h2><span class="tz">' + TZ.side + '</span></div>' : '<h2>' + cap(long(state.date)) + '</h2>') + '<div class="times">' +
         slots.map(function (t) { return '<button class="time" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + '</button>'; }).join('') + '</div>' +
         (state.f === 'online' && TZ.under ? '<p class="tz">' + TZ.under + '</p>' : '')
@@ -431,6 +474,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     if (slide) { view.querySelector('.grid').classList.add('in-' + slide); slide = null; }
     var back = fk && (view.querySelector(fk) || (fk.indexOf('.day') === 0 && view.querySelector('.day.sel')));
     if (back && !back.disabled) back.focus(); else if (fk === '#prev' || fk === '#next') view.querySelector('.nav:not(:disabled)').focus();
+    if (LOADING) { view.querySelectorAll('.nav').forEach(function (b) { b.disabled = true; }); say(LOADING.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')); return; }
     say(state.date && slots.length ? cap(long(state.date)) + ', ' + plural(slots.length) : MONTHS[mo] + ' ' + y + (hasFree(m) ? ', vyberte den' : ', bez volných termínů'));
   }
 
@@ -459,19 +503,86 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
       (value ? ' value="' + value + '"' : '') + (ph ? ' placeholder="' + ph + '"' : '') + ' aria-describedby="' + id + '-err">' +
       '<span class="err" id="' + id + '-err" aria-live="polite"></span></label>';
   }
+  /* Lab: payment inside the page (?pay=1|2|3), see the CSS note. 0 = today's plan, a redirect to Stripe's own page. */
+  var PAY = +new URLSearchParams(location.search).get('pay'); if (!/^[0-3]$/.test(String(PAY))) PAY = 0;
+  var LOCK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var APPLE = /iPhone|iPad|Macintosh/.test(navigator.userAgent);
+  function cardFields() {
+    return '<div class="paybox"><h2>Platba</h2>' +
+      '<button class="wallet" type="button" id="wallet">Zaplatit přes ' + (APPLE ? 'Apple Pay' : 'Google Pay') + '</button>' +
+      '<div class="or">nebo kartou</div>' +
+      '<label for="cn"><span>Číslo karty</span><span class="cardf"><input id="cn" inputmode="numeric" autocomplete="cc-number" enterkeyhint="next" value="4242 4242 4242 4242" aria-describedby="cn-err"><span class="brands" aria-hidden="true"><i>VISA</i><i>MC</i></span></span><span class="err" id="cn-err" aria-live="polite"></span></label>' +
+      '<div class="cardrow">' +
+      '<label for="cx"><span>Platnost</span><input id="cx" inputmode="numeric" autocomplete="cc-exp" enterkeyhint="next" placeholder="MM / RR" value="12 / 28" aria-describedby="cx-err"><span class="err" id="cx-err" aria-live="polite"></span></label>' +
+      '<label for="cc"><span>CVC</span><input id="cc" inputmode="numeric" autocomplete="cc-csc" enterkeyhint="done" value="123" aria-describedby="cc-err"><span class="err" id="cc-err" aria-live="polite"></span></label>' +
+      '</div>' +
+      '<p class="secure">' + LOCK + '<span>Platbu zpracovává Stripe. Údaje o kartě ke mně nechodí.</span></p></div>';
+  }
+  var CARD_CHECKS = {
+    cn: function (v) { return v.replace(/\D/g, '').length >= 15 ? '' : 'Číslo karty nevypadá správně.'; },
+    cx: function (v) { return /^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/.test(v) ? '' : 'Vyplňte platnost jako MM / RR.'; },
+    cc: function (v) { return /^\d{3,4}$/.test(v) ? '' : 'Vyplňte 3 číslice ze zadní strany karty.'; }
+  };
+  // typing aid: the card number in groups of four, the expiry with a slash
+  function wireCard() {
+    var cn = document.getElementById('cn'), cx = document.getElementById('cx');
+    if (cn) cn.addEventListener('input', function () { cn.value = cn.value.replace(/\D/g, '').slice(0, 19).replace(/(\d{4})(?=\d)/g, '$1 '); });
+    if (cx) cx.addEventListener('input', function (e) { var d = cx.value.replace(/\D/g, '').slice(0, 4); cx.value = d.length > 2 || (d.length === 2 && e.inputType !== 'deleteContentBackward') ? d.slice(0, 2) + ' / ' + d.slice(2) : d; });
+    var w = document.getElementById('wallet'); if (w) w.onclick = function () { pay(w, false); };
+  }
+  function check(map) {
+    var first = null;
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id); if (!el) return;
+      var msg = map[id](el.value.trim(), el.required);
+      el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      document.getElementById(id + '-err').textContent = msg;
+      if (msg && !first) first = el;
+    });
+    if (first) first.focus();
+    return !first;
+  }
+  function clearOnInput(form) {
+    form.addEventListener('input', function (ev) {
+      var el = ev.target, err = document.getElementById(el.id + '-err');
+      if (err && err.textContent) { err.textContent = ''; el.setAttribute('aria-invalid', 'false'); }
+    });
+  }
+  // mock of the payment: busy button, then (card only) the bank's confirmation, then the confirmation step
+  function pay(btn, bank) {
+    if (btn.getAttribute('aria-busy') === 'true') return; // no double payment
+    btn.setAttribute('aria-busy', 'true'); btn.disabled = true;
+    btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Probíhá platba…';
+    say('Probíhá platba');
+    setTimeout(function () {
+      if (!bank) { state.step = 3; render(); toTop(); return; }
+      var sheet = document.createElement('div'); sheet.className = 'bank'; sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-label', 'Potvrzení v bance');
+      sheet.innerHTML = '<div><b>Potvrďte platbu v aplikaci své banky</b><p>Ukázka: takhle to vypadá, když banka chce potvrzení (3D Secure). Pokračuje to samo.</p></div>';
+      document.body.appendChild(sheet);
+      setTimeout(function () { sheet.remove(); state.step = 3; render(); toTop(); }, 2200);
+    }, 900);
+  }
+
   function renderStep2() {
     var online = state.f === 'online';
     var contact = online
       ? field('e', 'E-mail', 'email', 'email', true, 'jana.novakova@example.cz', '')
-      : field('p', 'Telefon', 'tel', 'tel', true, '+420 777 123 456', '+420');
-    var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="3"></textarea></label>';
+      : field('p', 'Telefon', 'tel', 'tel', true, '+420 777 123 456', '+420') +
+        (PAY === 1 || PAY === 2 ? field('e', 'E-mail pro potvrzení a účtenku', 'email', 'email', false, '', '') : ''); // without Stripe's page nobody else asks for it
+    var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="3" maxlength="1500"></textarea></label>';
     view.innerHTML = '<div class="step">' +
       '<button class="link" id="back">‹ Změnit termín</button>' + summary() +
       '<form id="f" novalidate>' +
       '<div class="names">' + field('fn', 'Jméno', 'text', 'given-name', true, 'Jana', '') + field('ln', 'Příjmení', 'text', 'family-name', true, 'Nováková', '') + '</div>' +
       contact + reason +
-      '<div class="cta"><button class="btn" type="submit">Zaplatit 1 100 Kč</button></div>' +
+      (PAY === 1 ? cardFields() : '') +
+      '<div class="cta"><button class="btn" type="submit" id="go">' + (PAY >= 2 ? 'Pokračovat k platbě' : 'Zaplatit 1 100 Kč') + '</button></div>' +
+      '<p class="err" id="go-err" role="alert"></p>' +
       '</form></div>';
+    if (PAY === 1) wireCard();
+    // back from Stripe's page: what the client typed comes back (kept for this tab only, removed once paid)
+    try { var kept = JSON.parse(sessionStorage.getItem('khg-form') || 'null'); } catch (x) { kept = null; }
+    if (kept) Object.keys(kept).forEach(function (id) { var el = document.getElementById(id); if (el && kept[id]) el.value = kept[id]; });
     // same as the phone's back button when the details were opened from the calendar
     document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 1; render(); } };
     // an error goes away as soon as the field is being fixed, it is checked again on submit
@@ -496,19 +607,144 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
         if (msg && !first) first = el;
       });
       if (first) { first.focus(); return; }
-      state.email = online ? document.getElementById('e').value.trim() : '';
+      if (PAY === 1 && !check(CARD_CHECKS)) return;
+      var e = document.getElementById('e');
+      state.email = e ? e.value.trim() : '';
       state.phone = online ? '' : document.getElementById('p').value.trim();
-      state.step = 3; render();
+      state.name = document.getElementById('fn').value.trim() + ' ' + document.getElementById('ln').value.trim();
+      state.note = document.getElementById('r').value.trim(); // only to the therapist's e-mail, never to Stripe or the calendar
+      if (STRIPE && PAY === 0) {
+        var keep = {}; ['fn', 'ln', 'e', 'p', 'r'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
+        try { sessionStorage.setItem('khg-form', JSON.stringify(keep)); } catch (x) {}
+        toCheckout(document.getElementById('go')); return;
+      }
+      if (PAY === 1) { pay(document.getElementById('go'), true); return; }
+      state.step = PAY >= 2 ? 4 : 3; render(); toTop();
     };
   }
 
+  /* Lab, real Stripe TEST payments (?stripe=1, only with ui-lab/stripe-demo/server.py on port 8810):
+     pay=0 redirect to Stripe Checkout, pay=3 Checkout embedded in the page, pay=2 Payment Element in our design.
+     Stripe.js is loaded only when the payment is shown, never with the calendar. */
+  var STRIPE = new URLSearchParams(location.search).get('stripe') === '1';
+  var stripeP = null, embedded = null;
+  function loadStripe() {
+    if (!stripeP) stripeP = Promise.all([
+      fetch('/api/config').then(function (r) { return r.json(); }),
+      new Promise(function (ok, fail) { var s = document.createElement('script'); s.src = 'https://js.stripe.com/v3/'; s.onload = ok; s.onerror = fail; document.head.appendChild(s); })
+    ]).then(function (a) { return Stripe(a[0].pk, { locale: 'cs' }); });
+    return stripeP;
+  }
+  function api(path, extra) {
+    var b = { f: state.f, date: key(state.date), time: state.time, name: state.name || '', email: state.email || '', phone: state.phone || '', note: state.note || '', pay: PAY };
+    for (var k in extra) b[k] = extra[k];
+    return fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); });
+  }
+  function busy(btn, on, text) {
+    if (!btn) return;
+    btn.disabled = on; btn.setAttribute('aria-busy', on ? 'true' : 'false');
+    btn.innerHTML = on ? '<span class="spin" aria-hidden="true"></span>' + text : text;
+  }
+  function payError(msg) {
+    var el = document.getElementById('pay-err'); if (el) { el.textContent = msg; say(msg); }
+  }
+  // pay=0: our details, then off to Stripe's own page; it comes back with ?paid=cs_...
+  function toCheckout(btn) {
+    busy(btn, true, 'Přesměrovávám na platbu…');
+    api('/api/checkout', { mode: 'redirect' }).then(function (j) { location.href = j.url; })
+      .catch(function (e) {
+        // the server's message is written for the client (e.g. someone else is paying for this time right now)
+        busy(btn, false, 'Zaplatit 1 100 Kč');
+        loadSlots().catch(function () {});
+        var out = document.getElementById('go-err');
+        if (out) out.textContent = e.message; else alert(e.message);
+      });
+  }
+  var APPEARANCE = {
+    theme: 'stripe',
+    variables: { colorPrimary: '#163A55', colorText: '#163A55', colorTextSecondary: '#44576A', colorDanger: '#B5573F', colorBackground: '#FFFFFF',
+      fontFamily: 'Inter, system-ui, sans-serif', fontSizeBase: '16px', borderRadius: '12px', spacingUnit: '4px', focusBoxShadow: '0 0 0 3px rgba(45,90,123,.35)' },
+    rules: { '.Input': { border: '1.5px solid rgba(22,58,85,.14)', boxShadow: 'none', padding: '12px 14px' },
+      '.Input:focus': { borderColor: '#2D5A7B' }, '.Label': { fontSize: '14px', fontWeight: '500', marginBottom: '6px' },
+      '.Tab': { border: '1.5px solid rgba(22,58,85,.14)', boxShadow: 'none' }, '.Tab--selected': { borderColor: '#163A55', boxShadow: 'none' } }
+  };
+  function renderRealPay(head) {
+    if (PAY === 3) {
+      view.innerHTML = head + '<div id="checkout" style="min-height:640px"></div><p class="err" id="pay-err" role="alert"></p></div>';
+      loadStripe().then(function (stripe) {
+        return api('/api/checkout', { mode: 'embedded' }).then(function (j) {
+          return stripe.initEmbeddedCheckout({ fetchClientSecret: function () { return Promise.resolve(j.clientSecret); } });
+        });
+      }).then(function (c) { if (state.step !== 4) { c.destroy(); return; } embedded = c; c.mount('#checkout'); })
+        .catch(function (e) { payError('Platbu se nepodařilo načíst: ' + e.message); });
+    } else {
+      view.innerHTML = head + '<form id="pf" novalidate class="paybox"><div id="pe" style="min-height:260px"></div>' +
+        '<p class="err" id="pay-err" role="alert"></p>' +
+        '<div class="cta"><button class="btn" type="submit" id="go" disabled>Zaplatit 1 100 Kč</button></div>' +
+        '<p class="secure">' + LOCK + '<span>Platbu zpracovává Stripe. Údaje o kartě ke mně nechodí.</span></p></form></div>';
+      var go = document.getElementById('go'), elements, ret;
+      loadStripe().then(function (stripe) {
+        return api('/api/intent').then(function (j) {
+          ret = j.returnUrl;
+          elements = stripe.elements({ clientSecret: j.clientSecret, appearance: APPEARANCE, locale: 'cs',
+            fonts: [{ family: 'Inter', src: 'url(' + location.origin + '/fonts/Inter/Inter-LatinExt-var.woff2)', weight: '400 700' }] });
+          var pe = elements.create('payment', { layout: 'tabs', defaultValues: { billingDetails: { name: state.name, email: state.email } } });
+          pe.mount('#pe');
+          pe.on('ready', function () { go.disabled = false; });
+          document.getElementById('pf').onsubmit = function (ev) {
+            ev.preventDefault(); if (go.disabled) return;
+            payError(''); busy(go, true, 'Probíhá platba…');
+            stripe.confirmPayment({ elements: elements, redirect: 'if_required', confirmParams: { return_url: ret } }).then(function (r) {
+              if (r.error) { busy(go, false, 'Zaplatit 1 100 Kč'); payError(r.error.message); return; }
+              if (r.paymentIntent && r.paymentIntent.status === 'succeeded') { state.step = 3; render(); toTop(); }
+              else { busy(go, false, 'Zaplatit 1 100 Kč'); payError('Platba zatím neprošla (' + r.paymentIntent.status + ').'); }
+            });
+          };
+        });
+      }).catch(function (e) { payError('Platbu se nepodařilo načíst: ' + e.message); });
+    }
+  }
+
+  /* Lab: the payment as its own step after the details (pay=2 our fields, pay=3 Stripe's embedded form) */
+  function renderPay() {
+    if (STRIPE) {
+      renderRealPay('<div class="step"><button class="link" id="back">‹ Upravit údaje</button>' + summary().replace('class="summary"', 'class="summary mini"'));
+      document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 2; render(); } };
+      return;
+    }
+    var head = '<div class="step"><button class="link" id="back">‹ Upravit údaje</button>' + summary().replace('class="summary"', 'class="summary mini"');
+    if (PAY === 2) {
+      view.innerHTML = head + '<form id="pf" novalidate class="paybox">' + cardFields().replace('<div class="paybox"><h2>Platba</h2>', '').replace(/<\/div>$/, '') +
+        '<div class="cta"><button class="btn" type="submit" id="go">Zaplatit 1 100 Kč</button></div></form></div>';
+      wireCard(); clearOnInput(document.getElementById('pf'));
+      document.getElementById('pf').onsubmit = function (ev) { ev.preventDefault(); if (check(CARD_CHECKS)) pay(document.getElementById('go'), true); };
+    } else {
+      view.innerHTML = head + '<div class="stripe" aria-label="Platební formulář Stripe (ukázka)">' +
+        '<div class="link-btn">Plaťte bezpečně pomocí ›link</div><div class="s-or">NEBO</div>' +
+        '<h3>Kontakt</h3><label>E-mail<div class="s-in">' + (state.email || 'vy@example.com') + '</div></label>' +
+        '<h3>Způsob platby</h3><div class="s-split"><div class="s-in">Číslo karty</div><div class="s-in">MM / RR</div><div class="s-in">Bezpečnostní kód</div></div>' +
+        '<label>Jméno na kartě<div class="s-in">Jméno a příjmení</div></label><label>Země<div class="s-in" style="color:#30313d">Česko</div></label>' +
+        '<button class="s-pay" id="go">Zaplatit</button><p class="s-foot">Využívá technologii <b>stripe</b> · Podmínky · Soukromí</p></div></div>';
+      document.getElementById('go').onclick = function () { pay(this, true); };
+    }
+    document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 2; render(); } };
+  }
+
   function renderStep3() {
-    var sent = state.email ? 'Potvrzení přišlo na ' + state.email + '. ' : 'Termín máte zapsaný na telefon ' + state.phone + '. ';
+    // the e-mail and phone come back from the payment: never put them into the page as HTML
+    var esc = function (v) { return String(v || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var sent = state.email ? 'Potvrzení přišlo na ' + esc(state.email) + '. ' : 'Termín máte zapsaný na telefon ' + esc(state.phone) + '. ';
     view.innerHTML = '<div class="done"><h2>Termín je rezervovaný</h2>' + summary() +
       '<p>' + sent + FORMATS[state.f].after + '</p>' +
+      (state.meet ? '<p class="note">Demo: událost s Meet odkazem je v kalendáři „KHG test rezervace“: <a href="' + esc(state.meet) + '" target="_blank" rel="noopener">' + esc(state.meet.replace('https://', '')) + '</a></p>' : '') +
       '<p>Zrušit zdarma můžete nejpozději 36 hodin před sezením, vrátím celou částku.</p>' +
+      (state.cancel ? '<p class="note">Demo: <a href="' + state.cancel.replace('/ui-lab/rezervace/zruseni.html', '/api/email') + '" target="_blank" rel="noopener">potvrzovací e-mail</a> · <a href="' + state.cancel + '">odkaz na zrušení z e-mailu</a></p>' : '') +
       '<div><button class="btn" id="again">Zpět na kalendář</button></div></div>';
-    document.getElementById('again').onclick = function () { state.step = 1; state.time = null; render(); };
+    document.getElementById('again').onclick = function () {
+      state.step = 1; state.time = null;
+      if (STRIPE) loadSlots().then(function () { if (state.date && !slotsFor(state.date).length) state.date = null; render(); }, render); else render();
+    };
   }
 
   /* Browser history: the details step is its own entry, so the phone's back button returns to the calendar
@@ -519,11 +755,11 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     if (state.f === 'osobne') p.set('forma', 'osobne'); else p.delete('forma');
     if (state.date) p.set('den', key(state.date)); else p.delete('den');
     if (state.time) p.set('cas', state.time); else p.delete('cas');
-    if (state.step === 2) p.set('krok', '2'); else p.delete('krok');
-    p.delete('step');
+    if (state.step === 2 || state.step === 4) p.set('krok', state.step === 4 ? 'platba' : '2'); else p.delete('krok'); // a refresh on the payment returns to the details
+    ['step', 'paid', 'pi', 'payment_intent', 'payment_intent_client_secret', 'redirect_status'].forEach(function (k) { p.delete(k); });
     var entry = { step: state.step };
-    if (!fromHistory && state.step === 2 && shownStep === 1) { entry.pushed = true; history.pushState(entry, '', u); }
-    else if (history.state && history.state.pushed && state.step === 2) { entry.pushed = true; history.replaceState(entry, '', u); }
+    if (!fromHistory && ((state.step === 2 && shownStep === 1) || (state.step === 4 && shownStep === 2))) { entry.pushed = true; history.pushState(entry, '', u); }
+    else if (history.state && history.state.pushed && (state.step === 2 || state.step === 4)) { entry.pushed = true; history.replaceState(entry, '', u); }
     else history.replaceState(entry, '', u);
     shownStep = state.step; fromHistory = false;
   }
@@ -534,18 +770,19 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     var slots = d ? slotsFor(d) : [];
     state.date = slots.length ? d : null;
     state.time = state.date && slots.indexOf(p.get('cas')) >= 0 ? p.get('cas') : null;
-    state.step = state.time && p.get('krok') === '2' ? 2 : 1; // the confirmation is never restored from an address
+    state.step = state.time && /^(2|platba)$/.test(p.get('krok')) ? 2 : 1; // the confirmation is never restored from an address
     var show = state.date || firstFree(TODAY);
     if (show) state.month = new Date(show.getFullYear(), show.getMonth(), 1);
   }
   window.addEventListener('popstate', function () { fromHistory = true; readUrl(); render(); });
 
   function render() {
+    if (embedded) { embedded.destroy(); embedded = null; } // Stripe allows one embedded Checkout at a time
     renderHead();
     document.querySelector('.switch').hidden = state.step !== 1;
     document.getElementById('facts').hidden = state.step !== 1;
     document.getElementById('title').hidden = state.step === 3;
-    if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else renderStep3();
+    if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else if (state.step === 4) renderPay(); else renderStep3();
     syncUrl();
   }
 
@@ -558,11 +795,59 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     };
   });
 
-  var first = firstFree(TODAY);
-  readUrl(); // a refresh or a shared link restores format, day, time and step; otherwise the first free month, no day chosen
-  // lab: open straight on step 2 or 3 (?step=2|3) for the comparisons
-  var st = +new URLSearchParams(location.search).get('step');
-  if (st === 2 || st === 3) { state.date = first; state.time = slotsFor(state.date)[0]; state.step = st; state.email = 'jana.novakova@example.cz'; }
-  render();
+  /* Real free times from the booking back end (lab ?stripe=1: ui-lab/booking-php, the owner's hours calendars). */
+  function loadSlots() {
+    return fetch('/api/slots', { cache: 'no-store' })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
+      .then(function (j) {
+        AV = { online: j.online, osobne: j.osobne };
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(j.to);
+        LAST = new Date(+m[1], m[2] - 1, +m[3]);
+      });
+  }
+
+  function start() {
+    var first = firstFree(TODAY);
+    readUrl(); // a refresh or a shared link restores format, day, time and step; otherwise the first free month, no day chosen
+    // lab: open straight on step 2 or 3 (?step=2|3) for the comparisons
+    var st = +new URLSearchParams(location.search).get('step');
+    if (st === 4 && PAY < 2) st = 2;
+    // firstFree after readUrl, so it is the first free day of the format in the address
+    if (st >= 2 && st <= 4) { state.date = firstFree(TODAY); state.time = slotsFor(state.date)[0]; state.step = st; state.email = 'jana.novakova@example.cz'; }
+    // back from Stripe (redirect, embedded return or a bank check): ask the demo server whether it was paid
+    var qs = new URLSearchParams(location.search), back = qs.get('paid') || qs.get('payment_intent');
+    if (STRIPE && back) {
+      fetch((qs.get('paid') ? '/api/checkout?id=' : '/api/intent?id=') + encodeURIComponent(back)).then(function (r) { return r.json(); }).then(function (j) {
+        var m = j.meta || {}, md = /^(\d{4})-(\d{2})-(\d{2})$/.exec(m.den || '');
+        // paid: the time comes from the payment, not the free times (it is taken now, by this very booking)
+        if (j.paid && md && m.cas) {
+          state.f = m.forma === 'osobne' ? 'osobne' : 'online';
+          state.date = new Date(+md[1], md[2] - 1, +md[3]); state.time = m.cas;
+          state.month = new Date(state.date.getFullYear(), state.date.getMonth(), 1);
+        }
+        if (m.den && state.time) { state.email = m.email || j.email || ''; state.phone = m.telefon; state.name = m.jmeno; }
+        state.meet = j.meet || ''; // demo only: the real page never shows the link, it goes by e-mail
+        state.payId = j.id || '';
+        state.cancel = j.cancel || '';
+        if (j.paid) try { sessionStorage.removeItem('khg-form'); } catch (x) {}
+        state.step = j.paid && state.time ? 3 : (state.time ? 2 : 1);
+        render();
+        if (!j.paid) say('Platba neproběhla, můžete to zkusit znovu.');
+      });
+    } else render();
+  }
+
+  if (STRIPE) {
+    // today, not the 13 Nov snapshot; the calendar is drawn at once (same size) and filled when the times arrive
+    TODAY = new Date(); TODAY.setHours(0, 0, 0, 0); FIRST = new Date(TODAY);
+    state.month = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    state.f = new URLSearchParams(location.search).get('forma') === 'osobne' ? 'osobne' : 'online';
+    LOADING = 'Načítám volné termíny…';
+    renderHead(); renderStep1();
+    loadSlots().then(function () { LOADING = ''; start(); }, function () {
+      LOADING = 'Volné termíny se teď nepodařilo načíst. Zkuste to prosím za chvíli, nebo mi zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
+      renderStep1();
+    });
+  } else start();
 })();
 </script>
