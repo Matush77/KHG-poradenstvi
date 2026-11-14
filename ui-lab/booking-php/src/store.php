@@ -52,6 +52,12 @@ function db(): PDO
     if (!in_array('reminded', $have, true)) $pdo->exec('ALTER TABLE bookings ADD COLUMN reminded INTEGER DEFAULT 0');
     // small settings the cron keeps between runs (the calendar sync's last check)
     $pdo->exec('CREATE TABLE IF NOT EXISTS state (k TEXT PRIMARY KEY, v TEXT NOT NULL)');
+    // the owner's hours (src/hours.php) and the devices signed in to her hours page (src/owner.php)
+    $pdo->exec('CREATE TABLE IF NOT EXISTS hours_week (forma TEXT NOT NULL, wd INTEGER NOT NULL, hours TEXT NOT NULL, PRIMARY KEY (forma, wd))');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS hours_day (forma TEXT NOT NULL, day TEXT NOT NULL, hours TEXT NOT NULL, PRIMARY KEY (forma, day))');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS owner_devices (id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE, label TEXT NOT NULL,
+        created_at INTEGER NOT NULL, last_seen INTEGER NOT NULL, revoked_at INTEGER)');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS login_fails (who TEXT NOT NULL, at INTEGER NOT NULL)');
     return $pdo;
 }
 

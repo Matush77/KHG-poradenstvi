@@ -14,7 +14,12 @@
      GET  /api/sprava?b=&t=           the booking with the client's details
      GET  /api/sprava/terminy?b=&t=   free times of the booking's format, to move it
      POST /api/sprava/presunout {b, t, date, time}
-     POST /api/sprava/zrusit {b, t}   cancel with a full refund (or refund a late client cancellation) */
+     POST /api/sprava/zrusit {b, t}   cancel with a full refund (or refund a late client cancellation)
+   The owner's hours page (shared password, then a year-long cookie per device, src/owner.php):
+     GET  /api/hodiny                 hours, holidays, bookings, signed-in devices (401 = sign in)
+     POST /api/hodiny/prihlasit {heslo}
+     POST /api/hodiny/ulozit {version, week, days}   saves the page's draft (409 when another device saved meanwhile)
+     POST /api/hodiny/odhlasit {id}   signs a device out (no id: this one) */
 declare(strict_types=1);
 
 require __DIR__ . '/src/config.php';
@@ -24,6 +29,8 @@ require __DIR__ . '/src/store.php';
 require __DIR__ . '/src/mail.php';
 require __DIR__ . '/src/booking.php';
 require __DIR__ . '/src/slots.php';
+require __DIR__ . '/src/hours.php';
+require __DIR__ . '/src/owner.php';
 
 function out(int $code, array $body): never
 {
@@ -162,6 +169,41 @@ try {
             out(200, owner_view(owner_move($payId, (string)($j['date'] ?? ''), (string)($j['time'] ?? ''))));
         }
         if ($method === 'POST' && $route === 'sprava/zrusit') out(200, owner_view(owner_cancel($payId)));
+    }
+
+    if ($route === 'hodiny' || str_starts_with($route, 'hodiny/')) {
+        header('Referrer-Policy: no-referrer');
+        if ($method === 'POST') {
+            // a form on another site can't post here: the cookie is SameSite=Strict, and the origin must be ours
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            if ($origin !== '' && parse_url($origin, PHP_URL_HOST) !== parse_url('http://' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST)) {
+                throw new ClientError('Neplatný požadavek.', 403);
+            }
+            if (!str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) throw new ClientError('Neplatný požadavek.', 415);
+        }
+        $j = $method === 'POST' ? body_json() : [];
+        if ($method === 'POST' && $route === 'hodiny/prihlasit') {
+            $d = owner_login((string)($j['heslo'] ?? ''), (string)($_SERVER['HTTP_USER_AGENT'] ?? ''), visitor());
+            owner_cookie($d['token'], OWNER_DEVICE_DAYS);
+            out(200, ['ok' => true]);
+        }
+        $dev = owner_device($_COOKIE[OWNER_COOKIE] ?? null);
+        if (!$dev) out(401, ['error' => 'Přihlas se.', 'login' => true]);
+        if ($method === 'GET' && $route === 'hodiny') {
+            owner_cookie($_COOKIE[OWNER_COOKIE], OWNER_DEVICE_DAYS);   // a device in use stays signed in
+            out(200, hours_view() + ['devices' => owner_devices($dev['id'])]);
+        }
+        if ($method === 'POST' && $route === 'hodiny/ulozit') {
+            $v = hours_save(is_array($j['week'] ?? null) ? $j['week'] : [], is_array($j['days'] ?? null) ? $j['days'] : [],
+                (int)($j['version'] ?? -1), $dev['label'] . ' ' . $dev['id']);
+            out(200, ['version' => $v]);
+        }
+        if ($method === 'POST' && $route === 'hodiny/odhlasit') {
+            $id = (string)($j['id'] ?? $dev['id']);
+            owner_logout($id, $dev['id']);
+            if ($id === $dev['id']) owner_cookie('', 0);
+            out(200, ['devices' => $id === $dev['id'] ? [] : owner_devices($dev['id'])]);
+        }
     }
 
     out(404, ['error' => 'not found']);

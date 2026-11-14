@@ -35,7 +35,11 @@ function cfg(): array
         'calendar' => $env['BOOKING_CALENDAR'] ?? ($json('google-test-calendar.json')['id'] ?? ''),
         // the owner's calendars read as busy/free only
         'busy_calendars' => array_values(array_filter(explode(',', $env['BUSY_CALENDARS'] ?? 'primary'))),
-        // the owner's working hours per format: every (busy) event in these calendars is open time
+        // where her working hours come from: 'db' = her hours page (owner, 14 Nov), 'google' = the calendars below
+        'hours_source' => ($env['HOURS_SOURCE'] ?? 'db') === 'google' ? 'google' : 'db',
+        // the shared password of the hours page, as a password_hash() (tools/owner-password.php sets it)
+        'owner_password' => is_file("$dir/owner-password") ? trim((string)file_get_contents("$dir/owner-password")) : '',
+        // HOURS_SOURCE=google only: the owner's working hours per format, every (busy) event in these calendars is open time
         'hours' => [
             'online' => $env['HOURS_ONLINE'] ?? ($json('google-hours-calendars.json')['online'] ?? ''),
             'osobne' => $env['HOURS_OSOBNE'] ?? ($json('google-hours-calendars.json')['osobne'] ?? ''),

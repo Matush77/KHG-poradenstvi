@@ -7,6 +7,7 @@ $tmp = sys_get_temp_dir() . '/khg-booking-test-' . bin2hex(random_bytes(4));
 mkdir($tmp, 0700);
 file_put_contents("$tmp/stripe-test.env", "STRIPE_SECRET_KEY=sk_test_dummy\nSTRIPE_PUBLISHABLE_KEY=pk_test_dummy\n");
 file_put_contents("$tmp/booking-secret", str_repeat('ab', 32));
+file_put_contents("$tmp/owner-password", password_hash('spravne-heslo-42', PASSWORD_DEFAULT));
 file_put_contents("$tmp/booking.env", "SITE_URL=http://127.0.0.1:8820\nSTRIPE_WEBHOOK_SECRET=whsec_test123\n");
 putenv("KHG_CONFIG_DIR=$tmp");
 
@@ -17,6 +18,8 @@ require __DIR__ . '/../src/store.php';
 require __DIR__ . '/../src/mail.php';
 require __DIR__ . '/../src/booking.php';
 require __DIR__ . '/../src/slots.php';
+require __DIR__ . '/../src/hours.php';
+require __DIR__ . '/../src/owner.php';
 
 $fails = 0;
 $n = 0;
@@ -266,6 +269,57 @@ $ro = mail_reminder(booking_get('cs_test_rsoon'), prague(booking_get('cs_test_rs
 ok(str_starts_with($ro['subject'], 'Za 10 minut: sezení v ') && str_contains($ro['text'], 'Vítkovická') && !str_contains($ro['text'], 'zruseni'), 'short reminder in person: address, no cancel link');
 db()->prepare('UPDATE bookings SET reminded = 0, moved_at = ? WHERE pay_id = ?')->execute([$now + 36 * 3600, 'cs_test_rfar']);   // moved an hour before
 ok($mine(send_reminders($now + 37 * 3600)) === [] && (int)booking_get('cs_test_rfar')['reminded'] === 1, 'just moved: no day reminder right after the change e-mail');
+
+// --- the owner's hours page: hours in the database
+$nowH = prague('2026-11-14T10:00:00+01:00');
+ok(cz_holiday_names(2027)['2027-03-26'] === 'Velký pátek' && count(cz_holiday_names(2026)) === 13, 'holiday names incl. Easter, 13 a year');
+$v0 = hours_version();
+hours_save(['online' => [1 => [9, 10], 2 => [17, 8]], 'osobne' => [4 => [13]]], [], $v0, 'test', $nowH);
+ok(hours_week()['online'][2] === [8, 17], 'hours are sorted and kept');
+throws(fn() => hours_save(['online' => [1 => [18]]], [], hours_version(), 'test', $nowH), 400, 'an hour after 17:00 refused');
+throws(fn() => hours_save(['online' => [1 => ['9']]], [], hours_version(), 'test', $nowH), 400, 'an hour as text refused');
+throws(fn() => hours_save(['hack' => [1 => [9]]], [], hours_version(), 'test', $nowH), 400, 'unknown format refused');
+throws(fn() => hours_save([], ['online' => ['2026-11-13' => [9]]], hours_version(), 'test', $nowH), 400, 'a day gone by refused');
+throws(fn() => hours_save([], ['online' => ['2026-02-30' => [9]]], hours_version(), 'test', $nowH), 400, 'an impossible date refused');
+throws(fn() => hours_save([], [], $v0, 'test', $nowH), 409, 'a save from an old version refused (another device saved meanwhile)');
+// Mon 16 Nov: week 9, 10. Tue 17 Nov: holiday (closed though Tuesday has 8, 17). Sat 21 Nov: own hours 14. Mon 23: closed for the day.
+hours_save([], ['online' => ['2026-11-21' => [14], '2026-11-23' => []]], hours_version(), 'test', $nowH);
+$o = hours_open(prague('2026-11-16T00:00:00+01:00'), prague('2026-11-23T23:59:00+01:00'))['online'];
+$hrs = array_map(fn($b) => date('Y-m-d G', $b[0]), $o);
+ok(in_array('2026-11-16 9', $hrs, true) && in_array('2026-11-16 10', $hrs, true) && !in_array('2026-11-16 11', $hrs, true), 'a regular Monday has its weekly hours');
+ok(!array_filter($hrs, fn($x) => str_starts_with($x, '2026-11-17')), 'a holiday is closed by default');
+ok(in_array('2026-11-21 14', $hrs, true) && !array_filter($hrs, fn($x) => str_starts_with($x, '2026-11-23')), 'a day of its own: Saturday open at 14, Monday closed');
+ok($o[0][1] - $o[0][0] === 3600, 'each hour is an hour-long block');
+hours_save([], ['online' => ['2026-11-17' => [10]]], hours_version(), 'test', $nowH);
+$r = compute_slots(hours_open(prague('2026-11-17T00:00:00+01:00'), prague('2026-11-17T23:59:00+01:00')), [], prague('2026-11-17T00:00:00+01:00'), prague('2026-11-17T23:59:00+01:00'), false);
+ok(($r['online']['2026-11-17'] ?? null) === ['10:00'], 'a holiday she opened herself is bookable');
+hours_save([], ['online' => ['2026-11-21' => null]], hours_version(), 'test', $nowH);
+ok(!isset(hours_days('2026-11-21', '2026-11-21')['online']['2026-11-21']), 'null puts a day back on the regular week');
+$sp = hours_open(prague('2027-04-05T00:00:00+02:00'), prague('2027-04-05T23:00:00+02:00'))['online'];   // a summer-time Monday (29 Mar is Easter Monday)
+ok(date('G', $sp[0][0]) === '9', 'summer time: 9:00 stays 9:00');
+$hv = hours_view($nowH);
+ok($hv['first_hour'] === 8 && $hv['last_hour'] === 17 && isset(((array)$hv['holidays'])['2026-11-17']), 'the page gets 8–17 and the holidays');
+
+// --- the owner's hours page: sign-in
+$d1 = owner_login('spravne-heslo-42', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36', 'w1');
+ok($d1['label'] === 'Chrome · Windows' && strlen($d1['token']) >= 40, 'right password: a device "Chrome · Windows" with a long random token');
+ok(device_label('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0') === 'Firefox · Ubuntu'
+    && device_label('Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/131.0 Mobile Safari/537.36') === 'Chrome · Android', 'device names for Ubuntu and a phone');
+ok(owner_device($d1['token'])['id'] === $d1['id'], 'the cookie signs the device in');
+ok((string)db()->query("SELECT token_hash FROM owner_devices WHERE id = '{$d1['id']}'")->fetchColumn() !== $d1['token'], 'only a hash of the token is stored');
+ok(owner_device('nesmysl') === null && owner_device(null) === null, 'a made-up cookie or none: not signed in');
+ok(owner_device($d1['token'], time() + 366 * 86400) === null, 'a device unused for over a year is signed out');
+for ($i = 0; $i < 5; $i++) { try { owner_login('spatne', 'x', 'w2'); } catch (ClientError $e) {} }
+throws(fn() => owner_login('spravne-heslo-42', 'x', 'w2'), 429, 'after 5 wrong passwords even the right one waits 15 minutes');
+ok(owner_login('spravne-heslo-42', 'x', 'w3')['id'] !== '', 'another visitor is not locked by them');
+db()->exec('DELETE FROM login_fails');
+for ($i = 0; $i < 30; $i++) { try { owner_login('spatne', 'x', 'wx' . $i); } catch (ClientError $e) {} }
+throws(fn() => owner_login('spravne-heslo-42', 'x', 'w4'), 429, '30 wrong passwords from many addresses lock everyone for a while');
+db()->exec('DELETE FROM login_fails');
+$d2 = owner_login('spravne-heslo-42', 'x', 'w5');
+ok(count(array_filter(owner_devices($d1['id']), fn($x) => $x['current'])) === 1, 'the device list marks this device');
+owner_logout($d2['id'], $d1['id']);
+ok(owner_device($d2['token']) === null && owner_device($d1['token']) !== null, 'signing out one device leaves the others');
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";
 exit($fails ? 1 : 0);

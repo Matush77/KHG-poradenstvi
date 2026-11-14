@@ -12,5 +12,6 @@ require __DIR__ . '/src/store.php';
 require __DIR__ . '/src/mail.php';
 require __DIR__ . '/src/booking.php';
 require __DIR__ . '/src/slots.php';
+require __DIR__ . '/src/hours.php';
 
 echo json_encode(sweep(), JSON_UNESCAPED_SLASHES), "\n";

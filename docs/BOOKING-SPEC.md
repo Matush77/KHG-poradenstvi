@@ -197,7 +197,9 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
 5. Back end on the hosting: PHP 8.4 for the site, cron every minute, config outside the web root,
    `.htaccess` blocking `src/`, `tools/`, `tests/`; check that REMOTE_ADDR is the visitor's IP
    (not a proxy's), or the hold limit counts everyone as one visitor; DKIM and DMARC
-   for the domain's e-mail; the owner's real hours calendars and live Stripe keys.
+   for the domain's e-mail; live Stripe keys; the shared password of the hours page
+   (`tools/owner-password.php` on the hosting), then the owner's regular week and first changes on the
+   page, signed in on each device (PC Windows and Ubuntu, both phones). HTTPS only (the cookie is Secure).
 6. Test with three people, fix what they trip on.
 7. `python3 scripts/check-indexing.py` before pushing to `main`, `--live` after the deploy,
    PageSpeed (mobile) for the booking page.
@@ -513,4 +515,25 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   tried (only the outline held, the owner disliked it in light mode). Outlook recolours both and stays readable.
   Deep coral #C4614A with white text (what most senders do) was tried and rejected by the owner; the button
   stays the site's coral with navy text.
-
+- Hours page, 14 Nov (`ui-lab/rezervace/hodiny.html`, `src/hours.php`, `src/owner.php`). The owner edits
+  Kristýna's hours today in Google's booking schedule ("Terapie online", date-specific hours, about 6 taps) and
+  asked for the same or simpler. Google's appointment hours can't be read by the API, and writing repeating
+  Google events with exceptions from a page would be fragile, so the hours now live in the booking database
+  (`HOURS_SOURCE=db`, the default; `google` keeps the old two hours calendars). Her own Google calendar still
+  blocks time as busy.
+  - Page: a month (past weeks hidden so the day's hours fit on one phone screen), tap a day, tap hours 8:00–17:00
+    (owner: nothing after 18:00); Online/Osobně switch; "Běžný týden" for the regular week. A day of its own
+    overrides the week; "Vrátit na běžný týden", "Zavřít celý den". Booked hours are locked and link to her
+    booking page. Public holidays start closed but can be opened (owner: she sometimes works on them).
+  - Taps are a draft (dashed outline) until "Uložit" or "Zahodit" (owner asked for a save/discard step);
+    leaving with unsaved taps asks first. Each save bumps a version: when another device saved meanwhile,
+    the page loads its changes, puts only its own taps on top and asks to save again (nothing is lost).
+  - Access (owner: PC with Windows and Ubuntu, his phone, maybe hers; one shared password): the password
+    once per browser, then a random year-long cookie (HttpOnly, SameSite=Strict, Secure live, path /api/hodiny,
+    only its HMAC stored). "Přihlášená zařízení" lists the devices with "Odhlásit"; a new password signs out
+    all. 5 wrong passwords per visitor in 15 min, or 30 overall in an hour, lock sign-in for a while. POSTs need
+    JSON and our own Origin. Saves, sign-ins, failures and sign-outs are logged with the device.
+  - Tested: 27 new offline checks (141 total); in the lab pane at 375 px: wrong and right password, open
+    Sat 21 Nov 14:00, save, `/api/slots` offers it online only; two devices saving at once keep both changes
+    (first version lost the other device's change, fixed); sign-out kills the cookie; no cookie: 401.
+    Layout shift 0. Not tested: a real phone, Windows/Ubuntu browsers, the hosting's HTTPS cookie.
