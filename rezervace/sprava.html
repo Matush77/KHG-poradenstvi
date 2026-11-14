@@ -1,0 +1,200 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rezervace · správa | KHG Poradenství</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="only light">
+<link rel="preload" href="/fonts/Inter/Inter-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* The owner's page, opened from the buttons in the "Nová rezervace" e-mail: the client's details, move, cancel with refund.
+   Same look as the booking and the client's cancel page. */
+@font-face { font-family: Inter; src: url('/fonts/Inter/Inter-LatinExt-var.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: Fraunces; src: url('/fonts/Fraunces/Fraunces-500-Soft-cs.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Inter Fallback'; src: local('Arial'), local('ArialMT'); size-adjust: 106.44%; ascent-override: 91.01%; descent-override: 22.66%; line-gap-override: 0%; }
+@font-face { font-family: 'Inter Fallback Android'; src: local('Roboto'), local('Roboto-Regular'); size-adjust: 107.27%; ascent-override: 90.31%; descent-override: 22.49%; line-gap-override: 0%; }
+:root {
+  --paper: #FBF8F3; --sky: #E8EFF4; --peach: #F6E6DC; --navy: #163A55; --blue: #2D5A7B; --slate: #44576A; --mute: #5E6E7C;
+  --coral: #E8927C; --coral-ink: #B5573F; --line: rgba(22,58,85,.14); --card: #FFFFFF; --tint: var(--sky);
+  --f-head: Fraunces, Georgia, "Noto Serif", serif;
+  --f-body: Inter, "Inter Fallback", "Inter Fallback Android", system-ui, sans-serif;
+  color-scheme: light;
+}
+body.f-osobne { --tint: var(--peach); }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--navy); font: 400 16px/1.5 var(--f-body);
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+h1 { font-family: var(--f-head); font-weight: 500; font-variation-settings: "SOFT" 100, "WONK" 0; margin: 0; font-size: 28px; line-height: 1.2; letter-spacing: -.01em; }
+h2 { font-size: 17px; font-weight: 600; margin: 0; }
+button { font: inherit; color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+a { color: var(--blue); text-underline-offset: 3px; }
+.brand { max-width: 560px; margin: 0 auto; font-size: 14px; color: var(--mute); }
+.card { max-width: 560px; margin: 8px auto 0; display: grid; gap: 16px; align-content: start; min-height: 420px; }
+.card p { margin: 0; color: var(--slate); }
+.summary { background: var(--tint); border-radius: 16px; padding: 16px 18px; display: grid; gap: 2px; }
+.summary b { font-weight: 600; font-size: 17px; }
+.summary span { color: var(--slate); font-size: 15px; }
+.client { display: grid; gap: 2px; }
+.client b { font-size: 17px; font-weight: 600; }
+.client a { min-height: 32px; display: inline-flex; align-items: center; width: fit-content; }
+.note { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; white-space: pre-wrap; color: var(--navy) !important; }
+.label { font-size: 14px; color: var(--mute) !important; margin-bottom: -10px !important; }
+.actions { display: grid; gap: 12px; margin-top: 4px; }
+.btn { min-height: 56px; border: 0; border-radius: 999px; background: var(--coral); color: var(--navy); font-weight: 600; font-size: 18px; padding: 0 28px; cursor: pointer; width: 100%; }
+.btn.ghost { background: var(--card); border: 1.5px solid var(--line); }
+.btn[aria-busy="true"] { opacity: .75; cursor: progress; }
+@media (min-width: 720px) { .actions { grid-auto-flow: column; justify-content: start; } .btn { width: auto; } }
+.link { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 44px; font-weight: 500; justify-self: start; }
+.ok { background: var(--tint); border-radius: 16px; padding: 14px 18px; color: var(--navy) !important; }
+.warn { color: var(--coral-ink) !important; font-weight: 500; }
+.err { color: var(--coral-ink) !important; }
+.panel { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 14px; }
+.day { display: grid; gap: 8px; }
+.day h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.times { display: flex; flex-wrap: wrap; gap: 8px; }
+.time { min-height: 48px; min-width: 84px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
+.time[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+.confirm { position: sticky; bottom: 12px; background: var(--card); border: 1.5px solid var(--navy); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; box-shadow: 0 8px 24px rgba(22,58,85,.12); }
+.confirm p { color: var(--navy) !important; }
+.skel { height: 1.2em; border-radius: 8px; background: linear-gradient(90deg, #EFE9E1, #F6F1EA, #EFE9E1); }
+.skel.h { height: 34px; width: 50%; } .skel.s { height: 74px; border-radius: 16px; }
+@media (prefers-reduced-motion: no-preference) { .skel { background-size: 200% 100%; animation: sh 1.4s linear infinite; } @keyframes sh { to { background-position: -200% 0; } } }
+</style>
+<body>
+<p class="brand">KHG Poradenství · rezervace</p>
+<main class="card" id="card" aria-live="polite" aria-busy="true">
+  <div class="skel h"></div><div class="skel s"></div><div class="skel"></div><div class="skel" style="width:70%"></div>
+</main>
+<script>
+(function () {
+  var DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
+  var DAYS_ON = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu']; // after "na" (přesunout na pátek)
+  var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
+  var card = document.getElementById('card');
+  var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || q.get('amp;t') || '';   // amp;t: a link whose & arrived escaped as &amp; (seen once from a phone)
+  var akce = q.get('akce'); // from the e-mail button: open the move or the cancel step at once
+  var d = null, flash = '';
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function date(den) { var p = den.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function endOf(cas) { var h = cas.split(':'), m = +h[0] * 60 + +h[1] + 50; return Math.floor(m / 60) + ':' + ('0' + m % 60).slice(-2); }
+  function longDay(den) { var x = date(den), s = DAYS[x.getDay()]; return s.charAt(0).toUpperCase() + s.slice(1) + ' ' + x.getDate() + '. ' + MONTHS[x.getMonth()]; }
+  function onDay(den, cas) { var x = date(den); return DAYS_ON[x.getDay()] + ' ' + x.getDate() + '. ' + MONTHS[x.getMonth()] + ' v ' + cas; }
+  function api(path, body) {
+    var opt = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ b: b, t: t }, body)) } : {};
+    return fetch('/api/' + path + (body ? '' : '?' + new URLSearchParams({ b: b, t: t })), opt)
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); });
+  }
+  function ahead(h) { if (h < 48) return Math.max(0, Math.round(h)) + ' h'; var n = Math.round(h / 24); return n + (n < 5 ? ' dny' : ' dní'); }
+  function busy(btn, text) { btn.setAttribute('aria-busy', 'true'); btn.disabled = true; btn.textContent = text; }
+  function idle(btn, text) { btn.removeAttribute('aria-busy'); btn.disabled = false; btn.textContent = text; }
+  function show(html) { card.innerHTML = html; card.setAttribute('aria-busy', 'false'); }
+  function focusH1() { var h = card.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus(); } }
+
+  function head() {
+    var online = d.forma !== 'osobne';
+    document.body.classList.toggle('f-osobne', !online);
+    var title = d.cancelled ? 'Zrušená rezervace' : d.started ? 'Proběhlé sezení' : 'Rezervace';
+    var contact = (d.email ? '<a href="mailto:' + esc(d.email) + '">' + esc(d.email) + '</a>' : '') +
+      (d.phone ? '<a href="tel:' + esc(d.phone.replace(/[^\d+]/g, '')) + '">' + esc(d.phone) + '</a>' : '');
+    return '<h1>' + title + '</h1>' +
+      (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') +
+      '<div class="summary"><b>' + longDay(d.den) + ', ' + d.cas + '–' + endOf(d.cas) + '</b><span>' +
+      (online ? 'Online · Google Meet' : 'Osobně · Vítkovická 3299/3A') + ' · 1 100 Kč' + (d.moves ? ' · přesunuto' : '') + '</span></div>' +
+      '<div class="client"><b>' + esc(d.name || 'Bez jména') + '</b>' + contact + '</div>' +
+      (d.note ? '<p class="label">S čím přichází</p><p class="note">' + esc(d.note) + '</p>' : '') +
+      (d.clash && !d.cancelled ? '<p class="warn">V kalendáři je ve stejnou dobu i jiná událost.</p>' : '');
+  }
+
+  function render() {
+    var h = head(), acts = '';
+    if (d.processing) {
+      acts = '<p>Rezervace se ještě zpracovává. Zkus stránku obnovit za pár minut.</p>';
+    } else if (d.cancelled) {
+      var deleted = d.cancelled_by === 'calendar';
+      var by = d.cancelled_by === 'owner' ? 'Zrušila jsi ji ty' : deleted ? 'Smazala jsi ji v kalendáři'
+        : 'Zrušil ji klient' + (d.hours_before != null ? ' ' + ahead(d.hours_before) + ' předem' : '');
+      acts = d.refunded
+        ? '<p>' + by + '. 1 100 Kč se klientovi vrací.</p>'
+        : deleted
+          ? '<p>' + by + '. Termín je volný, peníze se zatím nevrátily a klient od webu nic nedostal.</p>' +
+            '<div class="actions"><button class="btn" id="cancel">Vrátit peníze a napsat klientovi</button></div>'
+          : '<p>' + by + ', peníze se nevrátily (méně než 36 hodin předem).</p>' +
+            '<div class="actions"><button class="btn ghost" id="cancel">Přesto vrátit 1 100 Kč</button></div>';
+    } else if (d.started) {
+      acts = '<p>Sezení už začalo nebo proběhlo.</p><div class="actions"><button class="btn ghost" id="cancel">Vrátit 1 100 Kč</button></div>';
+    } else {
+      acts = '<div class="actions"><button class="btn" id="move">Přesunout termín</button><button class="btn ghost" id="cancel">Zrušit a vrátit peníze</button></div>';
+    }
+    show(h + acts + '<div id="panel"></div>');
+    var m = document.getElementById('move'), c = document.getElementById('cancel');
+    if (m) m.onclick = function () { openMove(); };
+    if (c) c.onclick = function () { openCancel(); };
+  }
+
+  function openCancel() {
+    var refundOnly = d.cancelled || d.started, deleted = d.cancelled_by === 'calendar';
+    var p = document.getElementById('panel');
+    p.className = 'panel';
+    p.innerHTML = '<h2>' + (refundOnly ? 'Vrátit klientovi 1 100 Kč?' : 'Zrušit sezení a vrátit 1 100 Kč?') + '</h2>' +
+      '<p>' + (deleted ? 'Klient dostane e-mail, že sezení rušíš, a celou částku zpět na kartu.' : refundOnly ? 'Klient dostane e-mail, že mu peníze vracíš.' : 'Klient dostane e-mail, že sezení rušíš, a celou částku zpět na kartu. Událost z kalendáře zmizí.') + '</p>' +
+      '<p class="err" id="err" role="alert" hidden></p>' +
+      '<div class="actions"><button class="btn" id="yes">' + (refundOnly ? 'Ano, vrátit' : 'Ano, zrušit a vrátit') + '</button><button class="link" id="no">Ponechat</button></div>';
+    document.getElementById('no').onclick = render;
+    document.getElementById('yes').onclick = function () {
+      var btn = this, err = document.getElementById('err'), label = btn.textContent;
+      busy(btn, 'Vracím peníze…'); err.hidden = true;
+      api('sprava/zrusit', {}).then(function (j) {
+        d = j; akce = null;
+        flash = refundOnly ? 'Hotovo. Peníze se vracejí, klient dostal e-mail.' : 'Hotovo. Sezení je zrušené, peníze se vracejí a klient dostal e-mail.';
+        render(); focusH1();
+      }).catch(function (e) { idle(btn, label); err.textContent = e.message; err.hidden = false; });
+    };
+    p.querySelector('h2').scrollIntoView({ block: 'nearest' });
+  }
+
+  var SHOW_DAYS = 10; // days with free times shown at first; more on request
+  function openMove() {
+    var p = document.getElementById('panel');
+    p.className = 'panel';
+    p.innerHTML = '<h2>Vyber nový termín</h2><p>' + (d.forma === 'osobne' ? 'Volné časy pro osobní sezení.' : 'Volné časy pro online sezení.') + '</p><p id="load">Načítám volné termíny…</p>';
+    api('sprava/terminy').then(function (j) {
+      var days = Object.keys(j.slots).sort(), shown = Math.min(SHOW_DAYS, days.length), chosen = null;
+      function draw() {
+        var list = days.slice(0, shown).map(function (den) {
+          return '<div class="day"><h3>' + longDay(den) + '</h3><div class="times">' + j.slots[den].map(function (c) {
+            var on = chosen && chosen.den === den && chosen.cas === c;
+            return '<button class="time" data-d="' + den + '" data-c="' + c + '" aria-pressed="' + !!on + '">' + c + '</button>';
+          }).join('') + '</div></div>';
+        }).join('');
+        p.innerHTML = '<h2>Vyber nový termín</h2>' +
+          (days.length ? list : '<p>V příštích týdnech není nic volného. Zkontroluj hodiny v kalendářích Ordinace.</p>') +
+          (shown < days.length ? '<button class="link" id="more">Další termíny</button>' : '') +
+          '<button class="link" id="back">Zpět</button>' +
+          (chosen ? '<div class="confirm"><p>Přesunout na <b>' + onDay(chosen.den, chosen.cas) + '</b>? Klient dostane e-mail s novým termínem.</p>' +
+            '<p class="err" id="err" role="alert" hidden></p><button class="btn" id="go">Přesunout</button></div>' : '');
+        p.querySelectorAll('.time').forEach(function (x) { x.onclick = function () { chosen = { den: x.dataset.d, cas: x.dataset.c }; draw(); document.getElementById('go').focus({ preventScroll: true }); }; });
+        var more = document.getElementById('more'); if (more) more.onclick = function () { shown = Math.min(shown + SHOW_DAYS, days.length); draw(); };
+        document.getElementById('back').onclick = render;
+        var go = document.getElementById('go');
+        if (go) go.onclick = function () {
+          var err = document.getElementById('err');
+          busy(go, 'Přesouvám…'); err.hidden = true;
+          api('sprava/presunout', { date: chosen.den, time: chosen.cas }).then(function (r) {
+            d = r; akce = null; flash = 'Přesunuto. Klient dostal e-mail s novým termínem, událost v kalendáři se posunula.';
+            render(); focusH1();
+          }).catch(function (e) { idle(go, 'Přesunout'); err.textContent = e.message; err.hidden = false; });
+        };
+      }
+      draw();
+    }).catch(function (e) { p.innerHTML = '<h2>Vyber nový termín</h2><p class="err">Volné termíny se teď nepodařilo načíst. Zkus to prosím za chvíli. Pokud to nepomůže, zkontroluj kalendáře Ordinace online a osobně.</p><button class="link" id="back">Zpět</button>'; document.getElementById('back').onclick = render; });
+  }
+
+  api('sprava').then(function (j) {
+    d = j; render();
+    if (akce === 'presunout' && document.getElementById('move')) openMove();
+    if (akce === 'zrusit' && document.getElementById('cancel')) openCancel();
+  }).catch(function (e) { show('<h1>Odkaz nefunguje</h1><p>' + esc(e.message) + '</p>'); });
+})();
+</script>
+</body></html>

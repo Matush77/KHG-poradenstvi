@@ -81,3 +81,26 @@ Then:
   "Indexing allowed: Yes". Request indexing for the homepage.
 - PageSpeed Insights (mobile) on the homepage and one article: report score, LCP, CLS, TBT.
 - One to two weeks later: Search Console → Pages. The indexed count must not drop.
+
+## 4. Own booking (ships with the redesign, owner's choice 14 Nov)
+
+The "Objednat se" window now opens `/rezervace.html` (format from the window, `?forma=osobne`)
+instead of Google's booking pages. Ported from the lab (`ui-lab/rezervace-ukazka.html` with the
+owner's picks, `ui-lab/booking-php/`):
+
+- `rezervace.html`: calendar, details, then Stripe Checkout (redirect); in the sitemap.
+- `rezervace/zruseni.html` (client's move or cancel link), `rezervace/sprava.html` (owner's link
+  from "Nová rezervace"), `rezervace/hodiny.html` (her hours, shared password): all `noindex`.
+- `booking/`: the PHP back end. `.htaccess` sends `/api/…` to `booking/api.php` and answers 404
+  for anything under `/booking/`. Tests: `php booking/tests/run.php`. Local run:
+  `php -S 127.0.0.1:8830 -t . booking/router.php`.
+
+Before this goes live, on the hosting (none of it is in Git):
+
+- PHP 8.4 with curl, openssl, pdo_sqlite; config in `~/.config/khg/` outside `public_html`
+  (`booking.env` with `BOOKING_MODE=live` and `SITE_URL=https://khgporadenstvi.cz`, `booking-secret`,
+  Stripe live keys and webhook secret, Google OAuth token, `smtp.env`), files chmod 600.
+- `php booking/tools/owner-password.php` for the hours page password; her weekly hours entered there.
+- Stripe webhook to `https://khgporadenstvi.cz/api/webhook`; Scheduled Task every 5 minutes:
+  `php -f …/booking/cron.php`.
+- Check after deploy: `/booking/api.php` and `/booking/src/config.php` answer 404, `/api/slots` answers JSON.

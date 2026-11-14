@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervace termínu online a v Ostravě | KHG Poradenství</title>
+    <meta name="description" content="Online nebo osobně v Ostravě: vyberte volný termín, vyplňte jméno a kontakt a zaplaťte kartou. Sezení trvá 50 minut a stojí 1 100 Kč.">
+    <meta name="author" content="Mgr. Kristýna Hriciková Glattová">
+    <meta property="og:title" content="Rezervace termínu online a v Ostravě">
+    <meta property="og:description" content="Vyberte volný termín psychoterapie online nebo osobně v Ostravě. 50 minut, 1 100 Kč.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://khgporadenstvi.cz/rezervace.html">
+    <meta property="og:locale" content="cs_CZ">
+    <meta property="og:image" content="https://khgporadenstvi.cz/images/og-home.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="KHG Poradenství – psychoterapie online a osobně v Ostravě">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://khgporadenstvi.cz/rezervace.html">
+    <link rel="icon" href="images/heart.svg" type="image/svg+xml">
+    <link rel="icon" href="images/heart-32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="images/heart-96.png" sizes="96x96" type="image/png">
+    <link rel="apple-touch-icon" href="images/heart-180.png">
+    <link rel="preload" href="fonts/Inter/Inter-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/Fraunces/Fraunces-500-Soft-cs.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/styles.css?v=20261113-1">
+    <link rel="stylesheet" href="css/polish.css?v=20261111-3">
+    <style>@font-face{font-family:'Fraunces';src:url('/fonts/Fraunces/Fraunces-500-Soft-cs.woff2') format('woff2');font-weight:400 700;font-style:normal;font-display:swap}@font-face{font-family:'Fraunces Fallback';src:local('Georgia Bold'),local('Georgia-Bold');font-weight:400 700;size-adjust:91.58%;ascent-override:106.79%;descent-override:27.84%;line-gap-override:0%}@font-face{font-family:'Fraunces Fallback Android';src:local('Noto Serif Bold'),local('NotoSerif-Bold');font-weight:400 700;size-adjust:92.44%;ascent-override:105.80%;descent-override:27.59%;line-gap-override:0%}</style>
+    <style id="proposal">
+
+
+
+:root {
+  --navy: #163A55; --slate: #44576A; --mute: #5E6E7C; --coral-ink: #B5573F;
+  --paper: #FBF8F3; --sky: #E8EFF4; --line: #E3E0DA;
+  --primary: #2D5A7B; --primary-dark: #163A55; --primary-light: #4A7B9D;
+  --accent: #E8927C; --accent-light: #F5B5A5;
+  --text-dark: #163A55; --text-medium: #44576A; --text-light: #5E6E7C; --text: #44576A;
+  --bg-cream: #FBF8F3; --bg-sand: #F4EFE7; --bg-light: #FFFFFF; --border-light: #E3E0DA;
+  --font-heading: Inter, "Inter Fallback", "Inter Fallback Android", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --fs-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
+  --fs-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+  --fs-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --fs-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --r: 12px; --r-lg: 24px;
+}
+body { background: var(--paper); color: var(--slate); }
+
+
+h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .cap-content h3,
+.publication-content h3, .service-main h3, .booking-modal-title {
+  font-family: var(--font-heading) !important; font-weight: 600; letter-spacing: -0.02em; color: var(--navy);
+}
+.hero-title { font-size: var(--fs-h1); line-height: 1.08; }
+.section-title { font-size: var(--fs-h2); line-height: 1.15; margin-bottom: 0; }
+.section-title::after { display: none !important; }
+.about-name, .service-main h3, .cap-content h3, .publication-content h3, .cta-heading, .technical-info h3, .common-issues h3 {
+  font-size: var(--fs-h3) !important; line-height: 1.3; letter-spacing: -0.01em;
+}
+.benefit-item h3, .target-group h3, .step h3, .credential-card h3:not(.credential-label) { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; color: var(--navy); }
+strong, b { font-weight: 600 !important; }
+.faq-question { font-weight: 600; color: var(--navy); }
+.hero-subtitle, .service-description, .lead-text, .about-role { font-size: var(--fs-lead); }
+.benefit-item p, .target-group p, .step p, .common-issues li, .service-features-main li, .technical-info li,
+.credential-card p, .cap-content p, .publication-content p, .faq-answer p { font-size: 1.0625rem; line-height: 1.65; }
+
+
+.credential-label, .service-eyebrow, .service-fact dt, .service-fact-label, .contact-label, .pricing-card-label,
+.contact-details > span:first-child, dt {
+  text-transform: none !important; letter-spacing: 0 !important; font-size: .9375rem !important; font-weight: 500 !important; color: var(--mute) !important;
+}
+.service-eyebrow { color: var(--coral-ink) !important; }
+.service-eyebrow::before { display: none !important; }
+
+
+.section-header { text-align: left; max-width: none; }
+.section-header .section-subtitle { display: none; }
+@media (max-width: 768px) { .section-header { text-align: center; } }
+
+
+.hero { background: var(--paper) !important; }
+.about, .why-online, .who-for, .featured, .contact { background: var(--sky) !important; }
+.services, .how-it-works, .faq, .rv { background: var(--paper) !important; }
+.header { background: rgba(251, 248, 243, .97) !important; box-shadow: 0 1px 0 var(--line) !important; }
+.footer { background: var(--navy) !important; }
+.cta-section { background: var(--navy) !important; border-radius: var(--r-lg); box-shadow: none !important; }
+.cta-section .cta-heading { color: #fff !important; }
+.cta-section p { color: #C9D8E3 !important; }
+.publication-feature { background: #fff !important; background-image: none !important; box-shadow: none !important; border: 0 !important; border-radius: var(--r-lg) !important; }
+
+
+.credential-card, .benefit-item, .target-group, .common-issues, .technical-info, .service-main, .cap-membership,
+.featured-link, .contact-compact, .contact-info-compact, .office-gallery-image, .service-fact {
+  box-shadow: none !important;
+}
+.credential-card, .common-issues, .technical-info, .service-main, .cap-membership, .featured-link {
+  background: #fff !important; border: 1px solid var(--line) !important; border-radius: var(--r) !important;
+}
+.sky-card, .about .credential-card, .who-for .common-issues, .featured .cap-membership, .featured .featured-link { border-color: transparent !important; }
+.technical-info { border-left: 1px solid var(--line) !important; }
+.highlighted-text { background: transparent !important; border-left: 0 !important; padding: 0 !important; color: var(--slate) !important; }
+.service-fact { border-left-color: var(--line) !important; }
+
+
+.benefits-grid, .target-groups { display: grid !important; grid-template-columns: 1fr !important; gap: 0 !important; border-top: 1px solid #CCD8E2; }
+.benefit-item, .target-group {
+  background: transparent !important; border: 0 !important; border-bottom: 1px solid #CCD8E2 !important; border-radius: 0 !important;
+  padding: 20px 0 !important; text-align: left !important;
+}
+.benefit-item::before, .target-group::before { display: none !important; }
+@media (min-width: 769px) {
+  .benefit-item, .target-group { display: grid !important; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 32px; align-items: baseline; padding: 24px 0 !important; }
+  .benefit-item h3, .target-group h3 { margin: 0 !important; }
+  .benefit-item p, .target-group p { margin: 0 !important; max-width: 60ch; }
+}
+
+
+.step { background: transparent !important; box-shadow: none !important; border: 0 !important; text-align: left !important; padding: 0 !important; }
+.step-number {
+  background: none !important; box-shadow: none !important; width: auto !important; height: auto !important; border-radius: 0 !important;
+  color: var(--navy) !important; font: 500 1.5rem/1.2 var(--font-heading) !important; justify-content: flex-start !important;
+  margin: 0 0 8px !important; display: block !important;
+}
+.step-number::after { content: '.'; }
+.process-steps { border-top: 1px solid var(--line); padding-top: 24px; }
+
+
+.faq-item { background: transparent !important; background-image: none !important; box-shadow: none !important; border: 0 !important;
+  border-bottom: 1px solid var(--line) !important; border-radius: 0 !important; margin: 0 !important; }
+.faq-list { border-top: 1px solid var(--line); }
+.faq-question { padding-left: 0 !important; padding-right: 0 !important; background: none !important; }
+.faq-answer, .faq-answer-content, .faq-answer > div { padding-left: 0 !important; padding-right: 0 !important; }
+
+
+.blob-shape { animation: none !important; background: var(--sky) !important; box-shadow: none !important; }
+
+
+.stats-dot { color: var(--coral) !important; }
+.hero-stats-line strong { color: var(--navy) !important; }
+.common-issues li::before, .service-features-main li::before { background: var(--accent) !important; }
+.contact-item-compact { border-color: #CCD8E2 !important; }
+
+
+.header .logo-img { mix-blend-mode: multiply; }
+
+
+.technical-info { grid-template-columns: 1fr !important; }
+.technical-info-content { max-width: 72ch; }
+.how-it-works .office-gallery { margin: 32px 0 0 !important; max-width: none !important; width: auto !important; }
+.office-gallery-image, .office-gallery-image--main { border-radius: var(--r) !important; background: var(--sky) !important; }
+.office-gallery figcaption { font-size: .9375rem; color: var(--mute); margin-top: 12px; }
+@media (min-width: 769px) {
+  
+  .office-gallery-grid { grid-template-columns: 3fr 1fr !important; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 12px !important; aspect-ratio: 9 / 5; }
+  .office-gallery-image--main { grid-column: 1 !important; grid-row: 1 / 4; }
+  .office-gallery-image img, .office-gallery-image--main img { aspect-ratio: auto !important; height: 100% !important; }
+}
+@media (max-width: 768px) {
+  
+  .office-gallery-grid {
+    display: flex !important; gap: 12px !important; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-inline: calc(50% - 50vw); padding-inline: 16px; scroll-padding-inline: 16px;
+  }
+  .office-gallery-grid::-webkit-scrollbar { display: none; }
+  .office-gallery-image { flex: 0 0 84vw; scroll-snap-align: start; }
+  .office-gallery-image img { aspect-ratio: 4 / 3 !important; }
+}
+
+
+.featured-subtitle { font-size: 1.25rem !important; text-align: left !important; margin: 40px 0 8px !important; }
+.featured-links { display: grid !important; grid-template-columns: 1fr !important; gap: 0 !important; margin-top: 0 !important; border-top: 1px solid #CCD8E2; }
+.featured .featured-link {
+  background: transparent !important; border: 0 !important; border-bottom: 1px solid #CCD8E2 !important; border-radius: 0 !important;
+  padding: 12px 0 !important; gap: 14px !important; transform: none !important; box-shadow: none !important; min-height: 56px;
+}
+.featured-logo { width: 32px !important; height: 32px !important; border-radius: 0 !important; }
+.featured-link span { font-size: 1.0625rem !important; font-weight: 500 !important; color: var(--navy) !important; }
+.featured-link::after { content: '↗'; margin-left: auto; color: var(--mute); font-size: 1rem; }
+@media (hover: hover) { .featured .featured-link:hover span { text-decoration: underline; text-underline-offset: 3px; } }
+@media (min-width: 769px) {
+  .featured-links { grid-template-columns: repeat(3, 1fr) !important; column-gap: 32px !important; }
+}
+
+
+.faq-question { font-size: 1.0625rem !important; }
+.service-fact dd, dd { font-weight: 600 !important; }
+.technical-info h3, .common-issues h3, h3 { font-weight: 600 !important; }
+.cap-profile-link { font-weight: 600 !important; }
+cite { font-weight: 600 !important; }
+.service-facts { border-radius: var(--r) !important; }
+.highlighted-text { border-radius: 0 !important; }
+.footer-company-id, .footer-bottom, .footer-bottom p, .footer-bottom a, .footer-bottom span { font-size: .8125rem !important; }
+.cap-logo-link { border-radius: var(--r) !important; }
+.cta-section .btn { box-shadow: none !important; }
+
+
+:root {
+  --block-gap: clamp(2rem, 1.6rem + 1.6vw, 3rem);   
+  --card-gap: clamp(1.5rem, 1.3rem + .8vw, 2rem);    
+  --card-pad: clamp(1.5rem, 1.3rem + .8vw, 2rem);    
+  --panel-pad: clamp(2rem, 1.6rem + 1.6vw, 3rem);    
+  --text-w: 720px;
+}
+
+
+.section-header { margin-bottom: var(--section-head-gap) !important; }
+.section-header + * { margin-top: 0 !important; }
+
+
+.why-online-content, .benefits-grid { max-width: none !important; margin-inline: 0 !important; }
+
+.service-main, .faq-list, .common-issues, .contact-compact { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+.service-description, .faq-answer p, .technical-info li, .technical-info p, .cap-content p, .lead-text { max-width: 66ch; }
+
+
+.why-online .benefits-grid { margin-top: var(--block-gap) !important; }
+.service-main { margin-bottom: var(--block-gap) !important; }
+.process-steps { margin-bottom: var(--block-gap) !important; gap: var(--card-gap) !important; }
+.how-it-works .office-gallery { margin-top: var(--block-gap) !important; }
+.target-groups { margin-bottom: var(--block-gap) !important; }
+.cap-membership { margin-bottom: var(--block-gap) !important; }
+.featured-subtitle { margin: 0 0 16px !important; }
+.about-content { row-gap: var(--block-gap) !important; }
+.publication-feature { margin-top: 0 !important; }
+.credentials { display: grid !important; gap: var(--card-gap) !important; }
+.credentials .credential-card { margin: 0 !important; }
+
+
+.credential-card, .service-main, .technical-info, .common-issues, .cap-membership, .contact-compact { padding: var(--card-pad) !important; }
+.contact-compact { border-radius: var(--r) !important; }
+.cta-section, .publication-feature { padding: var(--panel-pad) !important; }
+.service-facts { margin: 24px 0 !important; }
+.benefit-item, .target-group { padding: 24px 0 !important; }
+.featured .featured-link { padding: 16px 0 !important; min-height: 0 !important; }
+
+
+.nav-link { font-size: .9375rem !important; }
+.cap-profile-link, .skip-to-main { font-size: 1.0625rem !important; }
+.footer strong { font-size: .9375rem !important; }
+.service-main strong, .service-main p, .cta-section p { font-size: var(--fs-body) !important; }
+.about-role { font-weight: 400 !important; }
+.benefit-item h3, .target-group h3, .step h3, .featured-subtitle, .service-fact dd:not(.service-fact-detail) { font-size: var(--fs-lead) !important; }
+.service-fact-detail { font-weight: 400 !important; }
+
+
+.btn-primary, .btn-hero, .btn-large, .header .btn {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  background: var(--accent) !important; color: var(--navy) !important; -webkit-text-fill-color: var(--navy) !important;
+  border: 0 !important; border-radius: 999px !important; box-shadow: none !important; transform: none !important;
+  font-family: var(--font-heading) !important; font-size: 1.125rem !important; font-weight: 600 !important; line-height: 1.2 !important;
+  min-height: 56px; padding: 0 32px !important; transition: background-color .15s ease !important;
+}
+
+@media (max-width: 480px) { .btn-hero, .btn-large, .cta-section .btn-primary, .services .btn-primary { width: 100% !important; max-width: none !important; } }
+.header .btn { min-height: 44px; padding: 0 20px !important; font-size: .9375rem !important; }
+@media (hover: hover) {
+  .btn-primary:hover, .btn-hero:hover, .btn-large:hover, .header .btn:hover { background: var(--accent-light) !important; transform: none !important; box-shadow: none !important; }
+}
+
+
+.fade-in, .hero-content, .hero-image, .hero-title { animation: none !important; }
+.featured-link:hover, .credential-card:hover, .service-main:hover, .step:hover { transform: none !important; box-shadow: none !important; }
+
+
+.booking-modal-overlay { background: rgba(22, 58, 85, .6) !important; }
+.booking-modal { background: var(--paper) !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad) !important; box-shadow: 0 16px 48px rgba(22, 58, 85, .24) !important; }
+.booking-modal-title { font-size: var(--fs-h3) !important; line-height: 1.25 !important; text-align: left !important; margin: 0 0 var(--block-gap) !important; padding-right: 48px !important; }
+.booking-modal-close { width: 44px; height: 44px; padding: 10px !important; top: calc(var(--panel-pad) - 10px) !important; right: calc(var(--panel-pad) - 10px) !important; color: var(--mute) !important; }
+@media (hover: hover) { .booking-modal-close:hover { color: var(--navy) !important; } }
+.booking-modal-options { grid-template-columns: 1fr !important; gap: var(--card-gap) !important; }
+.booking-modal { max-width: 520px !important; }
+.booking-option { position: relative; align-items: flex-start !important; text-align: left !important; background: #fff !important; border: 1px solid var(--line) !important; border-radius: var(--r) !important; box-shadow: none !important; transform: none !important; padding: var(--card-pad) !important; padding-right: calc(var(--card-pad) + 32px) !important; transition: border-color .15s ease !important; }
+.booking-option::after { content: "\2192"; position: absolute; right: var(--card-pad); top: 50%; transform: translateY(-50%); font-size: 1.25rem; line-height: 1; color: var(--navy); }
+@media (hover: hover) { .booking-option:hover { border-color: var(--navy) !important; } }
+
+:root { --peach: #F6E6DC; --peach-line: #E8D3C5; --sky-line: #CCD8E2; }
+.booking-modal-options .booking-option { border-color: transparent !important; }
+.booking-modal-options .booking-option:first-child { background: var(--sky) !important; }
+.booking-modal-options .booking-option:last-child { background: var(--peach) !important; }
+.booking-option-desc { color: var(--slate) !important; }
+.booking-option-title { font-size: var(--fs-lead) !important; font-weight: 600 !important; color: var(--navy) !important; text-align: left !important; margin: 0 0 4px !important; }
+.booking-option-desc { font-size: .9375rem !important; color: var(--mute) !important; text-align: left !important; }
+
+
+@media (max-width: 968px) {
+  
+  .nav-menu { top: 68px !important; left: 0 !important; height: calc(100dvh - 68px); max-height: none !important; background: var(--paper) !important; box-shadow: none !important; border-top: 0 !important;
+    gap: 0 !important; align-items: stretch !important; padding: 8px var(--space-lg) var(--panel-pad) !important;
+    transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility 0s linear .2s !important; }
+  .nav-menu.active { transform: none; visibility: visible; transition: transform .2s ease !important; }
+  .nav-menu li { border-bottom: 1px solid var(--line); }
+  .nav-menu li:last-child { border-bottom: 0; padding-top: var(--block-gap); }
+  .nav-menu .nav-link { display: block; padding: 16px 0 !important; font-size: var(--fs-lead) !important; font-weight: 500 !important; color: var(--navy) !important; }
+  .nav-menu .btn { width: 100%; max-width: 420px; min-height: 56px; font-size: 1.125rem !important; }
+}
+@media (max-width: 968px) and (prefers-reduced-motion: reduce) { .nav-menu, .nav-menu.active { transition: none !important; } }
+
+
+.credential-card::before, .cta-section::before, .blob-shape::before { display: none !important; }
+.office-gallery-open::after { background: rgba(22, 58, 85, .88) !important; }
+
+
+.common-issues li::before, .service-features-main li::before, .technical-info li::before, .service-features li::before { background: var(--primary) !important; }
+.nav-link::after { background: var(--navy) !important; }
+.stats-dot { color: var(--mute) !important; }
+
+.publication-feature img { border-radius: var(--r) !important; box-shadow: none !important; }
+
+
+.service-main, .service-main *, .service-facts, .service-fact, .why-online .lead-text, .who-for h3, .common-issues,
+.cap-membership, .cap-content, .cap-content *, .cta-section, .cta-section *, .contact-booking { text-align: left !important; }
+.service-facts { justify-items: stretch !important; }
+.service-fact { justify-items: start !important; }
+.cta-heading { margin-inline: 0 !important; }
+.cta-section { align-items: flex-start !important; }
+.cap-membership { justify-items: start !important; }
+.service-eyebrow { justify-content: flex-start !important; }
+.cta-section .cta-heading { margin: 0 0 8px !important; }
+.cta-section p:not(.cta-heading) { margin: 0 0 24px !important; }
+.why-online .lead-text { margin-inline: 0 !important; max-width: 66ch !important; }
+
+
+
+.hero, .who-for, .services, .why-online, .featured { background: var(--paper) !important; }
+.about, .rv, .how-it-works, .faq, .contact { background: var(--sky) !important; }
+
+.who-for .target-groups, .who-for .target-group { border-color: var(--line) !important; }
+.who-for .common-issues { border: 1px solid var(--line) !important; }
+
+.rv .rv-card:nth-child(3n+2) { background: var(--paper) !important; }
+.rv .rv-card:nth-child(3n+3) { box-shadow: none !important; }
+.why-online .benefits-grid { border-top-color: var(--line) !important; }
+.why-online .benefit-item { border-bottom-color: var(--line) !important; }
+.faq-list { border-top-color: #CCD8E2 !important; }
+.faq-item { border-bottom-color: #CCD8E2 !important; }
+.featured-links { border-top-color: var(--line) !important; }
+.featured .featured-link { border-bottom-color: var(--line) !important; }
+.featured .cap-membership { border: 1px solid var(--line) !important; }
+.how-it-works .technical-info { border-color: transparent !important; }
+
+
+
+.cta-section .cta-heading { font-size: var(--fs-h3) !important; }
+.common-issues h3 { color: var(--navy) !important; margin: 0 0 16px !important; }
+.service-features-main .features-heading { margin: 0 0 12px !important; }
+@media (min-width: 1024px) {
+  .service-main { display: grid !important; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); column-gap: var(--block-gap); align-items: start; }
+  .service-main > * { grid-column: 1; }
+  .service-main > .service-features-main { grid-column: 2; grid-row: 1 / span 4; margin: 0 !important; padding-left: var(--block-gap); border-left: 1px solid var(--line); }
+  .service-main .service-facts { margin-bottom: 0 !important; }
+  .common-issues ul { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; column-gap: 32px; }
+}
+@media (min-width: 769px) {
+  .contact-info-compact { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+  .contact-item-compact { border: 0 !important; padding-top: 0 !important; }
+}
+
+.service-facts { align-items: start !important; }
+.service-fact { align-content: start !important; }
+
+
+.footer { padding: var(--section-y) 0 var(--block-gap) !important; }
+.footer p, .footer li, .footer a, .footer span { color: #C9D8E3 !important; -webkit-text-fill-color: #C9D8E3; opacity: 1 !important; }
+.footer-heading, .footer-heading strong, .footer-brand > p:not([class]) { color: #fff !important; -webkit-text-fill-color: #fff; }
+.footer-brand > p:not([class]) { font-family: var(--font-heading) !important; font-size: 1.1875rem !important; font-weight: 500 !important; line-height: 1.3 !important; margin: 0 0 4px !important; font-synthesis: none; } 
+.footer-tagline { font-size: .9375rem !important; margin: 0 0 16px !important; }
+.footer-company-id { margin: 0 !important; line-height: 1.5 !important; }
+.footer-content { gap: var(--block-gap) !important; margin-bottom: var(--block-gap) !important; }
+.footer-heading { margin: 0 0 4px !important; line-height: 1.4 !important; }
+.footer-links ul { row-gap: 0 !important; margin: 0 !important; }
+.footer-links li, .footer-contact p:not(.footer-heading) { margin: 0 !important; }
+.footer-links a, .footer-contact p a, .footer-legal a { display: inline-block; padding: 12px 0 !important; line-height: 20px !important; font-size: .9375rem !important; }
+.footer-legal a { font-size: .8125rem !important; }
+@media (hover: hover) { .footer-links a:hover, .footer-contact p a:hover, .footer-legal a:hover { color: #fff !important; -webkit-text-fill-color: #fff; } }
+.footer-social { margin-top: 8px !important; }
+.footer-bottom, .footer-legal { text-align: left !important; justify-content: flex-start; }
+.footer-bottom { text-align: left !important; padding-top: 12px !important; border-top: 1px solid rgba(255, 255, 255, .18) !important; }
+.footer-bottom p { margin: 12px 0 0 !important; }
+@media (min-width: 769px) {
+  .footer-bottom { display: flex; justify-content: space-between !important; align-items: center; gap: 24px; }
+  .footer-bottom p { margin: 0 !important; }
+}
+
+
+
+@media (hover: hover) { .rv-btn:not(:disabled):hover { background: var(--paper) !important; } }
+
+.service-main .service-eyebrow { font-size: .9375rem !important; font-weight: 500 !important; margin-bottom: 8px !important; }
+
+.service-facts { background: none !important; border: 0 !important; border-top: 1px solid var(--line) !important; border-bottom: 1px solid var(--line) !important; border-radius: 0 !important; overflow: visible !important; }
+.service-fact { min-height: 0 !important; padding: 24px 0 !important; grid-template-rows: auto auto auto !important; }
+.service-fact + .service-fact { padding-left: 24px !important; border-left: 1px solid var(--line) !important; }
+.service-fact dt { margin: 0 0 4px !important; }
+.service-fact dd:not(.service-fact-detail) { color: var(--navy) !important; font-weight: 600 !important; }
+.service-fact .service-fact-detail { font-weight: 400 !important; color: var(--slate) !important; margin-top: 4px !important; }
+.service-fact-detail a { display: inline-block; padding: 12px 0; margin: -12px 0; font-weight: 500 !important; color: var(--blue, #2D5A7B) !important; }
+@media (max-width: 768px) {
+  .service-fact { padding: 16px 0 !important; }
+  .service-fact + .service-fact { padding-left: 0 !important; border-left: 0 !important; border-top: 1px solid var(--line) !important; }
+}
+
+
+html { scrollbar-gutter: stable; }
+
+
+.about-description > p { margin-bottom: 16px !important; }
+.about-more > summary { list-style: none; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer;
+  font-size: 1.0625rem; font-weight: 600; color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
+.about-more > summary::-webkit-details-marker { display: none; }
+.about-more > summary::after { content: '\2193'; margin-left: 8px; text-decoration: none; display: inline-block; }
+.about-more[open] > summary::after { content: '\2191'; }
+.about-more-close, .about-more[open] .about-more-open { display: none; }
+.about-more[open] .about-more-close { display: inline; }
+.about-more[open] > summary { margin-bottom: 16px; }
+.about-more p { margin-bottom: 16px !important; }
+
+
+
+.featured .publication-feature { border: 1px solid var(--line) !important; border-radius: var(--r) !important; padding: var(--card-pad) !important; margin: 0 0 var(--block-gap) !important; }
+@media (max-width: 700px) {
+  .featured .publication-feature { grid-template-columns: 72px 1fr !important; grid-template-areas: "cover title" "text text"; column-gap: 16px !important; row-gap: 16px !important; align-items: center !important; }
+  .featured .publication-content { display: contents; }
+  .featured .publication-content h3 { grid-area: title; margin: 0 !important; font-size: var(--fs-lead) !important; }
+  .featured .publication-content p { grid-area: text; }
+  .featured .publication-cover { grid-area: cover; justify-self: start; }
+  .featured .publication-cover img { width: 72px !important; }
+}
+
+
+:root {
+  --font-heading: Fraunces, "Fraunces Fallback", "Fraunces Fallback Android", Georgia, serif;
+  --font-ui: Inter, "Inter Fallback", "Inter Fallback Android", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+:is(h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .rv-title, .booking-modal-title,
+    .technical-info h3, .common-issues h3, .benefit-item h3, .target-group h3, .step h3, .service-main h3, .cap-content h3, .publication-content h3, .pricing-info-item h3) {
+  font-family: var(--font-heading) !important; font-weight: 500 !important; letter-spacing: -0.01em !important; font-synthesis: none;
+}
+.hero-title { line-height: 1.1 !important; }
+.step-number, .pricing-price strong { font-weight: 500 !important; font-synthesis: none; }
+
+.btn-primary, .btn-hero, .btn-large, .header .btn, .btn { font-family: var(--font-ui) !important; }
+:is(.credential-card .credential-label, h3.credential-label, .faq-heading, .faq-heading *, .footer h3, .footer h4) {
+  font-family: var(--font-ui) !important; letter-spacing: 0 !important;
+}
+.about .credential-card .credential-label { font-weight: 500 !important; }
+
+
+
+.who-for .common-issues { background: none !important; border: 0 !important; border-top: 1px solid var(--line) !important; border-radius: 0 !important;
+  padding: var(--block-gap) 0 0 !important; box-shadow: none !important; }
+.who-for .common-issues h3 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; }
+@media (min-width: 769px) {
+  .who-for .common-issues ul { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; column-gap: var(--block-gap) !important; max-width: 56rem; }
+}
+
+
+.service-main { display: block !important; }
+.service-main .service-extra { margin: -8px 0 24px !important; color: var(--slate) !important; max-width: 66ch; }
+
+
+.how-it-works .technical-info { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; box-shadow: none !important; }
+.how-it-works .technical-info-content { max-width: none !important; }
+.technical-info h3 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 16px !important; }
+.info-rows { border-top: 1px solid var(--sky-line, #CCD8E2); }
+.info-row { padding: 20px 0; border-bottom: 1px solid var(--sky-line, #CCD8E2); }
+.info-row h4 { font-family: var(--font-heading) !important; font-size: var(--fs-lead) !important; font-weight: 500 !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 4px !important; }
+.info-row p { margin: 0 !important; font-size: var(--fs-body, 1.0625rem) !important; line-height: 1.65 !important; color: var(--slate) !important; max-width: 66ch; }
+@media (min-width: 769px) {
+  .info-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); column-gap: var(--block-gap); align-items: baseline; }
+  .info-row h4 { margin: 0 !important; }
+}
+.service-main .service-description { margin-bottom: 12px !important; }
+.service-main .service-extra { margin: 0 0 var(--block-gap) !important; }
+.service-main .service-description { margin-left: 0 !important; margin-right: 0 !important; }
+@media (min-width: 769px) { .info-row { grid-template-columns: 14rem minmax(0, 1fr); } }
+
+
+
+.contact .section-header { margin-bottom: var(--block-gap) !important; }
+.contact-rows { margin: 0; border-top: 1px solid var(--sky-line, #CCD8E2); }
+.contact-row { padding: 20px 0; border-bottom: 1px solid var(--sky-line, #CCD8E2); }
+.contact-row dt { font-size: .9375rem !important; font-weight: 500 !important; line-height: 1.4 !important; color: var(--mute) !important;
+  letter-spacing: 0 !important; text-transform: none !important; margin: 0 0 4px; }
+.contact-row dd { margin: 0; }
+.contact-row a { font-size: var(--fs-lead); font-weight: 600; line-height: 1.4; color: var(--navy); overflow-wrap: anywhere;
+  text-decoration: underline; text-decoration-color: var(--sky-line, #CCD8E2); text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.contact-row a:hover { text-decoration-color: currentColor; }
+@media (min-width: 769px) {
+  .contact-row { display: grid; grid-template-columns: 14rem minmax(0, 1fr); column-gap: var(--block-gap); align-items: baseline; }
+  .contact-row dt { margin: 0; }
+}
+
+
+
+:root { --line: rgba(22, 58, 85, .14); --sky-line: rgba(22, 58, 85, .14); --border-light: rgba(22, 58, 85, .14); }
+.faq-list { border-top-color: var(--line) !important; }
+.faq-item { border-bottom-color: var(--line) !important; }
+.rv-btn { border-color: var(--line) !important; }
+.rv .rv-card:nth-child(3n+2) .rv-who, .rv .rv-card:nth-child(3n+3) .rv-who { border-top-color: var(--line) !important; }
+
+
+.cta-section { background: var(--peach) !important; }
+.cta-section .cta-heading { color: var(--navy) !important; }
+.cta-section p { color: var(--slate) !important; }
+
+
+.format-cards { display: grid; gap: var(--card-gap); margin-top: var(--block-gap); }
+@media (min-width: 769px) { .format-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.format-card { border-radius: var(--r); padding: var(--card-pad); }
+.format-card--online { background: var(--sky); }
+.format-card--osobne { background: var(--peach); }
+.format-card h3 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; margin: 0 0 8px !important; }
+.format-card p { margin: 0 0 24px; font-size: var(--fs-body, 1.0625rem); line-height: 1.65; color: var(--slate); max-width: 66ch; }
+.format-facts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.format-facts li { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-body, 1.0625rem); line-height: 1.5; color: var(--slate); }
+.format-facts li::before { display: none !important; }
+.format-card--osobne .format-facts, .format-card--osobne .format-facts li { border-color: var(--peach-line); }
+
+
+.how-it-works .technical-info { max-width: none !important; margin-inline: 0 !important; }
+
+
+@media (max-width: 768px) {
+  .rv-head { flex-direction: column; align-items: center !important; text-align: center; }
+}
+
+
+.contact .section-header { margin-bottom: var(--section-head-gap) !important; }
+
+
+.featured .featured-subtitle, .featured :is(.cap-content, .publication-content) h3 { font-size: var(--fs-h3) !important; line-height: 1.3 !important; color: var(--navy) !important; }
+.featured :is(.cap-content, .publication-content) :is(h3, p) { text-align: left !important; }
+.featured :is(.cap-content, .publication-content) h3 { margin: 0 0 12px !important; }
+
+
+.featured .cap-membership, .featured .publication-feature {
+  display: grid !important; grid-template-columns: 120px minmax(0, 1fr) !important; column-gap: var(--block-gap) !important; row-gap: 0 !important;
+  align-items: start !important; text-align: left !important; background: #fff !important; border: 1px solid var(--line) !important;
+  border-radius: var(--r) !important; padding: var(--card-pad) !important; }
+.featured .publication-cover { grid-column: 1; grid-row: 1; justify-self: start; margin: 0 !important; }
+.featured .publication-content { grid-column: 2; grid-row: 1; }
+.featured .publication-cover img { width: 120px !important; box-shadow: none !important; }
+.featured .cap-logo-img { margin: 0 !important; }
+@media (max-width: 700px) {
+  .featured .cap-membership, .featured .publication-feature { grid-template-columns: 72px minmax(0, 1fr) !important; column-gap: 16px !important; row-gap: 16px !important; align-items: center !important; }
+  .featured .cap-membership { grid-template-areas: "cover title" "text text" "link link"; }
+  .featured .publication-feature { grid-template-areas: "cover title" "text text"; }
+  .featured .cap-content, .featured .publication-content { display: contents; }
+  .featured .cap-logo, .featured .publication-cover { grid-area: cover; }
+  .featured :is(.cap-content, .publication-content) h3 { grid-area: title; margin: 0 !important; }
+  .featured :is(.cap-content, .publication-content) p { grid-area: text; margin: 0 !important; }
+  .featured .cap-profile-link { grid-area: link; justify-self: start; margin: 0 !important; }
+  .featured .cap-logo-img, .featured .publication-cover img { width: 72px !important; }
+}
+
+
+main p a:not(.btn), .cap-profile-link, .rv-source a, .service-fact-detail a {
+  color: var(--primary) !important; font-weight: 500 !important;
+  text-decoration: underline !important; text-decoration-thickness: 1px !important; text-underline-offset: 3px !important; }
+@media (hover: hover) { main p a:not(.btn):hover, .cap-profile-link:hover, .rv-source a:hover, .service-fact-detail a:hover { color: var(--navy) !important; } }
+
+
+main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight: 600 !important; }
+
+
+.rv-who { font-weight: 500 !important; }
+
+
+.service-main .service-facts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; border-bottom: 0 !important; margin-bottom: 0 !important; }
+.service-main .service-fact { padding-bottom: 0 !important; }
+.service-main .service-fact + .service-fact { padding-left: 24px !important; border-left: 1px solid var(--line) !important; border-top: 0 !important; }
+.service-main .service-fact dd:not(.service-fact-detail) { font-family: var(--font-heading) !important; font-size: var(--fs-h2) !important;
+  font-weight: 500 !important; line-height: 1.1 !important; letter-spacing: -0.02em; font-synthesis: none; margin-top: 4px !important; }
+.service-main .service-fact-detail a { white-space: nowrap; }
+@media (max-width: 768px) { .service-main .service-fact { padding-top: 16px !important; } }
+.services .cta-section .cta-heading { margin-bottom: 24px !important; }
+@media (min-width: 769px) {
+  .services .cta-section { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 24px; }
+  .services .cta-section .cta-heading { margin: 0 !important; }
+}
+
+
+.who-for .common-issues { border-top: 0 !important; padding-top: 0 !important; }
+
+
+.office-gallery-open::after { font-size: .8125rem !important; }
+
+
+.footer-social { display: flex !important; gap: 12px !important; margin-top: 16px !important; }
+.footer-social .social-link { width: 44px; height: 44px; padding: 0 !important; margin: 0 !important; display: grid !important; place-items: center;
+  border: 1px solid rgba(255, 255, 255, .28); border-radius: 50%; transition: border-color .15s, background-color .15s !important; }
+.footer-social .social-icon { width: 22px !important; height: 22px !important; }
+@media (hover: hover) { .footer-social .social-link:hover { transform: none !important; opacity: 1 !important; border-color: #fff; background: rgba(255, 255, 255, .08); } }
+.footer-social .social-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .footer-social .social-link { transition: none !important; } }
+
+
+:root { --sky-hover: #DCE6EE; --peach-hover: #F2DBCC; }
+.booking-modal-options .booking-option .booking-option-desc { color: var(--slate) !important; } 
+.booking-modal-options .booking-option { transition: background-color .15s !important; }
+.booking-option::after { transition: transform .15s; }
+.pricing-card#online, .pricing-card#osobne { position: relative; transition: background-color .15s, border-color .15s; }
+.pricing-card#online .btn::after, .pricing-card#osobne .btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } 
+@media (hover: hover) and (pointer: fine) {
+  .booking-modal-options .booking-option:first-child:hover { background: var(--sky-hover) !important; }
+  .booking-modal-options .booking-option:last-child:hover { background: var(--peach-hover) !important; }
+  .booking-option:hover::after { transform: translate(4px, -50%); }
+  .pricing-card#online:hover { background: var(--sky-hover) !important; border-color: var(--sky-hover) !important; }
+  .pricing-card#osobne:hover { background: var(--peach-hover) !important; border-color: var(--peach-hover) !important; }
+  .pricing-card#online:hover .btn, .pricing-card#osobne:hover .btn { background: var(--accent-light) !important; }
+}
+.booking-option:focus-visible, .pricing-card .btn:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .booking-modal-options .booking-option, .booking-option::after, .pricing-card#online, .pricing-card#osobne { transition: none !important; }
+}
+
+
+.target-groups, .who-for .target-groups, .who-for .target-group, .target-group, .benefits-grid, .benefit-item,
+.process-steps, .faq-list, .faq-item, .info-rows, .info-row, .contact-rows, .contact-row,
+.service-facts, .service-main .service-facts, .format-facts, .format-facts li { border-top: 0 !important; border-bottom: 0 !important; }
+.service-fact + .service-fact, .service-main .service-fact + .service-fact { border-left: 0 !important; border-top: 0 !important; }
+.rv .rv-card .rv-who, .rv-who { border-top: 0 !important; }
+.process-steps { padding-top: 0 !important; }
+
+.format-facts li { padding: 4px 0 !important; }
+
+.service-main .service-facts { column-gap: var(--block-gap) !important; }
+.service-main .service-fact + .service-fact { padding-left: 0 !important; }
+.service-main .service-fact { padding-top: 8px !important; }
+@media (max-width: 768px) {
+  .nav-menu li { border-bottom: 0 !important; }
+  .service-fact + .service-fact { padding-left: 0 !important; }
+}
+
+.faq-item + .faq-item { margin-top: 4px !important; }
+
+.about-content { grid-template-columns: minmax(0, 1fr) !important; }
+.about-text { max-width: 66ch !important; }
+.about-description > .highlighted-text { margin-bottom: 8px !important; }
+
+.format-facts li { color: var(--navy) !important; font-weight: 500 !important; }
+
+
+
+.featured-logo { mix-blend-mode: multiply; }
+
+.step { display: grid !important; grid-template-columns: auto minmax(0, 1fr); column-gap: .35em; align-items: baseline; }
+.step-number { grid-column: 1; margin: 0 !important; font-size: var(--fs-lead) !important; line-height: 1.3 !important; }
+.step h3 { grid-column: 2; margin: 0 0 8px !important; }
+.step > :not(.step-number):not(h3) { grid-column: 1 / -1; }
+
+
+
+:root { --page-top: 140px; --doc-w: 43rem; 
+        --fs-doc-title: clamp(2rem, 1.55rem + 1.9vw, 2.75rem);  }
+@media (max-width: 768px) { :root { --page-top: 100px; } }
+
+
+.back-link { display: inline-flex !important; align-items: center; min-height: 44px; margin: 0 0 8px !important;
+  font-size: .9375rem !important; font-weight: 500 !important; color: var(--primary) !important; opacity: 1 !important; transform: none !important; }
+@media (hover: hover) { .back-link:hover { color: var(--navy) !important; text-decoration: underline; text-underline-offset: 3px; } }
+
+
+.btn.btn-secondary, .btn.btn-navy {
+  display: inline-flex !important; align-items: center; justify-content: center; min-height: 56px; padding: 0 32px !important;
+  border: 0 !important; border-radius: 999px !important; transform: none !important;
+  font-family: var(--font-ui) !important; font-size: 1.125rem !important; font-weight: 600 !important; line-height: 1.2 !important;
+  transition: background-color .15s ease !important; cursor: pointer;
+}
+.btn.btn-secondary { background: transparent !important; color: var(--navy) !important; -webkit-text-fill-color: var(--navy) !important; box-shadow: inset 0 0 0 1px var(--navy) !important; }
+.btn.btn-navy { background: var(--navy) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; box-shadow: none !important; }
+.btn.btn-navy:disabled { opacity: .4; cursor: not-allowed; }
+@media (hover: hover) {
+  .btn.btn-secondary:hover { background: var(--sky) !important; }
+  .btn.btn-navy:not(:disabled):hover { background: var(--primary) !important; }
+}
+@media (max-width: 480px) { .btn.btn-secondary, .btn.btn-navy { width: 100% !important; max-width: none !important; } }
+
+
+.doc a:not(.btn):not(.back-link) { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+@media (hover: hover) { .doc a:not(.btn):not(.back-link):hover { color: var(--navy); } }
+
+
+.nav-link.active { color: var(--navy) !important; }
+
+
+.related-resource .btn.btn-secondary:hover, .quiz-related-article .btn.btn-secondary:hover { background: #fff !important; }
+
+
+@media (min-width: 969px) {
+  .nav-link.active { font-weight: 600 !important; }
+  .nav-link.active::after { transform: scaleX(1) !important; width: 100% !important; opacity: 1 !important; }
+}
+
+.legal-section { background: none !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; margin: 0 0 var(--block-gap) !important; }
+.legal-section h2 { font-size: var(--fs-h3) !important; }
+.legal-header, .legal-content { max-width: 66ch !important; margin-left: 0 !important; margin-right: auto !important; }
+    </style>
+
+    <style id="brand">
+    
+    .nav-logo a{display:block;line-height:1;text-decoration:none;border-radius:8px}
+    .brand{display:flex;align-items:center;gap:10px;min-height:44px}
+    .brand-heart{flex:none;width:24px;height:24px;fill:#E8927C}
+    .brand-text{display:block;min-width:0}
+    .brand-name{display:block;font:500 17px/1.15 Fraunces,"Fraunces Fallback","Fraunces Fallback Android",Georgia,serif;color:#163A55;letter-spacing:-.005em;white-space:nowrap;font-synthesis:none}
+    .brand-role{display:block;margin-top:4px;font:500 10.5px/1 Inter,"Inter Fallback","Inter Fallback Android",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5E6E7C}
+    @media (min-width:969px){.brand-name{font-size:19px}.brand-heart{width:26px;height:26px}}
+    @media (max-width:400px){.nav{padding-left:16px!important;padding-right:16px!important}}
+    @media (hover:hover){.nav-logo a:hover .brand-name{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}}
+    </style>
+    <style id="rezervace">
+    /* The booking, with the owner's picks of 13 Nov: switch 8, colours 2,
+       polish 2-5, time zone "Časové pásmo: Praha", payment 0 = redirect to Stripe Checkout). Everything is scoped to .rez,
+       so the site styles and these cannot touch each other. Phones: stacked; desktop: calendar left, times right. */
+    .rez {
+      --card: #FFFFFF; --sky: #E8EFF4; --sky-deep: #DCE6EE; --sky-strong: #CFDEEA;
+      --peach: #F6E6DC; --peach-deep: #F2DBCC; --peach-strong: #F0D3C2;
+      --navy: #163A55; --blue: #2D5A7B; --slate: #44576A; --mute: #5E6E7C;
+      --coral: #E8927C; --coral-ink: #B5573F; --on-coral: #163A55; --bk-line: rgba(22,58,85,.14);
+      --tint: var(--sky); --tint-deep: var(--sky-deep); --tint-strong: var(--sky-strong);
+      --f-head: Fraunces, "Fraunces Fallback", "Fraunces Fallback Android", Georgia, serif;
+      --f-body: Inter, "Inter Fallback", "Inter Fallback Android", system-ui, sans-serif;
+      display: block; color: var(--navy); font: 400 16px/1.5 var(--f-body);
+      padding: 84px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+      min-height: 100vh;
+    }
+    .rez.f-osobne { --tint: var(--peach); --tint-deep: var(--peach-deep); --tint-strong: var(--peach-strong); }
+    .rez * { box-sizing: border-box; }
+    .rez h1, .rez h2 { font-family: var(--f-head) !important; font-weight: 500 !important; font-variation-settings: "SOFT" 100, "WONK" 0; margin: 0; text-wrap: balance; letter-spacing: -.01em; color: var(--navy) !important; }
+    .rez button { font: inherit; color: inherit; }
+    .rez button, .rez a, .rez label { -webkit-tap-highlight-color: transparent; }
+    .rez :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+    .rez p { margin: 0; }
+
+    .rez .wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 16px; }
+    .rez .panel { display: grid; gap: 20px; scroll-margin-top: 84px; }
+    @media (min-width: 720px) { .rez .panel { gap: 28px; padding-top: 16px; } }
+
+    /* Header: one facts line, then the format switch */
+    .rez .head { display: grid; gap: 4px; }
+    .rez .facts { order: 1; color: var(--slate); font-size: 15px; }
+    .rez .facts b { color: var(--navy) !important; font-weight: 600 !important; }
+    /* the coloured pill slides to the chosen side and changes tint on the way (transform only; off with reduced motion) */
+    .rez .switch { order: 2; margin-top: 12px; position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--bk-line); }
+    .rez .switch::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 6px); border-radius: 999px; background: var(--sky-strong); transition: transform .3s cubic-bezier(.3,.7,.2,1), background-color .3s; }
+    .rez.f-osobne .switch::before { transform: translateX(calc(100% + 4px)); background: var(--peach-strong); }
+    @media (min-width: 720px) { .rez .switch { max-width: 360px; } }
+    .rez .fmt { position: relative; z-index: 1; border: 0; background: none; cursor: pointer; border-radius: 999px; min-height: 48px; font-size: 16px; color: var(--mute); transition: color .15s; }
+    .rez .fmt-t { font-weight: 500; }
+    .rez .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); }
+    .rez .fmt[aria-pressed="true"] { cursor: default; color: var(--navy); }
+    .rez .fmt[aria-pressed="true"] .fmt-t { font-weight: 600; }
+
+    /* Picker */
+    .rez .cols { display: grid; gap: 24px; }
+    @media (min-width: 720px) { .rez .cols { grid-template-columns: 340px 1fr; gap: 40px; } }
+    .rez .cal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .rez .cal-top b { font-weight: 600; font-size: 17px; }
+    .rez .bk-nav { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; font-size: 22px; }
+    .rez .bk-nav:hover:not(:disabled) { background: var(--tint); }
+    .rez .bk-nav:disabled { opacity: .25; cursor: default; }
+    .rez .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-variant-numeric: tabular-nums; touch-action: pan-y; }
+    .rez .dow { font-size: 12px; color: var(--mute); padding-bottom: 2px; }
+    .rez .day { aspect-ratio: 1; max-width: 100%; border: 0; border-radius: 50%; background: transparent; font-size: 14px; color: var(--mute); opacity: .28; display: grid; place-items: center; }
+    .rez .day.free { background: var(--tint); color: var(--navy); opacity: 1; cursor: pointer; font-weight: 600; font-size: 16px; }
+    .rez .day.free:hover { background: var(--tint-deep); }
+    .rez .day.sel { background: var(--coral); color: var(--on-coral); }
+    .rez .day.out { visibility: hidden; }
+    /* month change by swipe on phones: the new month slides in from the swipe side */
+    .rez .grid.in-next { animation: month-in-next .22s ease-out; }
+    .rez .grid.in-prev { animation: month-in-prev .22s ease-out; }
+    @keyframes month-in-next { from { transform: translateX(24px); opacity: 0; } }
+    @keyframes month-in-prev { from { transform: translateX(-24px); opacity: 0; } }
+
+    .rez .slots { display: grid; gap: 12px; align-content: start; }
+    /* phones: room for two rows of times is kept for every day, so a day with 2 times and a day with 6 do not resize the page */
+    @media (max-width: 719px) { .rez .slots { min-height: 189px; scroll-margin: 84px 0 16px; } }
+    .rez .slots h2 { font-size: 22px !important; line-height: 1.25; }
+    .rez .times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    @media (min-width: 720px) { .rez .times { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 860px) { .rez .times { grid-template-columns: repeat(3, 1fr); } }
+    .rez .time { min-height: 52px; border-radius: 14px; border: 1.5px solid transparent; background: var(--tint); cursor: pointer; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; transition: background .15s, border-color .15s; }
+    .rez .time:hover { background: var(--tint-strong); }
+    .rez .time[aria-pressed="true"] { background: var(--coral); color: var(--on-coral); border-color: var(--coral); }
+    .rez .tz { color: var(--mute); font-size: 13px; } /* online clients abroad: whose 14:00 it is */
+    .rez .hint { color: var(--mute); font-size: 15px; }
+    .rez .hint a { color: var(--blue); }
+    .rez .empty { background: var(--tint); border-radius: 16px; padding: 16px; font-size: 15px; color: var(--slate); display: grid; gap: 8px; }
+    .rez .link { border: 0; background: none; padding: 0; color: var(--blue); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; justify-self: start; min-height: 32px; text-align: left; }
+
+    .rez .bk-btn { min-height: 56px; border: 0; border-radius: 999px; background: var(--coral); color: var(--on-coral); font-weight: 600; font-size: 18px; line-height: 1.2; letter-spacing: .005em; padding: 0 32px; cursor: pointer; width: 100%; }
+    .rez .bk-btn:hover { filter: brightness(1.04); }
+    @media (min-width: 720px) { .rez .bk-btn { width: auto; } }
+    .rez .bk-btn[aria-busy="true"] { opacity: .75; cursor: progress; }
+    .rez .bk-cta { display: grid; gap: 8px; justify-items: start; }
+
+    /* Step 2 (details) and 3 (done) */
+    .rez .summary { background: var(--tint); border-radius: 16px; padding: 16px 18px; display: grid; gap: 2px; }
+    .rez .summary b { font-weight: 600; font-size: 17px; color: var(--navy); }
+    .rez .summary span { color: var(--slate); font-size: 15px; }
+    .rez form { display: grid; gap: 16px; max-width: 520px; }
+    .rez label { display: grid; gap: 6px; font-size: 14px; font-weight: 500; }
+    .rez label em { font-style: normal; font-weight: 400; color: var(--mute); }
+    /* 16px: smaller makes iPhones zoom into the field on tap */
+    .rez input, .rez textarea { font: inherit; font-size: 16px; color: var(--navy); background: var(--card); border: 1.5px solid var(--bk-line); border-radius: 12px; padding: 12px 14px; min-height: 48px; width: 100%; }
+    .rez textarea { resize: vertical; line-height: 1.5; }
+    .rez .names { display: grid; gap: 16px; }
+    @media (min-width: 480px) { .rez .names { grid-template-columns: 1fr 1fr; } }
+    .rez [hidden] { display: none !important; }
+    .rez .bk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+    .rez .err { color: var(--coral-ink); font-size: 13px; font-weight: 500; }
+    .rez .err:empty { display: none; }
+    .rez input[aria-invalid="true"] { border-color: var(--coral-ink); }
+    .rez .done { display: grid; gap: 16px; max-width: 560px; }
+    .rez .done p { color: var(--slate); }
+    .rez .bk-step { display: grid; gap: 20px; }
+    .rez .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 10px; vertical-align: -2px; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .rez .grid.in-next, .rez .grid.in-prev, .rez .spin { animation: none; } .rez * { transition: none !important; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
+        <nav class="nav container" aria-label="Hlavní navigace">
+            <div class="nav-logo">
+                <a href="/" aria-label="KHG Poradenství – úvodní stránka">
+                    <span class="brand brand-f"><svg class="brand-heart" viewBox="54 65 403 403" width="24" height="24" aria-hidden="true" focusable="false"><path d="M365.0 457.8C290.6 415.8 226.7 367.8 184.2 322.1C138.9 273.3 112.0 230.8 104.4 195.9C102.2 185.9 102.2 168.2 104.3 160.3C109.8 139.6 126.2 123.7 146.5 119.5C159.7 116.7 175.4 118.0 190.0 123.1C216.5 132.2 245.0 161.5 264.1 199.3C267.6 206.3 270.8 212.0 271.2 212.0C271.7 212.0 272.0 209.1 272.0 205.5C272.0 195.3 274.8 170.8 277.5 157.4C285.6 117.4 303.4 87.9 325.9 77.1C333.3 73.6 333.8 73.5 345.5 73.5C355.8 73.5 358.3 73.8 363.3 75.8C382.2 83.5 398.1 101.0 404.6 121.5C411.4 142.9 409.8 181.7 400.4 223.5C396.6 240.9 388.6 268.2 377.1 303.3C366.6 335.4 365.1 340.7 362.6 353.0C358.0 376.1 356.7 391.5 358.0 408.1C359.2 424.6 361.8 434.3 368.4 447.4C372.5 455.6 373.6 458.7 372.8 459.7C371.4 461.4 371.4 461.4 365.0 457.8Z"/></svg><span class="brand-text"><span class="brand-name">Kristýna Hriciková Glattová</span> <span class="brand-role">Psycholog a terapeut</span></span></span>
+                </a>
+            </div>
+
+            <button type="button" class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false" aria-controls="primary-navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="primary-navigation">
+                <li><a href="/#o-mne" class="nav-link">O mně</a></li>
+                <li><a href="/#sluzby" class="nav-link">Služby</a></li>
+                <li><a href="/cenik.html" class="nav-link">Ceník</a></li>
+                <li><a href="/blog.html" class="nav-link">Blog</a></li>
+                <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
+                <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
+                <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="rez f-online" id="main">
+        <div class="wrap">
+            <section class="panel" aria-labelledby="title">
+                <div class="head">
+                    <h1 id="title" class="bk-sr">Objednat sezení</h1>
+                    <div class="switch" role="group" aria-label="Forma sezení">
+                        <button type="button" class="fmt" data-f="online" aria-pressed="true"><span class="fmt-t">Online</span></button>
+                        <button type="button" class="fmt" data-f="osobne" aria-pressed="false"><span class="fmt-t">Osobně v Ostravě</span></button>
+                    </div>
+                    <p class="facts" id="facts"><b>50 min · 1 100 Kč</b> · Google&nbsp;Meet</p>
+                </div>
+                <div id="view"></div>
+                <p class="bk-sr" id="status" aria-live="polite"></p>
+                <noscript><p>Rezervace potřebuje JavaScript. Termín lze domluvit také na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a> nebo <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>.</p></noscript>
+            </section>
+        </div>
+    </main>
+
+
+    <footer class="footer">
+        <!-- Generated from partials/footer.html by scripts/sync-footer.ps1. -->
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <p>Mgr. Kristýna Hriciková Glattová</p>
+                    <p class="footer-tagline">Psycholog ve zdravotnictví a terapeut</p>
+                    <p class="footer-company-id">IČO: 11702711<br>Fyzická osoba zapsaná v živnostenském rejstříku</p>
+                </div>
+
+                <div class="footer-links">
+                    <p class="footer-heading"><strong>Navigace</strong></p>
+                    <ul>
+                        <li><a href="/#o-mne">O mně</a></li>
+                        <li><a href="/#sluzby">Služby</a></li>
+                        <li><a href="/cenik.html">Ceník</a></li>
+                        <li><a href="/blog.html">Blog</a></li>
+                        <li><a href="/kviz.html">Kvízy</a></li>
+                        <li><a href="/#kontakt">Kontakt</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact">
+                    <p class="footer-heading"><strong>Kontakt</strong></p>
+                    <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
+                    <p><a href="tel:+420605990980">+420&nbsp;605&nbsp;990&nbsp;980</a></p>
+                    <p><a href="https://www.google.com/maps/dir/?api=1&amp;destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a%2C+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                            <img src="/images/facebook-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
+                        </a>
+                        <a href="https://www.instagram.com/sitmyslenek/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <img src="/images/instagram-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span data-current-year>2026</span> Mgr. Kristýna Hriciková Glattová. Všechna práva vyhrazena.</p>
+                <div class="footer-legal">
+                    <a href="/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/privacy-consent.js?v=20261016-2"></script>
+    <script src="js/script.js?v=20261114-1"></script>
+    <script>
+    /* The booking: free times from /api/slots (booking/), the client's details, then Stripe's own payment page.
+       Stripe comes back with ?paid=cs_... and the page shows the confirmation. Nothing is loaded from Stripe here. */
+    (function () {
+      var MONTHS = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+      var MONTHS_LOC = ['lednu','únoru','březnu','dubnu','květnu','červnu','červenci','srpnu','září','říjnu','listopadu','prosinci'];
+      var MONTHS_GEN = ['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'];
+      var DAYS = ['neděle','pondělí','úterý','středa','čtvrtek','pátek','sobota'];
+      var DOW = ['Po','Út','St','Čt','Pá','So','Ne'];
+      var AV = { online: {}, osobne: {} };
+      var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+      var FIRST = new Date(TODAY);
+      var LAST = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() + 70); // replaced by the server's last day
+      var TZ = 'Časové pásmo: Praha'; // online clients abroad
+      var FORMATS = {
+        online: { name: 'Online', facts: '<b>50 min · 1 100 Kč</b> · Google&nbsp;Meet', after: 'Odkaz na videohovor je v potvrzení.' },
+        osobne: { name: 'Osobně v Ostravě', facts: '<b>50 min · 1 100 Kč</b> · Vítkovická&nbsp;3299/3A', place: 'Vítkovická 3299/3A, Ostrava', after: 'Ordinace je na adrese Vítkovická 3299/3A, Ostrava. Prosím, zvoňte až v čase vašeho sezení.' }
+      };
+      var PRICE = 'Zaplatit 1 100 Kč';
+
+      var state = { f: 'online', month: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1), date: null, time: null, step: 1, email: '' };
+      var LOADING = ''; // shown in place of the times while the free times load
+      var rez = document.querySelector('.rez'), view = document.getElementById('view');
+
+      function key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+      function slotsFor(d) { return d > LAST || d < FIRST ? [] : (AV[state.f][key(d)] || []).slice(); }
+      function long(d) { return DAYS[d.getDay()] + ' ' + d.getDate() + '. ' + MONTHS_GEN[d.getMonth()]; }
+      function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+      function firstFree(from) {
+        for (var d = new Date(Math.max(from, FIRST)); d <= LAST; d.setDate(d.getDate() + 1)) if (slotsFor(d).length) return new Date(d);
+        return null;
+      }
+      function endTime(t) { var m = +t.split(':')[0] * 60 + 50; return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
+      function esc(v) { return String(v || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function reduce() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+
+      // the header's "Objednat se": the booking is already here, so it only brings the calendar into view
+      window.openBookingModal = function () {
+        if (state.step !== 1) { state.step = 1; state.time = null; render(); }
+        document.querySelector('.rez .panel').scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'start' });
+      };
+
+      // Swipe left / right on the calendar changes the month (same as the arrows, so it stops at the first and last month)
+      var slide = null, sx = 0, sy = 0, swiping = false;
+      view.addEventListener('touchstart', function (e) {
+        swiping = state.step === 1 && !!e.target.closest('.grid, .cal-top') && e.touches.length === 1;
+        if (swiping) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }
+      }, { passive: true });
+      view.addEventListener('touchend', function (e) {
+        if (!swiping) return; swiping = false;
+        var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+        if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        var btn = document.getElementById(dx < 0 ? 'next' : 'prev');
+        if (btn && !btn.disabled) btn.click();
+      }, { passive: true });
+
+      function renderHead() {
+        rez.classList.toggle('f-osobne', state.f === 'osobne');
+        rez.classList.toggle('f-online', state.f !== 'osobne');
+        document.getElementById('facts').innerHTML = FORMATS[state.f].facts;
+        document.querySelectorAll('.rez .fmt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.f === state.f); });
+      }
+
+      // the calendar is redrawn on every choice: keep keyboard focus on the same control
+      function focusKey() {
+        var a = document.activeElement; if (!a || !view.contains(a)) return null;
+        return a.id ? '#' + a.id : a.dataset.d ? '.day[data-d="' + a.dataset.d + '"]' : null;
+      }
+      // no day is chosen for the visitor: the calendar opens (and changes format) with nothing selected
+      function hasFree(m) { var f = firstFree(m); return !!f && f.getMonth() === m.getMonth() && f.getFullYear() === m.getFullYear(); }
+      function plural(n) { return n === 1 ? '1 volný čas' : n < 5 ? n + ' volné časy' : n + ' volných časů'; }
+      function say(t) { var s = document.getElementById('status'); if (s.textContent !== t) s.textContent = t; }
+      // every month gets six week rows (empty ones invisible), so the times under the calendar never move when the month changes
+      function pad(n) { var a = []; for (var i = n; i < 7 + 42; i++) a.push('<span class="day out"></span>'); return a; }
+
+      function renderStep1() {
+        var fk = focusKey();
+        var m = state.month, y = m.getFullYear(), mo = m.getMonth();
+        var start = (new Date(y, mo, 1).getDay() + 6) % 7, len = new Date(y, mo + 1, 0).getDate();
+        var cells = DOW.map(function (d) { return '<div class="dow" aria-hidden="true">' + d + '</div>'; });
+        for (var i = 0; i < start; i++) cells.push('<span class="day out"></span>');
+        for (var n = 1; n <= len; n++) {
+          var d = new Date(y, mo, n), free = slotsFor(d).length > 0;
+          var cls = 'day' + (free ? ' free' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
+          cells.push(free
+            ? '<button type="button" class="' + cls + '" data-d="' + n + '" aria-label="' + long(d) + '" aria-pressed="' + (cls.indexOf(' sel') > 0) + '">' + n + '</button>'
+            : '<span class="' + cls + '">' + n + '</span>');
+        }
+        var slots = state.date ? slotsFor(state.date) : [];
+        var right = LOADING ? '<p class="hint" id="loading">' + LOADING + '</p>'
+          : (state.date && slots.length)
+          ? '<h2>' + cap(long(state.date)) + '</h2><div class="times">' +
+            slots.map(function (t) { return '<button type="button" class="time" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + '</button>'; }).join('') + '</div>' +
+            (state.f === 'online' ? '<p class="tz">' + TZ + '</p>' : '')
+          : !state.date && hasFree(m) ? '<p class="hint">Vyberte den v kalendáři, nebo<br><button type="button" class="link" id="jump">nejbližší volný: ' + long(firstFree(TODAY)) + ' →</button></p>'
+          : '<div class="empty">' + (state.date ? 'V tento den nejsou volné termíny.' : 'V ' + MONTHS_LOC[mo] + ' už nejsou volné termíny.') + (firstFree(TODAY) ? '<button type="button" class="link" id="jump">Nejbližší volný termín</button>' : '') + '</div>';
+
+        view.innerHTML =
+          '<div class="cols"><div><div class="cal-top"><button type="button" class="bk-nav" id="prev" aria-label="Předchozí měsíc"' + (y * 12 + mo <= FIRST.getFullYear() * 12 + FIRST.getMonth() ? ' disabled' : '') + '>‹</button><b>' + MONTHS[mo] + ' ' + y + '</b><button type="button" class="bk-nav" id="next" aria-label="Další měsíc"' + (y * 12 + mo >= LAST.getFullYear() * 12 + LAST.getMonth() ? ' disabled' : '') + '>›</button></div>' +
+          '<div class="grid">' + cells.concat(pad(cells.length)).join('') + '</div></div>' +
+          '<div class="slots" id="slots">' + right + '</div></div>';
+
+        view.querySelectorAll('.day.free').forEach(function (b) { b.onclick = function () { state.date = new Date(y, mo, +b.dataset.d); state.time = null; render(); scrollSlots(); }; });
+        // a time is the choice: tapping it goes straight to the details (the calendar history entry keeps the time, so back shows it chosen)
+        view.querySelectorAll('.time').forEach(function (b) { b.onclick = function () { state.time = b.dataset.t; syncUrl(); state.step = 2; render(); toTop(); }; });
+        var j = document.getElementById('jump');
+        if (j) j.onclick = function () { var d = firstFree(state.date || (hasFree(m) ? TODAY : state.month)) || firstFree(TODAY); if (d) { state.date = d; state.month = new Date(d.getFullYear(), d.getMonth(), 1); state.time = null; render(); } };
+        // changing the month clears the day, so no times from another month stay under the calendar
+        function month(delta) { state.month = new Date(y, mo + delta, 1); state.time = null; state.date = null; slide = delta > 0 ? 'next' : 'prev'; render(); }
+        document.getElementById('prev').onclick = function () { month(-1); };
+        document.getElementById('next').onclick = function () { month(1); };
+        if (slide) { view.querySelector('.grid').classList.add('in-' + slide); slide = null; }
+        var back = fk && (view.querySelector(fk) || (fk.indexOf('.day') === 0 && view.querySelector('.day.sel')));
+        if (back && !back.disabled) back.focus(); else if (fk === '#prev' || fk === '#next') { var nb = view.querySelector('.bk-nav:not(:disabled)'); if (nb) nb.focus(); }
+        if (LOADING) { view.querySelectorAll('.bk-nav').forEach(function (b) { b.disabled = true; }); say(LOADING.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')); return; }
+        say(state.date && slots.length ? cap(long(state.date)) + ', ' + plural(slots.length) : MONTHS[mo] + ' ' + y + (hasFree(m) ? ', vyberte den' : ', bez volných termínů'));
+      }
+
+      // On phones the times sit under the calendar: bring them into view after a day is picked.
+      function scrollSlots() {
+        if (window.innerWidth >= 720) return;
+        var s = document.getElementById('slots');
+        if (s) s.scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'nearest' }); // only as far as needed to show all the times
+      }
+      function toTop() {
+        var p = document.querySelector('.rez .panel'); if (!p || p.getBoundingClientRect().top >= 84) return;
+        p.scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'start' });
+      }
+      function summary() {
+        return '<div class="summary"><b>' + cap(long(state.date)) + ', ' + state.time + '–' + endTime(state.time) + '</b><span>' + FORMATS[state.f].name + ' · 50 minut · 1 100 Kč</span>' + (FORMATS[state.f].place ? '<span>' + FORMATS[state.f].place + '</span>' : '') + '</div>';
+      }
+
+      /* Details. Online asks for an e-mail (the Meet link goes there), in person for a phone (Stripe's page asks for the e-mail).
+         Last, an optional free-text reason, which goes only to the therapist's e-mail. */
+      function field(id, label, type, ac, required, ph) {
+        return '<label for="' + id + '"><span>' + label + (required ? '' : ' <em>(nepovinné)</em>') + '</span>' +
+          '<input id="' + id + '" type="' + type + '" autocomplete="' + ac + '" enterkeyhint="next"' +
+          (type === 'text' ? ' autocapitalize="words"' : ' autocapitalize="off" spellcheck="false"') + (required ? ' required aria-required="true"' : '') +
+          (ph ? ' placeholder="' + ph + '"' : '') + ' aria-describedby="' + id + '-err">' +
+          '<span class="err" id="' + id + '-err" aria-live="polite"></span></label>';
+      }
+      function renderStep2() {
+        var online = state.f === 'online';
+        var contact = online ? field('e', 'E-mail', 'email', 'email', true, '') : field('p', 'Telefon', 'tel', 'tel', true, '+420');
+        var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="3" maxlength="1500"></textarea></label>';
+        view.innerHTML = '<div class="bk-step">' +
+          '<button type="button" class="link" id="back">‹ Změnit termín</button>' + summary() +
+          '<form id="f" novalidate>' +
+          '<div class="names">' + field('fn', 'Jméno', 'text', 'given-name', true, '') + field('ln', 'Příjmení', 'text', 'family-name', true, '') + '</div>' +
+          contact + reason +
+          '<div class="bk-cta"><button class="bk-btn" type="submit" id="go">' + PRICE + '</button></div>' +
+          '<p class="err" id="go-err" role="alert"></p>' +
+          '</form></div>';
+        // back from Stripe's page: what the client typed comes back (kept for this tab only, removed once paid)
+        var kept = null; try { kept = JSON.parse(sessionStorage.getItem('khg-form') || 'null'); } catch (x) {}
+        if (kept) Object.keys(kept).forEach(function (id) { var el = document.getElementById(id); if (el && kept[id]) el.value = kept[id]; });
+        // same as the phone's back button when the details were opened from the calendar
+        document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 1; render(); } };
+        // an error goes away as soon as the field is being fixed, it is checked again on submit
+        document.getElementById('f').addEventListener('input', function (ev) {
+          var el = ev.target, err = document.getElementById(el.id + '-err');
+          if (err && err.textContent) { err.textContent = ''; el.setAttribute('aria-invalid', 'false'); }
+        });
+        document.getElementById('f').onsubmit = function (ev) {
+          ev.preventDefault();
+          var checks = {
+            fn: function (v) { return v ? '' : 'Vyplňte prosím jméno.'; },
+            ln: function (v) { return v ? '' : 'Vyplňte prosím příjmení.'; },
+            e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, přijde na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
+            p: function (v, req) { return !v ? (req ? 'Vyplňte prosím telefon.' : '') : (v.replace(/\D/g, '').length >= 9 ? '' : 'Telefon nevypadá správně.'); }
+          };
+          var first = null;
+          Object.keys(checks).forEach(function (id) {
+            var el = document.getElementById(id); if (!el) return;
+            var msg = checks[id](el.value.trim(), el.required);
+            el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+            document.getElementById(id + '-err').textContent = msg;
+            if (msg && !first) first = el;
+          });
+          if (first) { first.focus(); return; }
+          var e = document.getElementById('e');
+          state.email = e ? e.value.trim() : '';
+          state.phone = online ? '' : document.getElementById('p').value.trim();
+          state.name = document.getElementById('fn').value.trim() + ' ' + document.getElementById('ln').value.trim();
+          state.note = document.getElementById('r').value.trim();
+          var keep = {}; ['fn', 'ln', 'e', 'p', 'r'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
+          try { sessionStorage.setItem('khg-form', JSON.stringify(keep)); } catch (x) {}
+          toCheckout(document.getElementById('go'));
+        };
+      }
+
+      function busy(btn, on, text) {
+        btn.disabled = on; btn.setAttribute('aria-busy', on ? 'true' : 'false');
+        btn.innerHTML = on ? '<span class="spin" aria-hidden="true"></span>' + text : text;
+      }
+      // our details, then off to Stripe's own page; it comes back with ?paid=cs_...
+      function toCheckout(btn) {
+        busy(btn, true, 'Přesměrování na platbu…');
+        var body = { f: state.f, date: key(state.date), time: state.time, name: state.name || '', email: state.email || '', phone: state.phone || '', note: state.note || '', pay: 0, mode: 'redirect' };
+        fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
+          .then(function (j) { location.href = j.url; })
+          .catch(function (e) {
+            // the server's message is written for the client (e.g. someone else is paying for this time right now)
+            busy(btn, false, PRICE);
+            loadSlots().catch(function () {});
+            var out = document.getElementById('go-err');
+            out.textContent = /^(Chyba|Failed|NetworkError|Load failed)/.test(e.message) ? 'Platbu se teď nepodařilo otevřít. Zkuste to prosím za chvíli.' : e.message;
+          });
+      }
+
+      function renderStep3() {
+        // the e-mail and phone come back from the payment: never put them into the page as HTML
+        var sent = state.email ? 'Potvrzení přišlo na ' + esc(state.email) + '. ' : 'Termín máte zapsaný na telefon ' + esc(state.phone) + '. ';
+        view.innerHTML = '<div class="done"><h2>Termín je rezervovaný</h2>' + summary() +
+          '<p>' + sent + FORMATS[state.f].after + '</p>' +
+          '<p>Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením, celá částka bude vrácena. Odkaz je v potvrzovacím e-mailu.</p>' +
+          '<div><button type="button" class="bk-btn" id="again">Zpět na kalendář</button></div></div>';
+        document.getElementById('again').onclick = function () {
+          state.step = 1; state.time = null;
+          loadSlots().then(function () { if (state.date && !slotsFor(state.date).length) state.date = null; render(); }, render);
+        };
+      }
+
+      /* Browser history: the details step is its own entry, so the phone's back button returns to the calendar
+         instead of leaving the page. Format, day, time and step are kept in the address, so a refresh keeps the choice. */
+      var shownStep = null, fromHistory = false;
+      function syncUrl() {
+        var u = new URL(location.href), p = u.searchParams;
+        if (state.f === 'osobne') p.set('forma', 'osobne'); else p.delete('forma');
+        if (state.date) p.set('den', key(state.date)); else p.delete('den');
+        if (state.time) p.set('cas', state.time); else p.delete('cas');
+        if (state.step === 2) p.set('krok', '2'); else p.delete('krok');
+        ['paid', 'stripe', 'pay'].forEach(function (k) { p.delete(k); });
+        var entry = { step: state.step };
+        if (!fromHistory && state.step === 2 && shownStep === 1) { entry.pushed = true; history.pushState(entry, '', u); }
+        else if (history.state && history.state.pushed && state.step === 2) { entry.pushed = true; history.replaceState(entry, '', u); }
+        else history.replaceState(entry, '', u);
+        shownStep = state.step; fromHistory = false;
+      }
+      function readUrl() {
+        var p = new URLSearchParams(location.search);
+        state.f = p.get('forma') === 'osobne' ? 'osobne' : 'online';
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(p.get('den') || ''), d = m && new Date(+m[1], m[2] - 1, +m[3]);
+        var slots = d ? slotsFor(d) : [];
+        state.date = slots.length ? d : null;
+        state.time = state.date && slots.indexOf(p.get('cas')) >= 0 ? p.get('cas') : null;
+        state.step = state.time && p.get('krok') === '2' ? 2 : 1; // the confirmation is never restored from an address
+        var show = state.date || firstFree(TODAY);
+        if (show) state.month = new Date(show.getFullYear(), show.getMonth(), 1);
+      }
+      window.addEventListener('popstate', function () { fromHistory = true; readUrl(); render(); });
+
+      function render() {
+        renderHead();
+        document.querySelector('.rez .switch').hidden = state.step !== 1;
+        document.getElementById('facts').hidden = state.step !== 1;
+        if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else renderStep3();
+        syncUrl();
+      }
+
+      document.querySelectorAll('.rez .fmt').forEach(function (b) {
+        b.onclick = function () {
+          state.f = b.dataset.f; state.time = null;
+          if (state.date && !slotsFor(state.date).length) state.date = null; // the day is not free in this format: nothing chosen
+          if (!state.date && !hasFree(state.month)) { var f = firstFree(TODAY); if (f) state.month = new Date(f.getFullYear(), f.getMonth(), 1); }
+          render();
+        };
+      });
+
+      function loadSlots() {
+        return fetch('/api/slots', { cache: 'no-store' })
+          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
+          .then(function (j) {
+            AV = { online: j.online || {}, osobne: j.osobne || {} };
+            var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(j.to || '');
+            if (m) LAST = new Date(+m[1], m[2] - 1, +m[3]);
+          });
+      }
+
+      function start() {
+        readUrl(); // a refresh or a shared link restores format, day, time and step; otherwise the first free month, no day chosen
+        // back from Stripe: ask the server whether it was paid
+        var back = new URLSearchParams(location.search).get('paid');
+        if (!back) { render(); return; }
+        fetch('/api/checkout?id=' + encodeURIComponent(back)).then(function (r) { return r.json(); }).then(function (j) {
+          var m = j.meta || {}, md = /^(\d{4})-(\d{2})-(\d{2})$/.exec(m.den || '');
+          // paid: the time comes from the payment, not the free times (it is taken now, by this very booking)
+          if (j.paid && md && m.cas) {
+            state.f = m.forma === 'osobne' ? 'osobne' : 'online';
+            state.date = new Date(+md[1], md[2] - 1, +md[3]); state.time = m.cas;
+            state.month = new Date(state.date.getFullYear(), state.date.getMonth(), 1);
+          }
+          if (m.den && state.time) { state.email = m.email || j.email || ''; state.phone = m.telefon; state.name = m.jmeno; }
+          if (j.paid) try { sessionStorage.removeItem('khg-form'); } catch (x) {}
+          state.step = j.paid && state.time ? 3 : (state.time ? 2 : 1);
+          render();
+          if (!j.paid) say('Platba neproběhla, můžete to zkusit znovu.');
+        }, function () { render(); });
+      }
+
+      // the calendar is drawn at once (same size, so nothing moves) and filled when the times arrive
+      state.f = new URLSearchParams(location.search).get('forma') === 'osobne' ? 'osobne' : 'online';
+      LOADING = 'Načítám volné termíny…';
+      renderHead(); renderStep1();
+      loadSlots().then(function () { LOADING = ''; start(); }, function () {
+        LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
+        renderStep1();
+      });
+    })();
+    </script>
+</body>
+</html>

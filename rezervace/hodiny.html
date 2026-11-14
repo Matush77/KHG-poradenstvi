@@ -1,0 +1,420 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hodiny · KHG Poradenství</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="only light">
+<meta name="apple-mobile-web-app-title" content="Hodiny">
+<style>
+/* Kristýna's hours page (14 Nov): a month, tap a day, tap its hours open or closed; "Uložit" saves the draft.
+   "Běžný týden" is the regular week the days start from. Hours live in the booking database (booking-php/src/hours.php);
+   the page needs the shared password once per device (src/owner.php). */
+/* owner, 14 Nov: a dashboard that feels like the system: the device's own font (no web fonts to load),
+   blue while editing Online, the site's coral and peach while editing Osobně */
+:root {
+  --paper: #FFFFFF; --sky: #E8EFF4; --peach: #F6E6DC; --navy: #163A55; --blue: #2D5A7B; --slate: #44576A; --mute: #5E6E7C;
+  --coral: #E8927C; --coral-ink: #B5573F; --line: rgba(22,58,85,.14); --card: #FFFFFF; --tint: var(--sky);
+  --f-body: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  /* the form being edited: open hours, days with open hours, small marks, the save button */
+  --acc: #9CC5E6; --acc-soft: #DDEBF6; --acc-ink: #2D5A7B; --acc-btn: #2D5A7B; --acc-btn-ink: #FFFFFF;
+  color-scheme: light;
+}
+body.f-osobne { --tint: var(--peach); --acc: var(--coral); --acc-soft: #F7D9CF; --acc-ink: var(--coral-ink); --acc-btn: var(--coral); --acc-btn-ink: var(--navy); }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--navy); font: 400 16px/1.5 var(--f-body);
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px)); }
+button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+a { color: var(--blue); text-underline-offset: 3px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+
+/* the month fits on one phone screen, so the top scrolls with the page instead of eating a quarter of it */
+.top { padding: 16px 0 12px; border-bottom: 1px solid var(--line); display: grid; gap: 12px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h1 { font-weight: 700; margin: 0; font-size: 22px; line-height: 1.25; letter-spacing: -.01em; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: #EEF1F4; border-radius: 999px; padding: 4px; }
+.seg button { border: 0; background: none; min-height: 40px; border-radius: 999px; font-weight: 600; font-size: 15px; cursor: pointer; padding: 0 14px; }
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(22,58,85,.15); }
+.seg.forma button[aria-pressed="true"] { background: var(--tint); }
+.tabs { display: flex; gap: 20px; }
+.tabs button { border: 0; background: none; padding: 0; min-height: 36px; font-weight: 500; color: var(--mute); cursor: pointer; border-bottom: 2px solid transparent; }
+.tabs button[aria-pressed="true"] { color: var(--navy); border-color: var(--acc-ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--slate); }
+.legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; border: 1.5px solid var(--line); background: var(--card); }
+.legend i.on { background: var(--acc); border-color: var(--acc); }
+.legend i.bk { background: var(--navy); border-color: var(--navy); }
+
+.intro { margin: 16px 0 0; color: var(--slate); font-size: 15px; }
+.day { padding: 16px 0; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.day h2 { margin: 0; font-size: 16px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.day h2 small { font-weight: 400; color: var(--mute); font-size: 14px; }
+.day h2 .mark { color: var(--acc-ink); font-weight: 500; }
+.day.weekend h2 { color: var(--slate); }
+/* 5 a row on a phone (2 rows for 8–17), all 10 in one row from 640 px */
+.hours { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+@media (min-width: 640px) { .hours { grid-template-columns: repeat(10, 1fr); } }
+.h { min-height: 48px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--mute);
+  font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; cursor: pointer; padding: 0; position: relative; }
+.h[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: var(--navy); }
+.h.booked { background: var(--navy); border-color: var(--navy); color: #fff; }
+.h.booked::after { content: ''; position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
+.h:disabled { cursor: default; opacity: .45; }
+.h.past { visibility: hidden; }
+.books { display: grid; gap: 6px; }
+.info { margin: 0; background: var(--tint); border-radius: 12px; padding: 10px 14px; font-size: 15px; color: var(--navy); }
+.info a { font-weight: 500; }
+.quick { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.link { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 36px; font-weight: 500; font-size: 15px; }
+.more { display: block; width: 100%; margin: 20px 0 0; min-height: 52px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); font-weight: 600; cursor: pointer; }
+
+.mhead { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 4px; }
+.mhead h2 { margin: 0; font-size: 18px; font-weight: 600; }
+.nav { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card); font-size: 22px; line-height: 1; cursor: pointer; }
+.nav:disabled { opacity: .35; cursor: default; }
+.month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.wd { text-align: center; font-size: 13px; color: var(--mute); padding: 4px 0; }
+.wd.we { color: var(--coral-ink); }
+.d { height: 56px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); padding: 4px 0 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 0; position: relative; font-variant-numeric: tabular-nums; }
+.d b { font-size: 16px; font-weight: 600; line-height: 22px; }
+.d small { font-size: 12px; line-height: 16px; color: var(--mute); min-height: 16px; }
+.d.empty { border: 0; background: none; height: 56px; }
+.d.has { background: var(--acc-soft); border-color: var(--acc-soft); }
+.d.has small { color: var(--acc-ink); font-weight: 600; }
+.d.today b { text-decoration: underline; text-decoration-color: var(--acc-ink); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.d.chg::before { content: ''; position: absolute; left: 4px; top: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--acc-ink); }
+.d .bk { position: absolute; right: 4px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--navy); }
+.d .bk.two { box-shadow: 0 8px 0 var(--navy); }
+.d[aria-pressed="true"] { border: 2px solid var(--navy); box-shadow: 0 0 0 1px var(--navy) inset; }
+.d:disabled { cursor: default; opacity: .4; background: transparent; border-color: transparent; }
+.d.hol small { font-size: 10px; }
+.day.sel { border-bottom: 0; margin-top: 8px; }
+.quick { min-height: 36px; }
+@media (min-width: 640px) { .d { height: 68px; } .d.empty { height: 68px; } }
+
+.login { max-width: 400px; margin: 48px auto 0; display: grid; gap: 14px; }
+.login label { font-weight: 600; font-size: 15px; }
+.login input { min-height: 52px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); padding: 0 16px; font: inherit; color: var(--navy); }
+.login .b { width: 100%; min-height: 56px; font-size: 18px; }
+.login p { margin: 0; color: var(--slate); }
+.err { color: var(--coral-ink); font-weight: 500; }
+.devices { margin: 32px 0 0; border-top: 1px solid var(--line); padding-top: 8px; }
+.devices summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 500; color: var(--slate); }
+.devices ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.devices li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.devices li small { display: block; color: var(--mute); font-size: 13px; }
+.skel { height: 56px; border-radius: 12px; background: #EEF1F4; margin-top: 8px; }
+.skel:first-child { margin-top: 12px; }   /* where the month starts: no jump when it replaces the placeholder */
+/* not saved yet: a dashed ring inside the hour, a dashed day in the month */
+.h.pend { outline: 2px dashed var(--navy); outline-offset: -6px; }
+.d.pend { border: 2px dashed var(--navy); }
+.d.pend[aria-pressed="true"] { border-style: dashed; }
+/* the save bar floats over the page, so showing it never moves anything */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  padding: 12px max(16px, env(safe-area-inset-right, 0px), calc(50vw - 360px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px), calc(50vw - 360px));
+  background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(22,58,85,.1);
+  transform: translateY(110%); visibility: hidden; }
+.bar.show { transform: none; visibility: visible; }
+.bar span { margin-right: auto; font-size: 15px; color: var(--slate); }
+.bar b { color: var(--navy); }
+.b { min-height: 48px; border: 0; border-radius: 999px; background: var(--acc-btn); color: var(--acc-btn-ink); font-weight: 600; font-size: 16px; padding: 0 20px; cursor: pointer; }
+.b.ghost { background: var(--card); color: var(--navy); border: 1.5px solid var(--line); }
+@media (prefers-reduced-motion: no-preference) { .bar { transition: transform .2s, visibility .2s; } }
+/* "Uloženo" lives in its own fixed layer: it never moves the days */
+.toast { position: fixed; z-index: 5; left: 50%; bottom: max(84px, calc(env(safe-area-inset-bottom, 0px) + 72px)); transform: translate(-50%, 8px); opacity: 0; pointer-events: none;
+  background: var(--navy); color: #fff; border-radius: 999px; padding: 10px 18px; font-size: 15px; font-weight: 500; width: max-content; max-width: calc(100vw - 32px); text-align: center; box-shadow: 0 8px 24px rgba(22,58,85,.2); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: no-preference) { .toast { transition: opacity .2s, transform .2s; } .h { transition: background-color .12s, border-color .12s; } }
+</style>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="row"><h1>Moje hodiny</h1></div>
+    <div id="tools">
+      <div class="seg forma" role="group" aria-label="Forma sezení" style="margin-bottom:12px">
+        <button data-f="online" aria-pressed="true">Online</button>
+        <button data-f="osobne" aria-pressed="false">Osobně</button>
+      </div>
+      <div class="row">
+        <div class="tabs" role="group" aria-label="Zobrazení">
+          <button data-v="mesic" aria-pressed="true">Měsíc</button>
+          <button data-v="tyden" aria-pressed="false">Běžný týden</button>
+        </div>
+      </div>
+      <div class="legend" aria-hidden="true" style="margin-top:12px"><span><i class="on"></i>otevřeno</span><span><i></i>zavřeno</span><span><i class="bk"></i>rezervováno</span></div>
+    </div>
+  </header>
+  <main id="list" aria-live="off"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
+  <details class="devices" id="devices" hidden><summary>Přihlášená zařízení</summary><ul id="devList"></ul></details>
+</div>
+<div class="bar" id="bar" aria-hidden="true"><span><b id="barN"></b> neuloženo</span>
+  <button class="b ghost" id="discard" tabindex="-1">Zahodit</button><button class="b" id="save" tabindex="-1">Uložit</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function () {
+  var DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
+  var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
+  var MONTHS_1 = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+  var HOURS = [], HOLIDAYS = {}, MIN_NOTICE_H = 24;
+  var week = { online: {}, osobne: {} }, over = { online: {}, osobne: {} }, booked = {};
+  var savedWeek, savedOver, version = 0, now, today0, last, saving = false;
+  var state = { f: 'online', v: 'mesic', info: null };
+
+  var bar = document.getElementById('bar'), barN = document.getElementById('barN');
+  var list = document.getElementById('list'), toastEl = document.getElementById('toast'), toastT;
+  function pad(n) { return ('0' + n).slice(-2); }
+  function key(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function toast(t, long) {
+    toastEl.textContent = t; toastEl.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('show'); }, long ? 4000 : 1600);
+  }
+  function api(path, body) {
+    return fetch('/api/hodiny' + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' } : { credentials: 'same-origin' })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; if (!r.ok && r.status !== 401) { var e = new Error(j.error || 'Chyba ' + r.status); e.status = r.status; throw e; } return j; }); });
+  }
+
+  // a holiday starts closed, but she can still open hours on it by hand
+  function base(f, k, wd, w) { return HOLIDAYS[k] ? [] : w[f][wd] || []; }
+  function hoursFor(f, k, wd) { return over[f][k] || base(f, k, wd, week); }
+  function savedFor(f, k, wd) { return savedOver[f][k] || base(f, k, wd, savedWeek); }
+  function pend(f, k, wd, h) { return (hoursFor(f, k, wd).indexOf(h) > -1) !== (savedFor(f, k, wd).indexOf(h) > -1); }
+  function same(a, b) { a = a || []; b = b || []; return a.length === b.length && a.every(function (h) { return b.indexOf(h) > -1; }); }
+  function diff(a, b) { return a.filter(function (h) { return b.indexOf(h) < 0; }).length + b.filter(function (h) { return a.indexOf(h) < 0; }).length; }
+  function changes() {
+    var n = 0;
+    ['online', 'osobne'].forEach(function (f) {
+      for (var wd = 0; wd < 7; wd++) n += diff(week[f][wd] || [], savedWeek[f][wd] || []);
+      Object.keys(Object.assign({}, over[f], savedOver[f])).forEach(function (k) {
+        var wd = new Date(k + 'T12:00').getDay();
+        n += diff(hoursFor(f, k, wd), savedFor(f, k, wd));
+      });
+    });
+    return n;
+  }
+  function chip(h, on, extra, attrs) {
+    return '<button class="h' + (extra || '') + '" data-h="' + h + '" aria-pressed="' + on + '"' + (attrs || '') +
+      ' aria-label="' + h + ':00 ' + (on ? 'otevřeno' : 'zavřeno') + '">' + h + ':00</button>';
+  }
+  function dayOver(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), HOURS[HOURS.length - 1]) < now; }
+
+  function dayPanel(k) {
+    var d = new Date(k + 'T12:00'), f = state.f, wd = d.getDay(), hol = HOLIDAYS[k];
+    var open = hoursFor(f, k, wd), bk = booked[k] || {}, changed = !!over[f][k];
+    var html = '<section class="day sel" data-k="' + k + '"><h2>' + DAYS[wd].charAt(0).toUpperCase() + DAYS[wd].slice(1) +
+      ' <small>' + d.getDate() + '. ' + MONTHS[d.getMonth()] + '</small>' +
+      (hol ? '<small>' + esc(hol) + ', běžně zavřeno</small>' : '') + (changed ? '<small class="mark">upraveno</small>' : '') + '</h2><div class="hours">';
+    HOURS.forEach(function (h) {
+      var slot = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h), b = bk[h];
+      if (slot < now) { html += chip(h, false, ' past', ' disabled aria-hidden="true" tabindex="-1"'); return; }
+      if (b) { html += '<button class="h booked" data-h="' + h + '" aria-label="' + h + ':00 rezervováno, ' + esc(b.n) + '">' + h + ':00</button>'; return; }
+      html += chip(h, open.indexOf(h) > -1, pend(f, k, wd, h) ? ' pend' : '');
+    });
+    html += '</div>';
+    // every booking of the chosen day, without tapping (owner, 14 Nov)
+    var hs = Object.keys(bk).map(Number).sort(function (a, b) { return a - b; });
+    if (hs.length) html += '<div class="books">' + hs.map(function (h) { var b = bk[h];
+      return '<p class="info"><b>' + esc(b.cas) + ' · ' + esc(b.n) + '</b>, ' + (b.f === 'online' ? 'online' : 'osobně') +
+        '. Rezervovanou hodinu nejde zavřít. <a href="' + esc(b.url) + '">Přesunout nebo zrušit</a></p>'; }).join('') + '</div>';
+    // the links row is always there (empty or not), so tapping never moves the page
+    html += '<div class="quick">' + (changed ? '<button class="link" data-act="reset">' + (hol ? 'Zase zavřít' : 'Vrátit na běžný týden') + '</button>' : '') +
+      (open.length ? '<button class="link" data-act="close">Zavřít celý den</button>' : '') + '</div></section>';
+    return html;
+  }
+
+  function renderMonth() {
+    var f = state.f, y = state.y, m = state.m, first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7;
+    var canPrev = new Date(y, m, 1) > today0, canNext = new Date(y, m + 1, 1) <= last;
+    var html = '<div class="mhead"><button class="nav" data-nav="-1" aria-label="Předchozí měsíc"' + (canPrev ? '' : ' disabled') + '>‹</button>' +
+      '<h2>' + MONTHS_1[m] + ' ' + y + '</h2><button class="nav" data-nav="1" aria-label="Další měsíc"' + (canNext ? '' : ' disabled') + '>›</button></div>' +
+      '<div class="month"><span class="wd">Po</span><span class="wd">Út</span><span class="wd">St</span><span class="wd">Čt</span><span class="wd">Pá</span><span class="wd we">So</span><span class="wd we">Ne</span>';
+    // weeks that are already over are left out, so the chosen day's hours fit on the first screen
+    for (var i = 0; i < 42; i++) {
+      var d = new Date(y, m, 1 - lead + i);
+      if (i % 7 === 0 && addDays(d, 6) < today0) { i += 6; continue; }
+      if (i % 7 === 0 && d.getMonth() !== m && d > first) break;
+      if (d.getMonth() !== m) { html += '<span class="d empty"></span>'; continue; }
+      var k = key(d), wd = d.getDay(), hol = HOLIDAYS[k], off = dayOver(d) || d > last;
+      var open = hoursFor(f, k, wd).filter(function (h) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h) > now && !(booked[k] || {})[h]; });
+      var nb = Object.keys(booked[k] || {}).length;
+      var isPend = HOURS.some(function (h) { return pend(f, k, wd, h); });
+      var label = d.getDate() + '. ' + MONTHS[m] + ', ' + (open.length ? 'otevřeno ' + open.length + ' h' : hol ? 'svátek, zavřeno' : 'zavřeno') + (nb ? ', rezervace ' + nb : '') + (isPend ? ', neuloženo' : '');
+      html += '<button class="d' + (open.length ? ' has' : '') + (hol ? ' hol' : '') + (over[f][k] ? ' chg' : '') + (isPend ? ' pend' : '') + (+d === +today0 ? ' today' : '') +
+        '" data-day="' + k + '" aria-pressed="' + (k === state.sel) + '" aria-label="' + label + '"' + (off ? ' disabled' : '') + '>' +
+        '<b>' + d.getDate() + '</b><small>' + (open.length ? open.length + ' h' : hol ? 'svátek' : '') + '</small>' +
+        (nb ? '<i class="bk' + (nb > 1 ? ' two' : '') + '"></i>' : '') + '</button>';
+    }
+    html += '</div>';
+    list.innerHTML = html + dayPanel(state.sel);
+  }
+
+  function renderWeek() {
+    var f = state.f, html = '<p class="intro">Hodiny, které platí každý týden. Dny, které upravíš zvlášť, zůstanou, jak jsi je nastavila.</p>';
+    [1, 2, 3, 4, 5, 6, 0].forEach(function (wd) {
+      var open = week[f][wd] || [], sw = savedWeek[f][wd] || [];
+      html += '<section class="day' + (wd === 0 || wd === 6 ? ' weekend' : '') + '" data-wd="' + wd + '"><h2>' +
+        DAYS[wd].charAt(0).toUpperCase() + DAYS[wd].slice(1) + ' <small>' + (open.length ? open.length + (open.length === 1 ? ' hodina' : open.length < 5 ? ' hodiny' : ' hodin') : 'zavřeno') +
+        '</small></h2><div class="hours">';
+      HOURS.forEach(function (h) { var on = open.indexOf(h) > -1; html += chip(h, on, on !== (sw.indexOf(h) > -1) ? ' pend' : ''); });
+      html += '</div></section>';
+    });
+    list.innerHTML = html;
+  }
+
+  function render() {
+    document.body.classList.toggle('f-osobne', state.f === 'osobne');
+    if (state.v === 'mesic') renderMonth(); else renderWeek();
+    var n = changes();
+    bar.classList.toggle('show', n > 0);
+    bar.setAttribute('aria-hidden', n ? 'false' : 'true');
+    barN.textContent = n + (n === 1 ? ' změna' : n < 5 ? ' změny' : ' změn');
+    bar.querySelectorAll('button').forEach(function (x) { x.tabIndex = n ? 0 : -1; });
+  }
+
+  function toggle(arr, h) {
+    var a = arr.slice(), i = a.indexOf(h);
+    if (i > -1) a.splice(i, 1); else { a.push(h); a.sort(function (x, y) { return x - y; }); }
+    return a;
+  }
+  function sameAsWeek(f, k) { return same(over[f][k], base(f, k, new Date(k + 'T12:00').getDay(), week)); }
+
+  list.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t || !savedWeek) return;
+    if (t.dataset.nav) { state.m += +t.dataset.nav; if (state.m > 11) { state.m = 0; state.y++; } if (state.m < 0) { state.m = 11; state.y--; } render(); return; }
+    if (t.dataset.day) { state.sel = t.dataset.day; state.info = null; render(); return; }
+    var sec = t.closest('.day'), f = state.f;
+    if (state.v === 'tyden' && t.dataset.h) {
+      var wd = +sec.dataset.wd;
+      week[f][wd] = toggle(week[f][wd] || [], +t.dataset.h);
+      render(); return;
+    }
+    var k = sec && sec.dataset.k; if (!k) return;
+    var wd2 = new Date(k + 'T12:00').getDay();
+    if (t.dataset.act === 'reset') { delete over[f][k]; state.info = null; render(); return; }
+    if (t.dataset.act === 'close') { over[f][k] = []; if (sameAsWeek(f, k)) delete over[f][k]; render(); return; }
+    if (t.classList.contains('booked')) return;   // its details are listed under the hours
+    if (t.dataset.h) {
+      var h2 = +t.dataset.h, cur = hoursFor(f, k, wd2), on2 = cur.indexOf(h2) < 0;
+      over[f][k] = toggle(cur, h2);
+      if (sameAsWeek(f, k)) delete over[f][k];
+      render();
+      if (on2 && (new Date(k + 'T' + pad(h2) + ':00') - now) / 36e5 < MIN_NOTICE_H) toast('Méně než ' + MIN_NOTICE_H + ' h předem si tuto hodinu nikdo nezarezervuje', true);
+    }
+  });
+
+  // only what differs from the saved state goes to the server: the whole week of each format, and the changed days
+  function payload() {
+    var days = { online: {}, osobne: {} };
+    ['online', 'osobne'].forEach(function (f) {
+      Object.keys(Object.assign({}, over[f], savedOver[f])).forEach(function (k) {
+        var a = over[f][k], b = savedOver[f][k];
+        if (a !== undefined && sameAsWeek(f, k)) a = undefined;   // same as the week again: back on the week
+        if (a === undefined && b !== undefined) days[f][k] = null;
+        else if (a !== undefined && (b === undefined || !same(a, b))) days[f][k] = a;
+      });
+    });
+    return { version: version, week: week, days: days };
+  }
+
+  bar.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t || saving) return;
+    if (t.id === 'discard') { week = clone(savedWeek); over = clone(savedOver); state.info = null; render(); toast('Změny zahozeny'); return; }
+    saving = true; t.setAttribute('aria-busy', 'true'); t.textContent = 'Ukládám…';
+    api('/ulozit', payload()).then(function (j) {
+      if (j._status === 401) { showLogin('Přihlášení vypršelo. Po přihlášení ulož znovu.'); return; }
+      version = j.version; savedWeek = clone(week); savedOver = clone(over);
+      Object.keys(over).forEach(function (f) { Object.keys(over[f]).forEach(function (k) { if (sameAsWeek(f, k)) { delete over[f][k]; delete savedOver[f][k]; } }); });
+      render(); toast('Uloženo');
+    }).catch(function (err) {
+      if (err.status === 409) { load(true); toast('Mezitím ukládalo jiné zařízení. Jeho změny jsou načtené, tvoje zůstaly: ulož je ještě jednou.', true); return; }
+      toast('Uložit se nepovedlo: ' + err.message + ' Změny zůstávají, zkus to znovu.', true);
+    }).then(function () { saving = false; t.removeAttribute('aria-busy'); t.textContent = 'Uložit'; });
+  });
+  // closing the tab with unsaved taps asks first
+  addEventListener('beforeunload', function (e) { if (savedWeek && changes()) { e.preventDefault(); e.returnValue = ''; } });
+
+  function seg(sel, attr, prop) {
+    document.querySelector(sel).addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      state[prop] = b.dataset[attr]; state.info = null;
+      this.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      render();
+    });
+  }
+  seg('.forma', 'f', 'f');
+  seg('.tabs', 'v', 'v');
+
+  function renderDevices(devs) {
+    var box = document.getElementById('devices');
+    box.hidden = !devs.length;
+    document.getElementById('devList').innerHTML = devs.map(function (d) {
+      return '<li><span>' + esc(d.label) + (d.current ? ' · <b>toto zařízení</b>' : '') + '<small>přihlášeno od ' + d.since.split('-').reverse().map(Number).join('. ') +
+        '</small></span><button class="link" data-out="' + esc(d.id) + '">Odhlásit</button></li>';
+    }).join('');
+  }
+  document.getElementById('devList').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-out]'); if (!t) return;
+    var me = t.closest('li').querySelector('b');
+    if (me && changes() && !confirm('Máš neuložené změny. Opravdu se odhlásit?')) return;
+    api('/odhlasit', { id: t.dataset.out }).then(function (j) {
+      if (me || j._status === 401) { savedWeek = null; showLogin('Odhlášeno.'); return; }
+      renderDevices(j.devices); toast('Zařízení odhlášeno');
+    }).catch(function (err) { toast(err.message, true); });
+  });
+
+  function showLogin(msg) {
+    document.getElementById('tools').hidden = true;
+    document.getElementById('devices').hidden = true;
+    bar.classList.remove('show');
+    // a username field the password manager can remember next to the password (the same for everyone)
+    list.innerHTML = '<form class="login" id="login"><p>' + esc(msg || 'Zadej heslo. Toto zařízení si ho pak rok pamatuje.') + '</p>' +
+      '<input type="text" name="username" value="hodiny" autocomplete="username" hidden>' +
+      '<label for="pw">Heslo</label><input id="pw" type="password" autocomplete="current-password" required>' +
+      '<p class="err" id="loginErr" role="alert"></p><button class="b" type="submit">Přihlásit</button></form>';
+    var form = document.getElementById('login');
+    document.getElementById('pw').focus();
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = form.querySelector('button'), err = document.getElementById('loginErr');
+      btn.disabled = true; err.textContent = '';
+      api('/prihlasit', { heslo: document.getElementById('pw').value }).then(function (j) {
+        if (j._status === 401) throw new Error(j.error || 'Špatné heslo.');
+        load(true);
+      }).catch(function (x) { err.textContent = x.message; btn.disabled = false; document.getElementById('pw').select(); });
+    });
+  }
+
+  function load(keepDraft) {
+    api('').then(function (j) {
+      if (j._status === 401) { showLogin(); return; }
+      HOURS = []; for (var h = j.first_hour; h <= j.last_hour; h++) HOURS.push(h);
+      HOLIDAYS = j.holidays || {}; MIN_NOTICE_H = j.min_notice_hours; booked = j.booked || {};
+      version = j.version;
+      // keepDraft (another device saved meanwhile): only this device's own changes go on top of what it saved
+      var mine = keepDraft && savedWeek && changes() ? payload() : null, oldWeek = savedWeek;
+      savedWeek = { online: Object.assign({}, j.week.online), osobne: Object.assign({}, j.week.osobne) };
+      savedOver = { online: Object.assign({}, j.days.online), osobne: Object.assign({}, j.days.osobne) };
+      week = clone(savedWeek); over = clone(savedOver);
+      if (mine) ['online', 'osobne'].forEach(function (f) {
+        for (var wd = 0; wd < 7; wd++) if (!same(mine.week[f][wd], oldWeek[f][wd])) week[f][wd] = (mine.week[f][wd] || []).slice();
+        Object.keys(mine.days[f]).forEach(function (k) { if (mine.days[f][k] === null) delete over[f][k]; else over[f][k] = mine.days[f][k].slice(); });
+      });
+      now = new Date();
+      today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      last = new Date(j.to + 'T12:00');
+      if (!state.sel) {
+        var first = dayOver(today0) ? addDays(today0, 1) : today0;
+        state.y = first.getFullYear(); state.m = first.getMonth(); state.sel = key(first);
+      }
+      document.getElementById('tools').hidden = false;
+      renderDevices(j.devices || []);
+      render();
+    }).catch(function (err) {
+      list.innerHTML = '<p class="intro err">Hodiny se nepodařilo načíst (' + esc(err.message) + '). Zkus stránku obnovit.</p>';
+    });
+  }
+  load(false);
+})();
+</script>
+</body></html>

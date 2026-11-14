@@ -3,8 +3,8 @@
    ========================================== */
 
 // Booking Modal Functions
-const CALENDAR_ONLINE = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2cyoX4avobVw7UGTWRjjlBi8N_5RwZskrOTMR1Fn3f1k2DAdBjTnU8CRSBcC-MUVLtbrA_2-Ft';
-const CALENDAR_IN_PERSON = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3nWdQkWdPsdP3fc-me5LCSbNAX5SzFJOg47rgBe7utVxT7a8O38WGQ8Q8UgfupIuq0N_4MGgLG';
+// Our own booking page (booking/ back end, payment by Stripe); the modal picks the format.
+const BOOKING_PAGE = '/rezervace.html';
 const BOOKING_MODAL_FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 let bookingModalTrigger = null;
 let bookingModalPreviousOverflow = '';
@@ -277,13 +277,11 @@ function getBookingModalFocusableElements(modal) {
 }
 
 function bookOnline() {
-    window.open(CALENDAR_ONLINE, '_blank');
-    closeBookingModal();
+    window.location.href = BOOKING_PAGE;
 }
 
 function bookInPerson() {
-    window.open(CALENDAR_IN_PERSON, '_blank');
-    closeBookingModal();
+    window.location.href = BOOKING_PAGE + '?forma=osobne';
 }
 
 // Initialize modal event listeners
