@@ -119,7 +119,8 @@ try {
         header('Cache-Control: no-store');
         header('Content-Type: ' . ($part === 'ics' ? 'text/calendar' : ($part === 'txt' ? 'text/plain' : 'text/html')) . '; charset=utf-8');
         // the brand image travels inside the real e-mail (cid); the browser preview gets it inline
-        $html = str_replace('cid:' . BRAND_CID, 'data:image/png;base64,' . base64_encode(brand_png()), $m['html']);
+        $html = str_replace(['cid:' . BRAND_CID, MAIL_FONTS . 'Fraunces/', MAIL_FONTS],
+            ['data:image/png;base64,' . base64_encode(brand_png()), '/ui-lab/proposal/fonts/', '/fonts/'], $m['html']);   // fonts: the lab's copies
         echo $part === 'ics' ? (string)$m['ics'] : ($part === 'txt' ? $m['text'] : $html);
         exit;
     }

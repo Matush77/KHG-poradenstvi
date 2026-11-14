@@ -73,13 +73,16 @@ function ics_text(string $s): string
     return str_replace(['\\', ';', ',', "\n"], ['\\\\', '\\;', '\\,', '\\n'], $s);
 }
 
-/* ---- The look of every e-mail: the redesign's theme (paper ground, navy text, a sky panel for online and a
-   peach one for in person, coral pill buttons, system fonts) with the new header's heart-and-name brand.
-   E-mail apps don't load web fonts, so the brand is a small PNG drawn from the site's own fonts
-   (assets/brand.png), sent inside the e-mail (cid), so it shows without the live site.
+/* ---- The look of every e-mail: the redesign's theme. Paper ground, navy text; the top of the e-mail is the
+   site's booking panel (sky for online, peach for in person, radius 24) holding the Fraunces heading and the
+   session, so it fills a phone's width like the site's panels do. Fonts are the site's own files: Apple Mail
+   and iOS load them, Gmail and Outlook use the metric-matched fallbacks (Georgia, the system sans).
+   The brand is a small PNG drawn from those fonts (assets/brand.png), sent inside the e-mail (cid).
    No greetings or sign-offs; the footer carries her name and contacts. */
 const BRAND_CID = 'brand@khgporadenstvi.cz';
-const MAIL_FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+const MAIL_FONTS = 'https://khgporadenstvi.cz/fonts/';   // Fraunces is there once the redesign ships
+const MAIL_FONT = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+const MAIL_SERIF = "Fraunces,Georgia,'Times New Roman',serif";
 
 function brand_png(): string { return (string)file_get_contents(__DIR__ . '/../assets/brand.png'); }
 
@@ -105,26 +108,32 @@ function mail_link(string $label, string $url): string
     return '<a href="' . h($url) . '" style="color:#2D5A7B;font-weight:500;text-decoration:underline">' . h($label) . '</a>';
 }
 
-/* $panel: html inside the format card; $blocks: html paragraphs under it. Sizes from the guide: body 17,
-   small 15, card radius 12 and padding 24, no row lines (the footer hairline is the one allowed). */
+/* $panel: html inside the top panel, under the heading; $blocks: html paragraphs under the panel. Sizes from
+   the guide: heading Fraunces 500 (34, 28 on a phone), panel radius 24 with 32 padding (24 on a phone),
+   body 17, small 15, no row lines (the footer hairline is the one allowed). */
 function mail_page(string $subject, string $title, string $panel, array $blocks, string $tint, string $footNote = '', bool $foot = true): string
 {
     $p = fn(string $x) => '<div style="margin:24px 0 0;color:#44576A">' . $x . '</div>';
-    return '<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
-        . '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' . h($subject) . '</title></head>'
+    $css = "@font-face{font-family:'Inter';src:url('" . MAIL_FONTS . "Inter/Inter-LatinExt-var.woff2') format('woff2');font-weight:300 700}"
+        . "@font-face{font-family:'Fraunces';src:url('" . MAIL_FONTS . "Fraunces/Fraunces-500-Soft-cs.woff2') format('woff2');font-weight:400 700}"
+        . '@media (max-width:480px){.wrap{padding:16px 12px 32px!important}.panel{padding:24px 20px!important}.h1{font-size:28px!important}}';
+    return '<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        . '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' . h($subject) . '</title>'
+        . '<style>' . $css . '</style></head>'
         . '<body style="margin:0;padding:0;background:#FBF8F3;color:#163A55;font:17px/1.6 ' . MAIL_FONT . '">'
-        . '<div style="max-width:560px;margin:0 auto;padding:24px 16px 40px">'
-        . '<a href="https://khgporadenstvi.cz" style="display:inline-block;text-decoration:none"><img src="cid:' . BRAND_CID . '" width="255" height="35" '
+        . '<div class="wrap" style="max-width:600px;margin:0 auto;padding:24px 16px 40px">'
+        . '<a href="https://khgporadenstvi.cz" style="display:inline-block;margin:0 0 16px 4px;text-decoration:none"><img src="cid:' . BRAND_CID . '" width="255" height="35" '
         . 'alt="Kristýna Hriciková Glattová · psycholog a terapeut" style="display:block;border:0;width:255px;height:35px;color:#163A55;font-size:17px"></a>'
-        . '<h1 style="margin:32px 0 24px;font-size:24px;line-height:1.25;font-weight:600;color:#163A55">' . h($title) . '</h1>'
-        . '<div style="background:' . $tint . ';border-radius:12px;padding:24px">' . $panel . '</div>'
-        . implode('', array_map($p, array_filter($blocks)))
+        . '<div class="panel" style="background:' . $tint . ';border-radius:24px;padding:32px">'
+        . '<h1 class="h1" style="margin:0 0 24px;font:500 34px/1.15 ' . MAIL_SERIF . ';letter-spacing:-.01em;color:#163A55">' . h($title) . '</h1>'
+        . $panel . '</div>'
+        . '<div style="padding:0 4px">' . implode('', array_map($p, array_filter($blocks)))
         . (!$foot ? '' : '<div style="margin-top:40px;padding-top:16px;border-top:1px solid rgba(22,58,85,.14);color:#5E6E7C;font-size:15px;line-height:1.6">'
         . SENDER . '<br><a href="' . PHONE_HREF . '" style="color:#5E6E7C">' . PHONE . '</a><br>'
         . '<a href="mailto:' . OWNER_MAIL . '" style="color:#5E6E7C">' . OWNER_MAIL . '</a><br>'
         . '<a href="https://khgporadenstvi.cz" style="color:#5E6E7C">khgporadenstvi.cz</a>'
         . ($footNote ? '<br>' . h($footNote) : '') . '</div>')
-        . '</div></body></html>';
+        . '</div></div></body></html>';
 }
 
 /* 'Úterý 24. listopadu' (no year: it fits one line with the time on a phone) */
@@ -141,7 +150,7 @@ function session_panel(array $b, DateTimeImmutable $start, bool $action, ?string
 {
     $online = $b['forma'] !== 'osobne';
     $hours = hm($start) . '–' . hm($start->modify('+50 minutes'));
-    $html = '<div style="font-size:20px;line-height:1.3;font-weight:600;color:#163A55">' . h($dayTitle ?? cz_day_short($start))
+    $html = '<div style="font-size:20px;line-height:1.35;font-weight:600;color:#163A55">' . h($dayTitle ?? cz_day_short($start))
         . ', <span style="white-space:nowrap">' . $hours . '</span></div>'
         . '<div style="margin-top:4px;color:#44576A;font-size:15px">' . session_meta($b) . '</div>';
     if (!$action) return $html;

@@ -464,4 +464,10 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   her panel. The session date has no year and the facts read "Online · 50 minut · 1 100 Kč", so they
   fit a phone. The rule says "nejpozději 36 hodin před sezením" in the e-mails and on the client page
   instead of a computed date. 105 offline checks.
+  Then (owner: "more of a layout, use the screen, fonts for headings"; "check against our theme and rules"):
+  the top of every e-mail is the site's booking panel (sky or peach, radius 24, padding 32, 24 on a phone)
+  with the heading in Fraunces 500 (34, 28 on a phone) and the session inside it; the column is 600 px.
+  Inter and Fraunces come from the site's own font files (`/fonts/Inter/`, `/fonts/Fraunces/` once the
+  redesign ships): Apple Mail and iOS load them, Gmail and Outlook use Georgia and the system sans.
+  Until the redesign is live, the Fraunces URL is missing, so every app shows Georgia for headings.
 
