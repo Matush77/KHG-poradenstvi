@@ -49,6 +49,10 @@ function db(): PDO
     if (!in_array('who', array_column($pdo->query('PRAGMA table_info(holds)')->fetchAll(), 'name'), true)) {
         $pdo->exec('ALTER TABLE holds ADD COLUMN who TEXT');
     }
+    // holds.browser: keyed hash of the paying browser's cookie, so its own hold does not block it (see browser_id)
+    if (!in_array('browser', array_column($pdo->query('PRAGMA table_info(holds)')->fetchAll(), 'name'), true)) {
+        $pdo->exec('ALTER TABLE holds ADD COLUMN browser TEXT');
+    }
     if (!in_array('reminded', $have, true)) $pdo->exec('ALTER TABLE bookings ADD COLUMN reminded INTEGER DEFAULT 0');
     // small settings the cron keeps between runs (the calendar sync's last check)
     $pdo->exec('CREATE TABLE IF NOT EXISTS state (k TEXT PRIMARY KEY, v TEXT NOT NULL)');

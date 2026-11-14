@@ -88,6 +88,55 @@ function visitor(): string
     return substr(hash_hmac('sha256', 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'cli'), cfg()['secret']), 0, 16);
 }
 
+/* This browser, so a client back from Stripe's page (the back button or Stripe's own back link) still sees the time
+   they were paying for and can pay for it again: their own hold must not block them. A random cookie only for /api,
+   of which only a keyed hash is stored. Not the IP: a household or a mobile network shares one. */
+const HOLD_COOKIE = 'khg_rezervace';
+
+function browser_id(bool $create = false): ?string
+{
+    $t = (string)($_COOKIE[HOLD_COOKIE] ?? '');
+    if (!preg_match('/^[A-Za-z0-9_-]{22,64}$/', $t)) {
+        if (!$create) return null;
+        $t = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+        $_COOKIE[HOLD_COOKIE] = $t;
+        $https = ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off' || !lab();
+        if (PHP_SAPI !== 'cli' && !headers_sent()) {
+            setcookie(HOLD_COOKIE, $t, ['expires' => time() + 86400, 'path' => '/api', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
+        }
+    }
+    return substr(hash_hmac('sha256', 'browser:' . $t, cfg()['secret']), 0, 16);
+}
+
+/* Ends a hold's Stripe page so it can no longer be paid. False when it is already paid (the booking is on its way). */
+function expire_hold(array $h, string $failMsg): bool
+{
+    if (!$h['pay_id']) return true;
+    [$code] = stripe('POST', 'checkout/sessions/' . rawurlencode($h['pay_id']) . '/expire');
+    if ($code === 200) return true;
+    // Stripe refuses when the session is already paid or already expired
+    [$code, $sess] = stripe('GET', 'checkout/sessions/' . rawurlencode($h['pay_id']));
+    $st = $code === 200 ? ($sess['status'] ?? '') : '';
+    if ($st === 'complete') return false;
+    if ($st !== 'expired') throw new ClientError($failMsg, 429);
+    return true;
+}
+
+/* The same browser pays for the same time again (it came back from Stripe's page): its earlier Stripe page is ended
+   first, so the time can never be paid twice, and the new payment takes its place. */
+function release_own_hold(?string $browser, string $slot): void
+{
+    if (!$browser) return;
+    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE slot = ? AND browser = ? AND expires_at >= ?');
+    $s->execute([$slot, $browser, time()]);
+    if (!$h = $s->fetch()) return;
+    if (!expire_hold($h, 'Platbu se teď nepodařilo obnovit. Zkuste to prosím za chvíli.')) {
+        throw new ClientError('Tenhle termín už máte zaplacený. Potvrzení přijde e-mailem.', 409);
+    }
+    db()->prepare('DELETE FROM holds WHERE slot = ? AND browser = ?')->execute([$slot, $browser]);
+    log_line('HOLD_RELEASED', ['slot' => $slot, 'pay' => $h['pay_id'], 'why' => 'same browser again']);
+}
+
 /* One visitor may have only a few open payments (each blocks a time for 30 minutes). Going back and forth
    between times is normal, so a new one frees the visitor's oldest instead of refusing: someone trying to
    block the calendar can never hold more than the limit. */
@@ -97,17 +146,8 @@ function cap_holds(string $who, int $now): void
     $s->execute([$who, $now]);
     $open = $s->fetchAll();
     foreach (array_slice($open, 0, max(0, count($open) - cfg()['holds_per_visitor'] + 1)) as $h) {
-        if ($h['pay_id']) {
-            [$code] = stripe('POST', 'checkout/sessions/' . rawurlencode($h['pay_id']) . '/expire');
-            if ($code !== 200) {   // Stripe refuses when the session is already paid or already expired
-                [$code, $sess] = stripe('GET', 'checkout/sessions/' . rawurlencode($h['pay_id']));
-                $st = $code === 200 ? ($sess['status'] ?? '') : '';
-                if ($st === 'complete') continue;              // paid, being booked: its hold must stay
-                if ($st !== 'expired') {
-                    throw new ClientError('Máte rozpracovaných víc rezervací najednou. Dokončete prosím jednu z nich, nebo to zkuste za půl hodiny.', 429);
-                }
-            }
-        }
+        // paid, being booked: its hold must stay
+        if (!expire_hold($h, 'Máte rozpracovaných víc rezervací najednou. Dokončete prosím jednu z nich, nebo to zkuste za půl hodiny.')) continue;
         db()->prepare('DELETE FROM holds WHERE slot = ? AND who = ?')->execute([$h['slot'], $who]);
         log_line('HOLD_RELEASED', ['slot' => $h['slot'], 'pay' => $h['pay_id'], 'why' => 'visitor limit']);
     }
@@ -123,12 +163,14 @@ function create_checkout(array $b): string
     $stripeExpiry = $now + ($c['hold_minutes'] + 1) * 60;     // Stripe needs at least 30 minutes
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([$now]);   // outside the transaction: kept even when the slot is refused
     $who = visitor();
+    $browser = browser_id(true);
+    release_own_hold($browser, $slot);
     cap_holds($who, $now);
-    db_tx(function (PDO $pdo) use ($slot, $stripeExpiry, $who) {
+    db_tx(function (PDO $pdo) use ($slot, $stripeExpiry, $who, $browser) {
         $s = $pdo->prepare("SELECT (SELECT COUNT(*) FROM holds WHERE slot = :s) + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed'))");
         $s->execute(['s' => $slot]);
         if ((int)$s->fetchColumn() > 0) throw new ClientError('Tenhle termín si právě někdo rezervuje. Vyberte prosím jiný.', 409);
-        $pdo->prepare('INSERT INTO holds (slot, pay_id, expires_at, who) VALUES (?, NULL, ?, ?)')->execute([$slot, $stripeExpiry + 120, $who]);
+        $pdo->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, NULL, ?, ?, ?)')->execute([$slot, $stripeExpiry + 120, $who, $browser]);
     });
     $release = fn() => db()->prepare('DELETE FROM holds WHERE slot = ? AND pay_id IS NULL')->execute([$slot]);
     try {
