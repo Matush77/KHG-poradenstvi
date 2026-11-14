@@ -229,19 +229,27 @@ ok($left === ['2027-01-02T10:00:00+01:00', '2027-01-03T10:00:00+01:00'], 'a 4th 
 ok((int)db()->query("SELECT COUNT(*) FROM holds WHERE who = 'someoneelse00000'")->fetchColumn() === 1, 'other visitors\' holds untouched');
 db()->exec("DELETE FROM holds WHERE slot LIKE '2027-01-0%'");
 
-// --- reminder 30 minutes before
-$rs = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, meet, status, reminded, created_at, updated_at) VALUES (?, ?, ?, 'r@example.com', 'R', 'https://meet.google.com/abc-defg-hij', 'booked', 0, 0, 0)");
-$rs->execute(['cs_test_r25', date(DATE_ATOM, time() + 25 * 60), 'online']);
-$rs->execute(['cs_test_r40', date(DATE_ATOM, time() + 40 * 60), 'osobne']);
-$rs->execute(['cs_test_rpast', date(DATE_ATOM, time() - 60), 'online']);
-$sent = send_reminders();
-ok($sent === ['cs_test_r25'], 'reminder only for the session within 30 minutes');
-ok(send_reminders() === [], 'each reminder once');
-ok(send_reminders(time() + 15 * 60) === ['cs_test_r40'], 'the later one when its time comes');
-$rm = mail_reminder(booking_get('cs_test_r25'), prague(booking_get('cs_test_r25')['slot']));
-ok(str_starts_with($rm['subject'], 'Za půl hodiny: sezení dnes v ') && str_contains($rm['text'], 'meet.google.com/abc-defg-hij') && !str_contains($rm['text'], 'zruseni'), 'online reminder: Meet link, no cancel link');
-$ro = mail_reminder(booking_get('cs_test_r40'), prague(booking_get('cs_test_r40')['slot']));
-ok(str_contains($ro['text'], 'Vítkovická') && str_contains($ro['text'], 'Navigace:'), 'in-person reminder: address and navigation');
+// --- reminders: 24 hours and 10 minutes before
+$now = time();
+$rs = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, meet, status, reminded, created_at, updated_at) VALUES (?, ?, ?, 'r@example.com', 'R', 'https://meet.google.com/abc-defg-hij', 'booked', 0, ?, 0)");
+$rs->execute(['cs_test_rday', date(DATE_ATOM, $now + 23 * 3600 + 50 * 60), 'online', $now - 5 * 86400]);   // booked days ago
+$rs->execute(['cs_test_rnew', date(DATE_ATOM, $now + 23 * 3600 + 30 * 60), 'online', $now - 3600]);        // booked an hour ago
+$rs->execute(['cs_test_rsoon', date(DATE_ATOM, $now + 8 * 60), 'osobne', $now - 5 * 86400]);
+$rs->execute(['cs_test_rfar', date(DATE_ATOM, $now + 60 * 3600), 'osobne', $now - 5 * 86400]);
+$mine = fn(array $r) => array_values(array_filter($r, fn($x) => str_starts_with($x, 'cs_test_r')));   // other tests' bookings may get theirs too
+$got = $mine(send_reminders($now));
+sort($got);
+ok($got === ['cs_test_rday:day', 'cs_test_rsoon:soon'], 'day-before reminder 24 h ahead, short one 10 min ahead, none for a fresh booking or later');
+ok((int)booking_get('cs_test_rnew')['reminded'] === 1, 'a fresh booking skips the day-before reminder (confirmation just came)');
+ok(send_reminders($now) === [], 'each reminder once');
+ok($mine(send_reminders($now + 23 * 3600 + 22 * 60)) === ['cs_test_rnew:soon'] && $mine(send_reminders($now + 23 * 3600 + 42 * 60)) === ['cs_test_rday:soon'], 'the short one when its time comes');
+$rd = mail_reminder(booking_get('cs_test_rday'), prague(booking_get('cs_test_rday')['slot']), 'day', $now);
+ok(str_starts_with($rd['subject'], 'Připomínka: sezení zítra v ') && str_contains($rd['text'], 'meet.google.com/abc-defg-hij')
+    && str_contains($rd['text'], 'Zrušit termín: ') && str_contains($rd['text'], 'nevrací'), 'day reminder: tomorrow, Meet link, cancel link, no refund');
+$ro = mail_reminder(booking_get('cs_test_rsoon'), prague(booking_get('cs_test_rsoon')['slot']), 'soon', $now);
+ok(str_starts_with($ro['subject'], 'Za 10 minut: sezení v ') && str_contains($ro['text'], 'Vítkovická') && !str_contains($ro['text'], 'zruseni'), 'short reminder in person: address, no cancel link');
+db()->prepare('UPDATE bookings SET reminded = 0, moved_at = ? WHERE pay_id = ?')->execute([$now + 36 * 3600, 'cs_test_rfar']);   // moved an hour before
+ok($mine(send_reminders($now + 37 * 3600)) === [] && (int)booking_get('cs_test_rfar')['reminded'] === 1, 'just moved: no day reminder right after the change e-mail');
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";
 exit($fails ? 1 : 0);

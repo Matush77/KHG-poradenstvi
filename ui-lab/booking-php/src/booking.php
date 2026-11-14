@@ -352,14 +352,15 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
             + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed') AND pay_id != :p)");
         $s->execute(['s' => $slot, 'now' => time(), 'p' => $payId]);
         if ((int)$s->fetchColumn() > 0) throw new ClientError($taken, 409);
-        $pdo->prepare('UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, reminded = 0, updated_at = ? WHERE pay_id = ?')
-            ->execute([$slot, $client ? 1 : 0, time(), $payId]);
+        $pdo->prepare('UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, reminded = 0, moved_at = ?, updated_at = ? WHERE pay_id = ?')
+            ->execute([$slot, $client ? 1 : 0, time(), time(), $payId]);
     });
     if ($b['event_id']) {
         try {
             gcal_move($b['event_id'], $new);
         } catch (Throwable $e) {
-            booking_update($payId, ['slot' => $b['slot'], 'moves' => $b['moves'], 'client_moves' => $b['client_moves'], 'mail_sent' => $b['mail_sent']]);
+            booking_update($payId, ['slot' => $b['slot'], 'moves' => $b['moves'], 'client_moves' => $b['client_moves'], 'mail_sent' => $b['mail_sent'],
+                'reminded' => $b['reminded'], 'moved_at' => $b['moved_at']]);
             log_line('MOVE_FAILED', ['pay' => $payId, 'by' => $by, 'error' => $e->getMessage()]);
             throw new ClientError($client ? 'Termín se teď nepodařilo změnit, platí ten původní. Zkuste to prosím znovu.'
                 : 'Kalendář se teď nepodařilo upravit, termín zůstává původní. Zkus to prosím znovu.', 502);
@@ -437,7 +438,7 @@ function sync_calendar(?int $now = null): array
         }
         $start = isset($ev['start']['dateTime']) ? (new DateTimeImmutable($ev['start']['dateTime']))->setTimezone(new DateTimeZone('Europe/Prague')) : null;
         if ($start && $start->getTimestamp() !== $old->getTimestamp()) {
-            booking_update($payId, ['slot' => $start->format(DATE_ATOM), 'moves' => $b['moves'] + 1, 'mail_sent' => 0, 'clash' => 0, 'reminded' => 0]);
+            booking_update($payId, ['slot' => $start->format(DATE_ATOM), 'moves' => $b['moves'] + 1, 'mail_sent' => 0, 'clash' => 0, 'reminded' => 0, 'moved_at' => $now]);
             log_line('MOVED_IN_CALENDAR', ['pay' => $payId, 'from' => $b['slot'], 'to' => $start->format(DATE_ATOM)]);
             if ($start->getTimestamp() > $now) moved_mails(booking_get($payId), $old, 'calendar');
             else booking_update($payId, ['mail_sent' => 1]);         // moved into the past (a record): nobody to tell
@@ -483,24 +484,39 @@ function booking_view(array $b, ?DateTimeImmutable $now = null): array
         'can_move' => $b['status'] === 'booked' && $now <= $deadline];
 }
 
-/* The reminder, from the cron (every minute): to every booked client with an e-mail whose session starts
-   within remind_minutes. Each booking once per time (a move resets it). */
+/* The reminders, from the cron (every minute), to every booked client with an e-mail: one 24 hours before,
+   one 10 minutes before (the flags in `reminded`; a move clears them, so the new time gets both).
+   The day-before one is skipped when it would only repeat a fresh confirmation (booked or changed in the
+   last 6 hours) or come too late to matter (under 2 hours left, the short one follows anyway). */
+const REMIND_DAY = 1, REMIND_SOON = 2;
 function send_reminders(?int $now = null): array
 {
     $now ??= time();
+    $c = cfg();
     $done = [];
-    $s = db()->prepare("SELECT * FROM bookings WHERE status = 'booked' AND reminded = 0 AND email IS NOT NULL");
+    $s = db()->prepare("SELECT * FROM bookings WHERE status = 'booked' AND reminded < 3 AND email IS NOT NULL");
     $s->execute();
     foreach ($s->fetchAll() as $b) {
         $start = prague($b['slot']);
         $left = $start->getTimestamp() - $now;
-        if ($left <= 0 || $left > cfg()['remind_minutes'] * 60) continue;
+        if ($left <= 0) continue;
+        $flags = (int)$b['reminded'];
+        $kind = null;
+        if (!($flags & REMIND_SOON) && $left <= $c['remind_soon_minutes'] * 60) {
+            $kind = 'soon';
+            $flags |= REMIND_SOON | REMIND_DAY;                       // the day-before one is pointless now
+        } elseif (!($flags & REMIND_DAY) && $left <= $c['remind_day_hours'] * 3600) {
+            $fresh = max((int)$b['created_at'], (int)($b['moved_at'] ?? 0)) > $now - 6 * 3600;
+            $flags |= REMIND_DAY;
+            if (!$fresh && $left >= 2 * 3600) $kind = 'day';
+        }
+        if ($flags === (int)$b['reminded']) continue;
         try {
-            mail_send($b['pay_id'] . '-remind-' . $b['moves'], mail_reminder($b, $start));
-            booking_update($b['pay_id'], ['reminded' => 1]);
-            $done[] = $b['pay_id'];
+            if ($kind) mail_send($b['pay_id'] . '-remind-' . $kind . '-' . $b['moves'], mail_reminder($b, $start, $kind, $now));
+            booking_update($b['pay_id'], ['reminded' => $flags]);
+            if ($kind) $done[] = $b['pay_id'] . ':' . $kind;
         } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $b['pay_id'], 'what' => 'reminder', 'error' => $e->getMessage()]);
+            log_line('MAIL_ERROR', ['pay' => $b['pay_id'], 'what' => 'reminder ' . $kind, 'error' => $e->getMessage()]);
         }
     }
     return $done;
@@ -513,7 +529,7 @@ function sweep(): array
     $done = ['booked' => [], 'retried' => [], 'mailed' => []];
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([time()]);
     db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([time() - 2 * 86400]);   // never paid: forget what they wrote
-    // first her calendar edits (a session she just moved gets its reminder at the new time), then the reminders:
+    // first her calendar edits (a session she just moved gets its reminders at the new time), then the reminders:
     // neither needs Stripe, so a Stripe outage below doesn't hold them back
     try {
         $done += array_filter(sync_calendar());

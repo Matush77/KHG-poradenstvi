@@ -39,13 +39,13 @@ function db(): PDO
     $have = array_column($pdo->query('PRAGMA table_info(bookings)')->fetchAll(), 'name');
     // client_moves: how many times the client moved it (no limit; shown to the owner); declined_mailed: the owner was told the guest declined
     foreach (['note' => 'TEXT', 'owner_mailed' => 'INTEGER DEFAULT 0', 'moves' => 'INTEGER DEFAULT 0', 'cancelled_by' => 'TEXT',
-        'client_moves' => 'INTEGER DEFAULT 0', 'declined_mailed' => 'INTEGER DEFAULT 0'] as $col => $type) {
+        'client_moves' => 'INTEGER DEFAULT 0', 'declined_mailed' => 'INTEGER DEFAULT 0', 'moved_at' => 'INTEGER'] as $col => $type) {
         if (in_array($col, $have, true)) continue;
         $pdo->exec("ALTER TABLE bookings ADD COLUMN $col $type");
         if ($col === 'owner_mailed') $pdo->exec('UPDATE bookings SET owner_mailed = 1');
     }
     // holds.who: keyed hash of the visitor's IP (never the IP itself), to cap open holds per visitor;
-    // bookings.reminded: the 30-minute reminder went out
+    // bookings.reminded: flags of the reminders sent, 1 = the day before, 2 = just before (a move resets it)
     if (!in_array('who', array_column($pdo->query('PRAGMA table_info(holds)')->fetchAll(), 'name'), true)) {
         $pdo->exec('ALTER TABLE holds ADD COLUMN who TEXT');
     }

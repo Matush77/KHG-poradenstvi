@@ -295,16 +295,27 @@ function mail_owner_declined(array $b, DateTimeImmutable $start, string $ownerUr
         'ics' => null, 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
 }
 
-/* To the client 30 minutes before: where to go (the Meet button or the address). No cancel link: too late for it. */
-function mail_reminder(array $b, DateTimeImmutable $start): array
+/* The reminders (like the ones Google's booking page sends today): 'day' 24 hours before, with the details
+   and the client's link; 'soon' 10 minutes before, short, with the Meet button or the address. */
+function mail_reminder(array $b, DateTimeImmutable $start, string $kind, ?int $now = null): array
 {
     $online = $b['forma'] !== 'osobne';
     $hours = hm($start) . '–' . hm($start->modify('+50 minutes'));
-    $subject = 'Za půl hodiny: sezení dnes v ' . hm($start);
+    $today = (new DateTimeImmutable('@' . ($now ?? time())))->setTimezone(new DateTimeZone('Europe/Prague'));
+    $diff = (int)$today->setTime(0, 0)->diff($start->setTime(0, 0))->format('%r%a');
+    $dayWord = $diff === 0 ? 'dnes' : ($diff === 1 ? 'zítra' : null);
+    $when = $dayWord ? $dayWord . ' v ' . hm($start) : cz_at($start);
     $meet = (string)($b['meet'] ?? '');
     $email = (string)($b['email'] ?? '');
-    $first = $online ? "za půl hodiny začíná naše online sezení ($hours)." : "za půl hodiny vás čekám na sezení ($hours).";
+    if ($kind === 'soon') {
+        $subject = 'Za 10 minut: sezení v ' . hm($start);
+        $first = $online ? "za 10 minut začíná naše online sezení ($hours)." : "za 10 minut vás čekám na sezení ($hours).";
+    } else {
+        $subject = 'Připomínka: sezení ' . $when;
+        $first = 'připomínám naše ' . ($online ? 'online ' : '') . 'sezení ' . ($dayWord ? "$dayWord, $hours" : cz_at($start)) . '.';
+    }
     $late = 'Kdybyste se zdrželi, napište mi nebo zavolejte na ' . PHONE . '.';
+    $cancel = 'Kdybyste nemohli přijít, zrušte prosím termín, ať se uvolní pro někoho jiného. Platba se už nevrací (méně než 36 hodin předem).';
     if ($online) {
         $whereTxt = ['Připojit se: ' . ($meet ?: '(odkaz je v potvrzení)'),
             "Když budete v Googlu přihlášení jako $email, pustí vás to rovnou. Jinak požádáte o vstup a já vás pustím."];
@@ -316,12 +327,18 @@ function mail_reminder(array $b, DateTimeImmutable $start): array
         $whereTxt = [PLACE, 'Navigace: ' . NAVIGATE];
         $whereHtml = h(PLACE) . '<br><a href="' . h(NAVIGATE) . '" style="color:#2D5A7B">Navigovat</a>';
     }
-    $text = implode("\n", ['Dobrý den,', '', $first, '', ...$whereTxt, '', $late, '', 'Těším se na vás', SENDER]);
-    $card = '<b style="display:block;font-size:18px">Dnes, <span style="white-space:nowrap">' . $hours . '</span></b>'
+    $url = cancel_url($b['pay_id']);
+    $text = implode("\n", ['Dobrý den,', '', $first, '', ...$whereTxt, '',
+        ...($kind === 'day' ? [$cancel, 'Zrušit termín: ' . $url, ''] : [$late, '']), 'Těším se na vás', SENDER]);
+    $card = '<b style="display:block;font-size:18px">' . h(ucfirst_utf8($dayWord ?? cz_day($start))) . ', <span style="white-space:nowrap">' . $hours . '</span></b>'
         . '<span style="color:#44576A">' . ($online ? 'Online (Google Meet)' : 'Osobně') . ' · 50 minut</span>';
-    $html = mail_frame($subject, ['Dobrý den,', h($first), $whereHtml, h($late)
-        . ' <a href="' . PHONE_HREF . '" style="color:#2D5A7B">Zavolat</a>', 'Těším se na vás<br>' . SENDER], [], $online ? '#E8EFF4' : '#F6E6DC', $card);
-    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => $email];
+    $paras = ['Dobrý den,', h($first), $whereHtml];
+    $paras[] = $kind === 'day'
+        ? h($cancel) . ' <a href="' . h($url) . '" style="color:#2D5A7B">Zrušit termín</a>'
+        : h($late) . ' <a href="' . PHONE_HREF . '" style="color:#2D5A7B">Zavolat</a>';
+    $paras[] = 'Těším se na vás<br>' . SENDER;
+    return ['subject' => $subject, 'text' => $text, 'html' => mail_frame($subject, $paras, [], $online ? '#E8EFF4' : '#F6E6DC', $card),
+        'ics' => null, 'to' => $email];
 }
 
 /* To the client when the owner cancels (full refund), or refunds a session the client cancelled late. */

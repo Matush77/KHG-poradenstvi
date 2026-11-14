@@ -435,9 +435,16 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   back and forth between times never blocks a client, while one visitor can't block more than 3 times.
   A paid session that is still being booked keeps its hold. Tested: 4 checkouts from one browser ->
   the first released and expired on Stripe.
-- Reminder e-mail, 14 Nov (owner): 30 minutes before every session, to clients with an e-mail. Online:
-  the Meet button; in person: address and navigation; "Kdybyste se zdrželi, napište mi nebo zavolejte".
-  No cancel link (too late to cancel or move). Sent by the cron, once per booking and time (a move
-  sends it again for the new time); runs before the Stripe part, so a Stripe outage doesn't stop it.
-  Tested: both kinds arrived in Gmail, a second cron run sent nothing. 100 offline checks.
+- Reminder e-mails, 14 Nov (owner): like Google's booking page does today (clients told her they get
+  one 24 hours before and one 10 minutes before), the same two for everyone with an e-mail.
+  - 24 hours before, "Připomínka: sezení zítra v 10:00": the Meet button or the address and navigation,
+    and "Kdybyste nemohli přijít, zrušte prosím termín…" with the cancel link (no refund by then).
+    Skipped when the booking or a move is under 6 hours old (the confirmation just came) or under
+    2 hours are left.
+  - 10 minutes before, "Za 10 minut: sezení v 10:00": the Meet button or the address, and "Kdybyste
+    se zdrželi, napište mi nebo zavolejte". No cancel link.
+  - Sent by the cron, each once per booking and time (a move sends both again for the new time); runs
+    before the Stripe part, so a Stripe outage doesn't stop them. (First built as one e-mail 30 minutes
+    before; changed the same day.)
+  - Tested: both kinds arrived in Gmail, a second cron run sent nothing. 102 offline checks.
 
