@@ -297,8 +297,9 @@ ok((int)booking_get('cs_test_rnew')['reminded'] === 1, 'a fresh booking skips th
 ok(send_reminders($now) === [], 'each reminder once');
 ok($mine(send_reminders($now + 23 * 3600 + 22 * 60)) === ['cs_test_rnew:soon'] && $mine(send_reminders($now + 23 * 3600 + 42 * 60)) === ['cs_test_rday:soon'], 'the short one when its time comes');
 $rd = mail_reminder(booking_get('cs_test_rday'), prague(booking_get('cs_test_rday')['slot']), 'day', $now);
-ok(str_starts_with($rd['subject'], 'Připomínka: sezení zítra v ') && str_contains($rd['text'], 'meet.google.com/abc-defg-hij')
-    && !str_contains($rd['text'] . $rd['html'], 'Zrušit termín') && !preg_match('/Kdybyste|Těším se/u', $rd['text'] . $rd['html']), 'day reminder: tomorrow, Meet link, no cancel link under 36 hours, no filler');
+$rdWhen = prague(booking_get('cs_test_rday')['slot'])->format('Y-m-d') === prague(date(DATE_ATOM, $now))->format('Y-m-d') ? 'dnes' : 'zítra';   // just after midnight it is still today
+ok(str_starts_with($rd['subject'], "Připomínka: sezení $rdWhen v ") && str_contains($rd['text'], 'meet.google.com/abc-defg-hij')
+    && !str_contains($rd['text'] . $rd['html'], 'Zrušit termín') && !preg_match('/Kdybyste|Těším se/u', $rd['text'] . $rd['html']), 'day reminder: tomorrow (or today just after midnight), Meet link, no cancel link under 36 hours, no filler');
 $ro = mail_reminder(booking_get('cs_test_rsoon'), prague(booking_get('cs_test_rsoon')['slot']), 'soon', $now);
 ok(str_starts_with($ro['subject'], 'Za 10 minut: sezení v ') && str_contains($ro['text'], 'Vítkovická') && !str_contains($ro['text'], 'zruseni'), 'short reminder in person: address, no cancel link');
 db()->prepare('UPDATE bookings SET reminded = 0, moved_at = ? WHERE pay_id = ?')->execute([$now + 36 * 3600, 'cs_test_rfar']);   // moved an hour before

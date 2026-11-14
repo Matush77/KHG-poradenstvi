@@ -61,7 +61,7 @@ function gcal_create(DateTimeImmutable $start, string $summary, string $descript
         'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 10]]]];
     if (!$online) $ev['location'] = PLACE;
     if ($online && $guest) {
-        $ev['attendees'] = [['email' => $guest]];
+        $ev['attendees'] = [['email' => $guest, 'responseStatus' => 'accepted']];   // booked and paid: coming (as Google's booking page marks it)
         $ev['guestsCanSeeOtherGuests'] = false;
         $ev['guestsCanInviteOthers'] = false;
     }
