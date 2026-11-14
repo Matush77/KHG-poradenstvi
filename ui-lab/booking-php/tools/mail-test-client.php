@@ -1,7 +1,7 @@
 <?php
 /* Lab: sends every e-mail the client gets (the six in email-preview.html) through the real SMTP to LAB_MAIL_TO
    addresses, subjects marked [TEST]. Sample booking: online (or osobne with --osobne), in 10 days at 14:00.
-   php ui-lab/booking-php/tools/mail-test-client.php address [address ...] [--osobne] [--only=potvrzeni,zruseni] */
+   php ui-lab/booking-php/tools/mail-test-client.php address [address ...] [--osobne] [--only=potvrzeni,zruseni,pozde] */
 declare(strict_types=1);
 
 if (PHP_SAPI !== 'cli') exit;
@@ -33,6 +33,7 @@ foreach ($to as $t) {
         'za10' => mail_reminder($b, $start, 'soon', $start->modify('-10 minutes')->getTimestamp()),
         'zruseni' => mail_client_cancelled($b, $start, false),
         'vraceni' => mail_client_cancelled($b, $start, true),
+        'pozde' => mail_client_cancelled($b, $start, false, false),
     ];
     foreach ($mails as $name => $m) {
         if ($only && !in_array($name, $only, true)) continue;

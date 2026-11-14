@@ -87,7 +87,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   function render() {
     var d = data;
     if (d.cancelled) {
-      show('<h1>Termín zrušen</h1>' + summary(d) +
+      show('<h1>Termín zrušen</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) +
         '<p class="ok">' + (d.refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.' : 'Platba se nevrací, termín byl zrušen méně než 36 hodin předem.') + '</p>' +
         '<p>Nový termín lze kdykoli <a href="/ui-lab/rezervace-ukazka.html">vybrat v kalendáři</a>.</p>' + CONTACT);
       return;
@@ -177,7 +177,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (r) {
         if (!r.ok) throw new Error(r.j.error || 'Zrušení se nepovedlo.');
-        data.cancelled = true; data.refunded = !!r.j.refund; render();
+        data.cancelled = true; data.refunded = !!r.j.refund; flash = 'Hotovo. Potvrzení bylo odesláno e-mailem.'; render();
         document.querySelector('h1').setAttribute('tabindex', '-1'); document.querySelector('h1').focus();
       })
       .catch(function (e) {

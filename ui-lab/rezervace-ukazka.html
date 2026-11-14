@@ -595,7 +595,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
       var checks = {
         fn: function (v) { return v ? '' : 'Vyplňte prosím jméno.'; },
         ln: function (v) { return v ? '' : 'Vyplňte prosím příjmení.'; },
-        e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, pošlu na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
+        e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, přijde na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
         p: function (v, req) { return !v ? (req ? 'Vyplňte prosím telefon.' : '') : (v.replace(/\D/g, '').length >= 9 ? '' : 'Telefon nevypadá správně.'); }
       };
       var first = null;
@@ -651,7 +651,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
   }
   // pay=0: our details, then off to Stripe's own page; it comes back with ?paid=cs_...
   function toCheckout(btn) {
-    busy(btn, true, 'Přesměrovávám na platbu…');
+    busy(btn, true, 'Přesměrování na platbu…');
     api('/api/checkout', { mode: 'redirect' }).then(function (j) { location.href = j.url; })
       .catch(function (e) {
         // the server's message is written for the client (e.g. someone else is paying for this time right now)
@@ -738,7 +738,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     view.innerHTML = '<div class="done"><h2>Termín je rezervovaný</h2>' + summary() +
       '<p>' + sent + FORMATS[state.f].after + '</p>' +
       (state.meet ? '<p class="note">Demo: událost s Meet odkazem je v kalendáři „KHG test rezervace“: <a href="' + esc(state.meet) + '" target="_blank" rel="noopener">' + esc(state.meet.replace('https://', '')) + '</a></p>' : '') +
-      '<p>Zrušit zdarma můžete nejpozději 36 hodin před sezením, vrátím celou částku.</p>' +
+      '<p>Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením, celá částka bude vrácena.</p>' +
       (state.cancel ? '<p class="note">Demo: <a href="' + state.cancel.replace('/ui-lab/rezervace/zruseni.html', '/api/email') + '" target="_blank" rel="noopener">potvrzovací e-mail</a> · <a href="' + state.cancel + '">odkaz na zrušení z e-mailu</a></p>' : '') +
       '<div><button class="btn" id="again">Zpět na kalendář</button></div></div>';
     document.getElementById('again').onclick = function () {
@@ -845,7 +845,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     LOADING = 'Načítám volné termíny…';
     renderHead(); renderStep1();
     loadSlots().then(function () { LOADING = ''; start(); }, function () {
-      LOADING = 'Volné termíny se teď nepodařilo načíst. Zkuste to prosím za chvíli, nebo mi zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
+      LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
       renderStep1();
     });
   } else start();

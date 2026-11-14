@@ -269,6 +269,14 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null): array
     } catch (Throwable $e) {
         log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'owner', 'error' => $e->getMessage()]);
     }
+    // the client gets it in writing too (owner, 14 Nov): refunded or not
+    if ($b['email']) {
+        try {
+            mail_send($payId . '-client-cancelled', mail_client_cancelled($b, prague($b['slot']), false, $b['refund_id'] !== null));
+        } catch (Throwable $e) {
+            log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'client', 'error' => $e->getMessage()]);
+        }
+    }
     return $b;
 }
 

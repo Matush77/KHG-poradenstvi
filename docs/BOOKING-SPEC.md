@@ -360,7 +360,9 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
     "Zrušené sezení" with a link to book again. On a booking the client cancelled late (no refund)
     the page offers "Přesto vrátit 1 100 Kč" and the client gets "Vracím vám platbu".
   - When the client cancels from their link she gets "Zrušeno klientem" (lead time in hours or days,
-    refunded or not). No refund button in that e-mail (owner, 14 Nov): if she wants to refund a late
+    refunded or not). The client gets an e-mail too (owner, 14 Nov): "Zrušené sezení" with
+    "Částka bude vrácena…" or, when cancelled under 36 hours, "Platba se nevrací, termín byl zrušen
+    méně než 36 hodin předem.", plus "Vybrat jiný termín". The page says "Potvrzení bylo odesláno e-mailem." No refund button in that e-mail (owner, 14 Nov): if she wants to refund a late
     cancellation anyway, she opens the booking from her "Nová rezervace" e-mail ("Přesto vrátit").
   - Tested end to end (Stripe test, demo calendars): booking with a note -> both e-mails; her move
     button -> event moved in Google (same Meet), client e-mail, old time free again, new time taken;

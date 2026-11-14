@@ -34,6 +34,8 @@ foreach (['online', 'osobne'] as $forma) {
         ['day', 'Reminder, day before', '24 hours before', mail_reminder($b, $start, 'day', $dayBefore)],
         ['soon', 'Reminder, 10 minutes', '10 minutes before', mail_reminder($b, $start, 'soon', $sameDay)],
         ['cancelled', 'Cancelled by Kristýna', 'She cancels; full refund', mail_client_cancelled($b, $start, false)],
+        ['self', 'Cancelled by the client', 'Client cancels 36+ hours before; full refund', mail_client_cancelled($b, $start, false)],
+        ['self-late', 'Cancelled late by the client', 'Client cancels under 36 hours before; no refund', mail_client_cancelled($b, $start, false, false)],
         ['refund', 'Refund of a late cancel', 'She refunds a session the client cancelled late', mail_client_cancelled($b, $start, true)],
     ];
     foreach ($list as [$id, $name, $when, $m]) {

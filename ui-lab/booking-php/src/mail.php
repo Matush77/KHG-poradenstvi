@@ -364,13 +364,15 @@ function mail_reminder(array $b, DateTimeImmutable $start, string $kind, ?int $n
 }
 
 /* To the client when the owner cancels (full refund), or refunds a session the client cancelled late. */
-function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly): array
+/* $refunded false only when the client cancelled late themself (no refund): the money line says so instead. */
+function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly, bool $refunded = true): array
 {
     $book = site() . cfg()['booking_page'];
     $subject = $refundOnly ? 'Vrácení platby za sezení ' . cz_at($start) : 'Zrušené sezení ' . cz_at($start);
     // passive, no "I" or "you" (owner, 14 Nov): one sentence about the money, the same in both
     $title = $refundOnly ? 'Vrácení platby' : 'Zrušení sezení';
-    $money = 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.';
+    $money = $refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.'
+        : 'Platba se nevrací, termín byl zrušen méně než ' . cfg()['free_cancel_hours'] . ' hodin předem.';
     $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', $money,
         ...($refundOnly ? [] : ['', 'Vybrat jiný termín: ' . $book]), ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, false),
