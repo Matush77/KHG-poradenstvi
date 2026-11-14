@@ -199,9 +199,9 @@ assert m and 'contact-booking' in m.group(0)
 CONTACT_ROWS = """<dl class="contact-rows">
                 <div class="contact-row"><dt>E-mail</dt><dd><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></dd></div>
                 <div class="contact-row"><dt>Telefon</dt><dd><a href="tel:+420605990980">+420 605 990 980</a></dd></div>
-                <div class="contact-row"><dt>Osobní setkání</dt><dd><a href="https://www.google.com/maps/dir/?api=1&amp;destination=V%C3%ADtkovick%C3%A1+3299%2F3a%2C+702+00+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
+                <div class="contact-row"><dt>Osobní setkání</dt><dd><a href="https://www.google.com/maps/dir/?api=1&amp;destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a%2C+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
             </dl>"""
-assert 'tel:+420605990980' in m.group(0) and 'destination=V%C3%ADtkovick%C3%A1+3299%2F3a' in m.group(0)
+assert 'tel:+420605990980' in m.group(0) and 'destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a' in m.group(0)
 page = page[:m.start()] + CONTACT_ROWS + page[m.end():]
 
 # lab only: menu links point at "/#sluzby" (the live homepage); keep them on this page
