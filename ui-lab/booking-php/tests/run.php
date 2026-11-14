@@ -85,14 +85,16 @@ ok(cz_label('online', $w) === 'Sezení online · úterý 22. prosince · 13:00�
 $b = ['pay_id' => 'cs_test_abc', 'forma' => 'online', 'email' => 'jana@example.com', 'meet' => 'https://meet.google.com/abc-defg-hij'];
 $m = mail_build($b, $w, cancel_url('cs_test_abc'));
 ok($m['subject'] === 'Potvrzení: sezení v úterý 22. prosince v 13:00', 'subject');
-ok(str_contains($m['text'], 'do pondělí 21. prosince 1:00 (36 hodin předem)'), 'text: deadline');
+ok(str_contains($m['text'], 'zrušit můžete do pondělí 21. prosince 1:00. Později se platba nevrací.'), 'text: deadline');
+ok(!preg_match('/Kdybyste|Těším se|Dobrý den/u', $m['text'] . $m['html']), 'no greetings or filler lines');
+ok(str_contains($m['html'], 'images/logo.png') && str_contains($m['html'], '#E8EFF4'), 'html: logo and the online (sky) panel');
 ok(str_contains($m['html'], 'Připojit se k videohovoru') && str_contains($m['html'], 'white-space:nowrap">13:00–13:50'), 'html: Meet button, times kept together');
 $lines = explode("\r\n", $m['ics']);
 ok(max(array_map('strlen', $lines)) <= 75, 'ics: no line over 75 bytes');
 ok((bool)preg_match('//u', $m['ics']), 'ics: still valid UTF-8 after folding');
 ok(str_contains($m['ics'], "DTSTART;TZID=Europe/Prague:20261222T130000") && str_contains($m['ics'], 'METHOD:PUBLISH'), 'ics: start and method');
 $in = mail_build(['pay_id' => 'x', 'forma' => 'osobne', 'email' => 'a@b.cz'], slot_start('2027-07-15', '9:00'), 'http://x');
-ok(str_contains($in['text'], 'Místo: ' . PLACE) && !str_contains($in['html'], 'videohovoru'), 'in person: address, no Meet');
+ok(str_contains($in['text'], PLACE) && str_contains($in['text'], 'Navigace: ') && !str_contains($in['html'], 'videohovoru') && str_contains($in['html'], '#F6E6DC'), 'in person: address, no Meet, peach panel');
 $eml = mail_eml($m);
 ok(str_contains($eml, 'Subject: =?UTF-8?B?') && str_contains($eml, 'multipart/alternative') && str_contains($eml, 'filename="sezeni.ics"'), 'eml: encoded subject, both bodies, attachment');
 file_put_contents("$tmp/test.eml", $eml);
@@ -176,8 +178,9 @@ $mv = mail_build($ob + ['moves' => 2], $w, 'http://x', slot_start('2026-12-21', 
 ok($mv['subject'] === 'Změna termínu: sezení v úterý 22. prosince v 13:00' && str_contains($mv['text'], 'Původní termín v pondělí 21. prosince v 9:00 už neplatí.'), 'moved: subject and old time');
 ok(str_contains($mv['ics'], 'SEQUENCE:2') && str_contains($mv['ics'], 'UID:cs_test_abc@'), 'moved: same calendar UID, higher SEQUENCE');
 $cc = mail_client_cancelled($ob, $w, false);
-ok($cc['subject'] === 'Zrušené sezení v úterý 22. prosince v 13:00' && str_contains($cc['text'], 'musím bohužel zrušit') && str_contains($cc['text'], 'rezervace-ukazka.html'), 'owner cancels: client e-mail with a link to book again');
-ok(str_contains(mail_client_cancelled($ob, $w, true)['subject'], 'Vracím vám platbu'), 'refund after a late cancellation: own wording');
+ok($cc['subject'] === 'Zrušené sezení v úterý 22. prosince v 13:00' && str_contains($cc['text'], 'Sezení musím zrušit') && str_contains($cc['text'], 'rezervace-ukazka.html'), 'owner cancels: client e-mail with a link to book again');
+$cr = mail_client_cancelled($ob, $w, true);
+ok(str_starts_with($cr['subject'], 'Vrácení platby za sezení') && str_contains($cr['text'], 'vracím celých 1 100 Kč') && !str_contains($cr['text'], 'Vybrat jiný termín'), 'refund after a late cancellation: own wording');
 $oc = mail_owner_cancelled($ob + ['refund_id' => null, 'hours_before' => 10.2], $w, owner_url('cs_test_abc'));
 ok(str_contains($oc['text'], 'Zrušeno jen 10 h předem') && !str_contains($oc['html'], 'Vrátit') && !str_contains($oc['html'], 'sprava.html'), 'client cancelled late: no refund button for the owner');
 $oc = mail_owner_cancelled($ob + ['refund_id' => 're_1', 'hours_before' => 50], $w, owner_url('cs_test_abc'));
@@ -205,16 +208,16 @@ ok(booking_view(booking_get('cs_test_free'))['can_move'] && booking_view(booking
     && !booking_view(booking_get('cs_test_soon'))['can_move'], 'a move is offered while 36+ hours before, also after earlier moves');
 $fb = booking_get('cs_test_free');
 $mc = mail_build($fb, $w, cancel_url('cs_test_free'));
-ok(str_contains($mc['text'], 'Termín můžete přesunout nebo zdarma zrušit do') && str_contains($mc['text'], 'Přesunout nebo zrušit termín: '), 'confirmation offers move and cancel');
+ok(str_contains($mc['text'], 'Přesunout nebo zdarma zrušit můžete do') && str_contains($mc['text'], 'Přesunout nebo zrušit termín: '), 'confirmation offers move and cancel');
 $mm = mail_build(['client_moves' => 1] + $fb, $w, cancel_url('cs_test_free'), $w->modify('-1 day'), true);
-ok(str_contains($mm['text'], 'je přesunuté na nový termín') && str_contains($mm['text'], 'Přesunout nebo zrušit termín: '), 'after the client moved: own wording, still movable');
+ok(str_starts_with($mm['text'], 'Termín je změněný') && str_contains($mm['text'], 'Původní termín v pondělí 21. prosince v 13:00 už neplatí.') && str_contains($mm['text'], 'Přesunout nebo zrušit termín: '), 'after the client moved: own wording, still movable');
 $om = mail_owner_moved($fb, $w, $w->modify('-1 day'), owner_url('cs_test_free'));
 ok(str_starts_with($om['subject'], 'Přesunuto klientem: Jana') && str_contains($om['text'], 'Původně v pondělí 21. prosince') && !str_contains($om['text'], 'přesun od klienta'), 'owner told about the client move');
 ok(str_contains(mail_owner_moved(['client_moves' => 3] + $fb, $w, $w->modify('-1 day'), owner_url('cs_test_free'))['text'], 'Už je to 3. přesun od klienta.'), 'repeated moves show the count to the owner');
 $od = mail_owner_deleted($fb, $w, owner_url('cs_test_free'));
-ok(str_contains($od['text'], 'smazala v kalendáři') && str_contains($od['text'], 'akce=zrusit'), 'owner told about her calendar deletion, with the refund button');
+ok(str_starts_with($od['text'], 'Smazáno v kalendáři') && str_contains($od['text'], 'akce=zrusit'), 'owner told about her calendar deletion, with the refund button');
 $dl = mail_owner_declined($fb, $w, owner_url('cs_test_free'));
-ok(str_contains($dl['text'], 'rezervace platí dál') && $dl['reply_to'] === 'a@example.com', 'owner told about a declined invitation');
+ok(str_contains($dl['text'], 'Rezervace platí dál') && $dl['reply_to'] === 'a@example.com', 'owner told about a declined invitation');
 
 // --- hold limit per visitor (holds without a Stripe session yet: no Stripe call needed)
 $_SERVER['REMOTE_ADDR'] = '203.0.113.7';
@@ -245,7 +248,7 @@ ok(send_reminders($now) === [], 'each reminder once');
 ok($mine(send_reminders($now + 23 * 3600 + 22 * 60)) === ['cs_test_rnew:soon'] && $mine(send_reminders($now + 23 * 3600 + 42 * 60)) === ['cs_test_rday:soon'], 'the short one when its time comes');
 $rd = mail_reminder(booking_get('cs_test_rday'), prague(booking_get('cs_test_rday')['slot']), 'day', $now);
 ok(str_starts_with($rd['subject'], 'Připomínka: sezení zítra v ') && str_contains($rd['text'], 'meet.google.com/abc-defg-hij')
-    && str_contains($rd['text'], 'Zrušit termín: ') && str_contains($rd['text'], 'nevrací'), 'day reminder: tomorrow, Meet link, cancel link, no refund');
+    && str_contains($rd['text'], 'Zrušit termín: ') && !preg_match('/Kdybyste|Těším se/u', $rd['text'] . $rd['html']), 'day reminder: tomorrow, Meet link, plain cancel link, no filler');
 $ro = mail_reminder(booking_get('cs_test_rsoon'), prague(booking_get('cs_test_rsoon')['slot']), 'soon', $now);
 ok(str_starts_with($ro['subject'], 'Za 10 minut: sezení v ') && str_contains($ro['text'], 'Vítkovická') && !str_contains($ro['text'], 'zruseni'), 'short reminder in person: address, no cancel link');
 db()->prepare('UPDATE bookings SET reminded = 0, moved_at = ? WHERE pay_id = ?')->execute([$now + 36 * 3600, 'cs_test_rfar']);   // moved an hour before

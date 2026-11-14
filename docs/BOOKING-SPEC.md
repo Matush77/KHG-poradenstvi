@@ -447,4 +447,11 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
     before the Stripe part, so a Stripe outage doesn't stop them. (First built as one e-mail 30 minutes
     before; changed the same day.)
   - Tested: both kinds arrived in Gmail, a second cron run sent nothing. 102 offline checks.
+- E-mail look, 14 Nov (owner: "more our theme, no extra cuteness"): every e-mail on one layout in the
+  site's theme: the gold logo (khgporadenstvi.cz/images/logo.png, PNG because e-mail apps don't all
+  show WebP), a heading, the session in a sky (online) or peach (in person) panel with the Meet button
+  or the address, short facts under it, coral buttons, and a footer with her name, phone, e-mail and
+  web. System fonts (e-mail apps don't load Inter). No "Dobrý den", "Těším se na vás", "Kdybyste…"
+  lines; the reminders are only the panel (the day-before one with a plain "Zrušit termín" link).
+  Her own e-mails have no footer. 104 offline checks.
 
