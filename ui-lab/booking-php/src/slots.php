@@ -68,7 +68,16 @@ function slot_window(?DateTimeImmutable $now = null): array
 
 /* Free times read from Google now. $day: only that day (checkout re-check). $withTaken: also leave out slots
    held or booked in our database (the page); the checkout checks those itself, inside its transaction. */
-function free_slots(?DateTimeImmutable $day = null, bool $withTaken = true): array
+/* Times that are booked or being paid for. $mine: this browser's own holds stay free for it (back from Stripe's page). */
+function taken_slots(?string $mine = null): array
+{
+    $s = db()->prepare("SELECT slot FROM holds WHERE expires_at >= ? AND (browser IS NULL OR browser != ?)
+        UNION SELECT slot FROM bookings WHERE status IN ('pending','booked','failed')");
+    $s->execute([time(), (string)$mine]);
+    return $s->fetchAll(PDO::FETCH_COLUMN);
+}
+
+function free_slots(?DateTimeImmutable $day = null, bool $withTaken = true, ?string $mine = null): array
 {
     $c = cfg();
     $fromDb = $c['hours_source'] === 'db';   // the hours page (src/hours.php); 'google': the two hours calendars
@@ -87,11 +96,7 @@ function free_slots(?DateTimeImmutable $day = null, bool $withTaken = true): arr
         if (in_array($id, $c['hours'], true)) continue;
         array_push($busy, ...$fb[$id]);
     }
-    if ($withTaken) {
-        $rows = db()->query("SELECT slot FROM holds WHERE expires_at >= " . time() .
-            " UNION SELECT slot FROM bookings WHERE status IN ('pending','booked','failed')")->fetchAll(PDO::FETCH_COLUMN);
-        foreach ($rows as $s) { $t = strtotime($s); $busy[] = [$t, $t + SESSION_MIN * 60]; }
-    }
+    if ($withTaken) foreach (taken_slots($mine) as $s) { $t = strtotime($s); $busy[] = [$t, $t + SESSION_MIN * 60]; }
     // from the database a holiday is already closed unless she opened hours on it herself
     return compute_slots($open, $busy, $qFrom, $qTo, $fromDb ? false : $c['skip_public_holidays']);
 }

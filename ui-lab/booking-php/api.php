@@ -70,7 +70,7 @@ try {
 
     if ($method === 'GET' && $route === 'slots') {
         [$from, $to] = slot_window();
-        out(200, ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d')] + free_slots());
+        out(200, ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d')] + free_slots(null, true, browser_id()));
     }
 
     if ($method === 'POST' && $route === 'checkout') out(200, ['url' => create_checkout(body_json())]);

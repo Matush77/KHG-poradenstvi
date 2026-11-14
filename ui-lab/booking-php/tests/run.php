@@ -248,6 +248,23 @@ ok($left === ['2027-01-02T10:00:00+01:00', '2027-01-03T10:00:00+01:00'], 'a 4th 
 ok((int)db()->query("SELECT COUNT(*) FROM holds WHERE who = 'someoneelse00000'")->fetchColumn() === 1, 'other visitors\' holds untouched');
 db()->exec("DELETE FROM holds WHERE slot LIKE '2027-01-0%'");
 
+// --- back from Stripe's page: the browser's own hold does not block it, anyone else's does
+$_COOKIE[HOLD_COOKIE] = str_repeat('a', 24);
+$mine = browser_id();
+ok(strlen($mine) === 16 && $mine !== str_repeat('a', 16), 'browser key is a hash of the cookie');
+$_COOKIE[HOLD_COOKIE] = 'bad cookie!';
+ok(browser_id() === null && strlen((string)browser_id(true)) === 16 && preg_match('/^[A-Za-z0-9_-]{24}$/', $_COOKIE[HOLD_COOKIE]), 'no or bad cookie: none, or a new random one at checkout');
+$_COOKIE[HOLD_COOKIE] = str_repeat('a', 24);
+$own = '2027-01-12T10:00:00+01:00';
+db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, NULL, ?, ?, ?)')->execute([$own, time() + 600, $me, $mine]);
+ok(!in_array($own, taken_slots($mine), true) && in_array($own, taken_slots(null), true) && in_array($own, taken_slots('otherbrowser0000'), true), 'own hold is free for this browser only');
+try { create_checkout(['f' => 'online', 'date' => '2027-01-12', 'time' => '10:00', 'email' => 'a@b.cz']); $code = 0; }
+catch (ClientError $e) { $code = $e->getCode(); }
+ok($code !== 409, "same browser may pay for its held time again (got $code offline, not 409)");
+db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, NULL, ?, ?, ?)')->execute([$own, time() + 600, $me, 'otherbrowser0000']);
+throws(fn() => create_checkout(['f' => 'online', 'date' => '2027-01-12', 'time' => '10:00', 'email' => 'a@b.cz']), 409, 'another browser\'s hold still refused, even from the same IP');
+db()->exec("DELETE FROM holds WHERE slot = '$own'");
+
 // --- reminders: 24 hours and 10 minutes before
 $now = time();
 $rs = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, meet, status, reminded, created_at, updated_at) VALUES (?, ?, ?, 'r@example.com', 'R', 'https://meet.google.com/abc-defg-hij', 'booked', 0, ?, 0)");
