@@ -118,7 +118,9 @@ try {
         $part = (string)($_GET['part'] ?? 'html');
         header('Cache-Control: no-store');
         header('Content-Type: ' . ($part === 'ics' ? 'text/calendar' : ($part === 'txt' ? 'text/plain' : 'text/html')) . '; charset=utf-8');
-        echo $part === 'ics' ? (string)$m['ics'] : ($part === 'txt' ? $m['text'] : $m['html']);
+        // the brand image travels inside the real e-mail (cid); the browser preview gets it inline
+        $html = str_replace('cid:' . BRAND_CID, 'data:image/png;base64,' . base64_encode(brand_png()), $m['html']);
+        echo $part === 'ics' ? (string)$m['ics'] : ($part === 'txt' ? $m['text'] : $html);
         exit;
     }
 
