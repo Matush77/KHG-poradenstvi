@@ -470,4 +470,27 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   Inter and Fraunces come from the site's own font files (`/fonts/Inter/`, `/fonts/Fraunces/` once the
   redesign ships): Apple Mail and iOS load them, Gmail and Outlook use Georgia and the system sans.
   Until the redesign is live, the Fraunces URL is missing, so every app shows Georgia for headings.
+  Then (owner, 14 Nov, from the e-mail preview `ui-lab/booking-php/email-preview.html`): the Meet button
+  is coral; the confirmation drops the "Když budete v Googlu přihlášení…" line and says "Zaplatili jste
+  1 100 Kč." under the panel (not after a move: nothing new is paid).
+  Then the footer went to two rows (name · web, phone · e-mail), the attachment note above it. And the
+  client e-mails are passive, no "I" or "you" (owner): "Platba 1 100 Kč byla přijata.", "Přesunout nebo
+  zdarma zrušit lze…", the cancel and refund e-mails drop "Sezení musím zrušit, omlouvám se" and say only
+  "Celých 1 100 Kč bude vráceno na kartu použitou k platbě, obvykle do 5–10 pracovních dnů."; the refund
+  heading is "Vrácení platby" ("Platba se vrací" rejected).
+  All client e-mail headings in the nominal style (owner liked "Vrácení platby"): "Potvrzení rezervace",
+  "Změna termínu", "Připomínka", "Začátek za 10 minut", "Zrušení sezení", "Vrácení platby".
+  The reminders show "Zrušit termín" only while it is 36+ hours to the session (owner: no cancel link under
+  36 hours); the day-before one goes out 24 hours ahead, so it has none.
+  The refund sentence is shorter: "Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10
+  pracovních dnů." (the amount is in the panel).
+  In the confirmation "Platba 1 100 Kč byla přijata." is navy with the amount in 600, so it stands out.
+  After the first sends to Gmail and Seznam on a phone (14 Nov): the Gmail app ignored the phone media
+  query, so the heading broke over two lines and the Meet button label too; the e-mail is now phone-first
+  (heading 28, panel padding 24/20, column padding 12, button side padding 12) and a min-width:600 query
+  gives desktop apps the 34 heading and 32 padding. Seznam wrapped the footer rows and left a "·" at the
+  line end, so the footer items are spaced, not dotted.
+  Second send: Seznam shows the footer at body size, so the rows still wrapped; the footer is now three short
+  rows (name / phone and web / e-mail). The Gmail app enlarges text about a fifth, so the heading wraps to
+  two lines there; first kept, then (owner) the phone heading went to 24 px so it fits one line in Gmail too.
 

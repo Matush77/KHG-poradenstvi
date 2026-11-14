@@ -88,14 +88,14 @@ function brand_png(): string { return (string)file_get_contents(__DIR__ . '/../a
 
 function mail_tint(array $b): string { return ($b['forma'] ?? '') === 'osobne' ? '#F6E6DC' : '#E8EFF4'; }
 
-/* Buttons per the theme guide: pill, 56 px, 18 px / 600, full column width. Coral only for booking (coral
-   means "act: book"); every other action is navy, solid for the main one and outlined for the rest. */
+/* Buttons per the theme guide: pill, 56 px, 18 px / 600, full column width. Coral for booking and the client's Meet button
+   (owner, 14 Nov); every other action is navy, solid for the main one and outlined for the rest. */
 function mail_btn(string $label, string $url, string $kind = 'navy'): string
 {
     $look = ['coral' => 'background:#E8927C;border:1.5px solid #E8927C;color:#163A55',
         'navy' => 'background:#163A55;border:1.5px solid #163A55;color:#FFFFFF',
         'outline' => 'background:transparent;border:1.5px solid #163A55;color:#163A55'][$kind];
-    return '<a href="' . h($url) . '" style="display:block;margin:0 0 8px;padding:15px 24px;border-radius:999px;text-align:center;'
+    return '<a href="' . h($url) . '" style="display:block;margin:0 0 8px;padding:15px 12px;border-radius:999px;text-align:center;'
         . 'font-weight:600;font-size:18px;line-height:24px;text-decoration:none;' . $look . '">' . h($label) . '</a>';
 }
 
@@ -108,31 +108,39 @@ function mail_link(string $label, string $url): string
     return '<a href="' . h($url) . '" style="color:#2D5A7B;font-weight:500;text-decoration:underline">' . h($label) . '</a>';
 }
 
+function mail_foot_row(array $items): string
+{
+    // no dots between items: where a mail app wraps the row (Seznam did), a dot was left hanging at the line end
+    return implode(' ', array_map(fn($x) => '<span style="display:inline-block;white-space:nowrap;margin-right:16px">' . $x . '</span>', $items));
+}
+
 /* $panel: html inside the top panel, under the heading; $blocks: html paragraphs under the panel. Sizes from
-   the guide: heading Fraunces 500 (34, 28 on a phone), panel radius 24 with 32 padding (24 on a phone),
+   the guide: heading Fraunces 500 (34, 24 on a phone: the Gmail app enlarges it), panel radius 24 with 32 padding (24 on a phone),
    body 17, small 15, no row lines (the footer hairline is the one allowed). */
 function mail_page(string $subject, string $title, string $panel, array $blocks, string $tint, string $footNote = '', bool $foot = true): string
 {
     $p = fn(string $x) => '<div style="margin:24px 0 0;color:#44576A">' . $x . '</div>';
     $css = "@font-face{font-family:'Inter';src:url('" . MAIL_FONTS . "Inter/Inter-LatinExt-var.woff2') format('woff2');font-weight:300 700}"
         . "@font-face{font-family:'Fraunces';src:url('" . MAIL_FONTS . "Fraunces/Fraunces-500-Soft-cs.woff2') format('woff2');font-weight:400 700}"
-        . '@media (max-width:480px){.wrap{padding:16px 12px 32px!important}.panel{padding:24px 20px!important}.h1{font-size:28px!important}}';
+        . '@media (min-width:600px){.wrap{padding:24px 16px 40px!important}.panel{padding:32px!important}.h1{font-size:34px!important}}';
     return '<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         . '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' . h($subject) . '</title>'
         . '<style>' . $css . '</style></head>'
         . '<body style="margin:0;padding:0;background:#FBF8F3;color:#163A55;font:17px/1.6 ' . MAIL_FONT . '">'
-        . '<div class="wrap" style="max-width:600px;margin:0 auto;padding:24px 16px 40px">'
+        . '<div class="wrap" style="max-width:600px;margin:0 auto;padding:16px 12px 32px">'
         . '<a href="https://khgporadenstvi.cz" style="display:inline-block;margin:0 0 16px 4px;text-decoration:none"><img src="cid:' . BRAND_CID . '" width="255" height="35" '
         . 'alt="Kristýna Hriciková Glattová · psycholog a terapeut" style="display:block;border:0;width:255px;height:35px;color:#163A55;font-size:17px"></a>'
-        . '<div class="panel" style="background:' . $tint . ';border-radius:24px;padding:32px">'
-        . '<h1 class="h1" style="margin:0 0 24px;font:500 34px/1.15 ' . MAIL_SERIF . ';letter-spacing:-.01em;color:#163A55">' . h($title) . '</h1>'
+        . '<div class="panel" style="background:' . $tint . ';border-radius:24px;padding:24px 20px">'
+        . '<h1 class="h1" style="margin:0 0 24px;font:500 24px/1.15 ' . MAIL_SERIF . ';letter-spacing:-.01em;color:#163A55">' . h($title) . '</h1>'
         . $panel . '</div>'
-        . '<div style="padding:0 4px">' . implode('', array_map($p, array_filter($blocks)))
-        . (!$foot ? '' : '<div style="margin-top:40px;padding-top:16px;border-top:1px solid rgba(22,58,85,.14);color:#5E6E7C;font-size:15px;line-height:1.6">'
-        . SENDER . '<br><a href="' . PHONE_HREF . '" style="color:#5E6E7C">' . PHONE . '</a><br>'
-        . '<a href="mailto:' . OWNER_MAIL . '" style="color:#5E6E7C">' . OWNER_MAIL . '</a><br>'
-        . '<a href="https://khgporadenstvi.cz" style="color:#5E6E7C">khgporadenstvi.cz</a>'
-        . ($footNote ? '<br>' . h($footNote) : '') . '</div>')
+        . '<div style="padding:0 4px">' . implode('', array_map($p, array_filter([...$blocks, $footNote ? mail_muted(h($footNote)) : ''])))
+        // footer in three short rows that fit one line each even where an app shows it at body size (Seznam):
+        // name, then phone and web, then the e-mail (owner, 14 Nov)
+        . (!$foot ? '' : '<div style="margin-top:40px;padding-top:16px;border-top:1px solid rgba(22,58,85,.14);color:#5E6E7C;font-size:15px;line-height:1.7">'
+        . '<span style="color:#163A55;font-weight:600">' . SENDER . '</span><br>'
+        . mail_foot_row(['<a href="' . PHONE_HREF . '" style="color:#5E6E7C">' . PHONE . '</a>',
+            '<a href="https://khgporadenstvi.cz" style="color:#5E6E7C">khgporadenstvi.cz</a>']) . '<br>'
+        . '<a href="mailto:' . OWNER_MAIL . '" style="color:#5E6E7C">' . OWNER_MAIL . '</a></div>')
         . '</div></div></body></html>';
 }
 
@@ -142,10 +150,13 @@ function cz_day_short(DateTimeImmutable $d): string
     return ucfirst_utf8(CZ_DAYS[(int)$d->format('w')]) . ' ' . $d->format('j') . '. ' . CZ_MONTHS[(int)$d->format('n') - 1];
 }
 
-function session_meta(array $b): string { return ($b['forma'] !== 'osobne' ? 'Online' : 'Osobně') . ' · 50 minut · 1 100 Kč'; }
+/* '1 100 Kč' from the config, with no-break spaces so the amount never splits across lines */
+function price_kc(): string { return number_format(cfg()['price'] / 100, 0, ',', "\u{00A0}") . "\u{00A0}Kč"; }
+
+function session_meta(array $b): string { return ($b['forma'] !== 'osobne' ? 'Online' : 'Osobně') . ' · 50 minut · ' . price_kc(); }
 
 /* The session inside the format card: when (card heading), what (slate), and (when $action) where to go:
-   the Meet button (navy: joining is not booking) or the address. */
+   the Meet button (coral, owner 14 Nov) or the address. */
 function session_panel(array $b, DateTimeImmutable $start, bool $action, ?string $dayTitle = null): string
 {
     $online = $b['forma'] !== 'osobne';
@@ -156,7 +167,7 @@ function session_panel(array $b, DateTimeImmutable $start, bool $action, ?string
     if (!$action) return $html;
     $meet = (string)($b['meet'] ?? '');
     return $html . ($online
-        ? '<div style="margin-top:24px">' . mail_btn('Připojit se k videohovoru', $meet ?: '#') . '</div>'
+        ? '<div style="margin-top:24px">' . mail_btn('Připojit se k videohovoru', $meet ?: '#', 'coral') . '</div>'
         : '<div style="margin-top:16px;color:#163A55">' . h(PLACE) . '<br>' . mail_link('Navigovat', NAVIGATE) . '</div>');
 }
 
@@ -171,7 +182,7 @@ function session_text(array $b, DateTimeImmutable $start, bool $action): array
 
 function text_foot(): array { return ['', '—', SENDER . ' · ' . PHONE . ' · ' . OWNER_MAIL . ' · khgporadenstvi.cz']; }
 
-/* The client's confirmation, and "Termín je změněný" after a move ($old: the previous start). Plain text, HTML, .ics. */
+/* The client's confirmation, and "Změna termínu" after a move ($old: the previous start). Plain text, HTML, .ics. */
 function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?DateTimeImmutable $old = null, bool $byClient = false): array
 {
     $online = $b['forma'] !== 'osobne';
@@ -179,17 +190,19 @@ function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?Date
     $meet = (string)($b['meet'] ?? '');
     $email = (string)($b['email'] ?? '');
     $subject = ($old ? 'Změna termínu: sezení ' : 'Potvrzení: sezení ') . cz_at($start);
-    $title = $old ? 'Termín je změněný' : 'Sezení je rezervované';
+    $title = $old ? 'Změna termínu' : 'Potvrzení rezervace';
     $oldTxt = $old ? 'Původní termín ' . cz_at($old) . ' už neplatí.' : '';
-    $login = $online && $email ? "Když budete v Googlu přihlášení jako $email, pustí vás to rovnou. Jinak požádáte o vstup." : '';
-    $rule = 'Přesunout nebo zdarma zrušit můžete nejpozději 36 hodin před sezením. Později se platba nevrací.';
+    // the amount from the config, never from the browser; on a move nothing new is paid, so only the confirmation
+    $paid = $old ? '' : 'Platba ' . price_kc() . ' byla přijata.';
+    $rule = 'Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením. Později se platba nevrací.';
     $linkLabel = 'Přesunout nebo zrušit termín';
 
-    $text = implode("\n", [$title, '', ...session_text($b, $start, true), ...($old ? [$oldTxt] : []), ...($login ? [$login] : []), '',
+    $text = implode("\n", [$title, '', ...session_text($b, $start, true), ...($old ? [$oldTxt] : []), ...($paid ? [$paid] : []), '',
         $rule, $linkLabel . ': ' . $cancelUrl, ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, true), [
         $old ? h($oldTxt) : '',
-        $login ? mail_muted(h($login)) : '',
+        // the paid amount stands out (owner, 14 Nov): navy like the panel, the amount in 600 like the session time
+        $paid ? '<span style="color:#163A55">Platba <b style="font-weight:600">' . h(price_kc()) . '</b> byla přijata.</span>' : '',
         h($rule) . '<br>' . mail_link($linkLabel, $cancelUrl),
     ], mail_tint($b), 'V příloze je termín do kalendáře.');
 
@@ -322,16 +335,19 @@ function mail_reminder(array $b, DateTimeImmutable $start, string $kind, ?int $n
     $dayWord = $diff === 0 ? 'dnes' : ($diff === 1 ? 'zítra' : null);
     if ($kind === 'soon') {
         $subject = 'Za 10 minut: sezení v ' . hm($start);
-        $title = 'Za 10 minut začínáme';
+        $title = 'Začátek za 10 minut';
     } else {
         $subject = 'Připomínka: sezení ' . ($dayWord ? $dayWord . ' v ' . hm($start) : cz_at($start));
         $title = 'Připomínka';                                       // the panel right under it says when
     }
     $panelDay = $dayWord ? ucfirst_utf8($dayWord) : null;
-    $url = cancel_url($b['pay_id']);
+    // the cancel link only while free cancelling is still possible (owner, 14 Nov: none under 36 hours); the
+    // day-before reminder goes out 24 hours ahead, so with today's settings it never has one
+    $hoursLeft = ($start->getTimestamp() - $today->getTimestamp()) / 3600;
+    $cancel = $kind === 'day' && $hoursLeft >= cfg()['free_cancel_hours'] ? cancel_url($b['pay_id']) : '';
     $html = mail_page($subject, $title, session_panel($b, $start, true, $panelDay),
-        [$kind === 'day' ? mail_link('Zrušit termín', $url) : ''], mail_tint($b));
-    $text = implode("\n", [$title, '', ...session_text($b, $start, true), ...($kind === 'day' ? ['', 'Zrušit termín: ' . $url] : []), ...text_foot()]);
+        [$cancel ? mail_link('Zrušit termín', $cancel) : ''], mail_tint($b));
+    $text = implode("\n", [$title, '', ...session_text($b, $start, true), ...($cancel ? ['', 'Zrušit termín: ' . $cancel] : []), ...text_foot()]);
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)($b['email'] ?? '')];
 }
 
@@ -340,13 +356,13 @@ function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundO
 {
     $book = site() . cfg()['booking_page'];
     $subject = $refundOnly ? 'Vrácení platby za sezení ' . cz_at($start) : 'Zrušené sezení ' . cz_at($start);
-    $title = $refundOnly ? 'Vracím vám platbu' : 'Sezení je zrušené';
-    $first = $refundOnly ? 'Za zrušené sezení vám vracím celých 1 100 Kč.' : 'Sezení musím zrušit, omlouvám se. Celých 1 100 Kč vám vracím.';
-    $money = 'Peníze přijdou na kartu, kterou jste platili, obvykle do 5–10 pracovních dnů.';
-    $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', $first, $money,
+    // passive, no "I" or "you" (owner, 14 Nov): one sentence about the money, the same in both
+    $title = $refundOnly ? 'Vrácení platby' : 'Zrušení sezení';
+    $money = 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.';
+    $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', $money,
         ...($refundOnly ? [] : ['', 'Vybrat jiný termín: ' . $book]), ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, false),
-        [h($first) . ' ' . h($money), $refundOnly ? '' : mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
+        [h($money), $refundOnly ? '' : mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)$b['email']];
 }
 
