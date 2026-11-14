@@ -20,6 +20,10 @@ function config_dir(?string $site = null): string
     return (getenv('HOME') ?: dirname($site)) . '/.config/khg';
 }
 
+/* Which copy this is (khg = the live site or the lab, khg-test = the test subdomain), from its config folder.
+   Written into each payment, so a copy books only its own. */
+function site_copy(): string { return basename(rtrim(cfg()['dir'], '/')); }
+
 function cfg(): array
 {
     static $c = null;
