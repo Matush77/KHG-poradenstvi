@@ -6,7 +6,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/smtp.php';
 
 const PLACE = 'Vítkovická 3299/3a, 702 00 Ostrava';
-const NAVIGATE = 'https://www.google.com/maps/dir/?api=1&destination=V%C3%ADtkovick%C3%A1+3299%2F3a%2C+702+00+Ostrava';
+// route to her Google Business Profile, not to a bare address (owner, 14 Nov): the profile's name plus the
+// address resolves to the business pin in Google Maps
+const NAVIGATE = 'https://www.google.com/maps/dir/?api=1&destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a%2C+Ostrava';
 const PHONE = '+420 605 990 980';
 const PHONE_HREF = 'tel:+420605990980';
 const OWNER_MAIL = 'kristyna@khgporadenstvi.cz';
@@ -77,14 +79,16 @@ function ics_text(string $s): string
    site's booking panel (sky for online, peach for in person, radius 24) holding the Fraunces heading and the
    session, so it fills a phone's width like the site's panels do. Fonts are the site's own files: Apple Mail
    and iOS load them, Gmail and Outlook use the metric-matched fallbacks (Georgia, the system sans).
-   The brand is a small PNG drawn from those fonts (assets/brand.png), sent inside the e-mail (cid).
+   The brand is the coral heart as a small PNG (assets/heart.png, cut from brand.png) sent inside the e-mail (cid), and
+   the name and role as real text: Gmail's dark mode lightens text but not images, so a name drawn into the image
+   went navy on black (owner's phone, 14 Nov).
    No greetings or sign-offs; the footer carries her name and contacts. */
 const BRAND_CID = 'brand@khgporadenstvi.cz';
 const MAIL_FONTS = 'https://khgporadenstvi.cz/fonts/';   // Fraunces is there once the redesign ships
 const MAIL_FONT = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 const MAIL_SERIF = "Fraunces,Georgia,'Times New Roman',serif";
 
-function brand_png(): string { return (string)file_get_contents(__DIR__ . '/../assets/brand.png'); }
+function brand_png(): string { return (string)file_get_contents(__DIR__ . '/../assets/heart.png'); }
 
 function mail_tint(array $b): string { return ($b['forma'] ?? '') === 'osobne' ? '#F6E6DC' : '#E8EFF4'; }
 
@@ -128,8 +132,13 @@ function mail_page(string $subject, string $title, string $panel, array $blocks,
         . '<style>' . $css . '</style></head>'
         . '<body style="margin:0;padding:0;background:#FBF8F3;color:#163A55;font:17px/1.6 ' . MAIL_FONT . '">'
         . '<div class="wrap" style="max-width:600px;margin:0 auto;padding:16px 12px 32px">'
-        . '<a href="https://khgporadenstvi.cz" style="display:inline-block;margin:0 0 16px 4px;text-decoration:none"><img src="cid:' . BRAND_CID . '" width="255" height="35" '
-        . 'alt="Kristýna Hriciková Glattová · psycholog a terapeut" style="display:block;border:0;width:255px;height:35px;color:#163A55;font-size:17px"></a>'
+        // the site header's brand: heart, then the name (Fraunces 500 19) over the role (Inter 500 10.5, caps, tracked)
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 4px;border-collapse:collapse"><tr>'
+        . '<td style="padding:0 10px 0 0;vertical-align:middle"><img src="cid:' . BRAND_CID . '" width="26" height="26" alt="" style="display:block;border:0;width:26px;height:26px"></td>'
+        . '<td style="vertical-align:middle"><a href="https://khgporadenstvi.cz" style="text-decoration:none;color:#163A55">'
+        . '<span style="display:block;font:500 19px/1.15 ' . MAIL_SERIF . ';letter-spacing:-.005em;color:#163A55;white-space:nowrap">' . SENDER . '</span>'
+        . '<span style="display:block;margin-top:4px;font:500 10.5px/1 ' . MAIL_FONT . ';letter-spacing:.14em;text-transform:uppercase;color:#5E6E7C">Psycholog a terapeut</span>'
+        . '</a></td></tr></table>'
         . '<div class="panel" style="background:' . $tint . ';border-radius:24px;padding:24px 20px">'
         . '<h1 class="h1" style="margin:0 0 24px;font:500 24px/1.15 ' . MAIL_SERIF . ';letter-spacing:-.01em;color:#163A55">' . h($title) . '</h1>'
         . $panel . '</div>'
@@ -168,7 +177,10 @@ function session_panel(array $b, DateTimeImmutable $start, bool $action, ?string
     $meet = (string)($b['meet'] ?? '');
     return $html . ($online
         ? '<div style="margin-top:24px">' . mail_btn('Připojit se k videohovoru', $meet ?: '#', 'coral') . '</div>'
-        : '<div style="margin-top:16px;color:#163A55">' . h(PLACE) . '<br>' . mail_link('Navigovat', NAVIGATE) . '</div>');
+        // the address is our own link to the same route, plain-looking: left as text, Gmail and Seznam linked it
+        // themselves (to a map search), sometimes only half of it
+        : '<div style="margin-top:16px;color:#163A55"><a href="' . h(NAVIGATE) . '" style="color:#163A55;text-decoration:none">'
+            . h(PLACE) . '</a><br>' . mail_link('Navigovat', NAVIGATE) . '</div>');
 }
 
 /* Plain-text twin of the panel. */
@@ -406,9 +418,9 @@ function mail_eml(array $m): string
         '--' . $alt . '--',
         '',
         '--' . $rel,
-        'Content-Type: image/png; name="khg.png"',
+        'Content-Type: image/png; name="srdce.png"',
         'Content-ID: <' . BRAND_CID . '>',
-        'Content-Disposition: inline; filename="khg.png"',
+        'Content-Disposition: inline; filename="srdce.png"',
         'Content-Transfer-Encoding: base64',
         '', $b64(brand_png()),
         '--' . $rel . '--',

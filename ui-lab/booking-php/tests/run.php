@@ -99,6 +99,7 @@ ok(max(array_map('strlen', $lines)) <= 75, 'ics: no line over 75 bytes');
 ok((bool)preg_match('//u', $m['ics']), 'ics: still valid UTF-8 after folding');
 ok(str_contains($m['ics'], "DTSTART;TZID=Europe/Prague:20261222T130000") && str_contains($m['ics'], 'METHOD:PUBLISH'), 'ics: start and method');
 $in = mail_build(['pay_id' => 'x', 'forma' => 'osobne', 'email' => 'a@b.cz'], slot_start('2027-07-15', '9:00'), 'http://x');
+ok(str_contains($in['html'], 'destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1') && substr_count($in['html'], 'href="' . h(NAVIGATE) . '"') === 2, 'in person: address and Navigovat both route to her business profile');
 ok(str_contains($in['text'], PLACE) && str_contains($in['text'], 'Navigace: ') && !str_contains($in['html'], 'videohovoru') && str_contains($in['html'], '#F6E6DC'), 'in person: address, no Meet, peach panel');
 $eml = mail_eml($m);
 ok(str_contains($eml, 'Subject: =?UTF-8?B?') && str_contains($eml, 'multipart/alternative') && str_contains($eml, 'filename="sezeni.ics"'), 'eml: encoded subject, both bodies, attachment');

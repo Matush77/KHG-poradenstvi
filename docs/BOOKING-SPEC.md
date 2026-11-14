@@ -498,4 +498,17 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   "Nový termín"), short passive results ("Termín zrušen", "Termín přesunut"), the refund line as in the
   e-mails, "lze" instead of "můžete", and the phone number instead of "zavolejte mi". The owner's page
   and her e-mails keep "ty".
+  In-person e-mails, after a look on the phone: Gmail and Seznam turned the plain address into their own
+  map link (sometimes only half of it), next to "Navigovat". The address is now our own plain-looking link,
+  and both go to a route to her business profile (destination "Mgr. Kristýna Hriciková Glattová,
+  Vítkovická 3299/3a, Ostrava", checked to resolve to the business in Google Maps), not to the bare address.
+  Dark mode on the owner's phone (Gmail): the brand PNG kept its navy name on a darkened background, nearly
+  invisible. The header is now the coral heart as a 2.5 KB PNG (`assets/heart.png`, cid, file "srdce.png")
+  and the name and role as text, which Gmail lightens. Also seen: Gmail's "Přidat do kalendáře" uses the
+  user's own default reminder (30 min), not the .ics alarm, and copied the inline image into the event.
+  Buttons in dark mode: Gmail (Android) lightened the navy text on the light coral and left the coral, so the
+  label went light blue on coral; a background image, -webkit-text-fill-color and an outline-only button were
+  tried (only the outline held, the owner disliked it in light mode). Outlook recolours both and stays readable.
+  Deep coral #C4614A with white text (what most senders do) was tried and rejected by the owner; the button
+  stays the site's coral with navy text.
 
