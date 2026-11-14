@@ -104,3 +104,14 @@ Before this goes live, on the hosting (none of it is in Git):
 - Stripe webhook to `https://khgporadenstvi.cz/api/webhook`; Scheduled Task every 5 minutes:
   `php -f …/booking/cron.php`.
 - Check after deploy: `/booking/api.php` and `/booking/src/config.php` answer 404, `/api/slots` answers JSON.
+
+Hosting facts (14 Nov): PHP 8.4 for the site (panel: Change PHP Version); on SSH the plain `php` is 8.0,
+so commands and Scheduled Tasks use `/usr/bin/php84`. SSH: `khgporadenstvi.cz@ssh.gb.stackcp.com`, key only;
+the host drops connections opened too often, so reuse one (ControlMaster).
+
+Test copy: `test.khgporadenstvi.cz` serves `~/test_html`, a plain `git clone -b redesign-ship` (not the
+panel's Git deployment; update with `git pull` over SSH). Its config is `~/.config/khg-test` (Stripe test
+keys, `BOOKING_MODE=lab`, e-mail only to the lab test addresses, bookings in the "KHG test rezervace"
+calendar). Scheduled Task: `/usr/bin/php84 -f /home/sites/23b/3/364baa5c02/test_html/booking/cron.php`,
+every 5 minutes. For the live site the same task points to `public_html`. Each copy books only its own
+Stripe payments (metadata `kopie`), so the test and live copies never pick up each other's.
