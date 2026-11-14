@@ -1118,7 +1118,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         var body = { f: state.f, date: key(state.date), time: state.time, name: state.name || '', email: state.email || '', phone: state.phone || '', note: state.note || '', pay: 0, mode: 'redirect' };
         fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
           .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
-          .then(function (j) { location.href = j.url; })
+          .then(function (j) { try { sessionStorage.setItem('khg-pay', '1'); } catch (x) {} location.href = j.url; })
           .catch(function (e) {
             // the server's message is written for the client (e.g. someone else is paying for this time right now)
             busy(btn, false, PRICE);
@@ -1187,6 +1187,14 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         };
       });
 
+      /* Back from Stripe's page without paying (its back arrow, or the phone's back button): end that Stripe page,
+         so the time is free for everyone at once, not after Stripe's 30 minutes. What the client typed stays. */
+      function releaseHeld() {
+        var was; try { was = sessionStorage.getItem('khg-pay'); sessionStorage.removeItem('khg-pay'); } catch (x) {}
+        if (!was) return Promise.resolve();
+        return fetch('/api/release', { method: 'POST', keepalive: true }).catch(function () {});
+      }
+
       function loadSlots() {
         return fetch('/api/slots', { cache: 'no-store' })
           .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
@@ -1222,7 +1230,14 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       state.f = new URLSearchParams(location.search).get('forma') === 'osobne' ? 'osobne' : 'online';
       LOADING = 'Načítám volné termíny…';
       renderHead(); renderStep1();
-      loadSlots().then(function () { LOADING = ''; start(); }, function () {
+      if (new URLSearchParams(location.search).get('paid')) { try { sessionStorage.removeItem('khg-pay'); } catch (x) {} }
+      var released = releaseHeld();
+      // the phone's back button may restore this page from memory: free the time and redraw (the pay button was left spinning)
+      addEventListener('pageshow', function (e) {
+        if (!e.persisted) return;
+        releaseHeld().then(loadSlots).then(render, render);
+      });
+      released.then(loadSlots).then(function () { LOADING = ''; start(); }, function () {
         LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
         renderStep1();
       });

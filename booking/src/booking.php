@@ -137,6 +137,29 @@ function release_own_hold(?string $browser, string $slot): void
     log_line('HOLD_RELEASED', ['slot' => $slot, 'pay' => $h['pay_id'], 'why' => 'same browser again']);
 }
 
+/* The client came back from Stripe's page to ours without paying (Stripe's back arrow or the phone's back button):
+   every open Stripe page of this browser is ended, so its time is free for everyone at once instead of after
+   Stripe's 30 minutes. A page already paid keeps its hold (the booking is on its way); one still being created
+   (no Stripe id yet) is left alone. Returns the times freed. */
+function release_browser_holds(?string $browser): array
+{
+    if (!$browser) return [];
+    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE browser = ? AND pay_id IS NOT NULL AND expires_at >= ?');
+    $s->execute([$browser, time()]);
+    $freed = [];
+    foreach ($s->fetchAll() as $h) {
+        try {
+            if (!expire_hold($h, 'later')) continue;
+        } catch (ClientError $e) {
+            continue;   // Stripe unreachable: the hold simply runs out as before
+        }
+        db()->prepare('DELETE FROM holds WHERE slot = ? AND browser = ?')->execute([$h['slot'], $browser]);
+        log_line('HOLD_RELEASED', ['slot' => $h['slot'], 'pay' => $h['pay_id'], 'why' => 'back from Stripe']);
+        $freed[] = $h['slot'];
+    }
+    return $freed;
+}
+
 /* One visitor may have only a few open payments (each blocks a time for 30 minutes). Going back and forth
    between times is normal, so a new one frees the visitor's oldest instead of refusing: someone trying to
    block the calendar can never hold more than the limit. */
@@ -181,6 +204,7 @@ function create_checkout(array $b): string
         $back = $c['booking_page'] . '?' . http_build_query(['forma' => $meta['forma'], 'den' => $meta['den'], 'cas' => $meta['cas']]);
         [$code, $s] = stripe('POST', 'checkout/sessions', [
             'mode' => 'payment', 'locale' => 'cs', 'expires_at' => $stripeExpiry,
+            'payment_method_types' => ['card'],     // card, with Google Pay / Apple Pay where the phone has them; no Klarna
             'customer_email' => $meta['email'] ?: null, 'metadata' => $meta,
             'payment_intent_data' => ['description' => cz_label($meta['forma'], $start), 'metadata' => $meta],
             'line_items' => [['quantity' => 1, 'price_data' => ['currency' => 'czk', 'unit_amount' => $c['price'],

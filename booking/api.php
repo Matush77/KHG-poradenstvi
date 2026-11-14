@@ -75,6 +75,9 @@ try {
 
     if ($method === 'POST' && $route === 'checkout') out(200, ['url' => create_checkout(body_json())]);
 
+    // back from Stripe unpaid: end this browser's open Stripe pages (cookie-scoped, SameSite=Lax: no cross-site use)
+    if ($method === 'POST' && $route === 'release') out(200, ['freed' => release_browser_holds(browser_id())]);
+
     if ($method === 'GET' && $route === 'checkout') {
         $id = (string)($_GET['id'] ?? '');
         if (!preg_match('/^cs_(test|live)_[A-Za-z0-9]+$/', $id)) throw new ClientError('Neplatná platba.', 400);
