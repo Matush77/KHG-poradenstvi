@@ -451,7 +451,8 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
   every e-mail on one layout in the redesign's theme: the new header's brand (coral heart, name in
   Fraunces, "PSYCHOLOG A TERAPEUT") as a small PNG drawn from the site's own fonts
   (`ui-lab/booking-php/assets/brand.png`, 6 KB) and sent inside the e-mail (cid), so it shows without
-  the live site, which still has the old gold logo; a Fraunces heading (Georgia in e-mail apps), the session in a sky (online) or peach (in person) panel with the Meet button
+  the live site, which still has the old gold logo (owner kept only this from the new UI: serif
+  headings were tried and dropped); a heading in the system font, the session in a sky (online) or peach (in person) panel with the Meet button
   or the address, short facts under it, coral buttons, and a footer with her name, phone, e-mail and
   web. Body text in the system font (e-mail apps don't load Inter). No "Dobrý den", "Těším se na vás", "Kdybyste…"
   lines; the reminders are only the panel (the day-before one with a plain "Zrušit termín" link).

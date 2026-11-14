@@ -74,13 +74,12 @@ function ics_text(string $s): string
 }
 
 /* ---- The look of every e-mail: the redesign's theme (paper ground, navy text, a sky panel for online and a
-   peach one for in person, coral pill buttons, Fraunces headings, the heart-and-name brand of the new header).
+   peach one for in person, coral pill buttons, system fonts) with the new header's heart-and-name brand.
    E-mail apps don't load web fonts, so the brand is a small PNG drawn from the site's own fonts
-   (assets/brand.png), sent inside the e-mail (cid), so it shows without the live site; headings fall back to
-   Georgia, body text to the system font. No greetings or sign-offs; the footer carries her name and contacts. */
+   (assets/brand.png), sent inside the e-mail (cid), so it shows without the live site.
+   No greetings or sign-offs; the footer carries her name and contacts. */
 const BRAND_CID = 'brand@khgporadenstvi.cz';
 const MAIL_FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-const MAIL_SERIF = "Fraunces,Georgia,'Times New Roman',serif";
 
 function brand_png(): string { return (string)file_get_contents(__DIR__ . '/../assets/brand.png'); }
 
@@ -106,9 +105,9 @@ function mail_page(string $subject, string $title, string $panel, array $blocks,
         . '<body style="margin:0;padding:0;background:#FBF8F3;color:#163A55;font:16px/1.55 ' . MAIL_FONT . '">'
         . '<div style="max-width:560px;margin:0 auto;padding:24px 16px 32px">'
         . '<a href="https://khgporadenstvi.cz" style="display:inline-block;text-decoration:none"><img src="cid:' . BRAND_CID . '" width="255" height="35" '
-        . 'alt="Kristýna Hriciková Glattová · psycholog a terapeut" style="display:block;border:0;width:255px;height:35px;color:#163A55;font:500 17px ' . MAIL_SERIF . '"></a>'
-        . '<h1 style="margin:28px 0 16px;font:500 28px/1.2 ' . MAIL_SERIF . ';color:#163A55;letter-spacing:-.01em">' . h($title) . '</h1>'
-        . '<div style="background:' . $tint . ';border-radius:16px;padding:20px">' . $panel . '</div>'
+        . 'alt="Kristýna Hriciková Glattová · psycholog a terapeut" style="display:block;border:0;width:255px;height:35px;color:#163A55;font-size:17px"></a>'
+        . '<h1 style="margin:20px 0 16px;font-size:24px;line-height:1.25;font-weight:600;color:#163A55">' . h($title) . '</h1>'
+        . '<div style="background:' . $tint . ';border-radius:20px;padding:18px 20px">' . $panel . '</div>'
         . implode('', array_map($p, array_filter($blocks)))
         . (!$foot ? '' : '<div style="margin-top:32px;padding-top:16px;border-top:1px solid #E3E0DA;color:#5E6E7C;font-size:13px;line-height:1.6">'
         . SENDER . '<br><a href="' . PHONE_HREF . '" style="color:#5E6E7C">' . PHONE . '</a> · '
@@ -123,7 +122,7 @@ function session_panel(array $b, DateTimeImmutable $start, bool $action, ?string
 {
     $online = $b['forma'] !== 'osobne';
     $hours = hm($start) . '–' . hm($start->modify('+50 minutes'));
-    $html = '<div style="font:500 20px/1.3 ' . MAIL_SERIF . ';color:#163A55">' . h($dayTitle ?? cz_day($start)) . ', <span style="white-space:nowrap">' . $hours . '</span></div>'
+    $html = '<div style="font-size:19px;font-weight:600;color:#163A55">' . h($dayTitle ?? cz_day($start)) . ', <span style="white-space:nowrap">' . $hours . '</span></div>'
         . '<div style="color:#44576A;font-size:15px">' . ($online ? 'Online · Google Meet' : 'Osobně') . ' · 50 minut · 1 100 Kč</div>';
     if (!$action) return $html;
     $meet = (string)($b['meet'] ?? '');
