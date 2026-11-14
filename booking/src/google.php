@@ -50,14 +50,15 @@ function gcal_busy(DateTimeImmutable $start, DateTimeImmutable $end): array
     return array_merge(...array_values(gcal_freebusy(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), $start, $end)));
 }
 
-/* The session as an event. Online: Meet link, the client as a guest who can't invite or see others. No Google e-mails. */
+/* The session as an event. Online: Meet link, the client as a guest who can't invite or see others. No Google e-mails.
+   Its own reminder, a phone notification 10 minutes before (as her Google booking page sessions had), whatever the calendar's defaults. */
 function gcal_create(DateTimeImmutable $start, string $summary, string $description, bool $online, ?string $guest): array
 {
     $end = $start->modify('+50 minutes');
     $ev = ['summary' => $summary, 'description' => $description,
         'start' => ['dateTime' => $start->format('Y-m-d\TH:i:s'), 'timeZone' => 'Europe/Prague'],
         'end' => ['dateTime' => $end->format('Y-m-d\TH:i:s'), 'timeZone' => 'Europe/Prague'],
-        'reminders' => ['useDefault' => true]];
+        'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 10]]]];
     if (!$online) $ev['location'] = PLACE;
     if ($online && $guest) {
         $ev['attendees'] = [['email' => $guest]];
