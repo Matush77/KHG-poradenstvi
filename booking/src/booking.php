@@ -75,7 +75,7 @@ function parse_choice(array $b): array
     $email = trim((string)($b['email'] ?? ''));
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new ClientError('E-mail nevypadá správně.', 400);
     if ($forma === 'online' && $email === '') throw new ClientError('Vyplňte prosím e-mail, pošlu na něj odkaz na videohovor.', 400);
-    $meta = ['zdroj' => 'web', 'forma' => $forma, 'den' => $start->format('Y-m-d'), 'cas' => $start->format('G:i'),
+    $meta = ['zdroj' => 'web', 'kopie' => site_copy(), 'forma' => $forma, 'den' => $start->format('Y-m-d'), 'cas' => $start->format('G:i'),
         'jmeno' => cut(trim((string)($b['name'] ?? '')), 100), 'email' => substr($email, 0, 200),
         'telefon' => cut(trim((string)($b['phone'] ?? '')), 40)];
     return [$start, $meta];
@@ -590,7 +590,10 @@ function sweep(): array
     [$code, $page] = stripe('GET', 'checkout/sessions', ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - 86400]]);
     if ($code !== 200) throw new RuntimeException('Stripe list failed: HTTP ' . $code);
     foreach ($page['data'] ?? [] as $s) {
-        if (($s['payment_status'] ?? '') === 'paid' && ($s['metadata']['zdroj'] ?? '') === 'web' && !booking_get($s['id'])) {
+        // only this copy's payments: the test site and the lab share one Stripe test account (14 Nov: the test site's
+        // first run booked the lab's payments again)
+        if (($s['payment_status'] ?? '') === 'paid' && ($s['metadata']['zdroj'] ?? '') === 'web'
+            && ($s['metadata']['kopie'] ?? 'khg') === site_copy() && !booking_get($s['id'])) {
             book_paid($s);
             $done['booked'][] = $s['id'];
         }

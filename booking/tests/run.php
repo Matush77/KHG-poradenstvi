@@ -40,6 +40,8 @@ $keep = getenv('KHG_CONFIG_DIR'); putenv('KHG_CONFIG_DIR');
 ok(config_dir('/home/x/public_html') === '/home/x/.config/khg', 'live site: ~/.config/khg');
 ok(config_dir('/home/x/test_html') === '/home/x/.config/khg-test', 'test subdomain: its own ~/.config/khg-test');
 putenv("KHG_CONFIG_DIR=$keep");
+[, $m] = parse_choice(['f' => 'online', 'date' => date('Y-m-d', strtotime('+10 days')), 'time' => '10:00', 'email' => 'a@b.cz']);
+ok($m['kopie'] === site_copy() && site_copy() === basename(getenv('KHG_CONFIG_DIR')), 'each payment names its site copy (sweep books only its own)');
 
 // --- times
 $w = slot_start('2026-12-22', '13:00');
