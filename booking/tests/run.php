@@ -35,6 +35,12 @@ function throws(callable $fn, int $code, string $what): void
     catch (ClientError $e) { ok($e->getCode() === $code, "$what -> $code ({$e->getMessage()})"); }
 }
 
+// --- config folder per site copy
+$keep = getenv('KHG_CONFIG_DIR'); putenv('KHG_CONFIG_DIR');
+ok(config_dir('/home/x/public_html') === '/home/x/.config/khg', 'live site: ~/.config/khg');
+ok(config_dir('/home/x/test_html') === '/home/x/.config/khg-test', 'test subdomain: its own ~/.config/khg-test');
+putenv("KHG_CONFIG_DIR=$keep");
+
 // --- times
 $w = slot_start('2026-12-22', '13:00');
 ok($w->format(DATE_ATOM) === '2026-12-22T13:00:00+01:00', 'winter slot is +01:00');
