@@ -81,6 +81,38 @@ function parse_choice(array $b): array
     return [$start, $meta];
 }
 
+/* The visitor, for the hold limit: a keyed hash of the IP, so the database never holds an address.
+   Live: check that REMOTE_ADDR is the visitor and not the hosting's proxy. */
+function visitor(): string
+{
+    return substr(hash_hmac('sha256', 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'cli'), cfg()['secret']), 0, 16);
+}
+
+/* One visitor may have only a few open payments (each blocks a time for 30 minutes). Going back and forth
+   between times is normal, so a new one frees the visitor's oldest instead of refusing: someone trying to
+   block the calendar can never hold more than the limit. */
+function cap_holds(string $who, int $now): void
+{
+    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE who = ? AND expires_at >= ? ORDER BY expires_at');
+    $s->execute([$who, $now]);
+    $open = $s->fetchAll();
+    foreach (array_slice($open, 0, max(0, count($open) - cfg()['holds_per_visitor'] + 1)) as $h) {
+        if ($h['pay_id']) {
+            [$code] = stripe('POST', 'checkout/sessions/' . rawurlencode($h['pay_id']) . '/expire');
+            if ($code !== 200) {   // Stripe refuses when the session is already paid or already expired
+                [$code, $sess] = stripe('GET', 'checkout/sessions/' . rawurlencode($h['pay_id']));
+                $st = $code === 200 ? ($sess['status'] ?? '') : '';
+                if ($st === 'complete') continue;              // paid, being booked: its hold must stay
+                if ($st !== 'expired') {
+                    throw new ClientError('Máte rozpracovaných víc rezervací najednou. Dokončete prosím jednu z nich, nebo to zkuste za půl hodiny.', 429);
+                }
+            }
+        }
+        db()->prepare('DELETE FROM holds WHERE slot = ? AND who = ?')->execute([$h['slot'], $who]);
+        log_line('HOLD_RELEASED', ['slot' => $h['slot'], 'pay' => $h['pay_id'], 'why' => 'visitor limit']);
+    }
+}
+
 /* Step 2 -> Stripe. Holds the slot for as long as the Stripe page lives (30 min), so two people can't pay for it. */
 function create_checkout(array $b): string
 {
@@ -90,11 +122,13 @@ function create_checkout(array $b): string
     $now = time();
     $stripeExpiry = $now + ($c['hold_minutes'] + 1) * 60;     // Stripe needs at least 30 minutes
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([$now]);   // outside the transaction: kept even when the slot is refused
-    db_tx(function (PDO $pdo) use ($slot, $stripeExpiry) {
+    $who = visitor();
+    cap_holds($who, $now);
+    db_tx(function (PDO $pdo) use ($slot, $stripeExpiry, $who) {
         $s = $pdo->prepare("SELECT (SELECT COUNT(*) FROM holds WHERE slot = :s) + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed'))");
         $s->execute(['s' => $slot]);
         if ((int)$s->fetchColumn() > 0) throw new ClientError('Tenhle termín si právě někdo rezervuje. Vyberte prosím jiný.', 409);
-        $pdo->prepare('INSERT INTO holds (slot, pay_id, expires_at) VALUES (?, NULL, ?)')->execute([$slot, $stripeExpiry + 120]);
+        $pdo->prepare('INSERT INTO holds (slot, pay_id, expires_at, who) VALUES (?, NULL, ?, ?)')->execute([$slot, $stripeExpiry + 120, $who]);
     });
     $release = fn() => db()->prepare('DELETE FROM holds WHERE slot = ? AND pay_id IS NULL')->execute([$slot]);
     try {
@@ -318,7 +352,7 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
             + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed') AND pay_id != :p)");
         $s->execute(['s' => $slot, 'now' => time(), 'p' => $payId]);
         if ((int)$s->fetchColumn() > 0) throw new ClientError($taken, 409);
-        $pdo->prepare('UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, updated_at = ? WHERE pay_id = ?')
+        $pdo->prepare('UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, reminded = 0, updated_at = ? WHERE pay_id = ?')
             ->execute([$slot, $client ? 1 : 0, time(), $payId]);
     });
     if ($b['event_id']) {
@@ -403,7 +437,7 @@ function sync_calendar(?int $now = null): array
         }
         $start = isset($ev['start']['dateTime']) ? (new DateTimeImmutable($ev['start']['dateTime']))->setTimezone(new DateTimeZone('Europe/Prague')) : null;
         if ($start && $start->getTimestamp() !== $old->getTimestamp()) {
-            booking_update($payId, ['slot' => $start->format(DATE_ATOM), 'moves' => $b['moves'] + 1, 'mail_sent' => 0, 'clash' => 0]);
+            booking_update($payId, ['slot' => $start->format(DATE_ATOM), 'moves' => $b['moves'] + 1, 'mail_sent' => 0, 'clash' => 0, 'reminded' => 0]);
             log_line('MOVED_IN_CALENDAR', ['pay' => $payId, 'from' => $b['slot'], 'to' => $start->format(DATE_ATOM)]);
             if ($start->getTimestamp() > $now) moved_mails(booking_get($payId), $old, 'calendar');
             else booking_update($payId, ['mail_sent' => 1]);         // moved into the past (a record): nobody to tell
@@ -449,6 +483,29 @@ function booking_view(array $b, ?DateTimeImmutable $now = null): array
         'can_move' => $b['status'] === 'booked' && $now <= $deadline];
 }
 
+/* The reminder, from the cron (every minute): to every booked client with an e-mail whose session starts
+   within remind_minutes. Each booking once per time (a move resets it). */
+function send_reminders(?int $now = null): array
+{
+    $now ??= time();
+    $done = [];
+    $s = db()->prepare("SELECT * FROM bookings WHERE status = 'booked' AND reminded = 0 AND email IS NOT NULL");
+    $s->execute();
+    foreach ($s->fetchAll() as $b) {
+        $start = prague($b['slot']);
+        $left = $start->getTimestamp() - $now;
+        if ($left <= 0 || $left > cfg()['remind_minutes'] * 60) continue;
+        try {
+            mail_send($b['pay_id'] . '-remind-' . $b['moves'], mail_reminder($b, $start));
+            booking_update($b['pay_id'], ['reminded' => 1]);
+            $done[] = $b['pay_id'];
+        } catch (Throwable $e) {
+            log_line('MAIL_ERROR', ['pay' => $b['pay_id'], 'what' => 'reminder', 'error' => $e->getMessage()]);
+        }
+    }
+    return $done;
+}
+
 /* Safety net (cron every few minutes, next to the webhook): books paid sessions nobody booked (closed tab,
    lost webhook), retries failed bookings and unsent e-mails, clears old holds. */
 function sweep(): array
@@ -456,6 +513,14 @@ function sweep(): array
     $done = ['booked' => [], 'retried' => [], 'mailed' => []];
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([time()]);
     db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([time() - 2 * 86400]);   // never paid: forget what they wrote
+    // first her calendar edits (a session she just moved gets its reminder at the new time), then the reminders:
+    // neither needs Stripe, so a Stripe outage below doesn't hold them back
+    try {
+        $done += array_filter(sync_calendar());
+    } catch (Throwable $e) {
+        log_line('SYNC_ERROR', ['error' => $e->getMessage()]);   // the next run catches up from the last good check
+    }
+    if ($r = send_reminders()) $done['reminded'] = $r;
     [$code, $page] = stripe('GET', 'checkout/sessions', ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - 86400]]);
     if ($code !== 200) throw new RuntimeException('Stripe list failed: HTTP ' . $code);
     foreach ($page['data'] ?? [] as $s) {
@@ -472,11 +537,6 @@ function sweep(): array
         if ($row['status'] !== 'booked') $done['retried'][] = $row['pay_id'];
         elseif (($b['mail_sent'] || !$b['email']) && $b['owner_mailed']) $done['mailed'][] = $row['pay_id'];
         else $done['mail_failed'][] = $row['pay_id'];   // stays unsent: the next run tries again
-    }
-    try {
-        $done += array_filter(sync_calendar());
-    } catch (Throwable $e) {
-        log_line('SYNC_ERROR', ['error' => $e->getMessage()]);   // the next run catches up from the last good check
     }
     if (array_filter($done)) log_line('SWEEP', $done);
     return $done;

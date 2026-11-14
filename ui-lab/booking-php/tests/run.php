@@ -216,5 +216,32 @@ ok(str_contains($od['text'], 'smazala v kalendáři') && str_contains($od['text'
 $dl = mail_owner_declined($fb, $w, owner_url('cs_test_free'));
 ok(str_contains($dl['text'], 'rezervace platí dál') && $dl['reply_to'] === 'a@example.com', 'owner told about a declined invitation');
 
+// --- hold limit per visitor (holds without a Stripe session yet: no Stripe call needed)
+$_SERVER['REMOTE_ADDR'] = '203.0.113.7';
+$me = visitor();
+ok(strlen($me) === 16 && !str_contains($me, '203') && $me !== (function () { $_SERVER['REMOTE_ADDR'] = '203.0.113.8'; $o = visitor(); $_SERVER['REMOTE_ADDR'] = '203.0.113.7'; return $o; })(), 'visitor key is a hash, different per IP');
+$hold = db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who) VALUES (?, NULL, ?, ?)');
+foreach ([1, 2, 3] as $i) $hold->execute(["2027-01-0{$i}T10:00:00+01:00", time() + 600 + $i, $me]);
+$hold->execute(['2027-01-05T10:00:00+01:00', time() + 600, 'someoneelse00000']);
+cap_holds($me, time());
+$left = db()->query("SELECT slot FROM holds WHERE who = '$me' ORDER BY slot")->fetchAll(PDO::FETCH_COLUMN);
+ok($left === ['2027-01-02T10:00:00+01:00', '2027-01-03T10:00:00+01:00'], 'a 4th hold frees the visitor\'s oldest, keeping 2 + the new one');
+ok((int)db()->query("SELECT COUNT(*) FROM holds WHERE who = 'someoneelse00000'")->fetchColumn() === 1, 'other visitors\' holds untouched');
+db()->exec("DELETE FROM holds WHERE slot LIKE '2027-01-0%'");
+
+// --- reminder 30 minutes before
+$rs = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, meet, status, reminded, created_at, updated_at) VALUES (?, ?, ?, 'r@example.com', 'R', 'https://meet.google.com/abc-defg-hij', 'booked', 0, 0, 0)");
+$rs->execute(['cs_test_r25', date(DATE_ATOM, time() + 25 * 60), 'online']);
+$rs->execute(['cs_test_r40', date(DATE_ATOM, time() + 40 * 60), 'osobne']);
+$rs->execute(['cs_test_rpast', date(DATE_ATOM, time() - 60), 'online']);
+$sent = send_reminders();
+ok($sent === ['cs_test_r25'], 'reminder only for the session within 30 minutes');
+ok(send_reminders() === [], 'each reminder once');
+ok(send_reminders(time() + 15 * 60) === ['cs_test_r40'], 'the later one when its time comes');
+$rm = mail_reminder(booking_get('cs_test_r25'), prague(booking_get('cs_test_r25')['slot']));
+ok(str_starts_with($rm['subject'], 'Za půl hodiny: sezení dnes v ') && str_contains($rm['text'], 'meet.google.com/abc-defg-hij') && !str_contains($rm['text'], 'zruseni'), 'online reminder: Meet link, no cancel link');
+$ro = mail_reminder(booking_get('cs_test_r40'), prague(booking_get('cs_test_r40')['slot']));
+ok(str_contains($ro['text'], 'Vítkovická') && str_contains($ro['text'], 'Navigace:'), 'in-person reminder: address and navigation');
+
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";
 exit($fails ? 1 : 0);

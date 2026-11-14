@@ -195,7 +195,8 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
 4. Point "Objednat se" (header, booking modal, Ceník buttons) to the page, with the format set
    where it is obvious.
 5. Back end on the hosting: PHP 8.4 for the site, cron every minute, config outside the web root,
-   `.htaccess` blocking `src/`, `tools/`, `tests/`; a per-IP limit on open holds; DKIM and DMARC
+   `.htaccess` blocking `src/`, `tools/`, `tests/`; check that REMOTE_ADDR is the visitor's IP
+   (not a proxy's), or the hold limit counts everyone as one visitor; DKIM and DMARC
    for the domain's e-mail; the owner's real hours calendars and live Stripe keys.
 6. Test with three people, fix what they trip on.
 7. `python3 scripts/check-indexing.py` before pushing to `main`, `--live` after the deploy,
@@ -406,7 +407,7 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
     Fixed: the paid confirmation page put the e-mail and phone into the page unescaped (only someone
     who paid could abuse it); now escaped.
   - Open (before launch): nothing limits how many times a stranger can hold slots (each hold blocks
-    a time for 30 min). Add a per-IP limit (for example 3 open holds) when porting to the hosting.
+    a time for 30 min). Done the same day, see "Hold limit" below.
 - Client move, 14 Nov (owner's wife: it saves her admin). The client's link from the confirmation
   now opens "Přesunout nebo zrušit termín": the client may move to a free time of the same format
   as often as they like (owner, 14 Nov: no limit; first built as one move), while a free cancel is
@@ -429,4 +430,14 @@ Stripe dashboard settings (the owner, can be done now, they also improve today's
     move with the count in her e-mail; the owner's link on the client route refused; her drag in Google -> booking moved and client
     e-mail within one cron run; decline -> one e-mail; deletion -> cancelled, her page offers the
     refund. 92 offline checks.
+- Hold limit, 14 Nov: at most 3 open payments per visitor (keyed hash of the IP, never the IP itself).
+  A 4th frees that visitor's oldest hold (its Stripe page is expired) instead of refusing, so going
+  back and forth between times never blocks a client, while one visitor can't block more than 3 times.
+  A paid session that is still being booked keeps its hold. Tested: 4 checkouts from one browser ->
+  the first released and expired on Stripe.
+- Reminder e-mail, 14 Nov (owner): 30 minutes before every session, to clients with an e-mail. Online:
+  the Meet button; in person: address and navigation; "Kdybyste se zdrželi, napište mi nebo zavolejte".
+  No cancel link (too late to cancel or move). Sent by the cron, once per booking and time (a move
+  sends it again for the new time); runs before the Stripe part, so a Stripe outage doesn't stop it.
+  Tested: both kinds arrived in Gmail, a second cron run sent nothing. 100 offline checks.
 

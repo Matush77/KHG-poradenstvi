@@ -59,6 +59,8 @@ function cfg(): array
         'price' => 110000,                                        // 1 100 Kč in haléře; never from the browser
         'free_cancel_hours' => 36,                                // lab tests may change it, see below
         'hold_minutes' => 30,                                     // Stripe's shortest Checkout expiry
+        'holds_per_visitor' => 3,                                 // open payments at once from one IP; a 4th frees the oldest
+        'remind_minutes' => 30,                                   // reminder e-mail this long before the session
     ];
     if ($c['mode'] !== 'live' && isset($env['LAB_FREE_CANCEL_HOURS'])) $c['free_cancel_hours'] = (int)$env['LAB_FREE_CANCEL_HOURS'];
     if ($c['mode'] !== 'live' && !preg_match('/^(sk|rk)_test_/', $c['stripe_sk'])) {

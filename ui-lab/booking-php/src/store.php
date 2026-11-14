@@ -44,6 +44,12 @@ function db(): PDO
         $pdo->exec("ALTER TABLE bookings ADD COLUMN $col $type");
         if ($col === 'owner_mailed') $pdo->exec('UPDATE bookings SET owner_mailed = 1');
     }
+    // holds.who: keyed hash of the visitor's IP (never the IP itself), to cap open holds per visitor;
+    // bookings.reminded: the 30-minute reminder went out
+    if (!in_array('who', array_column($pdo->query('PRAGMA table_info(holds)')->fetchAll(), 'name'), true)) {
+        $pdo->exec('ALTER TABLE holds ADD COLUMN who TEXT');
+    }
+    if (!in_array('reminded', $have, true)) $pdo->exec('ALTER TABLE bookings ADD COLUMN reminded INTEGER DEFAULT 0');
     // small settings the cron keeps between runs (the calendar sync's last check)
     $pdo->exec('CREATE TABLE IF NOT EXISTS state (k TEXT PRIMARY KEY, v TEXT NOT NULL)');
     return $pdo;

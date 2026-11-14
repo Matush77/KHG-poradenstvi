@@ -295,6 +295,35 @@ function mail_owner_declined(array $b, DateTimeImmutable $start, string $ownerUr
         'ics' => null, 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
 }
 
+/* To the client 30 minutes before: where to go (the Meet button or the address). No cancel link: too late for it. */
+function mail_reminder(array $b, DateTimeImmutable $start): array
+{
+    $online = $b['forma'] !== 'osobne';
+    $hours = hm($start) . '–' . hm($start->modify('+50 minutes'));
+    $subject = 'Za půl hodiny: sezení dnes v ' . hm($start);
+    $meet = (string)($b['meet'] ?? '');
+    $email = (string)($b['email'] ?? '');
+    $first = $online ? "za půl hodiny začíná naše online sezení ($hours)." : "za půl hodiny vás čekám na sezení ($hours).";
+    $late = 'Kdybyste se zdrželi, napište mi nebo zavolejte na ' . PHONE . '.';
+    if ($online) {
+        $whereTxt = ['Připojit se: ' . ($meet ?: '(odkaz je v potvrzení)'),
+            "Když budete v Googlu přihlášení jako $email, pustí vás to rovnou. Jinak požádáte o vstup a já vás pustím."];
+        $whereHtml = '<a href="' . h($meet ?: '#') . '" style="display:inline-block;background:#E8927C;color:#163A55;font-weight:600;'
+            . 'text-decoration:none;padding:12px 20px;border-radius:999px">Připojit se k videohovoru</a>'
+            . '<br><span style="color:#44576A;font-size:14px">Když budete v Googlu přihlášení jako ' . h($email)
+            . ', pustí vás to rovnou. Jinak požádáte o vstup a já vás pustím.</span>';
+    } else {
+        $whereTxt = [PLACE, 'Navigace: ' . NAVIGATE];
+        $whereHtml = h(PLACE) . '<br><a href="' . h(NAVIGATE) . '" style="color:#2D5A7B">Navigovat</a>';
+    }
+    $text = implode("\n", ['Dobrý den,', '', $first, '', ...$whereTxt, '', $late, '', 'Těším se na vás', SENDER]);
+    $card = '<b style="display:block;font-size:18px">Dnes, <span style="white-space:nowrap">' . $hours . '</span></b>'
+        . '<span style="color:#44576A">' . ($online ? 'Online (Google Meet)' : 'Osobně') . ' · 50 minut</span>';
+    $html = mail_frame($subject, ['Dobrý den,', h($first), $whereHtml, h($late)
+        . ' <a href="' . PHONE_HREF . '" style="color:#2D5A7B">Zavolat</a>', 'Těším se na vás<br>' . SENDER], [], $online ? '#E8EFF4' : '#F6E6DC', $card);
+    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => $email];
+}
+
 /* To the client when the owner cancels (full refund), or refunds a session the client cancelled late. */
 function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly): array
 {
