@@ -1063,7 +1063,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
          Last, an optional free-text reason, which goes only to the therapist's e-mail. */
       function field(id, label, type, ac, required, ph) {
         return '<label for="' + id + '"><span>' + label + (required ? '' : ' <em>(nepovinné)</em>') + '</span>' +
-          '<input id="' + id + '" type="' + type + '" autocomplete="' + ac + '" enterkeyhint="next"' +
+          '<input id="' + id + '" name="' + ac + '" type="' + type + '" autocomplete="' + ac + '" enterkeyhint="next"' +
           (type === 'text' ? ' autocapitalize="words"' : ' autocapitalize="off" spellcheck="false"') + (required ? ' required aria-required="true"' : '') +
           (ph ? ' placeholder="' + ph + '"' : '') + ' aria-describedby="' + id + '-err">' +
           '<span class="err" id="' + id + '-err" aria-live="polite"></span></label>';
