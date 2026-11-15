@@ -125,7 +125,7 @@ sub('<h3>Nejčastější témata, se kterými pracuji:</h3>', '<h3>Nejčastějš
 page, n = re.subn(r'\n\s*<div class="service-features-main">.*?</ul>\s*</div>', "", page, count=1, flags=re.S)
 assert n == 1
 sub('v bezpečném a respektujícím prostředí.\n                </p>',
-    'v bezpečném a respektujícím prostředí.\n                </p>\n                <p class="service-extra">Termíny hledáme podle vašich možností. Svou práci pravidelně konzultuji v supervizi.</p>')
+    'v bezpečném a respektujícím prostředí.\n                </p>\n                <p class="service-extra">Svou práci pravidelně konzultuji v supervizi.</p>')   # 16 Nov: "Termíny hledáme…" dropped, clients pick a time themselves
 # 3. Praktické informace: rows as on Ceník (title + text), not bold-lead bullets in a card
 def info_rows(m):
     items = re.findall(r'<li><strong>([^<:]+):</strong>\s*(.*?)</li>', m.group(1), flags=re.S)
@@ -146,7 +146,7 @@ page = page[:m.start()] + """<div class="why-online-content">
                 <p class="lead-text">
                     Terapeutická setkání nabízím <strong>osobně v Ostravě</strong> i <strong>online</strong>.
                     Můžete si zvolit formu, ve které se cítíte bezpečně a která odpovídá vašim možnostem.
-                    Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.
+                    Formu si vyberete při rezervaci a v případě potřeby ji můžeme později společně změnit.
                 </p>
 
                 <div class="format-cards">
@@ -208,6 +208,21 @@ CONTACT_ROWS = """<dl class="contact-rows">
             </dl>"""
 assert 'tel:+420605990980' in m.group(0) and 'destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a' in m.group(0)
 page = page[:m.start()] + CONTACT_ROWS + page[m.end():]
+
+# 16 Nov (owner): payment is upfront now, so cancelling is a refund question, not "účtováno v plné výši";
+# the length row left Praktické informace (it is in Služby and the FAQ); Kontakt gets the booking button back
+CANCEL = ("Termín můžete přesunout nebo zrušit přes odkaz v potvrzovacím e-mailu, nejpozději {} 36 hodin před začátkem{}. "
+          "Platba se vám pak vrátí celá. Při pozdějším zrušení nebo nedostavení se platba nevrací.")
+OLD_CANCEL = "Pokud se na domluvený termín nemůžete dostavit, zrušte jej prosím nejpozději {}36 hodin před začátkem sezení{}. Při pozdějším zrušení nebo nedostavení se na termín je sezení účtováno v plné výši."
+sub(OLD_CANCEL.format("", ""), CANCEL.format("", "").replace("  ", " ").replace("nejpozději  ", "nejpozději "))
+sub(OLD_CANCEL.format("<strong>", "</strong>"), CANCEL.format("<strong>", "</strong>").replace("<strong> ", "<strong>"))
+sub("<p>Termín prosím zrušte nejpozději 36 hodin před začátkem. Při pozdějším zrušení nebo nedostavení se je sezení účtováno v plné výši.</p>",
+    "<p>" + CANCEL.format("", "").replace("nejpozději  ", "nejpozději ") + "</p>")
+sub('<div class="info-row"><h4>Délka setkání</h4><p>Jedno terapeutické setkání trvá 50 minut.</p></div>\n', "")
+sub(CONTACT_ROWS, CONTACT_ROWS + '\n            <div class="contact-book">\n'
+    '                <p>Nejrychleji se objednáte přes online rezervaci.</p>\n'
+    '                <a href="' + nomodal.BOOKING + '" class="btn btn-large">Objednat se</a>\n'
+    '            </div>')
 
 # lab only: menu links point at "/#sluzby" (the live homepage); keep them on this page
 def lab_links(html):
@@ -340,6 +355,10 @@ def build_cenik():
     # booking window and copy: as on the lab homepage
     p = re.sub(r"(?<=[a-zěščřžýáíéůúňťď,„(] )(Vy|Vám|Vás|Vámi|Váš|Vaše|Vašich|Vaší|Vašim|Vašimi|Vaši|Vašeho|Vaším|Vašem|Vašemu|Vašich)\b",
                lambda m: m.group(1).lower(), p)
+
+    # 16 Nov: the same cancellation text as on the homepage (payment is upfront)
+    s("<p>Termín prosím zrušte nejpozději <strong>36 hodin před začátkem</strong>. Při pozdějším zrušení nebo nedostavení se je setkání účtováno v plné výši.</p>",
+      "<p>" + CANCEL.format("<strong>", "</strong>").replace("<strong> ", "<strong>") + "</p>")
 
     # lab links: menu and footer stay inside the lab
     p = lab_links(p)

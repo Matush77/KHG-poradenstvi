@@ -556,6 +556,8 @@ html { scrollbar-gutter: stable; }
 .contact .section-header { margin-bottom: var(--block-gap) !important; }
 .contact-rows { margin: 0; border-top: 1px solid var(--sky-line, #CCD8E2); }
 .contact-row { padding: 20px 0; border-bottom: 1px solid var(--sky-line, #CCD8E2); }
+.contact-book { margin-top: var(--block-gap); }
+.contact-book p { margin: 0 0 16px; color: var(--slate); }
 .contact-row dt { font-size: .9375rem !important; font-weight: 500 !important; line-height: 1.4 !important; color: var(--mute) !important;
   letter-spacing: 0 !important; text-transform: none !important; margin: 0 0 4px; }
 .contact-row dd { margin: 0; }
@@ -959,7 +961,7 @@ html:has(.nav-menu.active) { overflow: hidden; }
           "name": "Jak mohu termín zrušit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Pokud se na domluvený termín nemůžete dostavit, zrušte jej prosím nejpozději 36 hodin před začátkem sezení. Při pozdějším zrušení nebo nedostavení se na termín je sezení účtováno v plné výši."
+            "text": "Termín můžete přesunout nebo zrušit přes odkaz v potvrzovacím e-mailu, nejpozději 36 hodin před začátkem. Platba se vám pak vrátí celá. Při pozdějším zrušení nebo nedostavení se platba nevrací."
           }
         }
       ]
@@ -1363,7 +1365,7 @@ html:has(.nav-menu.active) { overflow: hidden; }
                     podle toho, co vám vyhovuje. Pracuji s dětmi, adolescenty i dospělými
                     v bezpečném a respektujícím prostředí.
                 </p>
-                <p class="service-extra">Termíny hledáme podle vašich možností. Svou práci pravidelně konzultuji v supervizi.</p>
+                <p class="service-extra">Svou práci pravidelně konzultuji v supervizi.</p>
 
                 <dl class="service-facts">
                     <div class="service-fact">
@@ -1428,8 +1430,7 @@ html:has(.nav-menu.active) { overflow: hidden; }
                     <div class="info-rows">
                         <div class="info-row"><h4>Osobní setkání</h4><p>Přicházejte a zvoňte prosím až v čase vašeho objednaného sezení. V prostorách poradny není čekárna.</p></div>
                         <div class="info-row"><h4>Online setkání</h4><p>Odkaz na videohovor obdržíte automaticky v e-mailu s potvrzením rezervace. Potřebujete stabilní připojení a klidné, soukromé místo.</p></div>
-                        <div class="info-row"><h4>Délka setkání</h4><p>Jedno terapeutické setkání trvá 50 minut.</p></div>
-                        <div class="info-row"><h4>Zrušení termínu</h4><p>Termín prosím zrušte nejpozději 36 hodin před začátkem. Při pozdějším zrušení nebo nedostavení se je sezení účtováno v plné výši.</p></div>
+                                                <div class="info-row"><h4>Zrušení termínu</h4><p>Termín můžete přesunout nebo zrušit přes odkaz v potvrzovacím e-mailu, nejpozději 36 hodin před začátkem. Platba se vám pak vrátí celá. Při pozdějším zrušení nebo nedostavení se platba nevrací.</p></div>
                         <div class="info-row"><h4>Když si nejste jistí</h4><p>Nemusíte se předem rozhodnout pro dlouhodobou terapii. První setkání může sloužit i ke společnému zmapování toho, zda a jak by vám psychoterapie mohla být užitečná.</p></div>
                     </div>
                 </div>
@@ -1488,7 +1489,7 @@ html:has(.nav-menu.active) { overflow: hidden; }
                 <p class="lead-text">
                     Terapeutická setkání nabízím <strong>osobně v Ostravě</strong> i <strong>online</strong>.
                     Můžete si zvolit formu, ve které se cítíte bezpečně a která odpovídá vašim možnostem.
-                    Způsob setkávání si domluvíme na začátku spolupráce a v případě potřeby jej můžeme společně změnit.
+                    Formu si vyberete při rezervaci a v případě potřeby ji můžeme později společně změnit.
                 </p>
 
                 <div class="format-cards">
@@ -1572,7 +1573,7 @@ html:has(.nav-menu.active) { overflow: hidden; }
                         <button type="button" class="faq-question" id="faq-question-6" aria-expanded="true" aria-controls="faq-answer-6">Jak mohu termín zrušit?</button>
                     </h3>
                     <div class="faq-answer" id="faq-answer-6" role="region" aria-labelledby="faq-question-6">
-                        <p>Pokud se na domluvený termín nemůžete dostavit, zrušte jej prosím nejpozději <strong>36 hodin před začátkem sezení</strong>. Při pozdějším zrušení nebo nedostavení se na termín je sezení účtováno v plné výši.</p>
+                        <p>Termín můžete přesunout nebo zrušit přes odkaz v potvrzovacím e-mailu, nejpozději <strong>36 hodin před začátkem</strong>. Platba se vám pak vrátí celá. Při pozdějším zrušení nebo nedostavení se platba nevrací.</p>
                     </div>
                 </div>
             </div>
@@ -1669,6 +1670,10 @@ html:has(.nav-menu.active) { overflow: hidden; }
                 <div class="contact-row"><dt>Telefon</dt><dd><a href="tel:+420605990980">+420 605 990 980</a></dd></div>
                 <div class="contact-row"><dt>Osobní setkání</dt><dd><a href="https://www.google.com/maps/dir/?api=1&amp;destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a%2C+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></dd></div>
             </dl>
+            <div class="contact-book">
+                <p>Nejrychleji se objednáte přes online rezervaci.</p>
+                <a href="ui-lab/rezervace-ukazka.html" class="btn btn-large">Objednat se</a>
+            </div>
         </div>
     </section>
 
