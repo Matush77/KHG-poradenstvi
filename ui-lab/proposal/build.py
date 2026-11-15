@@ -23,6 +23,10 @@ sub('"closes": "18:00"', '"closes": "17:00"')
 sub('"latitude": "49.8358"', '"latitude": "49.8278"')
 sub('"longitude": "18.2928"', '"longitude": "18.2799"')
 sub("https://share.google/GunHQdaRB3wMknJMA", "https://maps.google.com/?cid=17834043374417315194", count=2)
+# book cover (15 Nov): images/terapie-do-kapsy.webp is a 590px lossless file (168 KB) shown at 72/120px.
+# A 240px lossy copy (13 KB) is sharp at 3x on phones and 2x on desktop; the schema keeps the large original.
+sub('<img src="images/terapie-do-kapsy.webp"\n                             alt="Obálka knihy Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě"\n                             width="590"\n                             height="834"',
+    '<img src="ui-lab/proposal/img/terapie-do-kapsy-240.webp"\n                             alt="Obálka knihy Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě"\n                             width="240"\n                             height="339"')
 
 # lab page: resolve paths from site root, keep out of search
 sub("<head>", '<head>\n    <base href="/">\n    <meta name="robots" content="noindex">')

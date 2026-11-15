@@ -42,6 +42,8 @@ a careless copy.
    - `ui-lab/proposal/icons/heart.svg`, `heart-32.png`, `heart-96.png`, `heart-180.png` → `images/`;
    - `ui-lab/proposal/img/portrait-avatar-192.webp` and `portrait-avatar-384.webp` → `images/`
      (the 192 in the article author boxes; both, as `srcset`, in the O mně quote card);
+   - `ui-lab/proposal/img/terapie-do-kapsy-240.webp` → `images/` (the book cover in Publikační činnost;
+     the schema `image` keeps the large `images/terapie-do-kapsy.webp`);
    - `ui-lab/proposal/styles.css` and the inlined `proposal.css` layers → `css/`;
    - `ui-lab/proposal/js/quiz-*.js` → `js/`.
 4. Lab links (`/ui-lab/proposal/#sluzby`, `/ui-lab/proposal/blog.html`, …) go back to the real
