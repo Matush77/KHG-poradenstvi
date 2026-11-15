@@ -751,6 +751,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
   .about-personal-note { flex-direction: column; text-align: center; gap: 12px; }
 }
 
+/* While the phone menu is open, the page behind it stays put (redesign-ship does this with
+   html.nav-open from js/script.js; the lab keeps main's script.js, so here it is CSS only). */
+html:has(.nav-menu.active) { overflow: hidden; }
+
 /* LAB: parts shared by the blog and quiz pages in the 12 Nov theme. Layered after proposal.css (same tokens).
    Buttons: coral stays for booking only. Every other action is navy: solid for the step forward, outline for the rest. */
 

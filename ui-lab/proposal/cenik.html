@@ -757,6 +757,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
   .about-personal-note { flex-direction: column; text-align: center; gap: 12px; }
 }
 
+/* While the phone menu is open, the page behind it stays put (redesign-ship does this with
+   html.nav-open from js/script.js; the lab keeps main's script.js, so here it is CSS only). */
+html:has(.nav-menu.active) { overflow: hidden; }
+
 /* LAB: Ceník page in the 12 Nov theme. Layered after proposal.css (same tokens, type roles, parts).
    Bands: hero + prices on paper -> Praktické informace on sky (rows) -> První setkání as the peach panel on paper. */
 
