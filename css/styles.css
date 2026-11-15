@@ -2583,6 +2583,10 @@ a:hover {
    MOBILE OPTIMIZATIONS
    ========================================== */
 
+/* While the mobile menu is open, the page behind it stays put (set by js/script.js).
+   html keeps its scrollbar gutter, so nothing shifts sideways when the scrollbar goes. */
+html.nav-open { overflow: hidden; }
+
 @media (max-width: 768px) {
     /* Keep the organic hero shape subtle and finite on mobile. */
     .blob-shape {

@@ -28,7 +28,7 @@
     <link rel="apple-touch-icon" href="images/heart-180.png">
     <link rel="preload" href="fonts/Inter/Inter-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/Fraunces/Fraunces-500-Soft-cs.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/styles.css?v=20261115-1">
+    <link rel="stylesheet" href="css/styles.css?v=20261115-2">
     <link rel="stylesheet" href="css/polish.css?v=20261115-1">
     <style>@font-face{font-family:'Fraunces';src:url('/fonts/Fraunces/Fraunces-500-Soft-cs.woff2') format('woff2');font-weight:400 700;font-style:normal;font-display:swap}@font-face{font-family:'Fraunces Fallback';src:local('Georgia Bold'),local('Georgia-Bold');font-weight:400 700;size-adjust:91.58%;ascent-override:106.79%;descent-override:27.84%;line-gap-override:0%}@font-face{font-family:'Fraunces Fallback Android';src:local('Noto Serif Bold'),local('NotoSerif-Bold');font-weight:400 700;size-adjust:92.44%;ascent-override:105.80%;descent-override:27.59%;line-gap-override:0%}</style>
     <style id="proposal">
@@ -731,7 +731,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     @media (min-width: 720px) { .rez .switch { max-width: 360px; } }
     .rez .fmt { position: relative; z-index: 1; border: 0; background: none; cursor: pointer; border-radius: 999px; min-height: 48px; font-size: 16px; color: var(--mute); transition: color .15s; }
     .rez .fmt-t { font-weight: 500; }
-    .rez .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); }
+    @media (hover: hover) { .rez .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); } }
     .rez .fmt[aria-pressed="true"] { cursor: default; color: var(--navy); }
     .rez .fmt[aria-pressed="true"] .fmt-t { font-weight: 600; }
 
@@ -741,13 +741,13 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .cal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
     .rez .cal-top b { font-weight: 600; font-size: 17px; }
     .rez .bk-nav { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; font-size: 22px; }
-    .rez .bk-nav:hover:not(:disabled) { background: var(--tint); }
+    @media (hover: hover) { .rez .bk-nav:hover:not(:disabled) { background: var(--tint); } }
     .rez .bk-nav:disabled { opacity: .25; cursor: default; }
     .rez .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-variant-numeric: tabular-nums; touch-action: pan-y; }
     .rez .dow { font-size: 12px; color: var(--mute); padding-bottom: 2px; }
     .rez .day { aspect-ratio: 1; max-width: 100%; border: 0; border-radius: 50%; background: transparent; font-size: 14px; color: var(--mute); opacity: .28; display: grid; place-items: center; }
     .rez .day.free { background: var(--tint); color: var(--navy); opacity: 1; cursor: pointer; font-weight: 600; font-size: 16px; }
-    .rez .day.free:hover { background: var(--tint-deep); }
+    @media (hover: hover) { .rez .day.free:hover { background: var(--tint-deep); } }
     .rez .day.sel { background: var(--coral); color: var(--on-coral); }
     .rez .day.out { visibility: hidden; }
     /* month change by swipe on phones: the new month slides in from the swipe side.
@@ -773,7 +773,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     @media (min-width: 720px) { .rez .times { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 860px) { .rez .times { grid-template-columns: repeat(3, 1fr); } }
     .rez .time { min-height: 52px; border-radius: 14px; border: 1.5px solid transparent; background: var(--tint); cursor: pointer; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; transition: background .15s, border-color .15s; }
-    .rez .time:hover { background: var(--tint-strong); }
+    @media (hover: hover) { .rez .time:hover { background: var(--tint-strong); } }
     .rez .time[aria-pressed="true"] { background: var(--coral); color: var(--on-coral); border-color: var(--coral); }
     .rez .tz { color: var(--mute); font-size: 13px; } /* online clients abroad: whose 14:00 it is */
     .rez .hint { color: var(--mute); font-size: 15px; }
@@ -782,7 +782,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .link { border: 0; background: none; padding: 0; color: var(--blue); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; justify-self: start; min-height: 32px; text-align: left; }
 
     .rez .bk-btn { min-height: 56px; border: 0; border-radius: 999px; background: var(--coral); color: var(--on-coral); font-weight: 600; font-size: 18px; line-height: 1.2; letter-spacing: .005em; padding: 0 32px; cursor: pointer; width: 100%; }
-    .rez .bk-btn:hover { filter: brightness(1.04); }
+    @media (hover: hover) { .rez .bk-btn:hover { filter: brightness(1.04); } }
     @media (min-width: 720px) { .rez .bk-btn { width: auto; } }
     .rez .bk-btn[aria-busy="true"] { opacity: .75; cursor: progress; }
     .rez .bk-cta { display: grid; gap: 8px; justify-items: start; }
@@ -907,7 +907,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     </footer>
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
-    <script src="js/script.js?v=20261115-2"></script>
+    <script src="js/script.js?v=20261115-3"></script>
     <script>
     /* The booking: free times from /api/slots (booking/), the client's details, then Stripe's own payment page.
        Stripe comes back with ?paid=cs_... and the page shows the confirmation. Nothing is loaded from Stripe here. */

@@ -214,6 +214,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setMobileNavigationState(isOpen) {
         navMenu.classList.toggle('active', isOpen);
+        // The open menu covers the screen: the page behind it must not scroll (css: html.nav-open).
+        document.documentElement.classList.toggle('nav-open', isOpen);
         navToggle.setAttribute('aria-expanded', String(isOpen));
         navToggle.setAttribute('aria-label', isOpen ? 'Zavřít navigaci' : 'Otevřít navigaci');
 
