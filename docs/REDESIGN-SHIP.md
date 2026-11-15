@@ -4,9 +4,11 @@
 together with the own booking (section 4). It passes the gate below and runs on the test subdomain.
 Checked in the browser at 375 px, 320 px and desktop: all 21 pages (the 20 from `main` plus
 `rezervace.html`) load with no 404s or console errors; CLS stays 0 on load, scroll and during the
-booking calendar's animations; the LCP element is unchanged. Still open before launch: an
-obchodní podmínky page (cancellation, 14-day withdrawal, ČOI), and on launch day the privacy
-page's "Platnost od" date set to the launch date. To ship: merge `redesign-ship` into
+booking calendar's animations; the LCP element is unchanged. `obchodni-podminky.html` (16 Nov)
+is linked from the footer, the booking box above "Zaplatit", the sitemap and the first
+confirmation e-mail. On launch day set "Platnost od" on both legal pages
+(`obchodni-podminky.html`, `ochrana-osobnich-udaju.html`) to the launch date, and make sure the
+registered place of business is Vítkovická 3299/3a (the terms name it as místo podnikání). To ship: merge `redesign-ship` into
 `main`, push, deploy, then follow section 3.
 
 Two choices made during the port:

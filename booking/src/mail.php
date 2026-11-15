@@ -208,14 +208,17 @@ function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?Date
     $paid = $old ? '' : 'Platba ' . price_kc() . ' byla přijata.';
     $rule = 'Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením. Později se platba nevrací.';
     $linkLabel = 'Přesunout nebo zrušit termín';
+    // § 1824 OZ: the confirmation carries the terms; on a move the contract is the same, so only the first time
+    $terms = $old ? '' : site() . '/obchodni-podminky.html';
 
     $text = implode("\n", [$title, '', ...session_text($b, $start, true), ...($old ? [$oldTxt] : []), ...($paid ? [$paid] : []), '',
-        $rule, $linkLabel . ': ' . $cancelUrl, ...text_foot()]);
+        $rule, $linkLabel . ': ' . $cancelUrl, ...($terms ? ['', 'Obchodní podmínky: ' . $terms] : []), ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, true), [
         $old ? h($oldTxt) : '',
         // the paid amount stands out (owner, 14 Nov): navy like the panel, the amount in 600 like the session time
         $paid ? '<span style="color:#163A55">Platba <b style="font-weight:600">' . h(price_kc()) . '</b> byla přijata.</span>' : '',
         h($rule) . '<br>' . mail_link($linkLabel, $cancelUrl),
+        $terms ? mail_muted('Rezervace se řídí ' . mail_link('obchodními podmínkami', $terms) . '.') : '',
     ], mail_tint($b), 'V příloze je termín do kalendáře.');
 
     // METHOD:PUBLISH, not REQUEST: a plain "add to calendar" file, no invitation/RSVP flow in the client's mail app
