@@ -776,8 +776,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .grid.in-next { animation: month-in-next .22s ease-out; }
     /* while the free times load: the days pulse in a soft wave, so the calendar reads as loading, not as empty;
        when they arrive, the calendar fades in (opacity only, nothing moves) */
-    .rez .grid.loading .day { background: var(--tint); opacity: .55; animation: day-wait 1.4s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 40ms); }
-    @keyframes day-wait { 50% { opacity: .2; } }
+    .rez .grid.loading .day { background: var(--tint-deep); opacity: .3; animation: day-wait 1s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 25ms); }
+    @keyframes day-wait { 50% { opacity: .95; } }
     .rez .cols.in-fade { animation: cal-in .3s ease-out; }
     @keyframes cal-in { from { opacity: .25; } }
     .rez .grid.in-prev { animation: month-in-prev .22s ease-out; }
