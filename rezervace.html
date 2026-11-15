@@ -808,8 +808,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     /* 16px: smaller makes iPhones zoom into the field on tap */
     .rez input, .rez textarea { font: inherit; font-size: 16px; color: var(--navy); background: var(--card); border: 1.5px solid var(--bk-line); border-radius: 12px; padding: 12px 14px; min-height: 48px; width: 100%; }
     .rez textarea { resize: vertical; line-height: 1.5; }
-    .rez .names { display: grid; gap: 16px; }
-    @media (min-width: 480px) { .rez .names { grid-template-columns: 1fr 1fr; } }
     .rez [hidden] { display: none !important; }
     .rez .bk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
     .rez .err { color: var(--coral-ink); font-size: 13px; font-weight: 500; }
@@ -1079,7 +1077,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         view.innerHTML = '<div class="bk-step">' +
           '<button type="button" class="link" id="back">‹ Změnit termín</button>' + summary() +
           '<form id="f" novalidate>' +
-          '<div class="names">' + field('fn', 'Jméno', 'text', 'given-name', true, '') + field('ln', 'Příjmení', 'text', 'family-name', true, '') + '</div>' +
+          field('n', 'Jméno a příjmení', 'text', 'name', true, '') +
           contact + reason + terms +
           '<div class="bk-cta"><button class="bk-btn" type="submit" id="go">' + PRICE + '</button></div>' +
           '<p class="err" id="go-err" role="alert"></p>' +
@@ -1097,8 +1095,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         document.getElementById('f').onsubmit = function (ev) {
           ev.preventDefault();
           var checks = {
-            fn: function (v) { return v ? '' : 'Vyplňte prosím jméno.'; },
-            ln: function (v) { return v ? '' : 'Vyplňte prosím příjmení.'; },
+            // one field, autofilled as a whole name; a surname is required (owner, 15 Nov): two words, the last one at least two letters
+            n: function (v) { var w = v.split(/\s+/); return !v ? 'Vyplňte prosím jméno a příjmení.' : (w.length < 2 || w[w.length - 1].replace(/[.\-']/g, '').length < 2 ? 'Doplňte prosím i příjmení.' : ''); },
             e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, přijde na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
             p: function (v, req) { return !v ? (req ? 'Vyplňte prosím telefon.' : '') : (v.replace(/\D/g, '').length >= 9 ? '' : 'Telefon nevypadá správně.'); }
           };
@@ -1114,9 +1112,9 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
           var e = document.getElementById('e');
           state.email = e ? e.value.trim() : '';
           state.phone = online ? '' : document.getElementById('p').value.trim();
-          state.name = document.getElementById('fn').value.trim() + ' ' + document.getElementById('ln').value.trim();
+          state.name = document.getElementById('n').value.trim().replace(/\s+/g, ' ');
           state.note = document.getElementById('r').value.trim();
-          var keep = {}; ['fn', 'ln', 'e', 'p', 'r'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
+          var keep = {}; ['n', 'e', 'p', 'r'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
           try { sessionStorage.setItem('khg-form', JSON.stringify(keep)); } catch (x) {}
           toCheckout(document.getElementById('go'));
         };

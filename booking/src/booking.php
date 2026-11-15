@@ -75,8 +75,12 @@ function parse_choice(array $b): array
     $email = trim((string)($b['email'] ?? ''));
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new ClientError('E-mail nevypadá správně.', 400);
     if ($forma === 'online' && $email === '') throw new ClientError('Vyplňte prosím e-mail, pošlu na něj odkaz na videohovor.', 400);
+    // first name and surname, in one field (the page checks the same)
+    $name = preg_replace('/\s+/u', ' ', trim((string)($b['name'] ?? '')));
+    $words = $name === '' ? [] : explode(' ', $name);
+    if (count($words) < 2 || preg_match_all('/\p{L}/u', end($words)) < 2) throw new ClientError('Vyplňte prosím jméno a příjmení.', 400);
     $meta = ['zdroj' => 'web', 'kopie' => site_copy(), 'forma' => $forma, 'den' => $start->format('Y-m-d'), 'cas' => $start->format('G:i'),
-        'jmeno' => cut(trim((string)($b['name'] ?? '')), 100), 'email' => substr($email, 0, 200),
+        'jmeno' => cut($name, 100), 'email' => substr($email, 0, 200),
         'telefon' => cut(trim((string)($b['phone'] ?? '')), 40)];
     return [$start, $meta];
 }

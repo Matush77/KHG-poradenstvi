@@ -40,7 +40,7 @@ $keep = getenv('KHG_CONFIG_DIR'); putenv('KHG_CONFIG_DIR');
 ok(config_dir('/home/x/public_html') === '/home/x/.config/khg', 'live site: ~/.config/khg');
 ok(config_dir('/home/x/test_html') === '/home/x/.config/khg-test', 'test subdomain: its own ~/.config/khg-test');
 putenv("KHG_CONFIG_DIR=$keep");
-[, $m] = parse_choice(['f' => 'online', 'date' => date('Y-m-d', strtotime('+10 days')), 'time' => '10:00', 'email' => 'a@b.cz']);
+[, $m] = parse_choice(['f' => 'online', 'date' => date('Y-m-d', strtotime('+10 days')), 'time' => '10:00', 'name' => 'Jana Nováková', 'email' => 'a@b.cz']);
 ok($m['kopie'] === site_copy() && site_copy() === basename(getenv('KHG_CONFIG_DIR')), 'each payment names its site copy (sweep books only its own)');
 
 // --- times
@@ -54,14 +54,19 @@ throws(fn() => slot_start('2026-12-22', '25:00'), 400, 'impossible time refused'
 throws(fn() => slot_start('22.12.2026', '9:00'), 400, 'wrong date format refused');
 
 // --- the client's choice
-throws(fn() => parse_choice(['f' => 'online', 'date' => '2020-01-01', 'time' => '9:00', 'email' => 'a@b.cz']), 400, 'past slot refused');
-throws(fn() => parse_choice(['f' => 'online', 'date' => (new DateTimeImmutable('+200 days'))->format('Y-m-d'), 'time' => '9:00', 'email' => 'a@b.cz']), 400, 'slot too far ahead refused');
+throws(fn() => parse_choice(['f' => 'online', 'date' => '2020-01-01', 'name' => 'Jana Nováková', 'time' => '9:00', 'email' => 'a@b.cz']), 400, 'past slot refused');
+throws(fn() => parse_choice(['f' => 'online', 'date' => (new DateTimeImmutable('+200 days'))->format('Y-m-d'), 'name' => 'Jana Nováková', 'time' => '9:00', 'email' => 'a@b.cz']), 400, 'slot too far ahead refused');
 $future = (new DateTimeImmutable('+10 days'))->format('Y-m-d');
-throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'time' => '9:00', 'email' => '']), 400, 'online without e-mail refused');
-throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'time' => '9:00', 'email' => 'nope']), 400, 'bad e-mail refused');
-[$s, $meta] = parse_choice(['f' => 'osobne', 'date' => $future, 'time' => '9:00', 'phone' => '+420 777 123 456', 'price' => 1]);
+throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'name' => 'Jana Nováková', 'time' => '9:00', 'email' => '']), 400, 'online without e-mail refused');
+throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'name' => 'Jana Nováková', 'time' => '9:00', 'email' => 'nope']), 400, 'bad e-mail refused');
+[$s, $meta] = parse_choice(['f' => 'osobne', 'date' => $future, 'time' => '9:00', 'phone' => '+420 777 123 456', 'name' => 'Jana  Nováková ', 'price' => 1]);
 ok($meta['forma'] === 'osobne' && $meta['cas'] === '9:00' && !isset($meta['price']), 'in person without e-mail accepted, price from the browser ignored');
-[, $meta] = parse_choice(['f' => 'hack', 'date' => $future, 'time' => '9:00', 'email' => 'a@b.cz']);
+ok($meta['jmeno'] === 'Jana Nováková', 'name spaces tidied');
+foreach (['', 'Jana', 'Jana N.', '  Jana  '] as $nm)
+    throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'time' => '9:00', 'name' => $nm, 'email' => 'a@b.cz']), 400, "name without a surname refused: '$nm'");
+[, $meta] = parse_choice(['f' => 'online', 'date' => $future, 'time' => '9:00', 'name' => 'Jan Novák-Dvořák', 'email' => 'a@b.cz']);
+ok($meta['jmeno'] === 'Jan Novák-Dvořák', 'double surname accepted');
+[, $meta] = parse_choice(['f' => 'hack', 'date' => $future, 'time' => '9:00', 'name' => 'Jana Nováková', 'email' => 'a@b.cz']);
 ok($meta['forma'] === 'online', 'unknown format falls back to online');
 
 // --- signed cancel links
@@ -119,10 +124,10 @@ file_put_contents("$tmp/test.eml", $eml);
 // --- holds and cancel rules (database only)
 $slot = slot_start($future, '10:00')->format(DATE_ATOM);
 db()->prepare('INSERT INTO holds (slot, pay_id, expires_at) VALUES (?, ?, ?)')->execute([$slot, 'cs_test_other', time() + 600]);
-throws(fn() => create_checkout(['f' => 'online', 'date' => $future, 'time' => '10:00', 'email' => 'a@b.cz']), 409, 'held slot refused before any network call');
+throws(fn() => create_checkout(['f' => 'online', 'date' => $future, 'name' => 'Jana Nováková', 'time' => '10:00', 'email' => 'a@b.cz']), 409, 'held slot refused before any network call');
 db()->prepare('UPDATE holds SET expires_at = ? WHERE slot = ?')->execute([time() - 1, $slot]);
 db()->prepare("INSERT INTO bookings (pay_id, slot, forma, status, created_at, updated_at) VALUES ('cs_test_paid', ?, 'online', 'booked', 0, 0)")->execute([$slot]);
-throws(fn() => create_checkout(['f' => 'osobne', 'date' => $future, 'time' => '10:00', 'phone' => '777123456']), 409, 'booked slot refused for the other format too');
+throws(fn() => create_checkout(['f' => 'osobne', 'date' => $future, 'name' => 'Jana Nováková', 'time' => '10:00', 'phone' => '777123456']), 409, 'booked slot refused for the other format too');
 $cnt = (int)db()->query('SELECT COUNT(*) FROM holds')->fetchColumn();
 ok($cnt === 0, 'expired hold cleaned up');
 
@@ -281,11 +286,11 @@ $_COOKIE[HOLD_COOKIE] = str_repeat('a', 24);
 $own = '2027-01-12T10:00:00+01:00';
 db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, NULL, ?, ?, ?)')->execute([$own, time() + 600, $me, $mine]);
 ok(!in_array($own, taken_slots($mine), true) && in_array($own, taken_slots(null), true) && in_array($own, taken_slots('otherbrowser0000'), true), 'own hold is free for this browser only');
-try { create_checkout(['f' => 'online', 'date' => '2027-01-12', 'time' => '10:00', 'email' => 'a@b.cz']); $code = 0; }
+try { create_checkout(['f' => 'online', 'date' => '2027-01-12', 'name' => 'Jana Nováková', 'time' => '10:00', 'email' => 'a@b.cz']); $code = 0; }
 catch (ClientError $e) { $code = $e->getCode(); }
 ok($code !== 409, "same browser may pay for its held time again (got $code offline, not 409)");
 db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, NULL, ?, ?, ?)')->execute([$own, time() + 600, $me, 'otherbrowser0000']);
-throws(fn() => create_checkout(['f' => 'online', 'date' => '2027-01-12', 'time' => '10:00', 'email' => 'a@b.cz']), 409, 'another browser\'s hold still refused, even from the same IP');
+throws(fn() => create_checkout(['f' => 'online', 'date' => '2027-01-12', 'name' => 'Jana Nováková', 'time' => '10:00', 'email' => 'a@b.cz']), 409, 'another browser\'s hold still refused, even from the same IP');
 db()->exec("DELETE FROM holds WHERE slot = '$own'");
 
 // --- back from Stripe unpaid: only this browser's finished Stripe pages are released (the Stripe call itself is checked live)
