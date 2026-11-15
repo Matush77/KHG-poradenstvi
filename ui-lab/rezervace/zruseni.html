@@ -84,7 +84,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   function summary(d) {
     var online = d.forma !== 'osobne';
     document.body.classList.toggle('f-osobne', !online);
-    return '<div class="summary"><b>' + esc(when(d)) + '</b><span>' + (online ? 'Online · Google Meet' : 'Osobně · Vítkovická 3299/3A, Ostrava') + ' · 50 minut · 1 100 Kč</span></div>';
+    return '<div class="summary"><b>' + esc(when(d)) + '</b><span>' + (online ? 'Online · Google Meet' : 'Osobně · Vítkovická 3299/3a, Ostrava') + ' · 50 minut · 1 100 Kč</span></div>';
   }
   function show(html) { card.innerHTML = html; card.setAttribute('aria-busy', 'false'); }
 

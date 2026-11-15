@@ -51,7 +51,7 @@ def load_keys():
 SK, PK = load_keys()
 BOOKED = os.path.join(os.path.expanduser('~/.config/khg'), 'demo-bookings.json')  # payment id -> calendar event, so a reload never books twice
 _lock = threading.Lock()
-PLACE = 'Vítkovická 3299/3A, Ostrava'
+PLACE = 'Vítkovická 3299/3a, Ostrava'
 SITE = 'http://localhost:8810'  # real back end: https://khgporadenstvi.cz
 CANCEL_PAGE = '/ui-lab/rezervace/zruseni.html'
 OUTBOX = os.path.expanduser('~/.config/khg/outbox')  # demo: e-mails are written here instead of being sent

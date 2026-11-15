@@ -12,7 +12,7 @@ window.KHG = (function () {
   var LAST = new Date(2027, 0, 31);
   var FORMATS = {
     online: { name: 'Online', where: 'videohovor Google&nbsp;Meet', facts: '<b>50 minut · 1 100 Kč</b> · videohovor Google&nbsp;Meet', after: 'Odkaz na videohovor je v potvrzení.' },
-    osobne: { name: 'Osobně v Ostravě', where: 'Vítkovická 3299/3A, Ostrava', facts: '<b>50 minut · 1 100 Kč</b> · Vítkovická 3299/3A, Ostrava', after: 'Ordinace je na adrese Vítkovická 3299/3A, Ostrava. Prosím, zvoňte až v čase vašeho sezení.' }
+    osobne: { name: 'Osobně v Ostravě', where: 'Vítkovická 3299/3a, Ostrava', facts: '<b>50 minut · 1 100 Kč</b> · Vítkovická 3299/3a, Ostrava', after: 'Ordinace je na adrese Vítkovická 3299/3a, Ostrava. Prosím, zvoňte až v čase vašeho sezení.' }
   };
 
   var state = { f: 'online', date: null, time: null, step: 1, email: '' };

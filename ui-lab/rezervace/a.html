@@ -47,7 +47,7 @@
       view.innerHTML = progress(1) + '<h1>Jak se chcete potkat?</h1>' +
         '<div class="opts two">' +
         '<button class="opt online" data-f="online"><b>Online</b><span>Videohovor Google Meet, odkudkoli</span><span>50 minut · 1 100 Kč</span></button>' +
-        '<button class="opt osobne" data-f="osobne"><b>Osobně v Ostravě</b><span>Vítkovická 3299/3A, Ostrava</span><span>50 minut · 1 100 Kč</span></button></div>';
+        '<button class="opt osobne" data-f="osobne"><b>Osobně v Ostravě</b><span>Vítkovická 3299/3a, Ostrava</span><span>50 minut · 1 100 Kč</span></button></div>';
       view.querySelectorAll('.opt').forEach(function (b) { b.onclick = function () { s.f = b.dataset.f; s.date = null; s.time = null; sub = 'day'; var ff = K.firstFree(K.TODAY); month = new Date(ff.getFullYear(), ff.getMonth(), 1); K.render(); }; });
     } else if (sub === 'day') {
       view.innerHTML = progress(2) + '<button class="back" id="b">‹ Zpět</button>' + '<h1>Který den vám vyhovuje?</h1>' + chosen() +
