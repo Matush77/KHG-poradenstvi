@@ -774,6 +774,12 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .day.out { visibility: hidden; }
     /* month change by swipe on phones: the new month slides in from the swipe side */
     .rez .grid.in-next { animation: month-in-next .22s ease-out; }
+    /* while the free times load: the days pulse in a soft wave, so the calendar reads as loading, not as empty;
+       when they arrive, the calendar fades in (opacity only, nothing moves) */
+    .rez .grid.loading .day { background: var(--tint); opacity: .55; animation: day-wait 1.4s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 40ms); }
+    @keyframes day-wait { 50% { opacity: .2; } }
+    .rez .cols.in-fade { animation: cal-in .3s ease-out; }
+    @keyframes cal-in { from { opacity: .25; } }
     .rez .grid.in-prev { animation: month-in-prev .22s ease-out; }
     @keyframes month-in-next { from { transform: translateX(24px); opacity: 0; } }
     @keyframes month-in-prev { from { transform: translateX(-24px); opacity: 0; } }
@@ -822,7 +828,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .bk-step { display: grid; gap: 20px; }
     .rez .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 10px; vertical-align: -2px; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) { .rez .grid.in-next, .rez .grid.in-prev, .rez .spin { animation: none; } .rez * { transition: none !important; } }
+    @media (prefers-reduced-motion: reduce) { .rez .grid.in-next, .rez .grid.in-prev, .rez .spin, .rez .grid.loading .day, .rez .cols.in-fade { animation: none; } .rez * { transition: none !important; } }
     </style>
 </head>
 <body>
@@ -943,6 +949,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
       var state = { f: 'online', month: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1), date: null, time: null, step: 1, email: '' };
       var LOADING = ''; // shown in place of the times while the free times load
+      var WAITING = 'Načítám volné termíny…'; // LOADING while the times are on their way (not the error message)
       var rez = document.querySelector('.rez'), view = document.getElementById('view');
 
       function key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -1007,10 +1014,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
           var cls = 'day' + (free ? ' free' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
           cells.push(free
             ? '<button type="button" class="' + cls + '" data-d="' + n + '" aria-label="' + long(d) + '" aria-pressed="' + (cls.indexOf(' sel') > 0) + '">' + n + '</button>'
-            : '<span class="' + cls + '">' + n + '</span>');
+            : '<span class="' + cls + '"' + (LOADING === WAITING ? ' style="--i:' + n + '"' : '') + '>' + n + '</span>');
         }
         var slots = state.date ? slotsFor(state.date) : [];
-        var right = LOADING ? '<p class="hint" id="loading">' + LOADING + '</p>'
+        var right = LOADING ? '<p class="hint" id="loading">' + (LOADING === WAITING ? '<span class="spin" aria-hidden="true"></span>' : '') + LOADING + '</p>'
           : (state.date && slots.length)
           ? '<h2>' + cap(long(state.date)) + '</h2><div class="times">' +
             slots.map(function (t) { return '<button type="button" class="time" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + '</button>'; }).join('') + '</div>' +
@@ -1020,7 +1027,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
         view.innerHTML =
           '<div class="cols"><div><div class="cal-top"><button type="button" class="bk-nav" id="prev" aria-label="Předchozí měsíc"' + (y * 12 + mo <= FIRST.getFullYear() * 12 + FIRST.getMonth() ? ' disabled' : '') + '>‹</button><b>' + MONTHS[mo] + ' ' + y + '</b><button type="button" class="bk-nav" id="next" aria-label="Další měsíc"' + (y * 12 + mo >= LAST.getFullYear() * 12 + LAST.getMonth() ? ' disabled' : '') + '>›</button></div>' +
-          '<div class="grid">' + cells.concat(pad(cells.length)).join('') + '</div></div>' +
+          '<div class="grid' + (LOADING === WAITING ? ' loading' : '') + '">' + cells.concat(pad(cells.length)).join('') + '</div></div>' +
           '<div class="slots" id="slots">' + right + '</div></div>';
 
         view.querySelectorAll('.day.free').forEach(function (b) { b.onclick = function () { state.date = new Date(y, mo, +b.dataset.d); state.time = null; render(); scrollSlots(); }; });
@@ -1032,7 +1039,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         function month(delta) { state.month = new Date(y, mo + delta, 1); state.time = null; state.date = null; slide = delta > 0 ? 'next' : 'prev'; render(); }
         document.getElementById('prev').onclick = function () { month(-1); };
         document.getElementById('next').onclick = function () { month(1); };
-        if (slide) { view.querySelector('.grid').classList.add('in-' + slide); slide = null; }
+        if (slide) { view.querySelector(slide === 'fade' ? '.cols' : '.grid').classList.add('in-' + slide); slide = null; }
         var back = fk && (view.querySelector(fk) || (fk.indexOf('.day') === 0 && view.querySelector('.day.sel')));
         if (back && !back.disabled) back.focus(); else if (fk === '#prev' || fk === '#next') { var nb = view.querySelector('.bk-nav:not(:disabled)'); if (nb) nb.focus(); }
         if (LOADING) { view.querySelectorAll('.bk-nav').forEach(function (b) { b.disabled = true; }); say(LOADING.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')); return; }
@@ -1235,7 +1242,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
       // the calendar is drawn at once (same size, so nothing moves) and filled when the times arrive
       state.f = new URLSearchParams(location.search).get('forma') === 'osobne' ? 'osobne' : 'online';
-      LOADING = 'Načítám volné termíny…';
+      LOADING = WAITING;
       renderHead(); renderStep1();
       if (new URLSearchParams(location.search).get('paid')) { try { sessionStorage.removeItem('khg-pay'); } catch (x) {} }
       var released = releaseHeld();
@@ -1244,7 +1251,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         if (!e.persisted) return;
         releaseHeld().then(loadSlots).then(render, render);
       });
-      released.then(loadSlots).then(function () { LOADING = ''; start(); }, function () {
+      released.then(loadSlots).then(function () { LOADING = ''; slide = 'fade'; start(); }, function () {
         LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
         renderStep1();
       });
