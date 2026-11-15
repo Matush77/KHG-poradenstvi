@@ -64,7 +64,13 @@ button, a, label { -webkit-tap-highlight-color: transparent; }
 /* Header: title, one facts line, format switch */
 .head { display: grid; gap: 12px; }
 .head h1 { font-size: 26px; line-height: 1.2; }
-.facts { margin: 0; color: var(--slate); font-size: 15px; }
+.facts { margin: 0; color: var(--slate); font-size: 15px; text-align: center; }
+/* the facts line, centred on phones, with a back arrow on its left (owner, 16 Nov); left-aligned from 720 px */
+.bar { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; margin: -10px -12px; }
+.bar[hidden] { display: none; }
+.bk-exit { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; color: var(--navy); }
+@media (hover: hover) { .bk-exit:hover { background: var(--card); } }
+@media (min-width: 720px) { .bar { grid-template-columns: 44px auto; justify-content: start; } .facts { text-align: left; } }
 .facts b { color: var(--navy); font-weight: 600; }
 /* Format switch: six looks to compare, picked with ?sw=1..10, default 8 (owner pick 13 Nov) (class on <html>; see rezervace/prepinac.html). Default 1. */
 .fmt-x, .fmt-s { display: none; }
@@ -329,7 +335,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
 .p-3 .time { background: var(--tint); border-color: transparent; }
 @media (hover: hover) { .p-3 .time:hover { background: var(--tint-strong); } }
 .p-4 .head { gap: 4px; }
-.p-4 .facts { order: 1; }
+.p-4 .bar { order: 1; }
 .p-4 .switch { order: 2; margin-top: 12px; }
 .p-5 input, .p-5 textarea { background: var(--card); }
 .p-6 .done { justify-items: start; }
@@ -352,7 +358,10 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
         <button class="fmt" data-f="online" aria-pressed="true"><span class="fmt-t">Online</span><small class="fmt-s">Videohovor Google Meet</small></button>
         <button class="fmt" data-f="osobne" aria-pressed="false"><span class="fmt-t">Osobně<span class="fmt-x"> v Ostravě</span></span><small class="fmt-s">Vítkovická 3299/3a</small></button>
       </div>
-      <p class="facts" id="facts"></p>
+      <div class="bar" id="bar">
+        <a class="bk-exit" href="/ui-lab/proposal/" aria-label="Zpět"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <p class="facts" id="facts"></p>
+      </div>
     </div>
     <div id="view"></div>
     <p class="sr" id="status" aria-live="polite"></p>
@@ -789,11 +798,16 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     if (embedded) { embedded.destroy(); embedded = null; } // Stripe allows one embedded Checkout at a time
     renderHead();
     document.querySelector('.switch').hidden = state.step !== 1;
-    document.getElementById('facts').hidden = state.step !== 1;
+    document.getElementById('bar').hidden = state.step !== 1;
     document.getElementById('title').hidden = state.step === 3;
     if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else if (state.step === 4) renderPay(); else renderStep3();
     syncUrl();
   }
+
+  // the back arrow: back to the page the visitor came from on this site, else the lab homepage
+  document.querySelector('.bk-exit').onclick = function (e) {
+    if (history.length > 1 && document.referrer.indexOf(location.origin + '/') === 0 && !/rezervace-ukazka\.html/.test(document.referrer)) { e.preventDefault(); history.back(); }
+  };
 
   document.querySelectorAll('.fmt').forEach(function (b) {
     b.onclick = function () {
