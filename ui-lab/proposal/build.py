@@ -476,6 +476,14 @@ def build_page(name, layer):
                        '<img src="ui-lab/proposal/img/portrait-avatar-192.webp" alt="Mgr. Kristýna Hriciková Glattová" width="96" height="96" loading="lazy" decoding="async">',
                        p, count=1)
         assert n == 1, name
+        # owner, 15 Nov: every article the same: "← Zpět na blog" at the top and at the bottom, no visible
+        # "Domů › Blog › …" line (the BreadcrumbList in the JSON-LD stays)
+        p = re.sub(r'\n[ \t]*<nav aria-label="breadcrumb"[^>]*>.*?</nav>[ \t]*(?=\n)', '', p, flags=re.S)
+        p = p.replace('class="btn btn-primary">← Zpět na všechny články</a>', 'class="back-link">← Zpět na blog</a>')
+        if p.count('Zpět na blog') == 1:
+            p, n = re.subn(r'(</a>\n                </div>\n            </div>\n)(        </div>\n    </section>)',
+                           r'\1\n            <div class="blog-post-footer">\n                <a href="blog.html" class="back-link">← Zpět na blog</a>\n            </div>\n\2', p, count=1)
+            assert n == 1, name
 
     if layer == "quiz.css":
         # steps forward are navy; coral stays for booking
