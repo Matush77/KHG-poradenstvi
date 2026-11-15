@@ -722,7 +722,13 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
     /* Header: one facts line, then the format switch */
     .rez .head { display: grid; gap: 4px; }
-    .rez .facts { order: 1; color: var(--slate); font-size: 15px; }
+    /* the facts line, centred on phones, with a back arrow on its left (owner, 16 Nov); left-aligned from 720 px like the rest */
+    .rez .bar { order: 1; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; margin: -10px -12px; }
+    .rez .bar[hidden] { display: none; }
+    .rez .facts { color: var(--slate); font-size: 15px; text-align: center; }
+    .rez .bk-exit { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; color: var(--navy); }
+    @media (hover: hover) { .rez .bk-exit:hover { background: var(--card); } }
+    @media (min-width: 720px) { .rez .bar { grid-template-columns: 44px auto; justify-content: start; } .rez .facts { text-align: left; } }
     .rez .facts b { color: var(--navy) !important; font-weight: 600 !important; }
     /* the coloured pill slides to the chosen side and changes tint on the way (transform only; off with reduced motion) */
     .rez .switch { order: 2; margin-top: 12px; position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--bk-line); }
@@ -854,7 +860,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                         <button type="button" class="fmt" data-f="online" aria-pressed="true"><span class="fmt-t">Online</span></button>
                         <button type="button" class="fmt" data-f="osobne" aria-pressed="false"><span class="fmt-t">Osobně v Ostravě</span></button>
                     </div>
-                    <p class="facts" id="facts"><b>50 min · 1 100 Kč</b> · Google&nbsp;Meet</p>
+                    <div class="bar" id="bar">
+                        <a class="bk-exit" href="/" aria-label="Zpět"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                        <p class="facts" id="facts"><b>50 min · 1 100 Kč</b> · Google&nbsp;Meet</p>
+                    </div>
                 </div>
                 <div id="view"></div>
                 <p class="bk-sr" id="status" aria-live="polite"></p>
@@ -1178,10 +1187,15 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       function render() {
         renderHead();
         document.querySelector('.rez .switch').hidden = state.step !== 1;
-        document.getElementById('facts').hidden = state.step !== 1;
+        document.getElementById('bar').hidden = state.step !== 1;
         if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else renderStep3();
         syncUrl();
       }
+
+      // the back arrow: back to the page the visitor came from on this site, else the homepage
+      document.querySelector('.rez .bk-exit').onclick = function (e) {
+        if (history.length > 1 && document.referrer.indexOf(location.origin + '/') === 0 && !/\/rezervace\.html/.test(document.referrer)) { e.preventDefault(); history.back(); }
+      };
 
       document.querySelectorAll('.rez .fmt').forEach(function (b) {
         b.onclick = function () {
