@@ -223,8 +223,6 @@ label em { font-style: normal; font-weight: 400; color: var(--mute); }
 input, textarea { font: inherit; font-size: 16px; color: var(--navy); background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 48px; width: 100%; }
 textarea { resize: vertical; line-height: 1.5; }
 
-.names { display: grid; gap: 16px; } /* first and last name, side by side when there is room */
-@media (min-width: 480px) { .names { grid-template-columns: 1fr 1fr; } }
 [hidden] { display: none !important; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
 .err { color: var(--coral-ink); font-size: 13px; font-weight: 500; }
@@ -591,7 +589,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     view.innerHTML = '<div class="step">' +
       '<button class="link" id="back">‹ Změnit termín</button>' + summary() +
       '<form id="f" novalidate>' +
-      '<div class="names">' + field('fn', 'Jméno', 'text', 'given-name', true, 'Jana', '') + field('ln', 'Příjmení', 'text', 'family-name', true, 'Nováková', '') + '</div>' +
+      field('n', 'Jméno a příjmení', 'text', 'name', true, 'Jana Nováková', '') +
       contact + reason +
       (PAY === 1 ? cardFields() : '') + terms +
       '<div class="cta"><button class="btn" type="submit" id="go">' + (PAY >= 2 ? 'Pokračovat k platbě' : 'Zaplatit 1 100 Kč') + '</button></div>' +
@@ -611,8 +609,8 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     document.getElementById('f').onsubmit = function (ev) {
       ev.preventDefault();
       var checks = {
-        fn: function (v) { return v ? '' : 'Vyplňte prosím jméno.'; },
-        ln: function (v) { return v ? '' : 'Vyplňte prosím příjmení.'; },
+        // one field, autofilled as a whole name; a surname is required (owner, 15 Nov): two words, the last one at least two letters
+        n: function (v) { var w = v.split(/\s+/); return !v ? 'Vyplňte prosím jméno a příjmení.' : (w.length < 2 || w[w.length - 1].replace(/[.\-']/g, '').length < 2 ? 'Doplňte prosím i příjmení.' : ''); },
         e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, přijde na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
         p: function (v, req) { return !v ? (req ? 'Vyplňte prosím telefon.' : '') : (v.replace(/\D/g, '').length >= 9 ? '' : 'Telefon nevypadá správně.'); }
       };
@@ -629,10 +627,10 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
       var e = document.getElementById('e');
       state.email = e ? e.value.trim() : '';
       state.phone = online ? '' : document.getElementById('p').value.trim();
-      state.name = document.getElementById('fn').value.trim() + ' ' + document.getElementById('ln').value.trim();
+      state.name = document.getElementById('n').value.trim().replace(/\s+/g, ' ');
       state.note = document.getElementById('r').value.trim(); // only to the therapist's e-mail, never to Stripe or the calendar
       if (STRIPE && PAY === 0) {
-        var keep = {}; ['fn', 'ln', 'e', 'p', 'r'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
+        var keep = {}; ['n', 'e', 'p', 'r'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
         try { sessionStorage.setItem('khg-form', JSON.stringify(keep)); } catch (x) {}
         toCheckout(document.getElementById('go')); return;
       }
