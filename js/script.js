@@ -380,6 +380,16 @@ document.addEventListener('DOMContentLoaded', function() {
             navToggle.focus();
         }
     });
+
+    // The open menu covers the whole screen, so Tab past its last item would reach links hidden
+    // behind it: close the menu once focus leaves it. Focus stays where the visitor tabbed to.
+    document.addEventListener('focusin', function(event) {
+        if (navMenu.classList.contains('active') &&
+            !navMenu.contains(event.target) &&
+            !navToggle.contains(event.target)) {
+            setMobileNavigationState(false);
+        }
+    });
 });
 
 // Arriving at /#section from another page: the browser jumps to the section
