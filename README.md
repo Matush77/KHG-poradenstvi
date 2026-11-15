@@ -21,7 +21,7 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 **SEO and structured data.** Every content page has its own meta description, canonical URL and Open Graph tags. The homepage has JSON-LD markup (`LocalBusiness`, `Person`, `Service`, `OfferCatalog`, `FAQPage`), and the site has a hand-maintained `sitemap.xml` and `robots.txt`.
 
 **Performance.**
-- Fonts (Inter and Playfair Display) are self-hosted as variable WOFF2 files.
+- Fonts (Inter and Fraunces) are self-hosted as subset WOFF2 files (`fonts/Inter/Inter-LatinExt-var.woff2`, `fonts/Fraunces/Fraunces-500-Soft-cs.woff2`), each with its licence (`OFL.txt`).
 - Images are WebP, served at 640 px or 1200 px depending on screen size.
 - Images below the fold load lazily.
 - No third-party scripts.
