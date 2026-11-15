@@ -143,7 +143,7 @@ h3 { line-height: 1.25; }
 
 /* [P6] Cards: one padding, one border, tinted layered shadows ----------- */
 .credential-card, .benefit-item, .target-group, .common-issues, .testimonial-content,
-.contact-compact, .service-main, .faq-item, .featured-link, .booking-option,
+.contact-compact, .service-main, .faq-item, .featured-link,
 .blog-card, .pricing-card, .pricing-info-item {
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
@@ -178,12 +178,12 @@ h3 { line-height: 1.25; }
 
 /* [P7] Radius: three sizes + pill (was 10 different values) -------------- */
 .credential-card, .benefit-item, .target-group, .common-issues, .technical-info,
-.faq-item, .featured-link, .booking-option, .blog-card, .pricing-info-item,
+.faq-item, .featured-link, .blog-card, .pricing-info-item,
 .service-facts, .contact-item, .article-summary, .article-safety-note,
 .article-callout, .related-resource, .article-author-box, .related-articles,
 .blog-post-image, .quiz-intro-image { border-radius: var(--r-md); }
 .service-main, .publication-feature, .cta-section, .cap-membership,
-.testimonial-content, .contact-compact, .contact-cta, .booking-modal,
+.testimonial-content, .contact-compact, .contact-cta,
 .pricing-card, .pricing-information, .blog-post-cta { border-radius: var(--r-lg); }
 .office-gallery-image, .office-gallery-image--main, .highlighted-text,
 .related-articles-list a, .article-examples p, .quiz-overview-note,
@@ -359,10 +359,6 @@ h3 { line-height: 1.25; }
 .quiz-info-box { background: none; border: 0; padding: 0; border-radius: 0;
     font-size: var(--fs-small); font-weight: 400; color: var(--text-medium); }
 .quiz-info-box strong { color: var(--primary); font-weight: 700; }
-/* F1 booking window: icon circles -> centred label cards */
-.booking-option { padding: 1.25rem 1.25rem 1.375rem; border-width: 1px; text-align: center; }
-.booking-option-label { display: block; margin-bottom: 0.375rem; font-size: var(--fs-label); font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); line-height: 1.3; }
 /* G2 empty blog category: no emoji, add a way back */
 .blog-empty { padding: var(--section-head-gap) var(--space-sm, 1rem); }
 .blog-empty h3 { font-size: var(--fs-h3); text-wrap: balance; }

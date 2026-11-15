@@ -2,13 +2,6 @@
    MODERN THERAPY WEBSITE - INTERACTIVE JS
    ========================================== */
 
-// Booking Modal Functions
-// Our own booking page (booking/ back end, payment by Stripe); the modal picks the format.
-const BOOKING_PAGE = '/rezervace.html';
-const BOOKING_MODAL_FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-let bookingModalTrigger = null;
-let bookingModalPreviousOverflow = '';
-
 // Keep the copyright year current across all pages.
 document.addEventListener('DOMContentLoaded', function() {
     const currentYear = new Date().getFullYear();
@@ -210,128 +203,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function openBookingModal() {
-    const modal = document.getElementById('bookingModal');
-    if (!modal || modal.classList.contains('active')) return;
-
-    const activeElement = document.activeElement;
-    bookingModalTrigger = activeElement && typeof activeElement.focus === 'function'
-        ? activeElement
-        : null;
-    bookingModalPreviousOverflow = document.body.style.overflow;
-
-    modal.removeAttribute('inert');
-    modal.classList.add('active');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-
-    // Let Chrome render the removed inert state before focusing the dialog.
-    window.requestAnimationFrame(function() {
-        window.requestAnimationFrame(function() {
-            modal.focus({ preventScroll: true });
-            setBookingModalBackgroundInert(modal, true);
-        });
-    });
-}
-
-function closeBookingModal() {
-    const modal = document.getElementById('bookingModal');
-    if (!modal || !modal.classList.contains('active')) return;
-
-    modal.classList.remove('active');
-    modal.setAttribute('aria-hidden', 'true');
-    modal.setAttribute('inert', '');
-    setBookingModalBackgroundInert(modal, false);
-    document.body.style.overflow = bookingModalPreviousOverflow;
-
-    const trigger = bookingModalTrigger;
-    bookingModalTrigger = null;
-
-    if (trigger && trigger.isConnected) {
-        window.requestAnimationFrame(function() {
-            trigger.focus();
-        });
-    }
-}
-
-function setBookingModalBackgroundInert(modal, shouldBeInert) {
-    if (shouldBeInert) {
-        Array.from(document.body.children).forEach(function(element) {
-            if (element === modal || element.tagName === 'SCRIPT' || element.hasAttribute('inert')) return;
-            element.setAttribute('inert', '');
-            element.dataset.bookingModalInert = 'true';
-        });
-        return;
-    }
-
-    document.querySelectorAll('[data-booking-modal-inert="true"]').forEach(function(element) {
-        element.removeAttribute('inert');
-        delete element.dataset.bookingModalInert;
-    });
-}
-
-function getBookingModalFocusableElements(modal) {
-    return Array.from(modal.querySelectorAll(BOOKING_MODAL_FOCUSABLE)).filter(function(element) {
-        return element.getAttribute('aria-hidden') !== 'true' && element.offsetParent !== null;
-    });
-}
-
-function bookOnline() {
-    window.location.href = BOOKING_PAGE;
-}
-
-function bookInPerson() {
-    window.location.href = BOOKING_PAGE + '?forma=osobne';
-}
-
-// Initialize modal event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('bookingModal');
-    if (modal) {
-        const isActive = modal.classList.contains('active');
-        modal.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-        modal.toggleAttribute('inert', !isActive);
-
-        // Close on backdrop click
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeBookingModal();
-            }
-        });
-
-        // Keep keyboard focus inside the modal and allow Escape to close it.
-        document.addEventListener('keydown', function(e) {
-            if (!modal.classList.contains('active')) return;
-
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                closeBookingModal();
-                return;
-            }
-
-            if (e.key !== 'Tab') return;
-
-            const focusableElements = getBookingModalFocusableElements(modal);
-            if (!focusableElements.length) {
-                e.preventDefault();
-                modal.focus();
-                return;
-            }
-
-            const firstElement = focusableElements[0];
-            const lastElement = focusableElements[focusableElements.length - 1];
-
-            if (e.shiftKey && (document.activeElement === firstElement || !modal.contains(document.activeElement))) {
-                e.preventDefault();
-                lastElement.focus();
-            } else if (!e.shiftKey && (document.activeElement === lastElement || !modal.contains(document.activeElement))) {
-                e.preventDefault();
-                firstElement.focus();
-            }
-        });
-    }
-});
-
 // Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.querySelector('.nav-toggle');
@@ -453,7 +324,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         const href = this.getAttribute('href');
 
-        // Skip smooth scroll for booking modal buttons and plain # links
+        // Skip plain # links and links with their own click handler
         if (href === '#' || this.hasAttribute('onclick')) return;
 
         e.preventDefault();

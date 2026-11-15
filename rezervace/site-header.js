@@ -7,12 +7,6 @@
   document.body.insertBefore(host, document.body.firstChild);
   var root = host.attachShadow({ mode: 'open' });
 
-  // site pages call this from the "Objednat se" button; here the booking is already on the page
-  window.openBookingModal = function () {
-    var p = document.querySelector('.panel');
-    if (p) p.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-  };
-
   function scope(css) {
     // :root, html and body rules of the site apply to the shadow host instead
     return css.replace(/:root\b/g, ':host').replace(/(^|[\s,{}>])(html|body)(?=[\s,{.:\[>])/g, '$1:host');
@@ -22,7 +16,7 @@
     var doc = new DOMParser().parseFromString(html, 'text/html');
     var header = doc.querySelector('header.header');
     var inline = Array.prototype.map.call(doc.querySelectorAll('head style'), function (s) { return s.textContent; }).join('\n');
-    return Promise.all(['/css/styles.css?v=20261113-1', '/css/polish.css?v=20261111-3'].map(function (u) {
+    return Promise.all(['/css/styles.css?v=20261115-1', '/css/polish.css?v=20261115-1'].map(function (u) {
       return fetch(u).then(function (r) { return r.ok ? r.text() : ''; });
     })).then(function (sheets) {
       var style = document.createElement('style');

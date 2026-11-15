@@ -34,9 +34,9 @@
     <link rel="apple-touch-icon" href="images/heart-180.png">
     <link rel="preload" href="fonts/Inter/Inter-LatinExt-var.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/Fraunces/Fraunces-500-Soft-cs.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/styles.css?v=20261113-1">
+    <link rel="stylesheet" href="css/styles.css?v=20261115-1">
     <link rel="stylesheet" href="css/cenik-styles.css">
-    <link rel="stylesheet" href="css/polish.css?v=20261111-3">
+    <link rel="stylesheet" href="css/polish.css?v=20261115-1">
 
     <script type="application/ld+json">
     {
@@ -138,7 +138,7 @@ body { background: var(--paper); color: var(--slate); }
 
 
 h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .cap-content h3,
-.publication-content h3, .service-main h3, .booking-modal-title {
+.publication-content h3, .service-main h3 {
   font-family: var(--font-heading) !important; font-weight: 600; letter-spacing: -0.02em; color: var(--navy);
 }
 .hero-title { font-size: var(--fs-h1); line-height: 1.08; }
@@ -352,24 +352,8 @@ cite { font-weight: 600 !important; }
 .featured-link:hover, .credential-card:hover, .service-main:hover, .step:hover { transform: none !important; box-shadow: none !important; }
 
 
-.booking-modal-overlay { background: rgba(22, 58, 85, .6) !important; }
-.booking-modal { background: var(--paper) !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad) !important; box-shadow: 0 16px 48px rgba(22, 58, 85, .24) !important; }
-.booking-modal-title { font-size: var(--fs-h3) !important; line-height: 1.25 !important; text-align: left !important; margin: 0 0 var(--block-gap) !important; padding-right: 48px !important; }
-.booking-modal-close { width: 44px; height: 44px; padding: 10px !important; top: calc(var(--panel-pad) - 10px) !important; right: calc(var(--panel-pad) - 10px) !important; color: var(--mute) !important; }
-@media (hover: hover) { .booking-modal-close:hover { color: var(--navy) !important; } }
-.booking-modal-options { grid-template-columns: 1fr !important; gap: var(--card-gap) !important; }
-.booking-modal { max-width: 520px !important; }
-.booking-option { position: relative; align-items: flex-start !important; text-align: left !important; background: #fff !important; border: 1px solid var(--line) !important; border-radius: var(--r) !important; box-shadow: none !important; transform: none !important; padding: var(--card-pad) !important; padding-right: calc(var(--card-pad) + 32px) !important; transition: border-color .15s ease !important; }
-.booking-option::after { content: "\2192"; position: absolute; right: var(--card-pad); top: 50%; transform: translateY(-50%); font-size: 1.25rem; line-height: 1; color: var(--navy); }
-@media (hover: hover) { .booking-option:hover { border-color: var(--navy) !important; } }
 
 :root { --peach: #F6E6DC; --peach-line: #E8D3C5; --sky-line: #CCD8E2; }
-.booking-modal-options .booking-option { border-color: transparent !important; }
-.booking-modal-options .booking-option:first-child { background: var(--sky) !important; }
-.booking-modal-options .booking-option:last-child { background: var(--peach) !important; }
-.booking-option-desc { color: var(--slate) !important; }
-.booking-option-title { font-size: var(--fs-lead) !important; font-weight: 600 !important; color: var(--navy) !important; text-align: left !important; margin: 0 0 4px !important; }
-.booking-option-desc { font-size: .9375rem !important; color: var(--mute) !important; text-align: left !important; }
 
 
 @media (max-width: 968px) {
@@ -521,7 +505,7 @@ html { scrollbar-gutter: stable; }
   --font-heading: Fraunces, "Fraunces Fallback", "Fraunces Fallback Android", Georgia, serif;
   --font-ui: Inter, "Inter Fallback", "Inter Fallback Android", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-:is(h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .rv-title, .booking-modal-title,
+:is(h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .rv-title,
     .technical-info h3, .common-issues h3, .benefit-item h3, .target-group h3, .step h3, .service-main h3, .cap-content h3, .publication-content h3, .pricing-info-item h3) {
   font-family: var(--font-heading) !important; font-weight: 500 !important; letter-spacing: -0.01em !important; font-synthesis: none;
 }
@@ -686,22 +670,16 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
 
 :root { --sky-hover: #DCE6EE; --peach-hover: #F2DBCC; }
-.booking-modal-options .booking-option .booking-option-desc { color: var(--slate) !important; } 
-.booking-modal-options .booking-option { transition: background-color .15s !important; }
-.booking-option::after { transition: transform .15s; }
 .pricing-card#online, .pricing-card#osobne { position: relative; transition: background-color .15s, border-color .15s; }
 .pricing-card#online .btn::after, .pricing-card#osobne .btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } 
 @media (hover: hover) and (pointer: fine) {
-  .booking-modal-options .booking-option:first-child:hover { background: var(--sky-hover) !important; }
-  .booking-modal-options .booking-option:last-child:hover { background: var(--peach-hover) !important; }
-  .booking-option:hover::after { transform: translate(4px, -50%); }
   .pricing-card#online:hover { background: var(--sky-hover) !important; border-color: var(--sky-hover) !important; }
   .pricing-card#osobne:hover { background: var(--peach-hover) !important; border-color: var(--peach-hover) !important; }
   .pricing-card#online:hover .btn, .pricing-card#osobne:hover .btn { background: var(--accent-light) !important; }
 }
-.booking-option:focus-visible, .pricing-card .btn:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px; }
+.pricing-card .btn:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
-  .booking-modal-options .booking-option, .booking-option::after, .pricing-card#online, .pricing-card#osobne { transition: none !important; }
+  .pricing-card#online, .pricing-card#osobne { transition: none !important; }
 }
 
 
@@ -839,7 +817,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                 <li><a href="/blog.html" class="nav-link">Blog</a></li>
                 <li><a href="/kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="/#kontakt" class="nav-link">Kontakt</a></li>
-                <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
+                <li><a href="/rezervace.html" class="btn btn-primary">Objednat se</a></li>
             </ul>
         </nav>
     </header>
@@ -862,7 +840,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                             <li>Odkaz přijde automaticky v potvrzení rezervace</li>
                             <li>Termíny od pondělí do pátku</li>
                         </ul>
-                        <a href="#" class="btn btn-hero" onclick="bookOnline(); return false;">Objednat online terapii</a>
+                        <a href="/rezervace.html" class="btn btn-hero">Objednat online terapii</a>
                     </article>
 
                     <article class="pricing-card" id="osobne">
@@ -872,7 +850,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                             <li>Soukromá ordinace na Vítkovické ulici</li>
                             <li>Osobní termíny v pondělí a úterý</li>
                         </ul>
-                        <a href="#" class="btn btn-hero" onclick="bookInPerson(); return false;">Objednat osobní terapii</a>
+                        <a href="/rezervace.html?forma=osobne" class="btn btn-hero">Objednat osobní terapii</a>
                     </article>
                 </div>
             </div>
@@ -909,7 +887,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                 <section class="pricing-first-session" aria-labelledby="prvni-setkani">
                     <h2 id="prvni-setkani">První setkání</h2>
                     <p>Nemusíte se předem rozhodnout pro dlouhodobou terapii. První setkání může sloužit ke společnému zmapování vaší situace a k tomu, abyste zjistili, zda vám můj způsob práce vyhovuje.</p>
-                    <a href="#" class="btn btn-hero" onclick="openBookingModal(); return false;">Vybrat termín</a>
+                    <a href="/rezervace.html" class="btn btn-hero">Vybrat termín</a>
                 </section>
             </div>
         </section>
@@ -962,30 +940,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         </div>
     </footer>
 
-    <!-- Generated from partials/booking-modal.html by scripts/sync-header.ps1. -->
-    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1" inert>
-        <div class="booking-modal">
-            <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
-            <div class="booking-modal-options">
-                <a href="#" class="booking-option" onclick="bookOnline(); return false;">
-                    <span class="booking-option-title">Online</span>
-                    <p class="booking-option-desc">Pondělí až pátek</p>
-                </a>
-                <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
-                    <span class="booking-option-title">Osobně v Ostravě</span>
-                    <p class="booking-option-desc">Pondělí a úterý</p>
-                </a>
-            </div>
-        </div>
-    </div>
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
-    <script src="js/script.js?v=20261115-1"></script>
+    <script src="js/script.js?v=20261115-2"></script>
 </body>
 </html>

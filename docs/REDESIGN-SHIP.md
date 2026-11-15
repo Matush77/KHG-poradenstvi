@@ -57,7 +57,7 @@ a careless copy.
    - `ui-lab/proposal/js/quiz-*.js` → `js/`.
 4. Lab links (`/ui-lab/proposal/#sluzby`, `/ui-lab/proposal/blog.html`, …) go back to the real
    ones (`/#sluzby`, `/blog.html`, …).
-5. Header, footer and booking window: change `partials/` and apply the same change to every page,
+5. Header and footer: change `partials/` and apply the same change to every page,
    including `ochrana-osobnich-udaju.html` and `404.html` (see `FOOTER-WORKFLOW.md`).
 6. Bump `?v=` on every CSS and JS file that changed, in every page that loads it.
 7. Keep titles, meta descriptions, H1s, canonicals, JSON-LD and URLs exactly as they are.
@@ -84,8 +84,9 @@ Then:
 
 ## 4. Own booking (ships with the redesign, owner's choice 14 Nov)
 
-The "Objednat se" window now opens `/rezervace.html` (format from the window, `?forma=osobne`)
-instead of Google's booking pages. Ported from the lab (`ui-lab/rezervace-ukazka.html` with the
+Every "Objednat se" button links straight to `/rezervace.html` instead of Google's booking pages;
+online or in person is chosen there (the Ceník in-person card opens `?forma=osobne`). The old
+format pop-up was removed on 15 Nov; the lab build drops it too (`ui-lab/proposal/nomodal.py`). Ported from the lab (`ui-lab/rezervace-ukazka.html` with the
 owner's picks, `ui-lab/booking-php/`):
 
 - `rezervace.html`: calendar, details, then Stripe Checkout (redirect); in the sitemap.

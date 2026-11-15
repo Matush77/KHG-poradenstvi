@@ -11,7 +11,7 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 - **Homepage** with services, pricing, credentials, an FAQ accordion and an office photo gallery with a lightbox
 - **Blog** with 10 long-form articles and category filtering
 - **Four self-assessment quizzes** (overthinking, procrastination, healthy boundaries, toxic relationships). Scoring runs entirely in the browser, so answers never leave the visitor's device. In the toxic-relationship quiz, high-risk results also show emergency and crisis-line contacts.
-- **Booking modal** that lets visitors choose between online and in-person sessions
+- **Own booking page** (`rezervace.html`): every "Objednat se" button links straight to it; online or in person is chosen there
 - **Privacy page and cookie notice.** The site uses no analytics or tracking, and the notice script also removes old Google cookies left over from a previous version of the site.
 
 ## Technical highlights
@@ -39,7 +39,7 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 ├── index.html, blog.html, cenik.html, kviz.html, …   pages (deployed)
 ├── blog-*.html, quiz-*.html                          articles and quizzes
 ├── css/  js/  fonts/  images/                        assets (deployed)
-├── partials/                                         shared header, footer, booking modal
+├── partials/                                         shared header, footer
 ├── scripts/                                          header/footer sync scripts (PowerShell)
 └── docs/                                             developer notes
 ```

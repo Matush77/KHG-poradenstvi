@@ -8,9 +8,8 @@ $ErrorActionPreference = 'Stop'
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repositoryRoot = (Resolve-Path (Join-Path $scriptDirectory '..')).Path
 $headerPartialPath = Join-Path $repositoryRoot 'partials\header.html'
-$modalPartialPath = Join-Path $repositoryRoot 'partials\booking-modal.html'
 
-foreach ($partialPath in @($headerPartialPath, $modalPartialPath)) {
+foreach ($partialPath in @($headerPartialPath)) {
     if (-not (Test-Path -LiteralPath $partialPath -PathType Leaf)) {
         throw "Shared partial was not found: $partialPath"
     }
@@ -18,7 +17,6 @@ foreach ($partialPath in @($headerPartialPath, $modalPartialPath)) {
 
 $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
 $headerTemplate = [System.IO.File]::ReadAllText($headerPartialPath, $utf8WithoutBom).TrimEnd([char[]]"`r`n")
-$modalTemplate = [System.IO.File]::ReadAllText($modalPartialPath, $utf8WithoutBom).TrimEnd([char[]]"`r`n")
 $headerPattern = [regex]::new(
     '<header\b[^>]*class="header"[^>]*>[\s\S]*?</header>',
     [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
@@ -238,28 +236,8 @@ foreach ($file in $htmlFiles) {
         1
     )
 
+    # The booking pop-up is gone (the buttons link to /rezervace.html); remove any copy left in a page.
     $updatedContent = Remove-BookingModals -Content $updatedContent
-    $galleryMatches = $galleryMarkerPattern.Matches($updatedContent)
-
-    if ($galleryMatches.Count -gt 1) {
-        throw "Expected at most one office gallery insertion point in $($file.Name), found $($galleryMatches.Count)."
-    }
-
-    if ($galleryMatches.Count -eq 1) {
-        $insertionMatch = $galleryMatches[0]
-    } else {
-        $scriptMatches = $privacyScriptPattern.Matches($updatedContent)
-
-        if ($scriptMatches.Count -ne 1) {
-            throw "Expected one privacy script insertion point in $($file.Name), found $($scriptMatches.Count)."
-        }
-
-        $insertionMatch = $scriptMatches[0]
-    }
-
-    $modalIndent = [regex]::Match($insertionMatch.Value, '^[\t ]*').Value
-    $modalForFile = Add-AbsoluteIndent -Template $modalTemplate -Indent $modalIndent -LineEnding $lineEnding
-    $updatedContent = $updatedContent.Insert($insertionMatch.Index, $modalForFile + $lineEnding + $lineEnding)
 
     if ($updatedContent -cne $content) {
         $changedFiles += $file.Name
@@ -271,11 +249,11 @@ foreach ($file in $htmlFiles) {
 }
 
 if ($Check -and $changedFiles.Count -gt 0) {
-    throw "Header or booking modal is out of sync in: $($changedFiles -join ', ')"
+    throw "Header is out of sync in: $($changedFiles -join ', ')"
 }
 
 if ($Check) {
-    Write-Output "Header and booking modal are synchronized across $($htmlFiles.Count) HTML files."
+    Write-Output "Header is synchronized across $($htmlFiles.Count) HTML files."
 } else {
-    Write-Output "Synchronized header and booking modal across $($htmlFiles.Count) HTML files; updated $($changedFiles.Count)."
+    Write-Output "Synchronized header across $($htmlFiles.Count) HTML files; updated $($changedFiles.Count)."
 }
