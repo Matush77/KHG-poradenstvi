@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="color-scheme" content="only light">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ask for the free times at once, while the rest of the page loads (the calendar code picks the answer up).
+         Not when back from Stripe: then the held time is released first, and only after that are the times read. -->
+    <script>try{if(!sessionStorage.getItem('khg-pay')&&!/[?&]paid=/.test(location.search))window.khgSlots=fetch('/api/slots',{cache:'no-store'})}catch(e){}</script>
     <title>Rezervace termínu online a v Ostravě | KHG Poradenství</title>
     <meta name="description" content="Online nebo osobně v Ostravě: vyberte volný termín, vyplňte jméno a kontakt a zaplaťte kartou. Sezení trvá 50 minut a stojí 1 100 Kč.">
     <meta name="author" content="Mgr. Kristýna Hriciková Glattová">
@@ -1197,7 +1200,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       }
 
       function loadSlots() {
-        return fetch('/api/slots', { cache: 'no-store' })
+        // the first time, the request started in <head> (if any); after that, and if it failed, a new one
+        var early = window.khgSlots; window.khgSlots = null;
+        var fresh = function () { return fetch('/api/slots', { cache: 'no-store' }); };
+        return (early ? early.catch(fresh) : fresh())
           .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
           .then(function (j) {
             AV = { online: j.online || {}, osobne: j.osobne || {} };
