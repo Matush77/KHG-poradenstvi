@@ -100,7 +100,7 @@ a { color: var(--blue); text-underline-offset: 3px; }
     return '<h1>' + title + '</h1>' +
       (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') +
       '<div class="summary"><b>' + longDay(d.den) + ', ' + d.cas + '–' + endOf(d.cas) + '</b><span>' +
-      (online ? 'Online · Google Meet' : 'Osobně · Vítkovická 3299/3A') + ' · 1 100 Kč' + (d.moves ? ' · přesunuto' : '') + '</span></div>' +
+      (online ? 'Online · Google Meet' : 'Osobně · Vítkovická 3299/3a') + ' · 1 100 Kč' + (d.moves ? ' · přesunuto' : '') + '</span></div>' +
       '<div class="client"><b>' + esc(d.name || 'Bez jména') + '</b>' + contact + '</div>' +
       (d.note ? '<p class="label">S čím přichází</p><p class="note">' + esc(d.note) + '</p>' : '') +
       (d.clash && !d.cancelled ? '<p class="warn">V kalendáři je ve stejnou dobu i jiná událost.</p>' : '');

@@ -1,10 +1,12 @@
 # Shipping the redesign
 
-**Status, 13 Nov 2026:** the port is done on the branch `redesign-ship` (from `main`, not merged).
-It passes the gate below and was checked in the browser at 375 px and desktop: all 20 pages load
-with no 404s or console errors; on the homepage, an article and a quiz CLS stays 0, the LCP element
-is unchanged and each page makes one request fewer. To ship: merge `redesign-ship` into `main`,
-push, deploy, then follow section 3.
+**Status, 15 Nov 2026:** the port is done on the branch `redesign-ship` (from `main`, not merged),
+together with the own booking (section 4). It passes the gate below and runs on the test subdomain.
+Checked in the browser at 375 px, 320 px and desktop: all 21 pages (the 20 from `main` plus
+`rezervace.html`) load with no 404s or console errors; CLS stays 0 on load, scroll and during the
+booking calendar's animations; the LCP element is unchanged. Still open before launch: the
+privacy page must describe the own booking (section 4). To ship: merge `redesign-ship` into
+`main`, push, deploy, then follow section 3.
 
 Two choices made during the port:
 - The theme CSS stays inline in each page, as in the lab where it was measured, instead of a new
@@ -60,8 +62,15 @@ a careless copy.
 5. Header and footer: change `partials/` and apply the same change to every page,
    including `ochrana-osobnich-udaju.html` and `404.html` (see `FOOTER-WORKFLOW.md`).
 6. Bump `?v=` on every CSS and JS file that changed, in every page that loads it.
-7. Keep titles, meta descriptions, H1s, canonicals, JSON-LD and URLs exactly as they are.
-   The SEO review of 12 Nov found none of them changed; keep it that way.
+7. Keep titles, meta descriptions, H1s, canonicals, JSON-LD and URLs exactly as they are,
+   except the changes the owner approved on 13 Nov (already on `redesign-ship`, do not revert them):
+   - every article and quiz title ends with "| KHG Poradenství", and four long ones are shorter
+     (panická ataka, prokrastinace, both quiz titles on overthinking and prokrastinace) (0c844c0);
+   - schema opening hours 08:00–17:00, as in the Google Business Profile (f8448af);
+   - schema `geo` and `hasMap` taken from the Google Business Profile pin
+     (`https://maps.google.com/?cid=17834043374417315194`) (dbc03e9), and the "Navigovat" links
+     go to the same profile (38b8419).
+   Any further change here is the owner's call, made the same way.
 8. Run the gate (section 1) until it passes. Then check the rules in `.claude/CLAUDE.md`:
    both widths, CLS, LCP, request count, console and 404s.
 
