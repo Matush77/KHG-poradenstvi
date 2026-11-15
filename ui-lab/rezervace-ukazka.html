@@ -577,8 +577,8 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
         (PAY === 1 || PAY === 2 ? field('e', 'E-mail pro potvrzení a účtenku', 'email', 'email', false, '', '') : ''); // without Stripe's page nobody else asks for it
     // owner, 15 Nov: like Terapie.cz, a short optional message, not an intake form; the cancellation rule before paying
     var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="2" maxlength="500"></textarea></label>';
-    var terms = '<div class="bk-terms"><p><b>Přesunout nebo zdarma zrušit lze nejpozději 36 hodin předem.</b></p>' +
-      '<p>Zpracování údajů podle <a href="/ochrana-osobnich-udaju.html">zásad ochrany osobních údajů</a>.</p></div>';
+    var terms = '<div class="bk-terms"><p><b>Přesunout nebo zrušit zdarma do 36 h předem.</b></p>' +
+      '<p><a href="/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a></p></div>';
     view.innerHTML = '<div class="step">' +
       '<button class="link" id="back">‹ Změnit termín</button>' + summary() +
       '<form id="f" novalidate>' +
