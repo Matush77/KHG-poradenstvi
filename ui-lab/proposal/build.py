@@ -220,7 +220,7 @@ sub("<p>Termín prosím zrušte nejpozději 36 hodin před začátkem. Při pozd
     "<p>" + CANCEL.format("", "").replace("nejpozději  ", "nejpozději ") + "</p>")
 sub('<div class="info-row"><h4>Délka setkání</h4><p>Jedno terapeutické setkání trvá 50 minut.</p></div>\n', "")
 sub(CONTACT_ROWS, CONTACT_ROWS + '\n            <div class="contact-book">\n'
-    '                <p>Nejrychleji se objednáte přes online rezervaci.</p>\n'
+    '                <p>Volné termíny najdete v rezervaci.</p>\n'
     '                <a href="' + nomodal.BOOKING + '" class="btn btn-large">Objednat se</a>\n'
     '            </div>')
 
