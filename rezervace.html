@@ -1057,7 +1057,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         return '<div class="summary"><b>' + cap(long(state.date)) + ', ' + state.time + '–' + endTime(state.time) + '</b><span>' + FORMATS[state.f].name + ' · 50 minut · 1 100 Kč</span>' + (FORMATS[state.f].place ? '<span>' + FORMATS[state.f].place + '</span>' : '') + '</div>';
       }
 
-      /* Details. Online asks for an e-mail (the Meet link goes there), in person for a phone (Stripe's page asks for the e-mail).
+      /* Details. Both ask for the e-mail (the confirmation and the move/cancel link go there; online also the Meet link), in person also a phone.
+         Asked here, not on Stripe's page, so one autofill fills it all and Stripe gets it filled in (owner, 15 Nov).
          Last, an optional free-text reason, which goes only to the therapist's e-mail. */
       function field(id, label, type, ac, required, ph) {
         return '<label for="' + id + '"><span>' + label + (required ? '' : ' <em>(nepovinné)</em>') + '</span>' +
@@ -1068,7 +1069,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       }
       function renderStep2() {
         var online = state.f === 'online';
-        var contact = online ? field('e', 'E-mail', 'email', 'email', true, '') : field('p', 'Telefon', 'tel', 'tel', true, '+420');
+        var contact = field('e', 'E-mail', 'email', 'email', true, '') + (online ? '' : field('p', 'Telefon', 'tel', 'tel', true, '+420'));
         // owner, 15 Nov: like Terapie.cz, a few optional words, not an intake form (no health details asked for at booking)
         var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="2" maxlength="500"></textarea></label>';
         // before paying: the cancellation rule and where the data goes (owner, 15 Nov)
@@ -1096,8 +1097,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
           ev.preventDefault();
           var checks = {
             // one field, autofilled as a whole name; a surname is required (owner, 15 Nov): two words, the last one at least two letters
-            n: function (v) { var w = v.split(/\s+/); return !v ? 'Vyplňte prosím jméno a příjmení.' : (w.length < 2 || w[w.length - 1].replace(/[.\-']/g, '').length < 2 ? 'Doplňte prosím i příjmení.' : ''); },
-            e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, přijde na něj odkaz na videohovor.' : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
+            n: function (v) { var w = v.split(/\s+/); return !v ? 'Vyplňte prosím jméno a příjmení.' : (w.length < 2 || (w[w.length - 1].match(/\p{L}/gu) || []).length < 2 ? 'Doplňte prosím i příjmení.' : ''); },
+            e: function (v, req) { return !v ? (req ? 'Vyplňte prosím e-mail, přijde na něj ' + (online ? 'odkaz na videohovor.' : 'potvrzení.') : '') : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'E-mail nevypadá správně.'); },
             p: function (v, req) { return !v ? (req ? 'Vyplňte prosím telefon.' : '') : (v.replace(/\D/g, '').length >= 9 ? '' : 'Telefon nevypadá správně.'); }
           };
           var first = null;
