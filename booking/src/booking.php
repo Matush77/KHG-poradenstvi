@@ -596,13 +596,32 @@ function send_reminders(?int $now = null): array
     return $done;
 }
 
+/* How long the site keeps what clients typed (owner, 15 Nov; the privacy page says the same):
+   the "S čím přicházíte" text 30 days after the session, the whole booking (name, contact)
+   3 years after it, the general limitation period for claims. Payment records stay in Stripe. */
+const KEEP_NOTE_DAYS = 30, KEEP_BOOKING_YEARS = 3;
+function forget_old(?int $now = null): array
+{
+    $now ??= time();
+    $noteCut = date(DATE_ATOM, $now - KEEP_NOTE_DAYS * 86400);
+    $bookCut = (new DateTimeImmutable('@' . $now))->setTimezone(new DateTimeZone('Europe/Prague'))
+        ->modify('-' . KEEP_BOOKING_YEARS . ' years')->format(DATE_ATOM);
+    // slots are stored with their Prague offset; julianday() reads the offset, so winter and summer times compare right
+    $n = db()->prepare("UPDATE bookings SET note = NULL WHERE note IS NOT NULL AND julianday(slot) < julianday(?)");
+    $n->execute([$noteCut]);
+    $b = db()->prepare("DELETE FROM bookings WHERE julianday(slot) < julianday(?) AND status <> 'pending'");
+    $b->execute([$bookCut]);
+    db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([$now - 2 * 86400]);   // never paid: forget what they wrote
+    return array_filter(['notes_forgotten' => $n->rowCount(), 'bookings_forgotten' => $b->rowCount()]);
+}
+
 /* Safety net (cron every few minutes, next to the webhook): books paid sessions nobody booked (closed tab,
-   lost webhook), retries failed bookings and unsent e-mails, clears old holds. */
+   lost webhook), retries failed bookings and unsent e-mails, clears old holds and old client data. */
 function sweep(): array
 {
     $done = ['booked' => [], 'retried' => [], 'mailed' => []];
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([time()]);
-    db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([time() - 2 * 86400]);   // never paid: forget what they wrote
+    $done += forget_old();
     // first her calendar edits (a session she just moved gets its reminders at the new time), then the reminders:
     // neither needs Stripe, so a Stripe outage below doesn't hold them back
     try {

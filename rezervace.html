@@ -786,6 +786,11 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     @media (min-width: 720px) { .rez .bk-btn { width: auto; } }
     .rez .bk-btn[aria-busy="true"] { opacity: .75; cursor: progress; }
     .rez .bk-cta { display: grid; gap: 8px; justify-items: start; }
+    .rez .bk-terms { background: var(--peach); border-radius: 12px; padding: 10px 14px; font-size: 13px; line-height: 1.45; color: var(--slate); }
+    .rez .bk-terms p { margin: 0; font-size: inherit; line-height: inherit; }
+    .rez .bk-terms p + p { margin-top: 2px; }
+    .rez .bk-terms b { color: var(--navy); font-weight: 600; }
+    .rez .bk-terms a { color: var(--navy); text-decoration: underline; text-underline-offset: 2px; }
 
     /* Step 2 (details) and 3 (done) */
     .rez .summary { background: var(--tint); border-radius: 16px; padding: 16px 18px; display: grid; gap: 2px; }
@@ -1056,12 +1061,16 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       function renderStep2() {
         var online = state.f === 'online';
         var contact = online ? field('e', 'E-mail', 'email', 'email', true, '') : field('p', 'Telefon', 'tel', 'tel', true, '+420');
-        var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="3" maxlength="1500"></textarea></label>';
+        // owner, 15 Nov: like Terapie.cz, a few optional words, not an intake form (no health details asked for at booking)
+        var reason = '<label for="r"><span>S čím přicházíte <em>(nepovinné)</em></span><textarea id="r" rows="2" maxlength="500"></textarea></label>';
+        // before paying: the cancellation rule and where the data goes (owner, 15 Nov)
+        var terms = '<div class="bk-terms"><p><b>Přesunout nebo zdarma zrušit lze nejpozději 36 hodin předem.</b></p>' +
+          '<p>Zpracování údajů podle <a href="/ochrana-osobnich-udaju.html">zásad ochrany osobních údajů</a>.</p></div>';
         view.innerHTML = '<div class="bk-step">' +
           '<button type="button" class="link" id="back">‹ Změnit termín</button>' + summary() +
           '<form id="f" novalidate>' +
           '<div class="names">' + field('fn', 'Jméno', 'text', 'given-name', true, '') + field('ln', 'Příjmení', 'text', 'family-name', true, '') + '</div>' +
-          contact + reason +
+          contact + reason + terms +
           '<div class="bk-cta"><button class="bk-btn" type="submit" id="go">' + PRICE + '</button></div>' +
           '<p class="err" id="go-err" role="alert"></p>' +
           '</form></div>';

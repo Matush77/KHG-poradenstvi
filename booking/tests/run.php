@@ -212,6 +212,21 @@ ok(str_contains($oc['text'], 'vrací automaticky') && !str_contains($oc['html'],
 db()->prepare('INSERT INTO notes (pay_id, note, created_at) VALUES (?, ?, ?)')->execute(['cs_test_old', 'x', time() - 3 * 86400]);
 db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([time() - 2 * 86400]);
 ok(!db()->query("SELECT COUNT(*) FROM notes WHERE pay_id = 'cs_test_old'")->fetchColumn(), 'notes of unpaid checkouts are forgotten after 2 days');
+// retention (owner, 15 Nov): the message 30 days after the session, the booking 3 years after it
+$fo = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, note, status, created_at, updated_at) VALUES (?, ?, 'online', 'a@example.com', 'Jana', 'vzkaz', ?, 0, 0)");
+$fo->execute(['cs_ret_29d', (new DateTimeImmutable('-29 days'))->format(DATE_ATOM), 'booked']);
+$fo->execute(['cs_ret_31d', (new DateTimeImmutable('-31 days'))->format(DATE_ATOM), 'booked']);
+$fo->execute(['cs_ret_old', (new DateTimeImmutable('-3 years -1 day'))->format(DATE_ATOM), 'cancelled']);
+$fo->execute(['cs_ret_2y', (new DateTimeImmutable('-2 years'))->format(DATE_ATOM), 'booked']);
+$fo->execute(['cs_ret_next', (new DateTimeImmutable('+3 days'))->format(DATE_ATOM), 'booked']);
+$gone = forget_old();
+$note = fn($id) => db()->query("SELECT note FROM bookings WHERE pay_id = '$id'")->fetchColumn();
+ok($note('cs_ret_29d') === 'vzkaz' && $note('cs_ret_next') === 'vzkaz', 'the message stays until 30 days after the session');
+ok($note('cs_ret_31d') === null && $note('cs_ret_2y') === null, 'the message is forgotten 30 days after the session, the booking stays');
+ok(db()->query("SELECT COUNT(*) FROM bookings WHERE pay_id = 'cs_ret_old'")->fetchColumn() == 0
+    && db()->query("SELECT COUNT(*) FROM bookings WHERE pay_id = 'cs_ret_2y'")->fetchColumn() == 1, 'a booking is deleted 3 years after the session');
+ok(($gone['bookings_forgotten'] ?? 0) >= 1 && ($gone['notes_forgotten'] ?? 0) >= 2, 'forget_old reports what it removed');
+db()->exec("DELETE FROM bookings WHERE pay_id LIKE 'cs_ret_%'");
 ok(cz_ahead(10.2) === '10 h' && cz_ahead(47.6) === '48 h' && cz_ahead(50) === '2 dny' && cz_ahead(771) === '32 dní', 'cancel lead time in hours or days');
 throws(fn() => owner_move('cs_test_late', $future, '10:00'), 409, 'a cancelled booking can not be moved');
 $long = 'a' . str_repeat('ž', 900);
