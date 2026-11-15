@@ -172,6 +172,8 @@ button, a, label { -webkit-tap-highlight-color: transparent; }
 .day.out { visibility: hidden; }
 /* month change by swipe on phones: the grid lets vertical scrolling through, the new month slides in from the swipe side */
 .grid { touch-action: pan-y; }
+/* the month sliding in must not make the page wider than the screen (it did by 24px; phones then shifted the whole page sideways) */
+body { overflow-x: clip; }
 .grid.in-next { animation: month-in-next .22s ease-out; }
 .grid.in-prev { animation: month-in-prev .22s ease-out; }
 @keyframes month-in-next { from { transform: translateX(24px); opacity: 0; } }

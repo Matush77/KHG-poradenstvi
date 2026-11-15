@@ -1,6 +1,7 @@
 """Build ui-lab/proposal/index.html: the live homepage with the 12 Nov theme proposal applied.
 Run: python3 ui-lab/proposal/build.py   Open: http://localhost:8000/ui-lab/proposal/"""
 import pathlib, re
+import nomodal
 
 here = pathlib.Path(__file__).parent
 lab = here.parent
@@ -56,7 +57,7 @@ sheet2 = re.sub(r"/\* Playfair Display Font Family \*/\s*@font-face\s*\{[^}]*\}"
 sheet2 = re.sub(r"@font-face\s*\{\s*font-family:\s*'Playfair Display Fallback(?: Android)?';[^}]*\}", "", sheet2)
 sheet2 = sheet2.replace("url('../fonts/", "url('/fonts/").replace('url("../fonts/', 'url("/fonts/').replace("url('../images/", "url('/images/").replace('url("../images/', 'url("/images/')
 assert "Playfair Display';" not in sheet2.split("--font-heading")[0], "Playfair face still present"
-(here / "styles.css").write_text(sheet2, encoding="utf-8")
+(here / "styles.css").write_text(nomodal.strip_css(sheet2), encoding="utf-8")
 page = page.replace("css/styles.css?v=20261110-3", "ui-lab/proposal/styles.css?v=lab1")
 
 # first paint before the async CSS arrives (first visit on a real network): the critical CSS only matches the hero,
@@ -296,7 +297,7 @@ MENU_FOCUS = """    <script>
 
 page = brand(page, LOGO_F, FAV_F)
 
-(here / "index.html").write_text(page, encoding="utf-8")
+(here / "index.html").write_text(nomodal.page(page), encoding="utf-8")
 print("built", here / "index.html")
 
 
@@ -343,7 +344,7 @@ def build_cenik():
     # lab links: menu and footer stay inside the lab
     p = lab_links(p)
     p = brand(p, LOGO_F, FAV_F)
-    (here / "cenik.html").write_text(p, encoding="utf-8")
+    (here / "cenik.html").write_text(nomodal.page(p), encoding="utf-8")
     print("built", here / "cenik.html")
 
 
@@ -499,7 +500,7 @@ def build_page(name, layer):
     p = re.sub(VY, lambda k: k.group(1).lower(), p)
     p = lab_links(p)
     p = brand(p, LOGO_F, FAV_F)
-    (here / name).write_text(p, encoding="utf-8")
+    (here / name).write_text(nomodal.page(p), encoding="utf-8")
 
 
 pages = [("blog.html", "blog.css"), ("kviz.html", "blog.css")]

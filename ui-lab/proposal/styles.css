@@ -2583,224 +2583,24 @@ a:hover {
    BOOKING MODAL
    ========================================== */
 
-.booking-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    padding: var(--space-md);
-}
 
-.booking-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
 
-.booking-modal {
-    background: var(--bg-light);
-    border-radius: 24px;
-    padding: var(--space-2xl);
-    max-width: 600px;
-    width: 100%;
-    position: relative;
-    transform: translateY(20px);
-    transition: transform 0.3s ease;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
 
-.booking-modal-overlay.active .booking-modal {
-    transform: translateY(0);
-}
 
-.booking-modal-close {
-    position: absolute;
-    top: var(--space-md);
-    right: var(--space-md);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--space-xs);
-    color: var(--text-light);
-    transition: var(--transition);
-    line-height: 1;
-}
 
-.booking-modal-close:hover {
-    color: var(--text-dark);
-}
 
-.booking-modal-close svg {
-    width: 24px;
-    height: 24px;
-    display: block;
-}
 
-.booking-modal-title {
-    font-family: var(--font-heading);
-    font-size: 1.75rem;
-    color: var(--text-dark);
-    text-align: center;
-    margin-bottom: var(--space-xl);
-    margin-top: var(--space-md);
-    padding-right: var(--space-xl);
-}
 
-.booking-modal-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-}
 
-.booking-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--space-xl);
-    background: var(--bg-cream);
-    border: 2px solid var(--border-light);
-    border-radius: 16px;
-    text-decoration: none;
-    transition: var(--transition);
-    cursor: pointer;
-}
 
-.booking-option:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(232, 146, 124, 0.2);
-}
 
-.booking-option-icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: var(--space-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-light);
-    border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
 
-.booking-option-icon svg {
-    width: 32px;
-    height: 32px;
-    color: var(--primary);
-}
 
-.booking-modal-options .booking-option:last-child .booking-option-icon {
-    background-image: url("/images/personal-therapy-icon.svg");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 32px 32px;
-}
 
-.booking-modal-options .booking-option:last-child .booking-option-icon svg {
-    visibility: hidden;
-}
 
-.booking-option-title {
-    font-family: var(--font-primary);
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--primary);
-    margin-bottom: var(--space-xs);
-    text-align: center;
-    white-space: nowrap;
-}
 
-.booking-option-desc {
-    font-size: 0.9375rem;
-    color: var(--text-medium);
-    text-align: center;
-    margin: 0;
-}
 
-@media (max-width: 540px) {
-    .booking-modal {
-        padding: var(--space-lg);
-    }
 
-    .booking-modal-title {
-        font-size: 1.5rem;
-        margin-bottom: var(--space-lg);
-    }
-
-    .booking-modal-options {
-        grid-template-columns: 1fr;
-        gap: var(--space-md);
-    }
-
-    .booking-option {
-        padding: var(--space-lg);
-    }
-}
-
-@media (max-height: 560px) and (orientation: landscape) {
-    .booking-modal-overlay {
-        align-items: flex-start;
-        padding: var(--space-xs) var(--space-sm);
-        overflow-y: auto;
-    }
-
-    .booking-modal {
-        max-height: calc(100dvh - 1rem);
-        padding: 1.25rem 1.5rem;
-        overflow-y: auto;
-        border-radius: 18px;
-    }
-
-    .booking-modal-close {
-        top: var(--space-xs);
-        right: var(--space-sm);
-    }
-
-    .booking-modal-title {
-        margin: 0.25rem 2.5rem var(--space-sm);
-        padding-right: 0;
-        font-size: 1.4rem;
-    }
-
-    .booking-modal-options {
-        gap: var(--space-sm);
-    }
-
-    .booking-option {
-        padding: var(--space-sm);
-    }
-
-    .booking-option-icon {
-        width: 48px;
-        height: 48px;
-        margin-bottom: var(--space-xs);
-    }
-
-    .booking-option-icon svg {
-        width: 26px;
-        height: 26px;
-    }
-
-    .booking-modal-options .booking-option:last-child .booking-option-icon {
-        background-size: 26px 26px;
-    }
-
-    .booking-option-title {
-        font-size: 1rem;
-    }
-
-    .booking-option-desc {
-        font-size: 0.875rem;
-    }
-}
 
 /* ==========================================
    MOBILE OPTIMIZATIONS

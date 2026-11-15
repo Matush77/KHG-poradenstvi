@@ -134,7 +134,7 @@ body { background: var(--paper); color: var(--slate); }
 
 /* ---- 2. Type: one family, weights 400/500/600 ---- */
 h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .cap-content h3,
-.publication-content h3, .service-main h3, .booking-modal-title {
+.publication-content h3, .service-main h3 {
   font-family: var(--font-heading) !important; font-weight: 600; letter-spacing: -0.02em; color: var(--navy);
 }
 .hero-title { font-size: var(--fs-h1); line-height: 1.08; }
@@ -348,25 +348,9 @@ cite { font-weight: 600 !important; }
 .featured-link:hover, .credential-card:hover, .service-main:hover, .step:hover { transform: none !important; box-shadow: none !important; }
 
 /* booking window: a panel (paper, r24, the one allowed shadow); options are white cards, left aligned like the page */
-.booking-modal-overlay { background: rgba(22, 58, 85, .6) !important; }
-.booking-modal { background: var(--paper) !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad) !important; box-shadow: 0 16px 48px rgba(22, 58, 85, .24) !important; }
-.booking-modal-title { font-size: var(--fs-h3) !important; line-height: 1.25 !important; text-align: left !important; margin: 0 0 var(--block-gap) !important; padding-right: 48px !important; }
-.booking-modal-close { width: 44px; height: 44px; padding: 10px !important; top: calc(var(--panel-pad) - 10px) !important; right: calc(var(--panel-pad) - 10px) !important; color: var(--mute) !important; }
-@media (hover: hover) { .booking-modal-close:hover { color: var(--navy) !important; } }
-.booking-modal-options { grid-template-columns: 1fr !important; gap: var(--card-gap) !important; }
-.booking-modal { max-width: 520px !important; }
-.booking-option { position: relative; align-items: flex-start !important; text-align: left !important; background: #fff !important; border: 1px solid var(--line) !important; border-radius: var(--r) !important; box-shadow: none !important; transform: none !important; padding: var(--card-pad) !important; padding-right: calc(var(--card-pad) + 32px) !important; transition: border-color .15s ease !important; }
-.booking-option::after { content: "\2192"; position: absolute; right: var(--card-pad); top: 50%; transform: translateY(-50%); font-size: 1.25rem; line-height: 1; color: var(--navy); }
-@media (hover: hover) { .booking-option:hover { border-color: var(--navy) !important; } }
 /* format tints: each format has its own pale tint of equal weight, neither is white (white beside a tint read as "selected").
    online = sky, in person = peach (the warm halo in the blog illustrations). Meta text is slate on tints (mute is 4.3:1 on peach). */
 :root { --peach: #F6E6DC; --peach-line: #E8D3C5; --sky-line: #CCD8E2; }
-.booking-modal-options .booking-option { border-color: transparent !important; }
-.booking-modal-options .booking-option:first-child { background: var(--sky) !important; }
-.booking-modal-options .booking-option:last-child { background: var(--peach) !important; }
-.booking-option-desc { color: var(--slate) !important; }
-.booking-option-title { font-size: var(--fs-lead) !important; font-weight: 600 !important; color: var(--navy) !important; text-align: left !important; margin: 0 0 4px !important; }
-.booking-option-desc { font-size: .9375rem !important; color: var(--mute) !important; text-align: left !important; }
 
 /* phone menu: the page's own paper, full height, links as hairline rows, the booking button as on the page */
 @media (max-width: 968px) {
@@ -527,7 +511,7 @@ html { scrollbar-gutter: stable; }
   --font-heading: Fraunces, "Fraunces Fallback", "Fraunces Fallback Android", Georgia, serif;
   --font-ui: Inter, "Inter Fallback", "Inter Fallback Android", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-:is(h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .rv-title, .booking-modal-title,
+:is(h1, h2, h3, h4, .hero-title, .section-title, .about-name, .cta-heading, .rv-title,
     .technical-info h3, .common-issues h3, .benefit-item h3, .target-group h3, .step h3, .service-main h3, .cap-content h3, .publication-content h3, .pricing-info-item h3) {
   font-family: var(--font-heading) !important; font-weight: 500 !important; letter-spacing: -0.01em !important; font-synthesis: none;
 }
@@ -707,22 +691,16 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
    the tint deepens one step and the arrow / button answers. Colour and transform only, 150 ms, none with reduced motion.
    Tints stay readable: slate on the hover peach #F2DBCC is 6.3:1, navy 10:1. */
 :root { --sky-hover: #DCE6EE; --peach-hover: #F2DBCC; }
-.booking-modal-options .booking-option .booking-option-desc { color: var(--slate) !important; } /* mute is only 4.3:1 on peach */
-.booking-modal-options .booking-option { transition: background-color .15s !important; }
-.booking-option::after { transition: transform .15s; }
 .pricing-card#online, .pricing-card#osobne { position: relative; transition: background-color .15s, border-color .15s; }
 .pricing-card#online .btn::after, .pricing-card#osobne .btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole card is the button */
 @media (hover: hover) and (pointer: fine) {
-  .booking-modal-options .booking-option:first-child:hover { background: var(--sky-hover) !important; }
-  .booking-modal-options .booking-option:last-child:hover { background: var(--peach-hover) !important; }
-  .booking-option:hover::after { transform: translate(4px, -50%); }
   .pricing-card#online:hover { background: var(--sky-hover) !important; border-color: var(--sky-hover) !important; }
   .pricing-card#osobne:hover { background: var(--peach-hover) !important; border-color: var(--peach-hover) !important; }
   .pricing-card#online:hover .btn, .pricing-card#osobne:hover .btn { background: var(--accent-light) !important; }
 }
-.booking-option:focus-visible, .pricing-card .btn:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px; }
+.pricing-card .btn:focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
-  .booking-modal-options .booking-option, .booking-option::after, .pricing-card#online, .pricing-card#osobne { transition: none !important; }
+  .pricing-card#online, .pricing-card#osobne { transition: none !important; }
 }
 
 /* ==== 26. No row lines (owner, 13 Nov): "I don't see what purpose they serve".
@@ -973,7 +951,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                 <li><a href="/ui-lab/proposal/blog.html" class="nav-link active" aria-current="location">Blog</a></li>
                 <li><a href="/ui-lab/proposal/kviz.html" class="nav-link">Kvízy</a></li>
                 <li><a href="/ui-lab/proposal/#kontakt" class="nav-link">Kontakt</a></li>
-                <li><a href="#" class="btn btn-primary" onclick="openBookingModal(); return false;">Objednat se</a></li>
+                <li><a href="ui-lab/rezervace-ukazka.html" class="btn btn-primary">Objednat se</a></li>
             </ul>
         </nav>
     </header>
@@ -1058,7 +1036,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                 <div class="blog-post-cta">
                     <p class="cta-heading"><strong>Potřebujete podporu?</strong></p>
                     <p>Pokud se chcete naučit pracovat se svými emocemi a vytvořit laskavější prostředí pro své děti, ráda vám pomohu.</p>
-                    <a href="#" class="btn btn-large" onclick="openBookingModal(); return false;">
+                    <a href="ui-lab/rezervace-ukazka.html" class="btn btn-large">
                         Objednat konzultaci
                     </a>
                 </div>
@@ -1118,28 +1096,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         </div>
     </footer>
 
-    <!-- Generated from partials/booking-modal.html by scripts/sync-header.ps1. -->
-    <div id="bookingModal" class="booking-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle" aria-hidden="true" tabindex="-1" inert>
-        <div class="booking-modal">
-            <button type="button" class="booking-modal-close" onclick="closeBookingModal()" aria-label="Zavřít výběr konzultace">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <h2 class="booking-modal-title" id="bookingModalTitle">Vyberte typ konzultace</h2>
-            <div class="booking-modal-options">
-                <a href="#" class="booking-option" onclick="bookOnline(); return false;">
-                    <span class="booking-option-title">Online</span>
-                    <p class="booking-option-desc">Pondělí až pátek</p>
-                </a>
-                <a href="#" class="booking-option" onclick="bookInPerson(); return false;">
-                    <span class="booking-option-title">Osobně v Ostravě</span>
-                    <p class="booking-option-desc">Pondělí a úterý</p>
-                </a>
-            </div>
-        </div>
-    </div>
 
     <script src="js/privacy-consent.js?v=20261016-2"></script>
     <script src="js/script.js?v=20261111-5"></script>
