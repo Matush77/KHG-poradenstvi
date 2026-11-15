@@ -3,25 +3,43 @@
    Scopes of the stored refresh token: calendar.freebusy and calendar.app.created. */
 declare(strict_types=1);
 
-function google_token(): string
+/* The access token lasts an hour. It is kept in the booking database (in the config folder, outside the web root)
+   for that hour, so a visit asks Google once (free/busy) instead of twice (token, then free/busy): about 0.2 s less
+   on every calendar load. Tied to the refresh token, so a new Google connection never reuses an old token.
+   $fresh skips the stored one (Google refused it). */
+function google_token(bool $fresh = false): string
 {
     static $tok = null, $until = 0;
-    if ($tok !== null && time() < $until - 60) return $tok;
+    if (!$fresh && $tok !== null && time() < $until - 60) return $tok;
     $c = cfg();
+    $who = substr(hash('sha256', $c['google_refresh']), 0, 16);
+    if (!$fresh) {
+        try {
+            $s = json_decode(state_get('google_access') ?? '', true);
+            if (is_array($s) && ($s['who'] ?? '') === $who && !empty($s['token']) && time() < (int)($s['until'] ?? 0) - 60) {
+                [$tok, $until] = [(string)$s['token'], (int)$s['until']];
+                return $tok;
+            }
+        } catch (Throwable $e) { /* no database: refresh as before */ }
+    }
     [$code, $j] = http('POST', 'https://oauth2.googleapis.com/token', ['Content-Type: application/x-www-form-urlencoded'],
         http_build_query(['client_id' => $c['google_id'], 'client_secret' => $c['google_secret'],
             'refresh_token' => $c['google_refresh'], 'grant_type' => 'refresh_token']));
     if ($code !== 200 || empty($j['access_token'])) throw new RuntimeException('Google token refresh failed: HTTP ' . $code);
     $tok = $j['access_token'];
     $until = time() + (int)($j['expires_in'] ?? 3600);
+    try { state_set('google_access', json_encode(['token' => $tok, 'until' => $until, 'who' => $who])); }
+    catch (Throwable $e) { /* not stored: the next visit refreshes again */ }
     return $tok;
 }
 
 function gcal(string $method, string $path, ?array $body = null, array $query = []): array
 {
     $url = 'https://www.googleapis.com/calendar/v3/' . $path . ($query ? '?' . http_build_query($query) : '');
-    [$code, $j] = http($method, $url, ['Authorization: Bearer ' . google_token(), 'Content-Type: application/json'],
+    $send = fn(bool $fresh) => http($method, $url, ['Authorization: Bearer ' . google_token($fresh), 'Content-Type: application/json'],
         $body === null ? null : json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    [$code, $j] = $send(false);
+    if ($code === 401) [$code, $j] = $send(true);   // stored token revoked or expired early: one retry with a new one
     if ($code >= 300) throw new RuntimeException("Google $method $path: HTTP $code " . substr(json_encode($j), 0, 300), $code);
     return $j;
 }
