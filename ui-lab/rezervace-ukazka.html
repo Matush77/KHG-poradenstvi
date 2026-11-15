@@ -513,7 +513,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
   /* Details. Online asks only for an e-mail (the Meet link goes there), in person only for a phone. Last, an optional free-text reason. */
   function field(id, label, type, ac, required, value, ph) {
     return '<label for="' + id + '"><span>' + label + (required ? '' : ' <em>(nepovinné)</em>') + '</span>' +
-      '<input id="' + id + '" type="' + type + '" autocomplete="' + ac + '" enterkeyhint="next"' +
+      '<input id="' + id + '" name="' + ac + '" type="' + type + '" autocomplete="' + ac + '" enterkeyhint="next"' +
       (type === 'text' ? ' autocapitalize="words"' : ' autocapitalize="off" spellcheck="false"') + (required ? ' required aria-required="true"' : '') +
       (value ? ' value="' + value + '"' : '') + (ph ? ' placeholder="' + ph + '"' : '') + ' aria-describedby="' + id + '-err">' +
       '<span class="err" id="' + id + '-err" aria-live="polite"></span></label>';
