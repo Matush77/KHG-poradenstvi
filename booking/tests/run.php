@@ -383,6 +383,11 @@ $sp = hours_open(prague('2027-04-05T00:00:00+02:00'), prague('2027-04-05T23:00:0
 ok(date('G', $sp[0][0]) === '9', 'summer time: 9:00 stays 9:00');
 $hv = hours_view($nowH);
 ok($hv['first_hour'] === 8 && $hv['last_hour'] === 17 && isset(((array)$hv['holidays'])['2026-11-17']), 'the page gets 8–17 and the holidays');
+$ts = fn($s) => prague($s)->getTimestamp();
+$bh = busy_hours([[$ts('2026-12-22T08:00:00+01:00'), $ts('2026-12-22T08:50:00+01:00')], [$ts('2026-12-22T11:30:00+01:00'), $ts('2026-12-22T12:10:00+01:00')],
+    [$ts('2026-12-23T00:00:00+01:00'), $ts('2026-12-24T00:00:00+01:00')]], prague('2026-12-22T00:00:00+01:00'), prague('2026-12-23T23:59:00+01:00'));
+ok(array_keys($bh['2026-12-22']) === [8, 11, 12], 'busy hours: a client 8:00–8:50 blocks 8 only; 11:30–12:10 blocks 11 and 12 (same rule as the booking page)');
+ok(count($bh['2026-12-23']) === OWNER_MOVE_LAST - OWNER_MOVE_FIRST + 1, 'a busy all-day event blocks every hour of the day');
 
 // --- the owner's hours page: sign-in
 $d1 = owner_login('spravne-heslo-42', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36', 'w1');

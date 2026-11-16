@@ -116,6 +116,42 @@ function hours_save(array $week, array $days, int $base, string $who, ?DateTimeI
     });
 }
 
+/* Pure part of hours_busy, tested offline: the whole hours of each day in [$from, $to] whose 50-minute session would
+   overlap a busy interval (the same test the booking page uses, so "busy here" = "not offered there").
+   Returns ['Y-m-d' => [hour => 1, ...]] for hours OWNER_MOVE_FIRST..OWNER_MOVE_LAST. */
+function busy_hours(array $busy, DateTimeImmutable $from, DateTimeImmutable $to): array
+{
+    $tz = new DateTimeZone('Europe/Prague');
+    $out = [];
+    for ($d = $from->setTimezone($tz)->setTime(0, 0); $d <= $to; $d = $d->modify('+1 day')) {
+        for ($h = OWNER_MOVE_FIRST; $h <= OWNER_MOVE_LAST; $h++) {
+            $s = $d->setTime($h, 0)->getTimestamp();
+            $e = $s + SESSION_MIN * 60;
+            foreach ($busy as [$bs, $be]) if ($bs < $e && $be > $s) { $out[$d->format('Y-m-d')][$h] = 1; break; }
+        }
+    }
+    return $out;
+}
+
+/* Busy hours from her Google calendar and the bookings calendar, for the hours page (owner, 16 Nov: Google-booked
+   clients and her own events showed there as open hours). Free/busy only: no names, no titles. The page puts its own
+   bookings over these. null when Google can't be read: the page says so instead of showing the hours as free. */
+function hours_busy(?DateTimeImmutable $now = null): ?array
+{
+    $tz = new DateTimeZone('Europe/Prague');
+    $now = ($now ?? new DateTimeImmutable())->setTimezone($tz);
+    $from = $now->setTime(0, 0);
+    $to = $from->modify('+' . cfg()['book_ahead_days'] . ' days')->setTime(23, 59, 59);
+    try {
+        $c = cfg();
+        $busy = array_merge(...array_values(gcal_freebusy(array_merge($c['busy_calendars'], [$c['calendar']]), $from, $to)));
+    } catch (Throwable $e) {
+        log_line('HOURS_BUSY_FAILED', ['error' => $e->getMessage()]);
+        return null;
+    }
+    return busy_hours($busy, $from, $to);
+}
+
 /* Everything the hours page shows: hours, holidays, the bookings in the window (with her link to each). */
 function hours_view(?DateTimeImmutable $now = null): array
 {
