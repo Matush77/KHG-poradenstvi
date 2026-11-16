@@ -113,7 +113,7 @@ try {
             [$code, $s] = stripe('GET', 'checkout/sessions/' . $id);      // trust Stripe's API, not the body
             if ($code !== 200) out(500, ['error' => 'stripe']);           // 5xx: Stripe retries later
             $b = book_paid($s);
-            log_line('WEBHOOK', ['type' => $type, 'pay' => $id, 'status' => $b['status'] ?? (($s['metadata']['kopie'] ?? site_copy()) !== site_copy() ? 'other copy' : 'unpaid')]);
+            log_line('WEBHOOK', ['type' => $type, 'pay' => $id, 'status' => $b['status'] ?? (session_copy($s) !== site_copy() ? 'other copy' : 'unpaid')]);
         } elseif (in_array($type, ['refund.failed', 'refund.updated', 'charge.refund.updated'], true) && str_starts_with($id, 're_')) {
             // a refund that fails days later (16 Nov review: this was ignored); 5xx makes Stripe retry
             try { $b = refund_changed($id); } catch (Throwable $e) { out(500, ['error' => 'stripe']); }
@@ -126,7 +126,10 @@ try {
     }
 
     if ($method === 'GET' && in_array($route, ['booking', 'email'], true)) {
-        $payId = signed((string)($_GET['b'] ?? ''), (string)($_GET['t'] ?? ''));
+        // the owner's e-mail carries her management link: its preview needs her token, not the client's
+        // (16 Nov review: a client's own link gave them a working owner link in lab mode)
+        $ownerMail = $route === 'email' && ($_GET['kind'] ?? '') === 'owner';
+        $payId = ($ownerMail ? 'owner_signed' : 'signed')((string)($_GET['b'] ?? ''), (string)($_GET['t'] ?? ''));
         $b = booking_get($payId);
         if (!$b) {   // the webhook may not have arrived yet: ask Stripe
             [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
@@ -135,7 +138,7 @@ try {
         if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
         if ($route === 'booking') out(200, booking_view($b));
         if (!lab()) out(404, ['error' => 'not found']);
-        $m = ($_GET['kind'] ?? '') === 'owner' ? mail_owner_new($b, prague($b['slot']), owner_url($payId))
+        $m = $ownerMail ? mail_owner_new($b, prague($b['slot']), owner_url($payId))
             : mail_build($b, prague($b['slot']), cancel_url($payId));
         $part = (string)($_GET['part'] ?? 'html');
         header('Cache-Control: no-store');

@@ -40,6 +40,9 @@ function owner_login(string $password, string $ua, string $who, ?int $now = null
     $s = $pdo->prepare('SELECT COUNT(*) FROM login_fails WHERE who = ? AND at >= ?');
     $s->execute([$who, $now - 900]);
     $mine = (int)$s->fetchColumn();
+    // a read left open keeps its snapshot, and a write after it then fails at once with "database is locked" when
+    // another request wrote meanwhile (16 Nov review: five of six sign-ins at once failed). Closed before any write.
+    $s->closeCursor();
     $all = (int)$pdo->query('SELECT COUNT(*) FROM login_fails')->fetchColumn();
     if ($mine >= LOGIN_FAILS_VISITOR || $all >= LOGIN_FAILS_ALL) {
         log_line('OWNER_LOGIN_LOCKED', ['who' => $who, 'mine' => $mine, 'all' => $all]);
@@ -68,6 +71,7 @@ function owner_device(?string $token, ?int $now = null): ?array
     $s = db()->prepare('SELECT * FROM owner_devices WHERE token_hash = ? AND revoked_at IS NULL AND last_seen >= ?');
     $s->execute([token_hash($token), $now - OWNER_DEVICE_DAYS * 86400]);
     $d = $s->fetch() ?: null;
+    $s->closeCursor();   // before the write below (see owner_login)
     if ($d && $now - (int)$d['last_seen'] > 60) db()->prepare('UPDATE owner_devices SET last_seen = ? WHERE id = ?')->execute([$now, $d['id']]);
     return $d;
 }
