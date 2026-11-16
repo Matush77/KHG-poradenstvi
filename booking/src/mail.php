@@ -465,6 +465,27 @@ function mail_send(string $name, array $m): void
         $m['to'] = $to;
         $m['subject'] = '[TEST] ' . $m['subject'];
     }
-    smtp_send($c['smtp'], FROM_MAIL, $m['to'], mail_eml($m));
+    if ($until = mail_paused()) throw new RuntimeException('SMTP paused until ' . date('H:i', $until) . ' (sending limit)');
+    try {
+        smtp_send($c['smtp'], FROM_MAIL, $m['to'], mail_eml($m));
+    } catch (RuntimeException $e) {
+        // the mailbox's daily limit (16 Nov: the cron retried every 5 minutes for two days and the limit never
+        // cleared): stop talking to the server for a while, the safety net sends what is waiting afterwards
+        if (smtp_over_limit($e->getMessage())) {
+            state_set('mail_paused_until', (string)(time() + MAIL_PAUSE_MINUTES * 60));
+            log_line('MAIL_PAUSED', ['minutes' => MAIL_PAUSE_MINUTES, 'error' => substr($e->getMessage(), 0, 200)]);
+        }
+        throw $e;
+    }
     log_line('SMTP_SENT', ['mail' => $name]);
+}
+
+/* After the mail server refused a message over its sending limit, nothing is sent for an hour. Returns the end
+   of the pause (a timestamp), or 0 when sending is allowed. */
+const MAIL_PAUSE_MINUTES = 60;
+function smtp_over_limit(string $error): bool { return (bool)preg_match('/\b[45]\d\d\b.*limit/is', $error); }
+function mail_paused(): int
+{
+    $until = (int)(state_get('mail_paused_until') ?? 0);
+    return $until > time() ? $until : 0;
 }

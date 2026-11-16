@@ -111,18 +111,20 @@ a { color: var(--blue); text-underline-offset: 3px; }
     if (d.processing) {
       acts = '<p>Rezervace se ještě zpracovává. Zkus stránku obnovit za pár minut.</p>';
     } else if (d.cancelled) {
-      var deleted = d.cancelled_by === 'calendar';
+      var deleted = d.cancelled_by === 'calendar', after = d.hours_before != null && d.hours_before <= 0;
       var by = d.cancelled_by === 'owner' ? 'Zrušila jsi ji ty' : deleted ? 'Smazala jsi ji v kalendáři'
         : 'Zrušil ji klient' + (d.hours_before != null ? ' ' + ahead(d.hours_before) + ' předem' : '');
       acts = d.refunded
         ? '<p>' + by + '. 1 100 Kč se klientovi vrací.</p>'
+        : after
+          ? '<p>' + by + ' až po začátku sezení. Platba se nevrací.</p>'
         : deleted
           ? '<p>' + by + '. Termín je volný, peníze se zatím nevrátily a klient od webu nic nedostal.</p>' +
             '<div class="actions"><button class="btn" id="cancel">Vrátit peníze a napsat klientovi</button></div>'
           : '<p>' + by + ', peníze se nevrátily (méně než 36 hodin předem).</p>' +
             '<div class="actions"><button class="btn ghost" id="cancel">Přesto vrátit 1 100 Kč</button></div>';
     } else if (d.started) {
-      acts = '<p>Sezení už začalo nebo proběhlo.</p><div class="actions"><button class="btn ghost" id="cancel">Vrátit 1 100 Kč</button></div>';
+      acts = '<p>Sezení už začalo nebo proběhlo. Platba se po sezení nevrací.</p>';
     } else {
       acts = '<div class="actions"><button class="btn" id="move">Přesunout termín</button><button class="btn ghost" id="cancel">Zrušit a vrátit peníze</button></div>';
     }
@@ -133,7 +135,7 @@ a { color: var(--blue); text-underline-offset: 3px; }
   }
 
   function openCancel() {
-    var refundOnly = d.cancelled || d.started, deleted = d.cancelled_by === 'calendar';
+    var refundOnly = d.cancelled, deleted = d.cancelled_by === 'calendar';
     var p = document.getElementById('panel');
     p.className = 'panel';
     p.innerHTML = '<h2>' + (refundOnly ? 'Vrátit klientovi 1 100 Kč?' : 'Zrušit sezení a vrátit 1 100 Kč?') + '</h2>' +
@@ -168,7 +170,7 @@ a { color: var(--blue); text-underline-offset: 3px; }
           }).join('') + '</div></div>';
         }).join('');
         p.innerHTML = '<h2>Vyber nový termín</h2>' +
-          (days.length ? list : '<p>V příštích týdnech není nic volného. Zkontroluj hodiny v kalendářích Ordinace.</p>') +
+          (days.length ? list : '<p>V příštích týdnech není nic volného. Zkontroluj svoje <a href="/rezervace/hodiny.html">hodiny</a>.</p>') +
           (shown < days.length ? '<button class="link" id="more">Další termíny</button>' : '') +
           '<button class="link" id="back">Zpět</button>' +
           (chosen ? '<div class="confirm"><p>Přesunout na <b>' + onDay(chosen.den, chosen.cas) + '</b>? Klient dostane e-mail s novým termínem.</p>' +
@@ -187,7 +189,7 @@ a { color: var(--blue); text-underline-offset: 3px; }
         };
       }
       draw();
-    }).catch(function (e) { p.innerHTML = '<h2>Vyber nový termín</h2><p class="err">Volné termíny se teď nepodařilo načíst. Zkus to prosím za chvíli. Pokud to nepomůže, zkontroluj kalendáře Ordinace online a osobně.</p><button class="link" id="back">Zpět</button>'; document.getElementById('back').onclick = render; });
+    }).catch(function (e) { p.innerHTML = '<h2>Vyber nový termín</h2><p class="err">Volné termíny se teď nepodařilo načíst. Zkus to prosím za chvíli. Pokud to nepomůže, zkontroluj svoje <a href="/rezervace/hodiny.html">hodiny</a>.</p><button class="link" id="back">Zpět</button>'; document.getElementById('back').onclick = render; });
   }
 
   api('sprava').then(function (j) {

@@ -240,6 +240,9 @@ function create_checkout(array $b): string
 function book_paid(array $s): ?array
 {
     if (($s['payment_status'] ?? '') !== 'paid' || empty($s['metadata']['den'])) return null;
+    // the test site and the lab share one Stripe test account, and Stripe sends every webhook to every endpoint:
+    // a payment made on another copy is never booked here
+    if (isset($s['metadata']['kopie']) && $s['metadata']['kopie'] !== site_copy()) return null;
     $payId = $s['id'];
     $meta = $s['metadata'];
     // in person the form asks only for a phone, but Stripe's page always asks for an e-mail: use it, so the
@@ -383,6 +386,11 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
     if (in_array($b['status'], ['pending', 'failed'], true)) throw new ClientError('Rezervace se ještě zpracovává. Zkus to prosím za pár minut.', 409);
     $refundOnly = $b['status'] === 'cancelled';
     $now ??= new DateTimeImmutable();
+    // owner, 16 Nov: once the session has taken place, the money is not returned
+    // (also an event she deleted from her calendar only after it started)
+    if (!$refundOnly ? prague($b['slot']) <= $now : ($b['hours_before'] !== null && (float)$b['hours_before'] <= 0)) {
+        throw new ClientError('Sezení už proběhlo, platba se nevrací.', 409);
+    }
     $fields = refund_full($payId, $refundOnly ? 'vraceno terapeutkou po zruseni' : 'zruseno terapeutkou');
     if (!$refundOnly) {
         $fields += ['status' => 'cancelled', 'cancelled_by' => 'owner',
@@ -633,7 +641,8 @@ function sweep(): array
     } catch (Throwable $e) {
         log_line('SYNC_ERROR', ['error' => $e->getMessage()]);   // the next run catches up from the last good check
     }
-    if ($r = send_reminders()) $done['reminded'] = $r;
+    $paused = mail_paused();   // over the mailbox's limit: reminders and unsent e-mails wait (they go once it ends)
+    if (!$paused && ($r = send_reminders())) $done['reminded'] = $r;
     [$code, $page] = stripe('GET', 'checkout/sessions', ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - 86400]]);
     if ($code !== 200) throw new RuntimeException('Stripe list failed: HTTP ' . $code);
     foreach ($page['data'] ?? [] as $s) {
@@ -649,11 +658,12 @@ function sweep(): array
         OR (status = 'booked' AND mail_sent = 0 AND email IS NOT NULL) OR (status = 'booked' AND owner_mailed = 0)");
     $s->execute([time() - 300]);
     foreach ($s->fetchAll() as $row) {
+        if ($paused && $row['status'] === 'booked') { $done['mail_waiting'][] = $row['pay_id']; continue; }
         $b = finish_booking($row['pay_id']);
         if ($row['status'] !== 'booked') $done['retried'][] = $row['pay_id'];
         elseif (($b['mail_sent'] || !$b['email']) && $b['owner_mailed']) $done['mailed'][] = $row['pay_id'];
         else $done['mail_failed'][] = $row['pay_id'];   // stays unsent: the next run tries again
     }
-    if (array_filter($done)) log_line('SWEEP', $done);
+    if (array_filter(array_diff_key($done, ['mail_waiting' => 1]))) log_line('SWEEP', $done);
     return $done;
 }
