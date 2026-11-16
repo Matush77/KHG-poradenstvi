@@ -773,6 +773,124 @@ ok(!str_contains(mail_build($tb, $t1, 'u', $t0, true)['text'], 'přesunula'), 'r
 ok(str_contains(mail_client_cancelled($tb, $t0, false, true, true)['text'], 'Sezení zrušila ' . SENDER), 'run 16/1: her cancel names her');
 ok(!str_contains(mail_client_cancelled($tb, $t0, false, true)['text'], 'zrušila'), 'run 16/1: the client\'s own cancel does not');
 
+// --- review 17 Nov (another model's list): e-mails that must not get lost, sent twice, or retried for ever
+$SENT = [];
+$smtpDown = function () { throw new RuntimeException('SMTP connect smtp-relay.gmail.com:587 failed: Connection timed out'); };
+$smtpOk = function (string $name, array $m) use (&$SENT) { $SENT[] = $name; };
+$sentOnce = function (string $name) use (&$SENT) { return count(array_keys($SENT, $name, true)); };
+$queued = fn(string $like) => db()->query("SELECT name, kind FROM mail_queue WHERE name LIKE " . db()->quote($like))->fetchAll();
+state_set('mail_paused_until', '0');
+
+// 1. Google's "come back later" answers pause sending too
+ok(smtp_backoff('SMTP: expected 235, got 454 4.7.0 Too many login attempts, please try again later.') > 0, 'r17/1: Google 454 "too many login attempts" pauses sending');
+ok(smtp_backoff('SMTP: expected 250, got 421 4.7.0 Try again later, closing connection.') === MAIL_BACKOFF_MINUTES, 'r17/1: Google 421 "try again later" pauses for a quarter of an hour');
+ok(smtp_backoff('SMTP: expected 250, got 550 5.4.5 Daily SMTP relay limit exceeded for customer.') === MAIL_PAUSE_MINUTES, 'r17/1: the relay\'s daily limit pauses for an hour');
+ok(smtp_backoff('SMTP: expected 235, got 535 5.7.8 Username and Password not accepted') === 0, 'r17/1: a wrong password does not pause');
+ok(smtp_backoff('SMTP connect smtp-relay.gmail.com:587 failed: Connection timed out') === 0, 'r17/1: a server not answering does not pause');
+ok(smtp_backoff('SMTP: expected 250, got 550 5.1.1 The email account that you tried to reach does not exist.') === 0, 'r17/1: a dead address does not pause');
+$GLOBALS['SMTP_FAKE'] = function () { throw new SmtpRejected('SMTP: expected 250, got 550 5.4.5 Daily SMTP relay limit exceeded'); };
+try { mail_send('r17-limit', ['to' => 'x@example.com', 'subject' => 's', 'text' => 't', 'html' => 'h', 'ics' => null]); } catch (Throwable $e) { $limitErr = $e; }
+ok(isset($limitErr) && !$limitErr instanceof SmtpRejected && mail_paused() > time(), 'r17/1: a limit refused at RCPT pauses and is not taken as a dead address');
+state_set('mail_paused_until', '0');
+
+// 7. her deletion in the calendar: the e-mail to her is queued, so a mail outage can't swallow it
+$add->execute(['cs_r17_del', $at('+40 days'), 'online', 'booked', 'evR17Del', null, null, 0, 0]);
+state_set('calendar_sync', (string)(time() - 60));
+$FAKE = ['#GET .*/events\?#' => fn() => [200, ['items' => [['id' => 'evR17Del', 'status' => 'cancelled', 'updated' => gmdate('Y-m-d\TH:i:s\Z', time() - 30)]]]]];
+$GLOBALS['SMTP_FAKE'] = $smtpDown;
+sync_calendar();
+ok(booking_get('cs_r17_del')['status'] === 'cancelled' && count($queued('cs_r17_del-deleted')) === 1, 'r17/7: deleted in the calendar with the mail down: her e-mail waits in the queue');
+$GLOBALS['SMTP_FAKE'] = $smtpOk;
+ok(mail_queue_send('cs_r17_del-deleted', 'cs_r17_del', 'owner_deleted') && $sentOnce('cs_r17_del-deleted') === 1 && !$queued('cs_r17_del-deleted'), 'r17/7: and goes once the mail works');
+db()->exec("UPDATE bookings SET refund_id = 're_r17', refund_status = 'pending' WHERE pay_id = 'cs_r17_del'");
+ok(queued_mail(booking_get('cs_r17_del'), 'owner_deleted') === null, 'r17/7: once she has refunded it, a late copy is not sent any more');
+
+// 5. the client's move: her note is queued too, and keeps the old time
+$add->execute(['cs_r17_mv', $at('+41 days'), 'online', 'booked', 'evR17Mv', null, null, 0, 0]);
+db()->exec("UPDATE bookings SET meet = 'https://meet.google.com/abc-defg-hij', mail_sent = 0, moves = 1, client_moves = 1 WHERE pay_id = 'cs_r17_mv'");
+$GLOBALS['SMTP_FAKE'] = $smtpDown;
+$oldMv = prague($at('+40 days'));
+moved_mails(booking_get('cs_r17_mv'), $oldMv, 'client');
+$qm = $queued('cs_r17_mv-moved-%');
+ok(count($qm) === 1 && $qm[0]['kind'] === 'owner_moved|' . $oldMv->format(DATE_ATOM), 'r17/5: the client moved it with the mail down: her note waits in the queue');
+ok(str_contains(queued_mail(booking_get('cs_r17_mv'), $qm[0]['kind'])['text'], 'Původně ' . cz_at($oldMv)), 'r17/5: and still names the old time when it goes');
+ok(!booking_get('cs_r17_mv')['mail_try'] && !booking_get('cs_r17_mv')['mail_sent'], 'r17/5: the client\'s failed e-mail is left for the safety net');
+
+// 3. one sender per e-mail
+$GLOBALS['SMTP_FAKE'] = $smtpOk;
+db()->exec("UPDATE bookings SET mail_try = " . time() . " WHERE pay_id = 'cs_r17_mv'");   // another request is sending it right now
+db()->exec("UPDATE bookings SET status = 'booked', owner_mailed = 1 WHERE pay_id = 'cs_r17_mv'");
+$FAKE = ['#GET .*/events/evR17Mv#' => fn() => [200, ['id' => 'evR17Mv', 'hangoutLink' => 'https://meet.google.com/abc-defg-hij']]];
+finish_booking('cs_r17_mv');
+ok($sentOnce('cs_r17_mv') === 0, 'r17/3: while another request is sending the confirmation, the safety net does not send it too');
+db()->exec("UPDATE bookings SET mail_try = " . (time() - MAIL_CLAIM_SECONDS - 5) . " WHERE pay_id = 'cs_r17_mv'");
+finish_booking('cs_r17_mv');
+ok($sentOnce('cs_r17_mv') === 1 && booking_get('cs_r17_mv')['mail_sent'] == 1 && !booking_get('cs_r17_mv')['mail_try'], 'r17/3: a sender that died is taken over after a while, and it goes once');
+finish_booking('cs_r17_mv');
+ok($sentOnce('cs_r17_mv') === 1, 'r17/3: a second run after it went sends nothing');
+db()->prepare('INSERT INTO mail_queue (name, pay_id, kind, created_at, tried_at) VALUES (?, ?, ?, ?, ?)')->execute(['cs_r17_mv-q', 'cs_r17_mv', 'owner_cancelled', time(), time()]);
+ok(!mail_queue_send('cs_r17_mv-q', 'cs_r17_mv', 'owner_cancelled') && $sentOnce('cs_r17_mv-q') === 0, 'r17/3: a queued e-mail another request is sending is not sent twice');
+ok(is_resource($lk = fopen($tmp . '/cron.lock', 'c')) && flock($lk, LOCK_EX | LOCK_NB)
+    && str_contains(implode("\n", $child = (function () use ($tmp) { exec('KHG_CONFIG_DIR=' . escapeshellarg($tmp) . ' php ' . escapeshellarg(__DIR__ . '/../cron.php'), $o); return $o; })()), 'previous run still going'),
+    'r17/3: a cron run while the previous one still runs does nothing');
+flock($lk, LOCK_UN);
+
+// 4. a dead address: no retry for ever, and she is told
+$add->execute(['cs_r17_dead', $at('+42 days'), 'online', 'booked', 'evR17Dead', null, null, 0, 0]);
+db()->exec("UPDATE bookings SET meet = 'https://meet.google.com/abc-defg-hij', owner_mailed = 1, phone = '+420 600 000 000' WHERE pay_id = 'cs_r17_dead'");
+$GLOBALS['SMTP_FAKE'] = function (string $name, array $m) use (&$SENT) {
+    if ($m['to'] === 'a@example.com') throw new SmtpRejected('SMTP: expected 250, got 550 5.1.1 The email account that you tried to reach does not exist.');
+    $SENT[] = $name;
+};
+finish_booking('cs_r17_dead');
+$dd = booking_get('cs_r17_dead');
+ok($dd['mail_dead'] == 1 && !$dd['mail_sent'] && !$dd['mail_try'], 'r17/4: an address refused for good is marked, not retried');
+ok($sentOnce('cs_r17_dead-undeliverable-confirmation') === 1, 'r17/4: she gets "E-mail klientovi nedorazil"');
+ok(str_contains(mail_owner_undeliverable($dd, prague($dd['slot']), 'u', 'confirmation')['text'], 'potvrzení rezervace'), 'r17/4: naming which e-mail it was');
+$s17 = db()->prepare("SELECT 1 FROM bookings WHERE pay_id = 'cs_r17_dead' AND status = 'booked' AND mail_sent = 0 AND email IS NOT NULL AND COALESCE(mail_dead, 0) = 0");
+$s17->execute();
+ok(!$s17->fetchColumn(), 'r17/4: the safety net no longer picks it up');
+db()->prepare('INSERT INTO mail_queue (name, pay_id, kind, created_at) VALUES (?, ?, ?, ?)')->execute(['cs_r17_dead-old', 'cs_r17_dead', 'owner_cancelled', time() - 4 * 86400]);
+$GLOBALS['SMTP_FAKE'] = $smtpDown;
+ok(!mail_queue_send('cs_r17_dead-old', 'cs_r17_dead', 'owner_cancelled') && !$queued('cs_r17_dead-old'), 'r17/4: a queued e-mail failing for over ' . MAIL_GIVE_UP_DAYS . ' days is given up');
+db()->prepare('INSERT INTO mail_queue (name, pay_id, kind, created_at) VALUES (?, ?, ?, ?)')->execute(['cs_r17_dead-new', 'cs_r17_dead', 'owner_cancelled', time()]);
+ok(!mail_queue_send('cs_r17_dead-new', 'cs_r17_dead', 'owner_cancelled') && count($queued('cs_r17_dead-new')) === 1, 'r17/4: a fresh one is kept for the next try');
+db()->exec("DELETE FROM mail_queue WHERE pay_id = 'cs_r17_dead'");
+
+// 2. a cancellation e-mail that goes after Stripe refused the refund promises nothing
+$rb = ['pay_id' => 'cs_r17_rf', 'forma' => 'online', 'email' => 'k@example.com', 'name' => 'K', 'slot' => $at('+43 days'), 'status' => 'cancelled',
+    'cancelled_by' => 'owner', 'refund_id' => 're_x', 'refund_status' => 'failed'];
+foreach (['client_cancel', 'client_refund', 'client_cancelled'] as $k) {
+    $txt = queued_mail($rb, $k)['text'];
+    ok(str_contains($txt, 'zdrželo') && !str_contains($txt, 'bude vrácena') && !str_contains($txt, 'nevrací'), "r17/2: '$k' after a failed refund says it is delayed");
+}
+ok(str_contains(queued_mail(['refund_status' => 'pending'] + $rb, 'client_cancel')['text'], 'bude vrácena'), 'r17/2: with the refund on its way it says the money comes back');
+
+// 6. cancelling again: nothing sent now, and the answer says so
+$again = cancel_booking('cs_r17_del');
+ok(($again['already'] ?? false) === true && $again['mailed'] === false, 'r17/6: a second cancel says it was cancelled already and nothing was sent');
+
+// 9. the cancel page knows who cancelled
+ok(booking_view(booking_get('cs_r17_del'))['cancelled_by'] === 'calendar' && booking_view(booking_get('cs_rv_move'))['cancelled_by'] === null, 'r17/9: the cancel page is told who cancelled');
+
+// 12. the visitor limit never ends a payment in the middle of its bank confirmation
+db()->exec("DELETE FROM holds WHERE who = 'whoP'");
+foreach (['p1' => 'requires_action', 'p2' => 'requires_payment_method', 'p3' => null] as $pid => $st)
+    db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, ?, ?, ?, ?, ?)')
+        ->execute([$at('+' . (50 + (int)$pid[1]) . ' days'), 'cs_test_' . $pid, time() + 31 * 60 + 120 + (int)$pid[1], 'whoP', 'br' . $pid, 'n' . $pid]);
+$CALLS = [];
+$FAKE = ['#GET .*/checkout/sessions/cs_test_p1\?#' => fn() => [200, ['id' => 'cs_test_p1', 'payment_intent' => ['status' => 'requires_action']]],
+    '#GET .*/checkout/sessions/cs_test_p2\?#' => fn() => [200, ['id' => 'cs_test_p2', 'payment_intent' => ['status' => 'requires_payment_method']]],
+    '#POST .*/checkout/sessions/cs_test_p\d/expire#' => fn() => [200, ['status' => 'expired']]];
+cap_holds('whoP', time());
+$left = db()->query("SELECT pay_id FROM holds WHERE who = 'whoP' ORDER BY expires_at")->fetchAll(PDO::FETCH_COLUMN);
+ok($left === ['cs_test_p1', 'cs_test_p2', 'cs_test_p3'] && !preg_grep('#cs_test_p1/expire#', $CALLS), 'r17/12: the oldest payment, in 3-D Secure, is left alone (' . implode(',', $left) . ')');
+db()->exec("UPDATE holds SET expires_at = expires_at - 10 WHERE pay_id = 'cs_test_p2'");   // now the oldest
+cap_holds('whoP', time());
+ok(!in_array('cs_test_p2', db()->query("SELECT pay_id FROM holds WHERE who = 'whoP'")->fetchAll(PDO::FETCH_COLUMN), true), 'r17/12: one not being paid is still freed as before');
+db()->exec("DELETE FROM holds WHERE who = 'whoP'");
+unset($GLOBALS['SMTP_FAKE']);
+
 unset($GLOBALS['HTTP_FAKE']);
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";

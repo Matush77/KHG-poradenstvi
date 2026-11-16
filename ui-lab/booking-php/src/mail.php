@@ -374,6 +374,18 @@ function mail_owner_deleted(array $b, DateTimeImmutable $start, string $ownerUrl
         ['Vrátit peníze a napsat klientovi' => $ownerUrl . '&akce=zrusit']);
 }
 
+/* To the owner when a client's e-mail could not be delivered: the address refused it, or it kept failing for days. */
+const MAIL_WHAT = ['confirmation' => 'potvrzení rezervace', 'client_cancelled' => 'zrušení sezení', 'client_cancel' => 'zrušení sezení',
+    'client_refund' => 'vrácení platby', 'client_double' => 'vrácení platby za obsazený termín'];
+function mail_owner_undeliverable(array $b, DateTimeImmutable $start, string $ownerUrl, string $what): array
+{
+    $addr = (string)($b['email'] ?? '');
+    return owner_mail($b, $start, 'E-mail klientovi nedorazil: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'E-mail klientovi nedorazil',
+        ['E-mail „' . (MAIL_WHAT[$what] ?? 'zpráva z webu') . '“ na adresu ' . $addr . ' se nepodařilo doručit, klient ho nemá.',
+         $b['phone'] ? 'Dej mu prosím vědět jinak, třeba telefonem.' : 'Dej mu prosím vědět jinak.'],
+        ['Otevřít rezervaci' => $ownerUrl]);
+}
+
 /* To the owner when an online client declined the calendar invitation. Nothing else changes. */
 function mail_owner_declined(array $b, DateTimeImmutable $start, string $ownerUrl): array
 {
@@ -407,8 +419,10 @@ function mail_reminder(array $b, DateTimeImmutable $start, string $kind, ?int $n
 }
 
 /* To the client when the owner cancels (full refund), or refunds a session the client cancelled late. */
-/* $refunded false only when the client cancelled late themself (no refund): the money line says so instead. */
-function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly, bool $refunded = true, bool $byOwner = false): array
+/* $refunded false only when the client cancelled late themself (no refund): the money line says so instead.
+   $delayed: the refund was started but Stripe refused it (she is told separately and sorts it out): the e-mail
+   neither promises the money nor says it is not coming back (review 17 Nov). */
+function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly, bool $refunded = true, bool $byOwner = false, bool $delayed = false): array
 {
     $book = site() . cfg()['booking_page'];
     $subject = $refundOnly ? 'Vrácení platby za sezení ' . cz_at($start) : 'Zrušené sezení ' . cz_at($start);
@@ -416,8 +430,9 @@ function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundO
     $title = $refundOnly ? 'Vrácení platby' : 'Zrušení sezení';
     // she cancelled (16 Nov test run: her page promised "Klient dostane e-mail, že sezení rušíš", the e-mail did not say so)
     $who = $byOwner ? 'Sezení zrušila ' . SENDER . '.' : '';
-    $money = $refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.'
-        : 'Platba se nevrací, termín byl zrušen méně než ' . cfg()['free_cancel_hours'] . ' hodin předem.';
+    $money = $delayed ? 'Vrácení platby se zdrželo a řeší se. Jakmile bude vyřízené, přijde další e-mail.'
+        : ($refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.'
+        : 'Platba se nevrací, termín byl zrušen méně než ' . cfg()['free_cancel_hours'] . ' hodin předem.');
     $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', ...($who ? [$who] : []), $money,
         ...($refundOnly ? [] : ['', 'Vybrat jiný termín: ' . $book]), ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, false),
@@ -497,35 +512,52 @@ function mail_send(string $name, array $m): void
         file_put_contents($path, mail_eml($m), LOCK_EX);
         @chmod($path, 0600);
     }
-    if ($c['smtp']['pass'] === '') {
-        if (lab()) return;
-        throw new RuntimeException('SMTP is not set up (SMTP_PASS missing).');
+    // the tests stand in for the mail server here (command line only, like HTTP_FAKE)
+    $fake = PHP_SAPI === 'cli' && isset($GLOBALS['SMTP_FAKE']) ? $GLOBALS['SMTP_FAKE'] : null;
+    if (!$fake) {
+        if ($c['smtp']['pass'] === '') {
+            if (lab()) return;
+            throw new RuntimeException('SMTP is not set up (SMTP_PASS missing).');
+        }
+        if (lab()) {
+            $to = strtolower($m['to'] === OWNER_MAIL ? $c['lab_owner_to'] : $m['to']);
+            if ($to === '' || !in_array($to, $c['lab_mail_to'], true)) return;
+            $m['to'] = $to;
+            $m['subject'] = '[TEST] ' . $m['subject'];
+        }
     }
-    if (lab()) {
-        $to = strtolower($m['to'] === OWNER_MAIL ? $c['lab_owner_to'] : $m['to']);
-        if ($to === '' || !in_array($to, $c['lab_mail_to'], true)) return;
-        $m['to'] = $to;
-        $m['subject'] = '[TEST] ' . $m['subject'];
-    }
-    if ($until = mail_paused()) throw new RuntimeException('SMTP paused until ' . date('H:i', $until) . ' (sending limit)');
+    if ($until = mail_paused()) throw new RuntimeException('SMTP paused until ' . date('H:i', $until) . ' (server asked to wait)');
     try {
-        smtp_send($c['smtp'], FROM_MAIL, $m['to'], mail_eml($m));
+        $fake ? $fake($name, $m) : smtp_send($c['smtp'], FROM_MAIL, $m['to'], mail_eml($m));
     } catch (RuntimeException $e) {
-        // the mailbox's daily limit (16 Nov: the cron retried every 5 minutes for two days and the limit never
-        // cleared): stop talking to the server for a while, the safety net sends what is waiting afterwards
-        if (smtp_over_limit($e->getMessage())) {
-            state_set('mail_paused_until', (string)(time() + MAIL_PAUSE_MINUTES * 60));
-            log_line('MAIL_PAUSED', ['minutes' => MAIL_PAUSE_MINUTES, 'error' => substr($e->getMessage(), 0, 200)]);
+        // the server asks to wait (a sending limit, or Google's "try again later"; 16 Nov: the cron retried every
+        // 5 minutes for two days and the limit never cleared): stop talking to it for a while, the safety net
+        // sends what is waiting afterwards. Such a refusal is never taken as a refusal for good.
+        if ($minutes = smtp_backoff($e->getMessage())) {
+            state_set('mail_paused_until', (string)(time() + $minutes * 60));
+            log_line('MAIL_PAUSED', ['minutes' => $minutes, 'error' => substr($e->getMessage(), 0, 200)]);
+            if ($e instanceof SmtpRejected) throw new RuntimeException($e->getMessage(), 0, $e);
         }
         throw $e;
     }
     log_line('SMTP_SENT', ['mail' => $name]);
 }
 
-/* After the mail server refused a message over its sending limit, nothing is sent for an hour. Returns the end
-   of the pause (a timestamp), or 0 when sending is allowed. */
-const MAIL_PAUSE_MINUTES = 60;
-function smtp_over_limit(string $error): bool { return (bool)preg_match('/\b[45]\d\d\b.*limit/is', $error); }
+/* After the mail server asked to wait, nothing is sent for a while. Returns the end of the pause (a timestamp),
+   or 0 when sending is allowed.
+   smtp_backoff: how long to wait after this error, 0 for none. A limit (Google: "550 5.4.5 Daily SMTP relay limit
+   exceeded", the old mailbox: "550 ... daily limit") waits an hour; Google's "come back later" answers (421, 454,
+   4.7.x, e.g. "454 4.7.0 Too many login attempts") a quarter of an hour (review 17 Nov: the 454 had no "limit" in
+   it and was retried every run). A wrong password or a refused address is not a reason to wait. */
+const MAIL_PAUSE_MINUTES = 60, MAIL_BACKOFF_MINUTES = 15;
+function smtp_backoff(string $error): int
+{
+    if (!preg_match('/\b([45])\d\d\b/', $error)) return 0;   // no answer from the server at all (a dead host): no pause
+    if (preg_match('/limit|quota|too many|rate\b|5\.4\.5/i', $error)) return MAIL_PAUSE_MINUTES;
+    if (preg_match('/got (421|454)\b|\b4\.7\.\d+|try again later/i', $error)) return MAIL_BACKOFF_MINUTES;
+    return 0;
+}
+function smtp_over_limit(string $error): bool { return smtp_backoff($error) === MAIL_PAUSE_MINUTES; }
 function mail_paused(): int
 {
     $until = (int)(state_get('mail_paused_until') ?? 0);

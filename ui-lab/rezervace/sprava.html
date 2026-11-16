@@ -148,7 +148,8 @@ a { color: var(--blue); text-underline-offset: 3px; }
       api('sprava/zrusit', {}).then(function (j) {
         d = j; akce = null;
         var told = !j.email ? 'klient e-mail nemá, dej mu vědět sám.' : j.mailed === false ? 'e-mail klientovi se teď odeslat nepovedl, odejde sám o něco později.' : 'klient dostal e-mail.';
-        flash = (refundOnly ? 'Hotovo. Peníze se vracejí, ' : 'Hotovo. Sezení je zrušené, peníze se vracejí, ') + told;
+        flash = j.already ? 'Peníze už se vracely dřív, teď se nic dalšího neposlalo.'
+          : (refundOnly ? 'Hotovo. Peníze se vracejí, ' : 'Hotovo. Sezení je zrušené, peníze se vracejí, ') + told;
         render(); focusH1();
       }).catch(function (e) { idle(btn, label); err.textContent = e.message; err.hidden = false; });
     };

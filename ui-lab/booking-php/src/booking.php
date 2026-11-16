@@ -212,11 +212,23 @@ function cap_holds(string $who, int $now): void
     $open = $s->fetchAll();
     foreach (array_slice($open, 0, max(0, count($open) - cfg()['holds_per_visitor'] + 1)) as $h) {
         if (hold_creating($h, $now)) continue;   // its request is still running: never pulled from under it
+        if (hold_paying($h)) continue;           // someone is confirming the payment in their bank right now
         // paid, being booked: its hold must stay
         if (!expire_hold($h, 'Máte rozpracovaných víc rezervací najednou. Dokončete prosím jednu z nich, nebo to zkuste za půl hodiny.')) continue;
         db()->prepare('DELETE FROM holds WHERE slot = ? AND who = ? AND pay_id IS ?')->execute([$h['slot'], $who, $h['pay_id']]);
         log_line('HOLD_RELEASED', ['slot' => $h['slot'], 'pay' => $h['pay_id'], 'why' => 'visitor limit']);
     }
+}
+
+/* The hold's payment is under way at the client's bank (3-D Secure) or being processed. The visitor limit counts
+   by IP, and phones on mobile data share one: a 4th payment from the same address must not end a stranger's payment
+   in the middle of its bank confirmation (review 17 Nov). Unknown (Stripe not answering): not under way. */
+function hold_paying(array $h): bool
+{
+    if (!$h['pay_id']) return false;
+    [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($h['pay_id']), ['expand' => ['payment_intent']]);
+    $st = $code === 200 && is_array($s['payment_intent'] ?? null) ? ($s['payment_intent']['status'] ?? '') : '';
+    return in_array($st, ['requires_action', 'processing', 'requires_capture'], true);
 }
 
 /* Step 2 -> Stripe. Holds the slot for as long as the Stripe page lives (30 min), so two people can't pay for it. */
@@ -358,18 +370,29 @@ function refund_double(string $payId): array
 /* --- e-mails that must arrive (16 Nov review: a failed cancellation e-mail was only logged). Each is written down
    first, sent, and crossed off when it went; the safety net sends whatever is left. Rebuilt from the booking when
    sent, so a retry says what is true then. */
-function queued_mail(array $b, string $kind): array
+/* A kind may carry one value after a "|" (the old time of a move, the e-mail that did not arrive).
+   Null: nothing to send any more (it would no longer be true). */
+function queued_mail(array $b, string $kind): ?array
 {
+    [$kind, $arg] = array_pad(explode('|', $kind, 2), 2, '');
     $start = prague($b['slot']);
+    $url = owner_url($b['pay_id']);
     $refunded = $b['refund_id'] !== null && !refund_failed($b);
+    // the refund Stripe refused since (review 17 Nov: an e-mail that went late still promised the money)
+    $delayed = refund_failed($b);
     return match ($kind) {
-        'owner_cancelled' => mail_owner_cancelled($b, $start, owner_url($b['pay_id'])),
-        'client_cancelled' => mail_client_cancelled($b, $start, false, $refunded),       // the client cancelled
-        'client_cancel' => mail_client_cancelled($b, $start, false, true, true),         // she cancelled, refunded
-        'client_refund' => mail_client_cancelled($b, $start, true),                      // refund after a cancellation
-        'owner_refund_failed' => mail_owner_refund_failed($b, $start, owner_url($b['pay_id'])),
+        'owner_cancelled' => mail_owner_cancelled($b, $start, $url),
+        'client_cancelled' => mail_client_cancelled($b, $start, false, $refunded, false, $delayed),   // the client cancelled
+        'client_cancel' => mail_client_cancelled($b, $start, false, $refunded, true, $delayed),       // she cancelled, with a refund
+        'client_refund' => mail_client_cancelled($b, $start, true, $refunded, false, $delayed),       // refund after a cancellation
+        'owner_refund_failed' => mail_owner_refund_failed($b, $start, $url),
         'owner_double' => mail_owner_double($b, $start, $refunded),
         'client_double' => mail_client_double($b, $start),
+        // she deleted it in her calendar; once she has refunded it there is nothing to ask her any more
+        'owner_deleted' => $b['refund_id'] && !$delayed ? null : mail_owner_deleted($b, $start, $url),
+        'owner_declined' => $b['status'] === 'booked' ? mail_owner_declined($b, $start, $url) : null,
+        'owner_moved' => mail_owner_moved($b, $start, prague($arg), $url),
+        'owner_undeliverable' => mail_owner_undeliverable($b, $start, $url, $arg),
         default => throw new RuntimeException('Unknown queued mail ' . $kind),
     };
 }
@@ -381,16 +404,76 @@ function mail_queued(string $name, string $payId, string $kind): bool
     return mail_queue_send($name, $payId, $kind);
 }
 
+/* One sender per e-mail (review 17 Nov: the cron and a web request, or two cron runs, could both send the same one).
+   Whoever marks it first sends it; the mark is cleared when the try ends, and one left by a request that died
+   is taken over after MAIL_CLAIM_SECONDS (longer than the slowest SMTP conversation). $table, $key, $col and
+   $cond are fixed strings from this file, never input. */
+const MAIL_CLAIM_SECONDS = 600;
+function mail_claim(string $table, string $key, string $col, string $id, string $cond = '1'): bool
+{
+    $s = db()->prepare("UPDATE $table SET $col = :now WHERE $key = :id AND ($cond) AND ($col IS NULL OR $col < :stale)");
+    $s->execute(['now' => time(), 'id' => $id, 'stale' => time() - MAIL_CLAIM_SECONDS]);
+    return $s->rowCount() === 1;
+}
+function mail_unclaim(string $table, string $key, string $col, string $id): void
+{
+    db()->prepare("UPDATE $table SET $col = NULL WHERE $key = ?")->execute([$id]);
+}
+
+/* Retrying ends when the server refused the e-mail for good (a dead address), or after this long (review 17 Nov:
+   such an e-mail was retried every 5 minutes for ever). She is told when a client's e-mail did not arrive. */
+const MAIL_GIVE_UP_DAYS = 3;
+function mail_gave_up(string $payId, string $what, string $to, string $error): void
+{
+    log_line('MAIL_GAVE_UP', ['pay' => $payId, 'mail' => $what, 'error' => substr($error, 0, 200)]);
+    if ($to !== '' && $to !== OWNER_MAIL) mail_queued($payId . '-undeliverable-' . preg_replace('/\W/', '', $what), $payId, 'owner_undeliverable|' . $what);
+}
+
 function mail_queue_send(string $name, string $payId, string $kind): bool
 {
+    if (!mail_claim('mail_queue', 'name', 'tried_at', $name)) return false;   // another request is sending it right now
     $b = booking_get($payId);
+    $m = null;
     try {
-        if ($b) mail_send($name, queued_mail($b, $kind));
+        $m = $b ? queued_mail($b, $kind) : null;
+        if ($m) mail_send($name, $m);
     } catch (Throwable $e) {
         log_line('MAIL_ERROR', ['pay' => $payId, 'mail' => $kind, 'error' => $e->getMessage()]);
+        $q = db()->prepare('SELECT created_at FROM mail_queue WHERE name = ?');
+        $q->execute([$name]);
+        $old = (int)$q->fetchColumn() < time() - MAIL_GIVE_UP_DAYS * 86400;
+        $q->closeCursor();
+        if (!$e instanceof SmtpRejected && !$old) {
+            mail_unclaim('mail_queue', 'name', 'tried_at', $name);
+            return false;
+        }
+        db()->prepare('DELETE FROM mail_queue WHERE name = ?')->execute([$name]);
+        mail_gave_up($payId, explode('|', $kind)[0], $m['to'] ?? '', $e->getMessage());
         return false;
     }
-    db()->prepare('DELETE FROM mail_queue WHERE name = ?')->execute([$name]);   // sent (or the booking is gone)
+    db()->prepare('DELETE FROM mail_queue WHERE name = ?')->execute([$name]);   // sent (or nothing left to say)
+    return true;
+}
+
+/* The client's confirmation (or "Změna termínu") and her "Nová rezervace": sent by one request only (mail_claim).
+   True when it went. A confirmation the client's address refused for good is not retried; she is told. */
+function booking_mail(string $payId, string $name, array $m, bool $owner): bool
+{
+    [$col, $done] = $owner ? ['owner_try', 'owner_mailed'] : ['mail_try', 'mail_sent'];
+    if (!mail_claim('bookings', 'pay_id', $col, $payId, "$done = 0")) return false;
+    try {
+        mail_send($name, $m);
+    } catch (Throwable $e) {
+        log_line('MAIL_ERROR', ['pay' => $payId, 'to' => $owner ? 'owner' : 'client', 'error' => $e->getMessage()]);
+        if ($e instanceof SmtpRejected) {
+            booking_update($payId, $owner ? ['owner_mailed' => 1, $col => null] : ['mail_dead' => 1, $col => null]);
+            if (!$owner) mail_gave_up($payId, 'confirmation', $m['to'], $e->getMessage());
+        } else {
+            mail_unclaim('bookings', 'pay_id', $col, $payId);
+        }
+        return false;
+    }
+    booking_update($payId, [$done => 1, $col => null]);
     return true;
 }
 
@@ -442,23 +525,11 @@ function finish_booking(string $payId): array
     $b = with_meet($b);
     if (!$b['mail_sent'] && $b['email'] && $online && !$b['meet'] && (int)$b['created_at'] > time() - MEET_WAIT_MINUTES * 60) {
         log_line('MEET_PENDING', ['pay' => $payId]);   // the safety net sends the confirmation once the link is there
-    } elseif (!$b['mail_sent'] && $b['email']) {
-        try {
-            mail_send($payId, mail_build($b, $start, cancel_url($payId)));
-            booking_update($payId, ['mail_sent' => 1]);
-            log_line('MAILED', ['pay' => $payId]);
-        } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $payId, 'error' => $e->getMessage()]);
-        }
+    } elseif (!$b['mail_sent'] && $b['email'] && !$b['mail_dead']) {
+        if (booking_mail($payId, $payId, mail_build($b, $start, cancel_url($payId)), false)) log_line('MAILED', ['pay' => $payId]);
     }
     if (!$b['owner_mailed']) {
-        try {
-            mail_send($payId . '-owner', mail_owner_new($b, $start, owner_url($payId)));
-            booking_update($payId, ['owner_mailed' => 1]);
-            log_line('OWNER_MAILED', ['pay' => $payId]);
-        } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'owner', 'error' => $e->getMessage()]);
-        }
+        if (booking_mail($payId, $payId . '-owner', mail_owner_new($b, $start, owner_url($payId)), true)) log_line('OWNER_MAILED', ['pay' => $payId]);
     }
     return booking_get($payId);
 }
@@ -470,7 +541,7 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
 {
     $b = booking_get($payId);
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
-    if ($b['status'] === 'cancelled') return $b;
+    if ($b['status'] === 'cancelled') return $b + ['already' => true, 'mailed' => false];   // nothing sent now (review 17 Nov)
     if ($b['status'] !== 'booked') throw new ClientError('Rezervace se ještě zpracovává. Stačí to zkusit za pár minut, případně zavolat na ' . PHONE . '.', 409);
     if (moving($b)) throw new ClientError('Termín se právě mění. Stačí to zkusit za chvíli.', 409);
     $now ??= new DateTimeImmutable();
@@ -635,7 +706,7 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
     $b = booking_get($payId);
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
     $failed = refund_failed($b) ? $b['refund_id'] : null;            // Stripe refused the refund before: she may try again
-    if ($b['refund_id'] && !$failed) return $b;                       // already refunded: nothing more to do
+    if ($b['refund_id'] && !$failed) return $b + ['already' => true, 'mailed' => false];   // already refunded: nothing more to do
     if (in_array($b['status'], ['pending', 'failed'], true)) throw new ClientError('Rezervace se ještě zpracovává. Zkus to prosím za pár minut.', 409);
     if (moving($b)) throw new ClientError('Termín se právě přesouvá. Zkus to prosím za chvíli.', 409);
     $refundOnly = $b['status'] === 'cancelled';
@@ -742,21 +813,10 @@ function moved_mails(array $b, DateTimeImmutable $old, string $by): array
     $payId = $b['pay_id'];
     $new = prague($b['slot']);
     $b = with_meet($b);
-    if ($b['email']) {
-        try {   // if this fails, the safety net sends a normal confirmation of the new time
-            mail_send($payId . '-move-' . $b['moves'], mail_build($b, $new, cancel_url($payId), $old, $by === 'client'));
-            booking_update($payId, ['mail_sent' => 1]);
-        } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $payId, 'error' => $e->getMessage()]);
-        }
-    }
-    if ($by === 'client') {
-        try {
-            mail_send($payId . '-moved-' . $b['moves'], mail_owner_moved($b, $new, $old, owner_url($payId)));
-        } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'owner', 'error' => $e->getMessage()]);
-        }
-    }
+    // if this fails, the safety net sends a normal confirmation of the new time
+    if ($b['email'] && !$b['mail_dead']) booking_mail($payId, $payId . '-move-' . $b['moves'], mail_build($b, $new, cancel_url($payId), $old, $by === 'client'), false);
+    // queued, so a failure is retried (review 17 Nov: it was lost)
+    if ($by === 'client') mail_queued($payId . '-moved-' . $b['moves'], $payId, 'owner_moved|' . $old->format(DATE_ATOM));
     return booking_get($payId);
 }
 
@@ -827,11 +887,8 @@ function sync_calendar(?int $now = null): array
             booking_update($payId, ['status' => 'cancelled', 'cancelled_by' => 'calendar',
                 'hours_before' => round(($old->getTimestamp() - $deleted) / 3600, 2)]);   // 2 places: a minute before is not 0
             log_line('DELETED_IN_CALENDAR', ['pay' => $payId]);
-            try {
-                mail_send($payId . '-deleted', mail_owner_deleted(booking_get($payId), $old, owner_url($payId)));
-            } catch (Throwable $e) {
-                log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'owner', 'error' => $e->getMessage()]);
-            }
+            // queued (review 17 Nov: when this one e-mail failed, a paid client was left cancelled, unrefunded and untold)
+            mail_queued($payId . '-deleted', $payId, 'owner_deleted');
             $done['deleted'][] = $payId;
             continue;
         }
@@ -846,13 +903,10 @@ function sync_calendar(?int $now = null): array
         $guest = $b['email'] ? strtolower($b['email']) : null;
         foreach ($ev['attendees'] ?? [] as $a) {
             if ($guest && strtolower($a['email'] ?? '') === $guest && ($a['responseStatus'] ?? '') === 'declined' && !$b['declined_mailed']) {
+                // queued: a failed e-mail was retried only if Google listed the event again, which it need not
+                booking_update($payId, ['declined_mailed' => 1]);
+                mail_queued($payId . '-declined', $payId, 'owner_declined');
                 $b = booking_get($payId);
-                try {
-                    mail_send($payId . '-declined', mail_owner_declined($b, prague($b['slot']), owner_url($payId)));
-                    booking_update($payId, ['declined_mailed' => 1]);
-                } catch (Throwable $e) {
-                    log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'owner', 'error' => $e->getMessage()]);
-                }
                 log_line('GUEST_DECLINED', ['pay' => $payId]);
                 $done['declined'][] = $payId;
             }
@@ -880,6 +934,8 @@ function booking_view(array $b, ?DateTimeImmutable $now = null): array
         'started' => $now >= $start, 'refund' => $now <= $deadline,
         'cancelled' => $b['status'] === 'cancelled', 'refunded' => (bool)$b['refund_id'] && !refund_failed($b),
         'refund_failed' => refund_failed($b), 'mailed' => (bool)($b['mail_sent'] ?? 0),
+        // who cancelled: the cancel page says why no money came back (review 17 Nov: it always blamed the 36 hours)
+        'cancelled_by' => $b['status'] === 'cancelled' ? ($b['cancelled_by'] ?: 'client') : null,
         'processing' => in_array($b['status'], ['pending', 'failed'], true),
         'can_move' => $b['status'] === 'booked' && $now <= $deadline];
 }
@@ -980,7 +1036,7 @@ function sweep(): array
         }
     }
     $s = db()->prepare("SELECT pay_id, status FROM bookings WHERE status = 'failed' OR (status = 'pending' AND updated_at < ?)
-        OR (status = 'booked' AND mail_sent = 0 AND email IS NOT NULL) OR (status = 'booked' AND owner_mailed = 0)");
+        OR (status = 'booked' AND mail_sent = 0 AND email IS NOT NULL AND COALESCE(mail_dead, 0) = 0) OR (status = 'booked' AND owner_mailed = 0)");
     $s->execute([time() - 300]);
     foreach ($s->fetchAll() as $row) {
         if ($paused && $row['status'] === 'booked') { $done['mail_waiting'][] = $row['pay_id']; continue; }
