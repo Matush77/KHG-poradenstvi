@@ -232,6 +232,8 @@ sub(CONTACT_ROWS, CONTACT_ROWS + '\n            <div class="contact-book">\n'
 
 # lab only: menu links point at "/#sluzby" (the live homepage); keep them on this page
 def lab_links(html):
+    # footer address: the postcode never breaks across lines (tablet footer, 16 Nov)
+    html = html.replace('>Vítkovická 3299/3a, 702 00 Ostrava</a></p>', '>Vítkovická 3299/3a, 702&nbsp;00&nbsp;Ostrava</a></p>')
     html = re.sub(r'href="/#(o-mne|sluzby|kontakt|faq)"', r'href="/ui-lab/proposal/#\1"', html)
     html = re.sub(r'href="/?((?:blog|quiz|kviz|cenik)[\w-]*\.html)', r'href="/ui-lab/proposal/\1', html)
     return re.sub(r'(<a\b[^>]*?)href="/"', r'\1href="/ui-lab/proposal/"', html)   # not the <base>

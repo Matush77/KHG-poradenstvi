@@ -819,6 +819,12 @@ html:has(.nav-menu.active) { overflow: hidden; }
 .pricing-information > h2 { text-align: left !important; }
 @media (max-width: 374px) { .btn-hero { padding-left: 16px !important; padding-right: 16px !important; } }
 .blog-meta time { white-space: nowrap; }
+/* Footer on tablets (owner, 16 Nov): from 600 px the name sits on top and Navigace | Kontakt side by side
+   (it was one long column up to 968 px; three columns only fit from about 1000 px). */
+@media (min-width: 600px) and (max-width: 968px) {
+  .footer-content { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; column-gap: var(--block-gap, 32px) !important; }
+  .footer-brand { grid-column: 1 / -1; }
+}
 
 /* LAB: parts shared by the blog and quiz pages in the 12 Nov theme. Layered after proposal.css (same tokens).
    Buttons: coral stays for booking only. Every other action is navy: solid for the step forward, outline for the rest. */
@@ -1154,7 +1160,7 @@ html:has(.nav-menu.active) { overflow: hidden; }
                     <p class="footer-heading"><strong>Kontakt</strong></p>
                     <p><a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a></p>
                     <p><a href="tel:+420605990980">+420&nbsp;605&nbsp;990&nbsp;980</a></p>
-                    <p><a href="https://www.google.com/maps/dir/?api=1&amp;destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a%2C+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702 00 Ostrava</a></p>
+                    <p><a href="https://www.google.com/maps/dir/?api=1&amp;destination=Mgr.+Krist%C3%BDna+Hricikov%C3%A1+Glattov%C3%A1%2C+V%C3%ADtkovick%C3%A1+3299%2F3a%2C+Ostrava" target="_blank" rel="noopener noreferrer">Vítkovická 3299/3a, 702&nbsp;00&nbsp;Ostrava</a></p>
                     <div class="footer-social">
                         <a href="https://www.facebook.com/terapieglattova" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
                             <img src="/images/facebook-icon.svg" width="32" height="32" alt="" class="social-icon" loading="lazy">
