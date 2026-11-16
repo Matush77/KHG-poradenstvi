@@ -179,9 +179,18 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
   function cancel() {
     var btn = this, err = document.getElementById('err');
     btn.setAttribute('aria-busy', 'true'); btn.disabled = true; btn.textContent = 'Rušení termínu…'; err.hidden = true;
-    fetch('/api/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ b: b, t: t }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+    // refund: what this page promised; if the 36 hours ran out meanwhile, the server cancels nothing
+    fetch('/api/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ b: b, t: t, refund: !!data.refund }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
       .then(function (r) {
+        if (r.status === 409 && data.refund) {
+          // the page's promise is out of date: show the booking as it is now, with the reason
+          return fetch('/api/booking?' + new URLSearchParams({ b: b, t: t })).then(function (x) { return x.json(); }).then(function (j) {
+            data = j; render();
+            var e = document.getElementById('err');
+            if (e) { e.textContent = r.j.error; e.hidden = false; }
+          });
+        }
         if (!r.ok) throw new Error(r.j.error || 'Zrušení se nepovedlo.');
         data.cancelled = true; data.refunded = !!r.j.refund; flash = 'Hotovo. Potvrzení bylo odesláno e-mailem.'; render();
         document.querySelector('h1').setAttribute('tabindex', '-1'); document.querySelector('h1').focus();
