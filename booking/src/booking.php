@@ -298,37 +298,43 @@ function book_paid(array $s): ?array
         $meta['email'] = substr($s['customer_details']['email'], 0, 200);
     }
     $start = slot_start($meta['den'], $meta['cas']);
-    $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start) {
+    // the session has already started: the payment was booked too late (webhook and safety net both down for a day
+    // or more). Never confirmed; refunded like a double payment, both told (17 Nov review: a confirmation for a
+    // session in the past, which no refund path would then accept)
+    $past = $start->getTimestamp() <= time();
+    $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start, $past) {
         if (booking_get($payId)) return false;
         // the last check: someone else's payment already has this time. The holds should make this impossible;
         // if it happens anyway, this payment is not booked but refunded, and both of them are told
         $t = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE slot = ? AND status IN ('pending','booked','failed') AND pay_id != ?");
         $t->execute([$start->format(DATE_ATOM), $payId]);
         $taken = (int)$t->fetchColumn() > 0;
+        $why = $taken ? 'double' : ($past ? 'missed' : null);
         $n = $pdo->prepare('SELECT note FROM notes WHERE pay_id = ?');
         $n->execute([$payId]);
         $pdo->prepare('INSERT INTO bookings (pay_id, slot, forma, email, phone, name, note, status, cancelled_by, owner_mailed, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([$payId, $start->format(DATE_ATOM), $meta['forma'],
             $meta['email'] ?: null, $meta['telefon'] ?: null, $meta['jmeno'] ?: null, $n->fetchColumn() ?: null,
-            $taken ? 'cancelled' : 'pending', $taken ? 'double' : null, $taken ? 1 : 0, time(), time()]);
+            $why ? 'cancelled' : 'pending', $why, $why ? 1 : 0, time(), time()]);
         $pdo->prepare('DELETE FROM notes WHERE pay_id = ?')->execute([$payId]);
-        if (!$taken) $pdo->prepare('DELETE FROM holds WHERE pay_id = ? OR slot = ?')->execute([$payId, $start->format(DATE_ATOM)]);
-        return $taken ? 'double' : true;
+        if (!$why) $pdo->prepare('DELETE FROM holds WHERE pay_id = ? OR slot = ?')->execute([$payId, $start->format(DATE_ATOM)]);
+        return $why ?? true;
     });
     if (!$claimed) return booking_get($payId);
-    if ($claimed === 'double') {
-        log_line('DOUBLE_PAYMENT', ['pay' => $payId, 'slot' => $start->format(DATE_ATOM)]);
+    if ($claimed !== true) {
+        log_line($claimed === 'double' ? 'DOUBLE_PAYMENT' : 'PAID_TOO_LATE', ['pay' => $payId, 'slot' => $start->format(DATE_ATOM)]);
         return refund_double($payId);
     }
     return finish_booking($payId);
 }
 
-/* A payment for a time that was already booked: refunded, the client and she get an e-mail. If Stripe fails,
-   the safety net tries again (a 'double' booking without a refund). */
+/* A payment that is not booked but refunded, the client and she get an e-mail: a time that was already booked
+   ('double'), or a session that had already started when the payment was booked ('missed'). If Stripe fails,
+   the safety net tries again (such a booking without a refund). */
 function refund_double(string $payId): array
 {
     try {
-        $fields = refund_full($payId, 'termin mezitim obsazen');
+        $fields = refund_full($payId, (booking_get($payId)['cancelled_by'] ?? '') === 'missed' ? 'termin uz probehl' : 'termin mezitim obsazen');
         booking_update($payId, $fields);
         log_line('DOUBLE_REFUNDED', ['pay' => $payId, 'refund' => $fields['refund_id']]);
     } catch (Throwable $e) {
@@ -585,11 +591,13 @@ function stripe_refund(string $paymentIntent, int $amount, string $why, string $
     } catch (RuntimeException $e) {
         return [$code, $r];
     }
-    foreach ($lc === 200 ? ($list['data'] ?? []) : [] as $x) {
-        if (($x['id'] ?? '') !== $failed && refund_alive($x) && $amount > 0 && (int)($x['amount'] ?? 0) === $amount) {
-            log_line('REFUND_FOUND', ['refund' => $x['id'], 'code' => $code]);
-            return [200, $x];
-        }
+    // the whole payment back, in one refund or in several (she may have refunded it in parts in her Stripe dashboard;
+    // 17 Nov review, second round): the newest one stands for them. Stripe lists newest first.
+    $alive = array_values(array_filter($lc === 200 ? ($list['data'] ?? []) : [], fn($x) => ($x['id'] ?? '') !== $failed && refund_alive($x)));
+    $total = array_sum(array_map(fn($x) => (int)($x['amount'] ?? 0), $alive));
+    if ($amount > 0 && $alive && $total >= $amount) {
+        log_line('REFUND_FOUND', ['refund' => $alive[0]['id'], 'code' => $code, 'refunds' => count($alive), 'total' => $total]);
+        return [200, $alive[0]];
     }
     return [$code, $r];
 }
@@ -746,9 +754,10 @@ function moved_mails(array $b, DateTimeImmutable $old, string $by): array
 
 /* Google answered a move with an error (or not at all): did the event move anyway? (17 Nov review: Google moved it,
    its answer was lost, and the booking went back to the old time after someone else had paid for that time.)
-   Google's own event decides. If Google can't be read either: the old time already booked by someone else means
-   it was free in her calendar, so the event did move; otherwise it is taken as not moved, and if it did move after
-   all, the calendar sync moves the booking to it within a minute. */
+   Google's own event decides. If Google can't be read either: the old time already booked, or being paid for, by
+   someone else means it was free in her calendar, so the event did move (17 Nov review, second round: a payment
+   still on Stripe's page was not counted); otherwise it is taken as not moved, and if it did move after all, the
+   calendar sync moves the booking to it within a minute. */
 function move_landed(string $payId, array $b, DateTimeImmutable $new): bool
 {
     if (!$b['event_id']) return false;
@@ -756,8 +765,9 @@ function move_landed(string $payId, array $b, DateTimeImmutable $new): bool
         $at = gcal_get($b['event_id'])['start']['dateTime'] ?? null;
         return $at !== null && (new DateTimeImmutable($at))->getTimestamp() === $new->getTimestamp();
     } catch (Throwable $e) {
-        $t = db()->prepare("SELECT COUNT(*) FROM bookings WHERE slot = ? AND status IN ('pending','booked','failed') AND pay_id != ?");
-        $t->execute([$b['slot'], $payId]);
+        $t = db()->prepare("SELECT (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed') AND pay_id != :p)
+            + (SELECT COUNT(*) FROM holds WHERE slot = :s AND expires_at >= :now)");
+        $t->execute(['s' => $b['slot'], 'p' => $payId, 'now' => time()]);
         return (int)$t->fetchColumn() > 0;
     }
 }
@@ -972,7 +982,7 @@ function sweep(): array
         }
     }
     // a payment for a time already taken whose refund did not go through yet
-    foreach (db()->query("SELECT pay_id FROM bookings WHERE cancelled_by = 'double' AND refund_id IS NULL")->fetchAll(PDO::FETCH_COLUMN) as $payId) {
+    foreach (db()->query("SELECT pay_id FROM bookings WHERE cancelled_by IN ('double', 'missed') AND refund_id IS NULL")->fetchAll(PDO::FETCH_COLUMN) as $payId) {
         $done['double_refunded'][] = refund_double($payId)['refund_id'] ? $payId : $payId . ' (still not)';
     }
     if (!$paused) {

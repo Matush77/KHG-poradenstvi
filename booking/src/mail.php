@@ -332,6 +332,12 @@ function mail_owner_refund_failed(array $b, DateTimeImmutable $start, string $ow
 /* To the owner when two payments arrived for one time (should never happen): the later one was refunded. */
 function mail_owner_double(array $b, DateTimeImmutable $start, bool $refunded): array
 {
+    if (($b['cancelled_by'] ?? '') === 'missed') {
+        return owner_mail($b, $start, 'Platba za termín, který už proběhl: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Platba za termín, který už proběhl',
+            [($refunded ? 'Platba přišla, ale web ji kvůli výpadku zpracoval až po začátku sezení. Rezervace nevznikla, 1 100 Kč se klientovi vrací a dostal e-mail.'
+                : 'Platba přišla, ale web ji kvůli výpadku zpracoval až po začátku sezení. Rezervace nevznikla, ale vrácení peněz se zatím nepovedlo: vyřeš ho prosím ve Stripe.'),
+             'Klient mohl na sezení čekat: ozvi se mu prosím.']);
+    }
     return owner_mail($b, $start, 'Dvě platby za jeden termín: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Dvě platby za jeden termín',
         [($refunded ? 'Tenhle klient zaplatil termín, který už měl někdo jiný. Rezervace nevznikla, 1 100 Kč se mu vrací a dostal e-mail.'
             : 'Tenhle klient zaplatil termín, který už měl někdo jiný. Rezervace nevznikla, ale vrácení peněz se zatím nepovedlo: vyřeš ho prosím ve Stripe.'),
@@ -342,9 +348,11 @@ function mail_owner_double(array $b, DateTimeImmutable $start, bool $refunded): 
 function mail_client_double(array $b, DateTimeImmutable $start): array
 {
     $book = site() . cfg()['booking_page'];
-    $subject = 'Termín ' . cz_at($start) . ' se mezitím obsadil';
-    $title = 'Termín se mezitím obsadil';
-    $money = 'Platba za tenhle termín se vrací celá na kartu použitou k platbě, obvykle do 5–10 pracovních dnů. Omlouvám se za komplikaci.';
+    $missed = ($b['cancelled_by'] ?? '') === 'missed';
+    $subject = $missed ? 'Rezervace ' . cz_at($start) . ' se nedokončila, platba se vrací' : 'Termín ' . cz_at($start) . ' se mezitím obsadil';
+    $title = $missed ? 'Rezervace se nedokončila' : 'Termín se mezitím obsadil';
+    $money = ($missed ? 'Platba proběhla, ale kvůli technické chybě webu se rezervace nezapsala včas, před začátkem sezení. ' : '')
+        . 'Platba za tenhle termín se vrací celá na kartu použitou k platbě, obvykle do 5–10 pracovních dnů. Omlouvám se za komplikaci.';
     $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', $money, '', 'Vybrat jiný termín: ' . $book, ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, false), [h($money), mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)$b['email']];

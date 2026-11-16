@@ -1405,11 +1405,19 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
             }
             // paid, but the calendar entry is not made yet (17 Nov review: it said "reserved" and "the e-mail came"):
             // the time is kept for them and the safety net finishes it; the confirmation e-mail is the answer
-            if (j.paid && j.processing) {
+            if (j.paid && (j.processing || j.booked === false)) {
               state.step = 1; state.time = null; render();
-              renderNotice('Platba proběhla', 'Termín je pro vás zablokovaný, jen ho ještě zapisuji do kalendáře. Potvrzení přijde e-mailem' +
-                (j.email ? ' na ' + esc(j.email) : '') + ', obvykle do pár minut. Znovu prosím neplaťte. Když nepřijde do hodiny, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
-                function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(back); });
+              if (j.booked === false) {
+                // paid, but there is no booking for it here (an old link, or a payment from another copy of the site)
+                renderNotice('Platba proběhla', 'K této platbě tu žádnou rezervaci nenacházím. Pokud vám nepřišel potvrzovací e-mail, zavolejte prosím na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.');
+              } else {
+                renderNotice('Platba proběhla', 'Termín je pro vás zablokovaný, jen ho ještě zapisuji do kalendáře. Potvrzení přijde e-mailem' +
+                  (j.email ? ' na ' + esc(j.email) : '') + ', obvykle do pár minut. Znovu prosím neplaťte. Když nepřijde do hodiny, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
+                  function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(back); });
+                // a refresh asks again instead of falling back to the calendar (17 Nov review, second round): the
+                // payment stays in the address while this screen is shown; "Zpět na kalendář" drops it as usual
+                try { var u = new URL(location.href); u.searchParams.set('paid', back); history.replaceState(history.state, '', u); } catch (x) {}
+              }
               return;
             }
             // paid: the time comes from the booking, not the free times (it is taken now, by this very booking)
