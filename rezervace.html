@@ -678,6 +678,70 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .legal-section { background: none !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; margin: 0 0 var(--block-gap) !important; }
 .legal-section h2 { font-size: var(--fs-h3) !important; }
 .legal-header, .legal-content { max-width: 66ch !important; margin-left: 0 !important; margin-right: auto !important; }
+    
+/* ---- UI audit 16 Nov (owner asked for fixes 2, 3, 4, 7) ----
+   (7) One text axis: section titles, page intros and the hero are left-aligned at every width
+       (they were centred up to 768 px over left-aligned text; centring is kept only for short, single items).
+   (2) Tablet: 32 px gutters from 600 px instead of the phone's 16 px; Kontakt rows label | value from 600 px
+       (the reviews row keeps its centred first card; the owner likes it).
+   (3) Blog: the lead article stays stacked up to 959 px (side by side it squeezed the title into 4 lines).
+   (4) O mně on desktop: text left, the quote card in a right column that stays in view. */
+@media (max-width: 768px) {
+  .section-header { text-align: left !important; }
+  .rv-head { align-items: flex-start !important; text-align: left !important; }
+}
+@media (max-width: 968px) {
+  .hero-container { max-width: none !important; margin: 0 !important; }
+  .hero-content { text-align: left !important; }
+  .hero-subtitle { margin-inline: 0 !important; }
+  .hero-stats { justify-content: flex-start !important; }
+}
+.pricing-hero, .blog-hero { text-align: left !important; }
+.pricing-intro, .blog-hero-subtitle { margin-inline: 0 !important; }
+
+@media (min-width: 600px) and (max-width: 768px) {
+  .container { padding-left: 32px !important; padding-right: 32px !important; }
+}
+@media (min-width: 600px) {
+  .contact-row { display: grid; grid-template-columns: 11rem minmax(0, 1fr); column-gap: var(--block-gap, 32px); align-items: baseline; }
+  .contact-row dt { margin: 0; }
+}
+
+@media (min-width: 640px) and (max-width: 959px) {
+  #blogGrid .blog-card:first-child { display: block !important; }
+  #blogGrid .blog-card:first-child .blog-card-image { height: auto !important; aspect-ratio: 40 / 21; }
+  #blogGrid .blog-card:first-child .blog-card-content { padding: 28px 32px 32px !important; }
+}
+
+/* the IVF text is now two paragraphs; the second one follows at normal paragraph spacing */
+.about-description > .highlighted-text + .highlighted-text { margin-top: 12px !important; }
+
+@media (min-width: 1024px) {
+  .about-text { max-width: none !important; display: grid; grid-template-columns: minmax(0, 40rem) minmax(260px, 340px); column-gap: clamp(48px, 6vw, 96px); align-items: start; }
+  .about-text > *, .about-description > * { grid-column: 1; }
+  .about-description { display: contents; }
+  .about-description > .about-personal-note { grid-column: 2; grid-row: 1 / span 6; align-self: start; position: sticky; top: 112px;
+    flex-direction: column; text-align: center; gap: 16px; margin: 0; padding: 32px 28px; }
+  .about-personal-note img { width: 160px; height: 160px; }
+  .about-personal-quote { font-size: 18px; line-height: 1.45; }
+  .about-personal-quote cite { font-size: 14px; margin-top: 10px; }
+}
+
+/* ---- Responsive pass 16 Nov (screenshots at 320–1920 px) ----
+   Hero on tablets: text left, photo right from 720 px (the photo was centred under left-aligned text).
+   600–768 px: text lines stay under about 75 characters. Ceník: section title left like the rest,
+   booking buttons on one line at 320 px. Blog: a date never breaks across two lines. */
+@media (min-width: 720px) and (max-width: 968px) {
+  .hero-container { grid-template-columns: minmax(0, 1fr) minmax(0, 300px) !important; gap: 40px !important; align-items: center !important; }
+  .hero-image { justify-content: flex-end !important; }
+  .blob-shape { max-width: 300px !important; margin: 0 !important; }
+}
+@media (min-width: 600px) and (max-width: 768px) {
+  main p, main li { max-width: 38rem; }
+}
+.pricing-information > h2 { text-align: left !important; }
+@media (max-width: 374px) { .btn-hero { padding-left: 16px !important; padding-right: 16px !important; } }
+.blog-meta time { white-space: nowrap; }
     </style>
 
     <style id="brand">
@@ -737,6 +801,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     @media (min-width: 720px) { .rez .switch { max-width: 360px; } }
     .rez .fmt { position: relative; z-index: 1; border: 0; background: none; cursor: pointer; border-radius: 999px; min-height: 48px; font-size: 16px; color: var(--mute); transition: color .15s; }
     .rez .fmt-t { font-weight: 500; }
+    @media (max-width: 374px) { .rez .fmt { font-size: 15px; padding: 0 6px; white-space: nowrap; } } /* 'Osobně v Ostravě' on one line at 320 px */
     @media (hover: hover) { .rez .fmt:hover:not([aria-pressed="true"]) { color: var(--navy); } }
     .rez .fmt[aria-pressed="true"] { cursor: default; color: var(--navy); }
     .rez .fmt[aria-pressed="true"] .fmt-t { font-weight: 600; }
@@ -815,9 +880,31 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez input[aria-invalid="true"] { border-color: var(--coral-ink); }
     .rez .done { display: grid; gap: 16px; max-width: 560px; }
     .rez .done p { color: var(--slate); }
-    .rez .bk-step { display: grid; gap: 20px; }
+    .rez .bk-step { display: grid; gap: 20px; max-width: 520px; } /* UI audit 16 Nov, owner: the details step is one column at one width (the booking card no longer stretches past the fields) */
     .rez .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 10px; vertical-align: -2px; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* UI audit 16 Nov. (1) A field with an error is scrolled into view below the fixed header, label included
+       (focus() alone scrolled it under the 68px header). (5) A visible page title with the back arrow beside it;
+       on desktop the empty right column (before a day is chosen, and while loading) is a soft card, so the page is balanced. */
+    .rez label { scroll-margin-top: 84px; }
+    .rez .ttl { order: 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; margin: -6px -12px 0; }
+    .rez .ttl h1 { font-size: 28px; line-height: 1.2; text-align: center; grid-column: 2; }
+    .rez .ttl .bk-exit { grid-column: 1; grid-row: 1; }
+    .rez .ttl.quiet { display: none; }
+    .rez .ttl.noexit { display: block; margin-left: 0; margin-right: 0; }
+    .rez .bar { display: block; margin: 0; }
+    @media (min-width: 720px) {
+      .rez .ttl { grid-template-columns: 44px auto; justify-content: start; }
+      .rez .ttl h1 { font-size: 34px; text-align: left; }
+      .rez .bar { padding-left: 32px; }
+      .rez .slots:has(> .hint) { align-content: stretch; }
+      .rez .slots > .hint { display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center; background: var(--tint); border-radius: 20px; padding: 32px 24px; min-height: 300px; color: var(--slate); }
+      .rez .slots > .hint .link { justify-self: center; text-align: center; }
+    }
+    @media (min-width: 1000px) {
+      .rez .ttl { margin-left: -56px; }
+      .rez .bar { padding-left: 0; }
+    }
     @media (prefers-reduced-motion: reduce) { .rez .grid.in-next, .rez .grid.in-prev, .rez .spin, .rez .grid.loading .day, .rez .cols.in-fade { animation: none; } .rez * { transition: none !important; } }
     </style>
 </head>
@@ -853,13 +940,15 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         <div class="wrap">
             <section class="panel" aria-labelledby="title">
                 <div class="head">
-                    <h1 id="title" class="bk-sr">Objednat sezení</h1>
+                    <div class="ttl" id="ttl">
+                        <a class="bk-exit" href="/" aria-label="Zpět"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                        <h1 id="title">Objednat sezení</h1>
+                    </div>
                     <div class="switch" role="group" aria-label="Forma sezení">
                         <button type="button" class="fmt" data-f="online" aria-pressed="true"><span class="fmt-t">Online</span></button>
                         <button type="button" class="fmt" data-f="osobne" aria-pressed="false"><span class="fmt-t">Osobně v Ostravě</span></button>
                     </div>
                     <div class="bar" id="bar">
-                        <a class="bk-exit" href="/" aria-label="Zpět"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                         <p class="facts" id="facts"><b>50 min · 1 100 Kč</b> · Google&nbsp;Meet</p>
                     </div>
                 </div>
@@ -1109,7 +1198,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
             document.getElementById(id + '-err').textContent = msg;
             if (msg && !first) first = el;
           });
-          if (first) { first.focus(); return; }
+          if (first) { first.focus({ preventScroll: true }); first.closest('label').scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'start' }); return; }
           var e = document.getElementById('e');
           state.email = e ? e.value.trim() : '';
           state.phone = online ? '' : document.getElementById('p').value.trim();
@@ -1187,6 +1276,9 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         renderHead();
         document.querySelector('.rez .switch').hidden = state.step !== 1;
         document.getElementById('bar').hidden = state.step !== 1;
+        document.querySelector('.rez .bk-exit').hidden = state.step !== 1;
+        document.getElementById('ttl').classList.toggle('quiet', state.step === 3);
+        document.getElementById('ttl').classList.toggle('noexit', state.step !== 1);
         if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else renderStep3();
         syncUrl();
       }
