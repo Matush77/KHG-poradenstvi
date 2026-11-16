@@ -39,7 +39,10 @@ function db(): PDO
     $have = array_column($pdo->query('PRAGMA table_info(bookings)')->fetchAll(), 'name');
     // client_moves: how many times the client moved it (no limit; shown to the owner); declined_mailed: the owner was told the guest declined
     foreach (['note' => 'TEXT', 'owner_mailed' => 'INTEGER DEFAULT 0', 'moves' => 'INTEGER DEFAULT 0', 'cancelled_by' => 'TEXT',
-        'client_moves' => 'INTEGER DEFAULT 0', 'declined_mailed' => 'INTEGER DEFAULT 0', 'moved_at' => 'INTEGER'] as $col => $type) {
+        'client_moves' => 'INTEGER DEFAULT 0', 'declined_mailed' => 'INTEGER DEFAULT 0', 'moved_at' => 'INTEGER',
+        // lock_until: a move is talking to Google right now (one move at a time); stale_event: a cancelled booking's
+        // calendar event that Google did not delete yet (the safety net tries again)
+        'lock_until' => 'INTEGER', 'stale_event' => 'TEXT'] as $col => $type) {
         if (in_array($col, $have, true)) continue;
         $pdo->exec("ALTER TABLE bookings ADD COLUMN $col $type");
         if ($col === 'owner_mailed') $pdo->exec('UPDATE bookings SET owner_mailed = 1');
@@ -53,6 +56,12 @@ function db(): PDO
     if (!in_array('browser', array_column($pdo->query('PRAGMA table_info(holds)')->fetchAll(), 'name'), true)) {
         $pdo->exec('ALTER TABLE holds ADD COLUMN browser TEXT');
     }
+    // holds.nonce: which request made the hold, so a request only ever fills in or removes its own
+    if (!in_array('nonce', array_column($pdo->query('PRAGMA table_info(holds)')->fetchAll(), 'name'), true)) {
+        $pdo->exec('ALTER TABLE holds ADD COLUMN nonce TEXT');
+    }
+    // e-mails that must reach someone (cancellations, alerts to her): kept until sent, the safety net retries
+    $pdo->exec('CREATE TABLE IF NOT EXISTS mail_queue (name TEXT PRIMARY KEY, pay_id TEXT NOT NULL, kind TEXT NOT NULL, created_at INTEGER NOT NULL)');
     if (!in_array('reminded', $have, true)) $pdo->exec('ALTER TABLE bookings ADD COLUMN reminded INTEGER DEFAULT 0');
     // small settings the cron keeps between runs (the calendar sync's last check)
     $pdo->exec('CREATE TABLE IF NOT EXISTS state (k TEXT PRIMARY KEY, v TEXT NOT NULL)');

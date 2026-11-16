@@ -3,6 +3,9 @@
    Runs against a throwaway config dir with a dummy test key, so nothing real is touched. */
 declare(strict_types=1);
 
+// never from the web (16 Nov review: an address trick could reach this file, and it does heavy password work)
+if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
+
 $tmp = sys_get_temp_dir() . '/khg-booking-test-' . bin2hex(random_bytes(4));
 mkdir($tmp, 0700);
 file_put_contents("$tmp/stripe-test.env", "STRIPE_SECRET_KEY=sk_test_dummy\nSTRIPE_PUBLISHABLE_KEY=pk_test_dummy\n");
@@ -408,6 +411,109 @@ throws(fn() => owner_cancel('cs_test_bh2_past'), 409, 'no refund once the sessio
 db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, status, cancelled_by, hours_before, created_at, updated_at) VALUES ('cs_test_bh_delafter', ?, 'online', 'a@b.cz', 'cancelled', 'calendar', -1.5, 0, 0)")
     ->execute([(new DateTimeImmutable('-3 hours'))->format(DATE_ATOM)]);
 throws(fn() => owner_cancel('cs_test_bh_delafter'), 409, 'no refund for a session deleted from the calendar after it started');
+
+// --- 16 Nov review: the eight problems, each with Stripe and Google answers made up on purpose
+$FAKE = [];
+$CALLS = [];
+$GLOBALS['HTTP_FAKE'] = function (string $m, string $u, ?string $b, array $h) use (&$FAKE, &$CALLS) {
+    $CALLS[] = "$m $u";
+    if (str_contains($u, 'oauth2.googleapis.com')) return [200, ['access_token' => 'fake', 'expires_in' => 3600]];
+    foreach ($FAKE as $re => $fn) if (preg_match($re, "$m $u")) return $fn($m, $u, $b, $h);
+    return [599, ['error' => ['message' => "no fake for $m $u"]]];
+};
+$at = fn(string $rel) => (new DateTimeImmutable($rel))->setTime(10, 0)->format(DATE_ATOM);
+$add = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, status, event_id, refund_id, refund_status, created_at, updated_at) VALUES (?, ?, ?, 'a@example.com', 'Jana Nováková', ?, ?, ?, ?, ?, ?)");
+
+// 1. two tabs of one browser: a hold still waiting for Stripe can't be taken over, and the visitor limit leaves it alone
+$slotR = $at('+20 days');
+db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, NULL, ?, ?, ?, ?)')
+    ->execute([$slotR, time() + 31 * 60 + 120, 'whoR', 'browserR', 'n1']);
+throws(fn() => release_own_hold('browserR', $slotR), 409, 'review 1: a second tab cannot replace a hold whose payment page is still being made');
+ok((bool)db()->query("SELECT 1 FROM holds WHERE nonce = 'n1'")->fetchColumn(), 'review 1: and that hold stays');
+foreach (['a', 'b', 'c'] as $i => $x) db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, ?, ?, ?, ?, ?)')
+    ->execute([$at('+' . (21 + $i) . ' days'), null, time() + 31 * 60 + 120 + $i, 'whoR', 'b' . $x, 'm' . $x]);
+cap_holds('whoR', time());
+ok((int)db()->query("SELECT COUNT(*) FROM holds WHERE who = 'whoR'")->fetchColumn() === 4, 'review 1: the visitor limit never ends a hold whose request is still running');
+db()->prepare('UPDATE holds SET expires_at = ? WHERE nonce = ?')->execute([time() + 31 * 60 + 120 - 120, 'n1']);   // made 2 minutes ago: dead
+release_own_hold('browserR', $slotR);
+ok(!db()->query("SELECT 1 FROM holds WHERE nonce = 'n1'")->fetchColumn(), 'review 1: a hold stuck without a Stripe page for a minute is let go');
+db()->exec("DELETE FROM holds WHERE who = 'whoR'");
+// the last line: a second payment for a time already booked is refunded, not booked
+$slotD = $at('+25 days');
+$add->execute(['cs_rv_first', $slotD, 'online', 'booked', 'ev1', null, null, time(), time()]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_second#' => fn() => [200, ['id' => 'cs_rv_second', 'payment_intent' => 'pi_2']],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_double', 'status' => 'pending']]];
+$dmeta = ['den' => substr($slotD, 0, 10), 'cas' => '10:00', 'forma' => 'online', 'email' => 'b@example.com', 'jmeno' => 'Petr Novák', 'telefon' => '', 'kopie' => site_copy()];
+$d = book_paid(['id' => 'cs_rv_second', 'payment_status' => 'paid', 'metadata' => $dmeta]);
+ok($d['status'] === 'cancelled' && $d['cancelled_by'] === 'double' && $d['refund_id'] === 're_double', 'review 1: a payment for a time already booked is refunded, not booked');
+ok(booking_get('cs_rv_first')['status'] === 'booked' && !in_array('POST https://www.googleapis.com/calendar/v3/calendars/' . rawurlencode(cfg()['calendar']) . '/events?conferenceDataVersion=1&sendUpdates=none', $CALLS, true),
+    'review 1: the first booking stays, no second calendar event');
+ok(!db()->query("SELECT 1 FROM mail_queue WHERE pay_id = 'cs_rv_second'")->fetchColumn(), 'review 1: the client and she are both told (nothing left in the queue)');
+ok(str_contains(mail_client_double($d, prague($d['slot']))['text'], 'vrací celá'), 'review 1: the client e-mail says the money comes back');
+
+// 2. Meet link still being made: no confirmation with a dead button; it goes once the link is there
+$slotM = $at('+26 days');
+db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, status, owner_mailed, created_at, updated_at) VALUES ('cs_rv_meet', ?, 'online', 'a@example.com', 'Jana Nováková', 'pending', 1, ?, ?)")
+    ->execute([$slotM, time(), time()]);
+$link = null;
+$FAKE = ['#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), ['busy' => []])]],
+    '#POST .*/events\?#' => fn() => [200, ['id' => 'evMeet', 'conferenceData' => ['createRequest' => ['status' => ['statusCode' => 'pending']]]]],
+    '#GET .*/events/evMeet#' => function () use (&$link) { return [200, ['id' => 'evMeet'] + ($link ? ['hangoutLink' => $link] : [])]; }];
+$m1 = finish_booking('cs_rv_meet');
+ok($m1['status'] === 'booked' && !$m1['meet'] && !$m1['mail_sent'], 'review 2: without the Meet link the confirmation waits');
+ok(!str_contains(session_panel($m1, prague($m1['slot']), true), 'href="#"') && str_contains(session_panel($m1, prague($m1['slot']), true), MEET_LATER),
+    'review 2: an e-mail without the link never has a button to "#"');
+$link = 'https://meet.google.com/abc-defg-hij';
+$m2 = finish_booking('cs_rv_meet');
+ok($m2['meet'] === $link && $m2['mail_sent'] == 1, 'review 2: the safety net picks up the link and sends the confirmation with it');
+
+// 3. refunds: Stripe's "failed" is a failure, and a later failure reaches her
+$add->execute(['cs_rv_ref', $at('+27 days'), 'online', 'booked', null, null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_ref#' => fn() => [200, ['id' => 'cs_rv_ref', 'payment_intent' => 'pi_r']],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_bad', 'status' => 'failed', 'failure_reason' => 'expired_or_canceled_card']]];
+throws(fn() => cancel_booking('cs_rv_ref', null, true), 502, 'review 3: a refund Stripe answers with "failed" is not shown as refunded');
+ok(booking_get('cs_rv_ref')['status'] === 'booked', 'review 3: and the booking stays');
+$add->execute(['cs_rv_ref2', $at('+28 days'), 'online', 'cancelled', null, 're_later', 'pending', 0, 0]);
+$FAKE = ['#GET .*/v1/refunds/re_later#' => fn() => [200, ['id' => 're_later', 'status' => 'failed', 'failure_reason' => 'lost_or_stolen_card']]];
+$rf = refund_changed('re_later');
+ok($rf['refund_status'] === 'failed' && !booking_view($rf)['refunded'] && booking_view($rf)['refund_failed'], 'review 3: a refund failing later (webhook) is recorded');
+ok(str_contains(mail_owner_refund_failed($rf, prague($rf['slot']), owner_url('cs_rv_ref2'))['text'], 'nevrátily'), 'review 3: she gets an e-mail about it');
+ok(refund_changed('re_later')['refund_status'] === 'failed' && (int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_ref2'")->fetchColumn() === 0, 'review 3: a repeated webhook changes nothing');
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_ref2#' => fn() => [200, ['id' => 'cs_rv_ref2', 'payment_intent' => 'pi_r2']],
+    '#POST .*/v1/refunds#' => fn($m, $u, $b, $h) => [200, ['id' => in_array('Idempotency-Key: cancel-cs_rv_ref2-after-re_later', $h, true) ? 're_again' : 're_samekey', 'status' => 'pending']]];
+ok(owner_cancel('cs_rv_ref2')['refund_id'] === 're_again', 'review 3: after a failed refund she can refund again (a new Stripe key)');
+
+// 4. covered by .htaccess (needs Apache) and the command-line guard at the top of this file
+
+// 5. moves: one at a time; a failed Google update undoes only its own move
+$slotV = $at('+29 days');
+$add->execute(['cs_rv_move', $slotV, 'online', 'booked', 'evMove', null, null, 0, 0]);
+db()->prepare("UPDATE bookings SET lock_until = ? WHERE pay_id = 'cs_rv_move'")->execute([time() + 30]);
+throws(fn() => owner_move('cs_rv_move', substr($at('+30 days'), 0, 10), '12:00'), 409, 'review 5: a second move while the first is talking to Google is refused');
+throws(fn() => cancel_booking('cs_rv_move'), 409, 'review 5: so is a cancellation');
+db()->exec("UPDATE bookings SET lock_until = NULL WHERE pay_id = 'cs_rv_move'");
+$FAKE = ['#PATCH .*/events/evMove#' => fn() => [500, ['error' => 'boom']]];
+throws(fn() => owner_move('cs_rv_move', substr($at('+30 days'), 0, 10), '12:00'), 502, 'review 5: Google fails the move');
+$mv = booking_get('cs_rv_move');
+ok($mv['slot'] === $slotV && !$mv['lock_until'], 'review 5: the booking is back on its time and unlocked');
+$FAKE = ['#PATCH .*/events/evMove#' => fn() => [200, ['id' => 'evMove']]];
+ok(owner_move('cs_rv_move', substr($at('+30 days'), 0, 10), '12:00')['slot'] !== $slotV && !booking_get('cs_rv_move')['lock_until'], 'review 5: a move that works unlocks');
+
+// 6. cancellation: a calendar event Google failed to delete is retried; e-mails wait in the queue until sent
+$add->execute(['cs_rv_can', $at('+31 days'), 'osobne', 'booked', 'evCan', null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_can#' => fn() => [200, ['id' => 'cs_rv_can', 'payment_intent' => 'pi_c']],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_can', 'status' => 'succeeded']],
+    '#DELETE .*/events/evCan#' => fn() => [503, ['error' => 'backend']]];
+$cn = cancel_booking('cs_rv_can', null, true);
+ok($cn['status'] === 'cancelled' && booking_get('cs_rv_can')['stale_event'] === 'evCan', 'review 6: a failed calendar delete is written down');
+ok($cn['mailed'] === true, 'review 6: the page hears whether the client e-mail went');
+$FAKE = ['#DELETE .*/events/evCan#' => fn() => [204, []]];
+event_gone('cs_rv_can', 'evCan');
+ok(booking_get('cs_rv_can')['stale_event'] === null, 'review 6: the next try deletes it and crosses it off');
+ok(mail_queued('rv-bad-kind', 'cs_rv_can', 'no_such_kind') === false && (bool)db()->query("SELECT 1 FROM mail_queue WHERE name = 'rv-bad-kind'")->fetchColumn(),
+    'review 6: an e-mail that could not go stays queued for the safety net');
+db()->exec("DELETE FROM mail_queue WHERE name = 'rv-bad-kind'");
+unset($GLOBALS['HTTP_FAKE']);
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";
 exit($fails ? 1 : 0);

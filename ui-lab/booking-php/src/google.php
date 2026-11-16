@@ -89,6 +89,12 @@ function gcal_create(DateTimeImmutable $start, string $summary, string $descript
         ['conferenceDataVersion' => 1, 'sendUpdates' => 'none']);
 }
 
+/* One event of the booking calendar (for its Meet link, which Google may add a moment after creating it). */
+function gcal_get(string $eventId): array
+{
+    return gcal('GET', 'calendars/' . rawurlencode(cfg()['calendar']) . '/events/' . rawurlencode($eventId));
+}
+
 function gcal_delete(string $eventId): void
 {
     try {

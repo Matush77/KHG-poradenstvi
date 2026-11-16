@@ -479,11 +479,14 @@ h1 { white-space: nowrap; }
     var t = e.target.closest('button'); if (!t || saving) return;
     if (t.id === 'discard') { week = clone(savedWeek); over = clone(savedOver); render(); toast('Změny zahozeny'); return; }
     saving = true; t.setAttribute('aria-busy', 'true'); t.textContent = 'Ukládám…';
+    // what this request sends: taps made while it runs are not in it, so they stay unsaved (16 Nov review: they were
+    // marked saved and lost)
+    var sentWeek = clone(week), sentOver = clone(over);
     api('/ulozit', payload()).then(function (j) {
       if (j._status === 401) { showLogin('Přihlášení vypršelo. Po přihlášení ulož znovu.'); return; }
-      version = j.version; savedWeek = clone(week); savedOver = clone(over);
+      version = j.version; savedWeek = sentWeek; savedOver = sentOver;
       Object.keys(over).forEach(function (f) { Object.keys(over[f]).forEach(function (k) { if (sameAsWeek(f, k)) { delete over[f][k]; delete savedOver[f][k]; } }); });
-      render(); toast('Uloženo');
+      render(); toast(changes() ? 'Uloženo. Pozdější změny ještě ulož.' : 'Uloženo');
     }).catch(function (err) {
       if (err.status === 409) { load(true); toast('Mezitím ukládalo jiné zařízení. Jeho změny jsou načtené, tvoje zůstaly: ulož je ještě jednou.', true); return; }
       toast('Uložit se nepovedlo: ' + err.message + ' Změny zůstávají, zkus to znovu.', true);

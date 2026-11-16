@@ -127,14 +127,26 @@ function expire_hold(array $h, string $failMsg): bool
     return true;
 }
 
+/* A hold whose request is still asking Stripe for the payment page (no Stripe id yet). Nobody else may end it:
+   that request would hand out a payment page for a time it no longer holds (16 Nov review: two tabs of one
+   browser both got a page for the same time). After a minute without a Stripe id the request is dead. */
+const HOLD_CREATING_SECONDS = 60;
+function hold_creating(array $h, ?int $now = null): bool
+{
+    if ($h['pay_id']) return false;
+    $created = (int)$h['expires_at'] - (cfg()['hold_minutes'] + 1) * 60 - 120;
+    return $created > ($now ?? time()) - HOLD_CREATING_SECONDS;
+}
+
 /* The same browser pays for the same time again (it came back from Stripe's page): its earlier Stripe page is ended
    first, so the time can never be paid twice, and the new payment takes its place. */
 function release_own_hold(?string $browser, string $slot): void
 {
     if (!$browser) return;
-    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE slot = ? AND browser = ? AND expires_at >= ?');
+    $s = db()->prepare('SELECT slot, pay_id, expires_at FROM holds WHERE slot = ? AND browser = ? AND expires_at >= ?');
     $s->execute([$slot, $browser, time()]);
     if (!$h = $s->fetch()) return;
+    if (hold_creating($h)) throw new ClientError('Platba za tenhle termín se právě zakládá v jiném okně. Pokračujte prosím tam, nebo to zkuste za minutu.', 409);
     if (!expire_hold($h, 'Platbu se teď nepodařilo obnovit. Zkuste to prosím za chvíli.')) {
         throw new ClientError('Tenhle termín už máte zaplacený. Potvrzení přijde e-mailem.', 409);
     }
@@ -178,10 +190,11 @@ function release_browser_holds(?string $browser, ?string $pay = null): array
    block the calendar can never hold more than the limit. */
 function cap_holds(string $who, int $now): void
 {
-    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE who = ? AND expires_at >= ? ORDER BY expires_at');
+    $s = db()->prepare('SELECT slot, pay_id, expires_at FROM holds WHERE who = ? AND expires_at >= ? ORDER BY expires_at');
     $s->execute([$who, $now]);
     $open = $s->fetchAll();
     foreach (array_slice($open, 0, max(0, count($open) - cfg()['holds_per_visitor'] + 1)) as $h) {
+        if (hold_creating($h, $now)) continue;   // its request is still running: never pulled from under it
         // paid, being booked: its hold must stay
         if (!expire_hold($h, 'Máte rozpracovaných víc rezervací najednou. Dokončete prosím jednu z nich, nebo to zkuste za půl hodiny.')) continue;
         db()->prepare('DELETE FROM holds WHERE slot = ? AND who = ?')->execute([$h['slot'], $who]);
@@ -202,13 +215,14 @@ function create_checkout(array $b): array
     $browser = browser_id(true);
     release_own_hold($browser, $slot);
     cap_holds($who, $now);
-    db_tx(function (PDO $pdo) use ($slot, $stripeExpiry, $who, $browser) {
+    $nonce = bin2hex(random_bytes(8));
+    db_tx(function (PDO $pdo) use ($slot, $stripeExpiry, $who, $browser, $nonce) {
         $s = $pdo->prepare("SELECT (SELECT COUNT(*) FROM holds WHERE slot = :s) + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed'))");
         $s->execute(['s' => $slot]);
         if ((int)$s->fetchColumn() > 0) throw new ClientError('Tenhle termín si právě někdo rezervuje. Vyberte prosím jiný.', 409);
-        $pdo->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser) VALUES (?, NULL, ?, ?, ?)')->execute([$slot, $stripeExpiry + 120, $who, $browser]);
+        $pdo->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, NULL, ?, ?, ?, ?)')->execute([$slot, $stripeExpiry + 120, $who, $browser, $nonce]);
     });
-    $release = fn() => db()->prepare('DELETE FROM holds WHERE slot = ? AND pay_id IS NULL')->execute([$slot]);
+    $release = fn() => db()->prepare('DELETE FROM holds WHERE slot = ? AND nonce = ?')->execute([$slot, $nonce]);
     try {
         // still inside her hours for this format and nothing busy: her calendars may have changed since the page loaded
         if (!in_array($meta['cas'], free_slots($start, false)[$meta['forma']][$meta['den']] ?? [], true)) {
@@ -229,7 +243,14 @@ function create_checkout(array $b): array
             log_line('CHECKOUT_FAILED', ['code' => $code, 'error' => $s['error']['message'] ?? null]);
             throw new ClientError('Platbu se teď nepodařilo založit. Zkuste to prosím za chvíli.', 502);
         }
-        db()->prepare('UPDATE holds SET pay_id = ? WHERE slot = ?')->execute([$s['id'], $slot]);
+        $own = db()->prepare('UPDATE holds SET pay_id = ? WHERE slot = ? AND nonce = ?');
+        $own->execute([$s['id'], $slot, $nonce]);
+        if ($own->rowCount() === 0) {
+            // the hold is no longer ours (it ran out, or something removed it): this page must never be paid
+            stripe('POST', 'checkout/sessions/' . rawurlencode($s['id']) . '/expire');
+            log_line('HOLD_LOST', ['slot' => $slot, 'pay' => $s['id']]);
+            throw new ClientError('Tenhle termín si právě někdo rezervuje. Vyberte prosím jiný.', 409);
+        }
         $note = cut(str_replace("\r", '', trim((string)($b['note'] ?? ''))), 1500);
         if ($note !== '') {
             db()->prepare('INSERT OR REPLACE INTO notes (pay_id, note, created_at) VALUES (?, ?, ?)')->execute([$s['id'], $note, time()]);
@@ -262,17 +283,101 @@ function book_paid(array $s): ?array
     $start = slot_start($meta['den'], $meta['cas']);
     $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start) {
         if (booking_get($payId)) return false;
+        // the last check: someone else's payment already has this time. The holds should make this impossible;
+        // if it happens anyway, this payment is not booked but refunded, and both of them are told
+        $t = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE slot = ? AND status IN ('pending','booked','failed') AND pay_id != ?");
+        $t->execute([$start->format(DATE_ATOM), $payId]);
+        $taken = (int)$t->fetchColumn() > 0;
         $n = $pdo->prepare('SELECT note FROM notes WHERE pay_id = ?');
         $n->execute([$payId]);
-        $pdo->prepare('INSERT INTO bookings (pay_id, slot, forma, email, phone, name, note, status, owner_mailed, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, \'pending\', 0, ?, ?)')->execute([$payId, $start->format(DATE_ATOM), $meta['forma'],
-            $meta['email'] ?: null, $meta['telefon'] ?: null, $meta['jmeno'] ?: null, $n->fetchColumn() ?: null, time(), time()]);
+        $pdo->prepare('INSERT INTO bookings (pay_id, slot, forma, email, phone, name, note, status, cancelled_by, owner_mailed, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([$payId, $start->format(DATE_ATOM), $meta['forma'],
+            $meta['email'] ?: null, $meta['telefon'] ?: null, $meta['jmeno'] ?: null, $n->fetchColumn() ?: null,
+            $taken ? 'cancelled' : 'pending', $taken ? 'double' : null, $taken ? 1 : 0, time(), time()]);
         $pdo->prepare('DELETE FROM notes WHERE pay_id = ?')->execute([$payId]);
-        $pdo->prepare('DELETE FROM holds WHERE pay_id = ? OR slot = ?')->execute([$payId, $start->format(DATE_ATOM)]);
-        return true;
+        if (!$taken) $pdo->prepare('DELETE FROM holds WHERE pay_id = ? OR slot = ?')->execute([$payId, $start->format(DATE_ATOM)]);
+        return $taken ? 'double' : true;
     });
     if (!$claimed) return booking_get($payId);
+    if ($claimed === 'double') {
+        log_line('DOUBLE_PAYMENT', ['pay' => $payId, 'slot' => $start->format(DATE_ATOM)]);
+        return refund_double($payId);
+    }
     return finish_booking($payId);
+}
+
+/* A payment for a time that was already booked: refunded, the client and she get an e-mail. If Stripe fails,
+   the safety net tries again (a 'double' booking without a refund). */
+function refund_double(string $payId): array
+{
+    try {
+        $fields = refund_full($payId, 'termin mezitim obsazen');
+        booking_update($payId, $fields);
+        log_line('DOUBLE_REFUNDED', ['pay' => $payId, 'refund' => $fields['refund_id']]);
+    } catch (Throwable $e) {
+        log_line('DOUBLE_REFUND_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
+        return booking_get($payId);
+    }
+    $b = booking_get($payId);
+    if ($b['email']) mail_queued($payId . '-double', $payId, 'client_double');
+    mail_queued($payId . '-double-owner', $payId, 'owner_double');
+    return booking_get($payId);
+}
+
+/* --- e-mails that must arrive (16 Nov review: a failed cancellation e-mail was only logged). Each is written down
+   first, sent, and crossed off when it went; the safety net sends whatever is left. Rebuilt from the booking when
+   sent, so a retry says what is true then. */
+function queued_mail(array $b, string $kind): array
+{
+    $start = prague($b['slot']);
+    $refunded = $b['refund_id'] !== null && !refund_failed($b);
+    return match ($kind) {
+        'owner_cancelled' => mail_owner_cancelled($b, $start, owner_url($b['pay_id'])),
+        'client_cancelled' => mail_client_cancelled($b, $start, false, $refunded),       // the client cancelled
+        'client_cancel' => mail_client_cancelled($b, $start, false),                     // she cancelled, refunded
+        'client_refund' => mail_client_cancelled($b, $start, true),                      // refund after a cancellation
+        'owner_refund_failed' => mail_owner_refund_failed($b, $start, owner_url($b['pay_id'])),
+        'owner_double' => mail_owner_double($b, $start, $refunded),
+        'client_double' => mail_client_double($b, $start),
+        default => throw new RuntimeException('Unknown queued mail ' . $kind),
+    };
+}
+
+/* Writes the e-mail down and tries to send it now. True when it went. */
+function mail_queued(string $name, string $payId, string $kind): bool
+{
+    db()->prepare('INSERT OR IGNORE INTO mail_queue (name, pay_id, kind, created_at) VALUES (?, ?, ?, ?)')->execute([$name, $payId, $kind, time()]);
+    return mail_queue_send($name, $payId, $kind);
+}
+
+function mail_queue_send(string $name, string $payId, string $kind): bool
+{
+    $b = booking_get($payId);
+    try {
+        if ($b) mail_send($name, queued_mail($b, $kind));
+    } catch (Throwable $e) {
+        log_line('MAIL_ERROR', ['pay' => $payId, 'mail' => $kind, 'error' => $e->getMessage()]);
+        return false;
+    }
+    db()->prepare('DELETE FROM mail_queue WHERE name = ?')->execute([$name]);   // sent (or the booking is gone)
+    return true;
+}
+
+/* --- the Meet link. Google may answer "being created" (16 Nov review): the confirmation then waits for the link
+   instead of carrying a dead button. */
+const MEET_WAIT_MINUTES = 30;   // after this the confirmation goes without the link; the reminders carry it
+function with_meet(array $b): array
+{
+    if ($b['forma'] === 'osobne' || $b['meet'] || !$b['event_id']) return $b;
+    try {
+        $link = gcal_get($b['event_id'])['hangoutLink'] ?? null;
+    } catch (Throwable $e) {
+        log_line('MEET_FETCH_FAILED', ['pay' => $b['pay_id'], 'error' => $e->getMessage()]);
+        return $b;
+    }
+    if (!$link) return $b;
+    booking_update($b['pay_id'], ['meet' => $link]);
+    return booking_get($b['pay_id']);
 }
 
 /* Calendar event (+ Meet) and the e-mail. A failure is recorded and retried by the safety net. */
@@ -288,7 +393,12 @@ function finish_booking(string $payId): array
             $title = (lab() ? 'TEST · ' : '') . ($online ? 'Online' : 'Osobně') . ' · ' . ($b['name'] ?: 'klient');
             $note = 'Rezervace z webu' . (lab() ? ' (lab, Stripe test)' : '') . '. Kontakt: ' . ($contact ?: '-') . '. Platba: ' . $payId;
             $ev = gcal_create($start, $title, $note, $online, $online ? $b['email'] : null);
-            booking_update($payId, ['event_id' => $ev['id'], 'meet' => $ev['hangoutLink'] ?? null, 'clash' => (int)$clash, 'status' => 'booked', 'error' => null]);
+            $meet = $ev['hangoutLink'] ?? null;
+            for ($i = 0; $online && !$meet && $i < 2; $i++) {   // usually there at once; else Google needs a moment
+                sleep(1);
+                try { $meet = gcal_get($ev['id'])['hangoutLink'] ?? null; } catch (Throwable $e) { break; }
+            }
+            booking_update($payId, ['event_id' => $ev['id'], 'meet' => $meet, 'clash' => (int)$clash, 'status' => 'booked', 'error' => null]);
             log_line($clash ? 'BOOKED_CLASH' : 'BOOKED', ['pay' => $payId, 'slot' => $b['slot']]);
             $b = booking_get($payId);
         }
@@ -298,7 +408,10 @@ function finish_booking(string $payId): array
         return booking_get($payId);
     }
     // the two e-mails separately: one failing doesn't hold back the other; the safety net retries both
-    if (!$b['mail_sent'] && $b['email']) {
+    $b = with_meet($b);
+    if (!$b['mail_sent'] && $b['email'] && $online && !$b['meet'] && (int)$b['created_at'] > time() - MEET_WAIT_MINUTES * 60) {
+        log_line('MEET_PENDING', ['pay' => $payId]);   // the safety net sends the confirmation once the link is there
+    } elseif (!$b['mail_sent'] && $b['email']) {
         try {
             mail_send($payId, mail_build($b, $start, cancel_url($payId)));
             booking_update($payId, ['mail_sent' => 1]);
@@ -328,6 +441,7 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
     if ($b['status'] === 'cancelled') return $b;
     if ($b['status'] !== 'booked') throw new ClientError('Rezervace se ještě zpracovává. Stačí to zkusit za pár minut, případně zavolat na ' . PHONE . '.', 409);
+    if (moving($b)) throw new ClientError('Termín se právě mění. Stačí to zkusit za chvíli.', 409);
     $now ??= new DateTimeImmutable();
     $hours = (prague($b['slot'])->getTimestamp() - $now->getTimestamp()) / 3600;
     if ($hours <= 0) throw new ClientError('Sezení už začalo nebo proběhlo, zrušit ho nejde.', 400);
@@ -348,10 +462,10 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
             sleep(2);
             [$code, $r] = $refund();
         }
-        if ($code !== 200) {
+        if ($code !== 200 || !refund_alive($r)) {
             // the first request has cancelled it meanwhile: that is the answer, not an error
             if (($done = booking_get($payId)) && $done['status'] === 'cancelled') return $done;
-            log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
+            log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'status' => $r['status'] ?? null, 'error' => $r['error']['message'] ?? null]);
             throw new ClientError('Vrácení peněz se nepovedlo, termín zůstává. Pomůže telefon: ' . PHONE . '.', 502);
         }
         $fields += ['refund_id' => $r['id'], 'refund_status' => $r['status']];
@@ -364,40 +478,71 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     booking_update($payId, $fields);
     if ($b['event_id']) event_gone($payId, $b['event_id']);
     log_line('CANCELLED', ['pay' => $payId, 'hours' => $fields['hours_before'], 'refund' => $fields['refund_id'] ?? null]);
-    $b = booking_get($payId);
-    try {
-        mail_send($payId . '-cancelled', mail_owner_cancelled($b, prague($b['slot']), owner_url($payId)));
-    } catch (Throwable $e) {
-        log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'owner', 'error' => $e->getMessage()]);
-    }
-    // the client gets it in writing too (owner, 14 Nov): refunded or not
-    if ($b['email']) {
-        try {
-            mail_send($payId . '-client-cancelled', mail_client_cancelled($b, prague($b['slot']), false, $b['refund_id'] !== null));
-        } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $payId, 'to' => 'client', 'error' => $e->getMessage()]);
-        }
-    }
-    return $b;
+    mail_queued($payId . '-cancelled', $payId, 'owner_cancelled');
+    // the client gets it in writing too (owner, 14 Nov): refunded or not. 'mailed': the page says it was sent only if it was
+    $mailed = booking_get($payId)['email'] ? mail_queued($payId . '-client-cancelled', $payId, 'client_cancelled') : false;
+    return booking_get($payId) + ['mailed' => $mailed];
 }
 
-/* Deletes the event of a booking already marked cancelled. A failure only leaves a stale event in her calendar. */
+/* Deletes the event of a booking already marked cancelled. If Google fails, the event is written down and the
+   safety net deletes it later (16 Nov review: a stale event kept blocking the freed time). */
 function event_gone(string $payId, string $eventId): void
 {
     try {
         gcal_delete($eventId);
+        booking_update($payId, ['stale_event' => null]);
     } catch (Throwable $e) {
+        booking_update($payId, ['stale_event' => $eventId]);
         log_line('EVENT_DELETE_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
     }
 }
 
+/* Stripe's refund states: pending and succeeded are on their way; failed and canceled mean no money goes back
+   (16 Nov review: a refund id alone was taken as success). */
+function refund_alive(array $r): bool
+{
+    return !empty($r['id']) && !in_array($r['status'] ?? '', ['failed', 'canceled'], true);
+}
+
+function refund_failed(array $b): bool
+{
+    return $b['refund_id'] !== null && in_array($b['refund_status'] ?? '', ['failed', 'canceled'], true);
+}
+
+/* Stripe reports a refund that failed later (refund.failed / refund.updated / charge.refund.updated): the status is
+   kept and she gets an e-mail to sort it out, once. The state is read from Stripe, never from the webhook body. */
+function refund_changed(string $refundId): ?array
+{
+    [$code, $r] = stripe('GET', 'refunds/' . rawurlencode($refundId));
+    if ($code !== 200) throw new RuntimeException('Stripe refund read failed: HTTP ' . $code);
+    $s = db()->prepare('SELECT * FROM bookings WHERE refund_id = ?');
+    $s->execute([$refundId]);
+    if (!$b = $s->fetch()) return null;                                // another copy's refund, or an old one
+    $was = refund_failed($b);
+    booking_update($b['pay_id'], ['refund_status' => (string)($r['status'] ?? '')]);
+    $b = booking_get($b['pay_id']);
+    if (!$was && refund_failed($b)) {
+        log_line('REFUND_FAILED_LATER', ['pay' => $b['pay_id'], 'refund' => $refundId, 'reason' => $r['failure_reason'] ?? null]);
+        mail_queued($b['pay_id'] . '-refund-failed-' . $refundId, $b['pay_id'], 'owner_refund_failed');
+    }
+    return $b;
+}
+
+/* A move is talking to Google right now. */
+function moving(array $b, ?int $now = null): bool
+{
+    return (int)($b['lock_until'] ?? 0) > ($now ?? time());
+}
+
 /* Full refund through Stripe; the idempotency key makes a second click (or a second tab) refund only once. */
-function refund_full(string $payId, string $why): array
+function refund_full(string $payId, string $why, ?string $failed = null): array
 {
     [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
     if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Platbu se teď nepodařilo najít. Zkus to prosím znovu.', 502);
+    // after a failed refund the same key would only give back the same failed refund
+    $key = 'cancel-' . $payId . ($failed ? '-after-' . $failed : '');
     $refund = fn() => stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
-        'metadata' => ['duvod' => $why]], 'cancel-' . $payId);
+        'metadata' => ['duvod' => $why]], $key);
     [$code, $r] = $refund();
     // her phone and laptop at once: Stripe refuses the second while the first runs (409); a moment later the
     // same key gives back the first one's refund
@@ -409,6 +554,10 @@ function refund_full(string $payId, string $why): array
         log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
         throw new ClientError('Vrácení peněz se nepovedlo, nic se nezměnilo. Zkus to prosím znovu.', 502);
     }
+    if (!refund_alive($r)) {
+        log_line('REFUND_FAILED', ['pay' => $payId, 'status' => $r['status'] ?? null, 'reason' => $r['failure_reason'] ?? null]);
+        throw new ClientError('Stripe vrácení peněz odmítl (' . ($r['failure_reason'] ?? $r['status'] ?? '?') . '). Nic se nezměnilo; vrácení je potřeba vyřešit v Stripe.', 502);
+    }
     return ['refund_id' => $r['id'], 'refund_status' => $r['status']];
 }
 
@@ -417,8 +566,10 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
 {
     $b = booking_get($payId);
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
-    if ($b['refund_id']) return $b;                                   // already refunded: nothing more to do
+    $failed = refund_failed($b) ? $b['refund_id'] : null;            // Stripe refused the refund before: she may try again
+    if ($b['refund_id'] && !$failed) return $b;                       // already refunded: nothing more to do
     if (in_array($b['status'], ['pending', 'failed'], true)) throw new ClientError('Rezervace se ještě zpracovává. Zkus to prosím za pár minut.', 409);
+    if (moving($b)) throw new ClientError('Termín se právě přesouvá. Zkus to prosím za chvíli.', 409);
     $refundOnly = $b['status'] === 'cancelled';
     $now ??= new DateTimeImmutable();
     // owner, 16 Nov: once the session has taken place, the money is not returned
@@ -426,9 +577,9 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
     if (!$refundOnly ? prague($b['slot']) <= $now : ($b['hours_before'] !== null && (float)$b['hours_before'] <= 0)) {
         throw new ClientError('Sezení už proběhlo, platba se nevrací.', 409);
     }
-    $fields = refund_full($payId, $refundOnly ? 'vraceno terapeutkou po zruseni' : 'zruseno terapeutkou');
-    $set = db()->prepare('UPDATE bookings SET refund_id = ? WHERE pay_id = ? AND refund_id IS NULL');
-    $set->execute([$fields['refund_id'], $payId]);
+    $fields = refund_full($payId, $refundOnly ? 'vraceno terapeutkou po zruseni' : 'zruseno terapeutkou', $failed);
+    $set = db()->prepare('UPDATE bookings SET refund_id = ? WHERE pay_id = ? AND refund_id IS ?');
+    $set->execute([$fields['refund_id'], $payId, $failed]);
     if ($set->rowCount() === 0) return booking_get($payId);   // the other request got there first
     if (!$refundOnly) {
         $fields += ['status' => 'cancelled', 'cancelled_by' => 'owner',
@@ -438,15 +589,10 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
     if (!$refundOnly && $b['event_id']) event_gone($payId, $b['event_id']);
     log_line('OWNER_CANCELLED', ['pay' => $payId, 'refund' => $fields['refund_id'], 'refund_only' => $refundOnly]);
     $b = booking_get($payId);
-    if ($b['email']) {
-        try {
-            // deleted by her in the calendar: the client hasn't heard anything yet, so "I had to cancel, refunding"
-            mail_send($payId . '-cancel', mail_client_cancelled($b, prague($b['slot']), $refundOnly && $b['cancelled_by'] !== 'calendar'));
-        } catch (Throwable $e) {
-            log_line('MAIL_ERROR', ['pay' => $payId, 'error' => $e->getMessage()]);
-        }
-    }
-    return $b;
+    // deleted by her in the calendar: the client hasn't heard anything yet, so "I had to cancel, refunding"
+    $mailed = $b['email'] ? mail_queued($payId . '-cancel' . ($failed ? '-' . $fields['refund_id'] : ''), $payId,
+        $refundOnly && $b['cancelled_by'] !== 'calendar' ? 'client_refund' : 'client_cancel') : false;
+    return $b + ['mailed' => $mailed];
 }
 
 /* A move to another free time of the same format. The calendar event (and its Meet link) moves with it;
@@ -482,7 +628,7 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
     }
     $slot = $new->format(DATE_ATOM);
     $at = $new->getTimestamp();
-    db_tx(function (PDO $pdo) use ($slot, $at, $payId, $taken, $client) {
+    db_tx(function (PDO $pdo) use ($slot, $at, $payId, $taken, $client, $b) {
         $s = $pdo->prepare("SELECT (SELECT COUNT(*) FROM holds WHERE slot = :s AND expires_at >= :now)
             + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed') AND pay_id != :p)");
         $s->execute(['s' => $slot, 'now' => time(), 'p' => $payId]);
@@ -493,20 +639,24 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
         foreach ($o->fetchAll(PDO::FETCH_COLUMN) as $other) {
             if (abs(prague($other)->getTimestamp() - $at) < 3600) throw new ClientError($taken, 409);
         }
-        $pdo->prepare('UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, reminded = 0, moved_at = ?, updated_at = ? WHERE pay_id = ?')
-            ->execute([$slot, $client ? 1 : 0, time(), time(), $payId]);
+        // only from the time this request read, and only when no other move is talking to Google (16 Nov review:
+        // two moves at once left Google on one time and the booking on another). The lock covers the Google call.
+        $u = $pdo->prepare("UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, reminded = 0, moved_at = ?, updated_at = ?, lock_until = ?
+            WHERE pay_id = ? AND slot = ? AND status = 'booked' AND (lock_until IS NULL OR lock_until < ?)");
+        $u->execute([$slot, $client ? 1 : 0, time(), time(), time() + 60, $payId, $b['slot'], time()]);
+        if ($u->rowCount() === 0) throw new ClientError($client ? 'Termín se mezitím změnil. Načtěte prosím stránku znovu.' : 'Termín se mezitím změnil. Načti prosím stránku znovu.', 409);
     });
-    if ($b['event_id']) {
-        try {
-            gcal_move($b['event_id'], $new);
-        } catch (Throwable $e) {
-            booking_update($payId, ['slot' => $b['slot'], 'moves' => $b['moves'], 'client_moves' => $b['client_moves'], 'mail_sent' => $b['mail_sent'],
-                'reminded' => $b['reminded'], 'moved_at' => $b['moved_at']]);
-            log_line('MOVE_FAILED', ['pay' => $payId, 'by' => $by, 'error' => $e->getMessage()]);
-            throw new ClientError($client ? 'Termín se teď nepodařilo změnit, platí ten původní. Stačí to zkusit znovu.'
-                : 'Kalendář se teď nepodařilo upravit, termín zůstává původní. Zkus to prosím znovu.', 502);
-        }
+    try {
+        if ($b['event_id']) gcal_move($b['event_id'], $new);
+    } catch (Throwable $e) {
+        // back to the time before, only if the booking is still where this move put it
+        db()->prepare('UPDATE bookings SET slot = ?, moves = ?, client_moves = ?, mail_sent = ?, reminded = ?, moved_at = ?, lock_until = NULL, updated_at = ? WHERE pay_id = ? AND slot = ?')
+            ->execute([$b['slot'], $b['moves'], $b['client_moves'], $b['mail_sent'], $b['reminded'], $b['moved_at'], time(), $payId, $slot]);
+        log_line('MOVE_FAILED', ['pay' => $payId, 'by' => $by, 'error' => $e->getMessage()]);
+        throw new ClientError($client ? 'Termín se teď nepodařilo změnit, platí ten původní. Stačí to zkusit znovu.'
+            : 'Kalendář se teď nepodařilo upravit, termín zůstává původní. Zkus to prosím znovu.', 502);
     }
+    db()->prepare('UPDATE bookings SET lock_until = NULL WHERE pay_id = ?')->execute([$payId]);
     log_line('MOVED', ['pay' => $payId, 'by' => $by, 'from' => $b['slot'], 'to' => $slot]);
     return moved_mails(booking_get($payId), $old, $by);
 }
@@ -517,6 +667,7 @@ function moved_mails(array $b, DateTimeImmutable $old, string $by): array
 {
     $payId = $b['pay_id'];
     $new = prague($b['slot']);
+    $b = with_meet($b);
     if ($b['email']) {
         try {   // if this fails, the safety net sends a normal confirmation of the new time
             mail_send($payId . '-move-' . $b['moves'], mail_build($b, $new, cancel_url($payId), $old, $by === 'client'));
@@ -565,7 +716,7 @@ function sync_calendar(?int $now = null): array
         $find->execute([(string)($ev['id'] ?? '')]);
         $b = $find->fetch();
         if (!$b) continue;                                            // not ours, or already cancelled through the site
-        if ($b['updated_at'] > $now - 30) continue;                   // the site is changing it right now; the next run looks again
+        if ($b['updated_at'] > $now - 30 || moving($b, $now)) continue;   // the site is changing it right now; the next run looks again
         $payId = $b['pay_id'];
         $old = prague($b['slot']);
         if (($ev['status'] ?? '') === 'cancelled') {
@@ -623,7 +774,8 @@ function booking_view(array $b, ?DateTimeImmutable $now = null): array
     return ['forma' => $b['forma'], 'den' => $start->format('Y-m-d'), 'cas' => $start->format('G:i'),
         'when' => cz_at($start), 'deadline' => cz_until($deadline),
         'started' => $now >= $start, 'refund' => $now <= $deadline,
-        'cancelled' => $b['status'] === 'cancelled', 'refunded' => (bool)$b['refund_id'],
+        'cancelled' => $b['status'] === 'cancelled', 'refunded' => (bool)$b['refund_id'] && !refund_failed($b),
+        'refund_failed' => refund_failed($b), 'mailed' => (bool)($b['mail_sent'] ?? 0),
         'processing' => in_array($b['status'], ['pending', 'failed'], true),
         'can_move' => $b['status'] === 'booked' && $now <= $deadline];
 }
@@ -656,7 +808,7 @@ function send_reminders(?int $now = null): array
         }
         if ($flags === (int)$b['reminded']) continue;
         try {
-            if ($kind) mail_send($b['pay_id'] . '-remind-' . $kind . '-' . $b['moves'], mail_reminder($b, $start, $kind, $now));
+            if ($kind) mail_send($b['pay_id'] . '-remind-' . $kind . '-' . $b['moves'], mail_reminder(with_meet($b), $start, $kind, $now));
             booking_update($b['pay_id'], ['reminded' => $flags]);
             if ($kind) $done[] = $b['pay_id'] . ':' . $kind;
         } catch (Throwable $e) {
@@ -691,6 +843,20 @@ function sweep(): array
             && ($s['metadata']['kopie'] ?? 'khg') === site_copy() && !booking_get($s['id'])) {
             book_paid($s);
             $done['booked'][] = $s['id'];
+        }
+    }
+    // cancelled sessions whose calendar event Google did not delete: the time stays blocked until it goes
+    foreach (db()->query('SELECT pay_id, stale_event FROM bookings WHERE stale_event IS NOT NULL')->fetchAll() as $row) {
+        event_gone($row['pay_id'], $row['stale_event']);
+        if (!booking_get($row['pay_id'])['stale_event']) $done['events_deleted'][] = $row['pay_id'];
+    }
+    // a payment for a time already taken whose refund did not go through yet
+    foreach (db()->query("SELECT pay_id FROM bookings WHERE cancelled_by = 'double' AND refund_id IS NULL")->fetchAll(PDO::FETCH_COLUMN) as $payId) {
+        $done['double_refunded'][] = refund_double($payId)['refund_id'] ? $payId : $payId . ' (still not)';
+    }
+    if (!$paused) {
+        foreach (db()->query('SELECT name, pay_id, kind FROM mail_queue ORDER BY created_at')->fetchAll() as $m) {
+            if (mail_queue_send($m['name'], $m['pay_id'], $m['kind'])) $done['queued_sent'][] = $m['name'];
         }
     }
     $s = db()->prepare("SELECT pay_id, status FROM bookings WHERE status = 'failed' OR (status = 'pending' AND updated_at < ?)
