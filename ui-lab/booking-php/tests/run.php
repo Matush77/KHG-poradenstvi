@@ -700,6 +700,50 @@ db()->exec("DELETE FROM bookings WHERE pay_id = 'cs_mv_not'");
 }, fn() => [503, ['error' => 'down']]);
 ok(is_array($r) && $bk['slot'] === $new->format(DATE_ATOM), 'review 17/2b: Google unreadable and the old time sold meanwhile: the booking never goes back onto it');
 
+// --- 17 Nov review, second round
+// 1b. Google unreadable and someone is on Stripe's page for the old time: the move is kept, not rolled back onto it
+db()->exec("DELETE FROM bookings WHERE pay_id IN ('cs_mv_sold', 'cs_mv_other')");
+[$r, $bk, $new] = $moveCase('cs_mv_held', 'evH', function () use ($at) {
+    db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, ?, ?, ?, ?, ?)')->execute([$at('+50 days'), 'cs_paying', time() + 1800, 'whoP', 'brP', 'nP']);
+    throw new RuntimeException('timeout');
+}, fn() => [503, ['error' => 'down']]);
+ok(is_array($r) && $bk['slot'] === $new->format(DATE_ATOM), 'review 17b/1b: Google unreadable and the old time being paid for: the move is kept');
+db()->exec("DELETE FROM holds WHERE who = 'whoP'"); db()->exec("DELETE FROM bookings WHERE pay_id = 'cs_mv_held'");
+
+// 5. her refunds in parts that together return the whole payment count as the refund
+$add->execute(['cs_rv_split', $at('+51 days'), 'osobne', 'booked', null, null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_split#' => fn() => [200, ['id' => 'cs_rv_split', 'payment_intent' => 'pi_split', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [400, ['error' => ['message' => 'Charge has already been refunded']]],
+    '#GET .*/v1/refunds\?payment_intent=pi_split#' => fn() => [200, ['data' => [['id' => 're_s2', 'status' => 'succeeded', 'amount' => 50000],
+        ['id' => 're_s1', 'status' => 'succeeded', 'amount' => 60000]]]]];
+$sp = cancel_booking('cs_rv_split', null, true);
+ok($sp['status'] === 'cancelled' && $sp['refund_id'] === 're_s2', 'review 17b/5: two refunds of 600 + 500 Kč count as the full refund');
+
+// 2. a payment booked only after its session started is refunded, never confirmed
+$y = (new DateTimeImmutable('-1 day'))->setTime(10, 0);
+$late = ['id' => 'cs_rv_missed', 'payment_status' => 'paid', 'created' => time() - 2 * 86400,
+    'metadata' => ['den' => $y->format('Y-m-d'), 'cas' => '10:00', 'forma' => 'online', 'email' => 'a@b.cz', 'jmeno' => 'Jana Nováková', 'telefon' => '', 'kopie' => site_copy()]];
+$CALLS = [];
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_missed#' => fn() => [200, ['id' => 'cs_rv_missed', 'payment_intent' => 'pi_missed', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn($m, $u, $b) => [200, ['id' => 're_missed', 'status' => 'pending', 'meta' => $b]]];
+$ms = book_paid($late);
+ok($ms['status'] === 'cancelled' && $ms['cancelled_by'] === 'missed' && $ms['refund_id'] === 're_missed' && !$ms['event_id'], 'review 17b/2: a session already past is refunded, not booked');
+ok(!array_filter($CALLS, fn($c) => str_contains($c, 'googleapis.com/calendar')) && (int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_missed'")->fetchColumn() === 0,
+    'review 17b/2: no calendar event; the client and she got their e-mails');
+$cm = mail_client_double($ms, $y);
+$om = mail_owner_double($ms, $y, true);
+ok(str_contains($cm['subject'], 'se nedokončila') && str_contains($cm['text'], 'nezapsala včas') && str_contains($om['text'], 'až po začátku sezení'), 'review 17b/2: the e-mails say what happened');
+$late2 = $late; $late2['id'] = 'cs_rv_missed2';
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_missed2#' => fn() => [200, ['id' => 'cs_rv_missed2', 'payment_intent' => 'pi_missed2', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [500, ['error' => ['message' => 'down']]], '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]]];
+ok(book_paid($late2)['refund_id'] === null, 'review 17b/2: Stripe down: not refunded yet');
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_missed2#' => fn() => [200, ['id' => 'cs_rv_missed2', 'payment_intent' => 'pi_missed2', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_missed2', 'status' => 'pending']],
+    '#GET .*/checkout/sessions\?#' => fn() => [200, ['data' => [], 'has_more' => false]],
+    '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
+$sw2 = sweep();
+ok(booking_get('cs_rv_missed2')['refund_id'] === 're_missed2' && in_array('cs_rv_missed2', $sw2['double_refunded'] ?? [], true), 'review 17b/2: the safety net refunds it later');
+
 // 5a. the live site refuses Stripe test keys
 $lv = "$tmp/live";
 mkdir($lv, 0700);

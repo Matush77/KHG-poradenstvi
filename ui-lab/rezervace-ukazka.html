@@ -907,12 +907,20 @@ label { scroll-margin-top: 84px; }
           return;
         }
         // paid, but the calendar entry is not made yet (17 Nov review: it said "reserved" and "the e-mail came")
-        if (j.paid && j.processing) {
+        if (j.paid && (j.processing || j.booked === false)) {
           state.step = 1; state.time = null; render();
-          var em = String(j.email || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
-          renderNotice('Platba proběhla', 'Termín je pro vás zablokovaný, jen ho ještě zapisuji do kalendáře. Potvrzení přijde e-mailem' +
-            (em ? ' na ' + em : '') + ', obvykle do pár minut. Znovu prosím neplaťte. Když nepřijde do hodiny, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
-            function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(url); });
+          if (j.booked === false) {
+            // paid, but there is no booking for it here (an old link, or a payment from another copy of the site)
+            renderNotice('Platba proběhla', 'K této platbě tu žádnou rezervaci nenacházím. Pokud vám nepřišel potvrzovací e-mail, zavolejte prosím na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.');
+          } else {
+            var em = String(j.email || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+            renderNotice('Platba proběhla', 'Termín je pro vás zablokovaný, jen ho ještě zapisuji do kalendáře. Potvrzení přijde e-mailem' +
+              (em ? ' na ' + em : '') + ', obvykle do pár minut. Znovu prosím neplaťte. Když nepřijde do hodiny, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
+              function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(url); });
+            // a refresh asks again instead of falling back to the calendar (17 Nov review, second round)
+            var back = new URLSearchParams(location.search).get('paid');
+            try { if (!back && /[?&]id=([^&]+)/.test(url)) { var u = new URL(location.href); u.searchParams.set(url.indexOf('/api/intent') >= 0 ? 'payment_intent' : 'paid', decodeURIComponent(RegExp.$1)); history.replaceState(history.state, '', u); } } catch (x) {}
+          }
           return;
         }
         // paid: the time comes from the booking, not the free times (it is taken now, by this very booking)

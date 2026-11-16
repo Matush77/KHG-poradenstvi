@@ -97,6 +97,8 @@ try {
             'refunded' => $b && $b['refund_id'] && !refund_failed($b),                         // that refund is on its way already
             // paid, but the calendar entry is not made yet (Google failed; the safety net retries): not "reserved" yet
             'processing' => in_array($b['status'] ?? '', ['pending', 'failed'], true),
+            // paid, but no booking here at all (another copy's payment, or an old one): never shown as reserved
+            'booked' => $b !== null,
             // the time now (the booking may have been moved since; the payment's metadata keeps the first one)
             'den' => $b ? prague($b['slot'])->format('Y-m-d') : null, 'cas' => $b ? prague($b['slot'])->format('G:i') : null,
             'mailed' => (bool)($b['mail_sent'] ?? false),
