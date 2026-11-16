@@ -552,7 +552,7 @@ $FAKE = ['#GET .*/checkout/sessions\?#' => function ($m, $u) use (&$pages) {
         return str_contains($u, 'starting_after=cs_p1_last') ? [200, ['data' => [['id' => 'cs_p2']], 'has_more' => false]]
             : [200, ['data' => [['id' => 'cs_p1'], ['id' => 'cs_p1_last']], 'has_more' => true]];
     }];
-ok(array_column(paid_sessions_last_day(), 'id') === ['cs_p1', 'cs_p1_last', 'cs_p2'] && count($pages) === 2, 'open 5: both pages of the list are read');
+ok(array_column(paid_sessions_recent(), 'id') === ['cs_p1', 'cs_p1_last', 'cs_p2'] && count($pages) === 2, 'open 5: both pages of the list are read');
 db()->exec("UPDATE bookings SET stale_event = 'evStale' WHERE pay_id = 'cs_rv_can'");
 $FAKE = ['#GET .*/checkout/sessions\?#' => fn() => [500, ['error' => 'down']], '#DELETE .*/events/evStale#' => fn() => [204, []],
     '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
@@ -562,9 +562,9 @@ ok($threw && booking_get('cs_rv_can')['stale_event'] === null, 'open 5: Stripe d
 
 // 3. Stripe made the refund but the answer was lost; the retry is refused: the refund found on Stripe counts
 $add->execute(['cs_rv_lost', $at('+35 days'), 'osobne', 'booked', null, null, null, 0, 0]);
-$FAKE = ['#GET .*/checkout/sessions/cs_rv_lost#' => fn() => [200, ['id' => 'cs_rv_lost', 'payment_intent' => 'pi_lost']],
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_lost#' => fn() => [200, ['id' => 'cs_rv_lost', 'payment_intent' => 'pi_lost', 'amount_total' => 110000]],
     '#POST .*/v1/refunds#' => fn() => [400, ['error' => ['message' => 'Keys for idempotent requests can only be used with the same parameters']]],
-    '#GET .*/v1/refunds\?payment_intent=pi_lost#' => fn() => [200, ['data' => [['id' => 're_lost', 'status' => 'succeeded']]]]];
+    '#GET .*/v1/refunds\?payment_intent=pi_lost#' => fn() => [200, ['data' => [['id' => 're_lost', 'status' => 'succeeded', 'amount' => 110000]]]]];
 $l3 = cancel_booking('cs_rv_lost', null, true);
 ok($l3['status'] === 'cancelled' && $l3['refund_id'] === 're_lost', 'open 3: a refund that went through is found and the booking cancelled');
 $add->execute(['cs_rv_lost2', $at('+36 days'), 'osobne', 'booked', null, null, null, 0, 0]);
@@ -616,6 +616,100 @@ ok((int)$o->query("SELECT owner_mailed FROM bookings WHERE pay_id = 'cs_old'")->
 $o = null;
 $r15 = $child($tmp, 'owner_login("spravne-heslo-42", "Chrome/1 Windows", "w" . getmypid());');
 ok($r15 === array_fill(0, 6, 'OK'), 'open 15: six sign-ins at once with the right password all go in (' . implode(' | ', array_unique($r15)) . ')');
+// --- 17 Nov review
+// 1. a slow "back from Stripe" release must not delete the newer hold that replaced it for the same time
+$slotH = $at('+41 days');
+db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, ?, ?, ?, ?, ?)')->execute([$slotH, 'cs_hA', time() + 1800, 'whoH', 'brH', 'hA']);
+$FAKE = ['#POST .*/checkout/sessions/cs_hA/expire#' => function () use ($slotH) {
+    // while Stripe answers, the same browser's other tab replaces the hold with a new payment page
+    db()->prepare("DELETE FROM holds WHERE nonce = 'hA'")->execute();
+    db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, ?, ?, ?, ?, ?)')->execute([$slotH, 'cs_hB', time() + 1800, 'whoH', 'brH', 'hB']);
+    return [200, ['status' => 'expired']];
+}];
+release_browser_holds('brH', 'cs_hA');
+ok((bool)db()->query("SELECT 1 FROM holds WHERE pay_id = 'cs_hB'")->fetchColumn(), 'review 17/1: a slow release leaves the newer hold for the same time alone');
+db()->exec("DELETE FROM holds WHERE who = 'whoH'");
+foreach (['a', 'b', 'c'] as $i => $x) db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, ?, ?, ?, ?, ?)')
+    ->execute([$at('+' . (42 + $i) . ' days'), 'cs_c' . $x, time() + 1800 + $i, 'whoC', 'brC', 'c' . $x]);
+$FAKE = ['#POST .*/checkout/sessions/cs_ca/expire#' => function () {
+    db()->prepare("UPDATE holds SET pay_id = 'cs_cnew', nonce = 'cnew' WHERE nonce = 'ca'")->execute();
+    return [200, ['status' => 'expired']];
+}];
+cap_holds('whoC', time());
+ok((bool)db()->query("SELECT 1 FROM holds WHERE pay_id = 'cs_cnew'")->fetchColumn(), 'review 17/1: the visitor limit leaves a hold that was replaced meanwhile alone');
+db()->exec("DELETE FROM holds WHERE who = 'whoC'");
+
+// 3a. a partial refund she made in Stripe is never taken as the full one
+$add->execute(['cs_rv_part', $at('+46 days'), 'osobne', 'booked', null, null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_part#' => fn() => [200, ['id' => 'cs_rv_part', 'payment_intent' => 'pi_part', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [400, ['error' => ['message' => 'Refund amount is greater than unrefunded amount on charge']]],
+    '#GET .*/v1/refunds\?payment_intent=pi_part#' => fn() => [200, ['data' => [['id' => 're_part', 'status' => 'succeeded', 'amount' => 12000]]]]];
+throws(fn() => cancel_booking('cs_rv_part', null, true), 502, 'review 17/3a: a 120 Kč partial refund is not the refund of 1 100 Kč');
+ok(booking_get('cs_rv_part')['status'] === 'booked' && booking_get('cs_rv_part')['refund_id'] === null, 'review 17/3a: the booking stays, no refund recorded');
+throws(fn() => owner_cancel('cs_rv_part'), 502, 'review 17/3a: her cancel does not take the partial refund either');
+$FAKE['#GET .*/v1/refunds\?payment_intent=pi_part#'] = fn() => [200, ['data' => [['id' => 're_full', 'status' => 'pending', 'amount' => 110000]]]];
+ok(owner_cancel('cs_rv_part')['refund_id'] === 're_full', 'review 17/3a: a full refund found on Stripe still counts');
+
+// 3c. two cancellations either side of 36 hours: the refund that went through stays on the record, the client is told
+$add->execute(['cs_rv_race', $at('+47 days'), 'osobne', 'booked', null, null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_race#' => fn() => [200, ['id' => 'cs_rv_race', 'payment_intent' => 'pi_race', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => function () {
+        // meanwhile the other request (just after the 36 hours, so without a refund) cancels first
+        booking_update('cs_rv_race', ['status' => 'cancelled', 'cancelled_by' => 'client', 'hours_before' => 35.9]);
+        return [200, ['id' => 're_race', 'status' => 'pending']];
+    }];
+$rc = cancel_booking('cs_rv_race', null, true);
+ok($rc['status'] === 'cancelled' && $rc['refund_id'] === 're_race' && $rc['refund_status'] === 'pending', 'review 17/3c: the refund made by the slower request is recorded');
+ok(str_contains((string)file_get_contents(cfg()['dir'] . '/booking.log'), 'REFUND_AFTER_CANCEL {"pay":"cs_rv_race"'), 'review 17/3c: and the client gets the refund e-mail');
+
+// 3b. the safety net asks Stripe about refunds still on their way: a failure reaches her without the webhook
+$add->execute(['cs_rv_chk', $at('+48 days'), 'osobne', 'cancelled', null, 're_chk', 'pending', 0, 0]);
+ok(in_array('re_chk', refunds_to_check(), true) && !in_array('re_lost', refunds_to_check(), true), 'review 17/3b: pending refunds are rechecked, finished ones are not');
+$FAKE = ['#GET .*/checkout/sessions\?#' => fn() => [200, ['data' => [], 'has_more' => false]],
+    '#GET .*/v1/refunds/re_chk#' => fn() => [200, ['id' => 're_chk', 'status' => 'failed', 'failure_reason' => 'expired_or_canceled_card']],
+    '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
+$sw = sweep();
+ok(booking_get('cs_rv_chk')['refund_status'] === 'failed' && in_array('cs_rv_chk', $sw['refund_failed'] ?? [], true), 'review 17/3b: a refund that failed is found by the safety net');
+ok((int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_chk'")->fetchColumn() === 0 && !in_array('re_chk', refunds_to_check(), true), 'review 17/3b: she got the e-mail, and it is not asked again');
+
+// 6. the safety net looks back 3 days, as long as Stripe retries a webhook
+$gte = null;
+$FAKE = ['#GET .*/checkout/sessions\?#' => function ($m, $u) use (&$gte) { parse_str((string)parse_url($u, PHP_URL_QUERY), $q); $gte = (int)$q['created']['gte']; return [200, ['data' => [], 'has_more' => false]]; }];
+paid_sessions_recent();
+ok($gte !== null && abs($gte - (time() - 3 * 86400)) < 10, 'review 17/6: a payment made 25 hours ago is still looked for');
+
+// 2b. Google moved the event but its answer was lost: the booking keeps the new time
+$evPath = '/calendars/' . rawurlencode(cfg()['calendar']) . '/events/';
+$moveCase = function (string $pay, string $evId, callable $patch, callable $get) use ($add, $at, &$FAKE) {
+    $add->execute([$pay, $at('+50 days'), 'osobne', 'booked', $evId, null, null, 0, 0]);
+    $FAKE = ['#PATCH .*/events/' . $evId . '#' => $patch, '#GET .*/events/' . $evId . '#' => $get];
+    $new = (new DateTimeImmutable($at('+50 days')))->setTime(14, 0);
+    try { $r = owner_move($pay, $new->format('Y-m-d'), '14:00'); } catch (ClientError $e) { $r = $e; }
+    return [$r, booking_get($pay), $new];
+};
+$newIso = fn(DateTimeImmutable $d) => ['start' => ['dateTime' => $d->format(DATE_ATOM)]];
+[$r, $bk, $new] = $moveCase('cs_mv_landed', 'evL', fn() => throw new RuntimeException('timeout'), fn() => [200, ['start' => ['dateTime' => (new DateTimeImmutable($at('+50 days')))->setTime(14, 0)->format(DATE_ATOM)]]]);
+ok(is_array($r) && $bk['slot'] === $new->format(DATE_ATOM) && $bk['lock_until'] === null, 'review 17/2b: Google moved it, its answer was lost: the booking keeps the new time');
+db()->exec("DELETE FROM bookings WHERE pay_id = 'cs_mv_landed'");
+[$r, $bk] = $moveCase('cs_mv_not', 'evN', fn() => [500, ['error' => 'x']], fn() => [200, ['start' => ['dateTime' => $at('+50 days')]]]);
+ok($r instanceof ClientError && $r->getCode() === 502 && $bk['slot'] === $at('+50 days'), 'review 17/2b: Google did not move it: back to the old time, as before');
+db()->exec("DELETE FROM bookings WHERE pay_id = 'cs_mv_not'");
+[$r, $bk, $new] = $moveCase('cs_mv_sold', 'evS', function () use ($add, $at) {
+    $add->execute(['cs_mv_other', $at('+50 days'), 'osobne', 'booked', 'evO', null, null, 0, 0]);   // someone paid for the old time meanwhile
+    throw new RuntimeException('timeout');
+}, fn() => [503, ['error' => 'down']]);
+ok(is_array($r) && $bk['slot'] === $new->format(DATE_ATOM), 'review 17/2b: Google unreadable and the old time sold meanwhile: the booking never goes back onto it');
+
+// 5a. the live site refuses Stripe test keys
+$lv = "$tmp/live";
+mkdir($lv, 0700);
+foreach (['booking-secret', 'owner-password'] as $f) copy("$tmp/$f", "$lv/$f");
+file_put_contents("$lv/booking.env", "BOOKING_MODE=live\nSITE_URL=https://example.invalid\n");
+file_put_contents("$lv/stripe-test.env", "STRIPE_SECRET_KEY=sk_test_dummy\n");
+ok(in_array('Live mode refuses Stripe keys that are not live keys.', $child($lv, 'cfg();'), true), 'review 17/5a: live mode with a test key refuses to start');
+file_put_contents("$lv/stripe-test.env", "STRIPE_SECRET_KEY=sk_live_dummy\n");
+ok($child($lv, 'cfg();')[0] === 'OK', 'review 17/5a: live mode with a live key starts');
+
 unset($GLOBALS['HTTP_FAKE']);
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";

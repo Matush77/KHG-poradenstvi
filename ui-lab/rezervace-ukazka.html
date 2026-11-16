@@ -769,7 +769,11 @@ label { scroll-margin-top: 84px; }
   function renderStep3() {
     // the e-mail and phone come back from the payment: never put them into the page as HTML
     var esc = function (v) { return String(v || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-    var sent = state.email ? 'Potvrzení přišlo na ' + esc(state.email) + '. ' : 'Termín máte zapsaný na telefon ' + esc(state.phone) + '. ';
+    // "sent" only when the server says it went (17 Nov review): online, the e-mail waits a moment for the Meet link.
+    // The lab's own steps (?step=3, no server) show it as sent.
+    var sent = !state.email ? 'Termín máte zapsaný na telefon ' + esc(state.phone) + '. '
+      : state.mailed !== false ? 'Potvrzení odešlo na ' + esc(state.email) + '. '
+      : 'Potvrzení přijde na ' + esc(state.email) + ', obvykle do pár minut. ';
     view.innerHTML = '<div class="done"><h2>Termín je rezervovaný</h2>' + summary() +
       '<p>' + sent + FORMATS[state.f].after + '</p>' +
       (state.meet ? '<p class="note">Demo: událost s Meet odkazem je v kalendáři „KHG test rezervace“: <a href="' + esc(state.meet) + '" target="_blank" rel="noopener">' + esc(state.meet.replace('https://', '')) + '</a></p>' : '') +
@@ -896,8 +900,19 @@ label { scroll-margin-top: 84px; }
         // paid but not booked: cancelled since, or paid for a time someone else had just taken (16 Nov review)
         if (j.paid && j.cancelled) {
           state.step = 1; state.time = null; render();
-          if (j.double) renderNotice('Termín se mezitím obsadil', 'Tenhle čas si chvíli před vámi zaplatil někdo jiný. Platba se vám vrací celá a podrobnosti přijdou e-mailem. Omlouvám se, vyberte si prosím jiný termín.');
+          if (j.double) renderNotice('Termín se mezitím obsadil', 'Tenhle čas si chvíli před vámi zaplatil někdo jiný. ' +
+            (j.refunded ? 'Platba se vám vrací celá a podrobnosti přijdou e-mailem.' : 'Platbu vám vrátím celou, podrobnosti přijdou e-mailem.') +
+            ' Omlouvám se, vyberte si prosím jiný termín.');
           else renderNotice('Rezervace je zrušená', 'Tahle rezervace už byla zrušena. Pokud chcete nový termín, vyberte si ho v kalendáři.');
+          return;
+        }
+        // paid, but the calendar entry is not made yet (17 Nov review: it said "reserved" and "the e-mail came")
+        if (j.paid && j.processing) {
+          state.step = 1; state.time = null; render();
+          var em = String(j.email || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+          renderNotice('Platba proběhla', 'Termín je pro vás zablokovaný, jen ho ještě zapisuji do kalendáře. Potvrzení přijde e-mailem' +
+            (em ? ' na ' + em : '') + ', obvykle do pár minut. Znovu prosím neplaťte. Když nepřijde do hodiny, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
+            function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(url); });
           return;
         }
         // paid: the time comes from the booking, not the free times (it is taken now, by this very booking)
@@ -910,6 +925,7 @@ label { scroll-margin-top: 84px; }
         state.meet = j.meet || ''; // demo only: the real page never shows the link, it goes by e-mail
         state.payId = j.id || '';
         state.cancel = j.cancel || '';
+        state.mailed = !!j.mailed;
         state.step = j.paid && state.time ? 3 : (state.time ? 2 : 1);
         render();
         if (!j.paid) {

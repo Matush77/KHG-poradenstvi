@@ -89,6 +89,10 @@ function cfg(): array
     if ($c['mode'] !== 'live' && !preg_match('/^(sk|rk)_test_/', $c['stripe_sk'])) {
         throw new RuntimeException('Lab mode refuses Stripe keys that are not test keys.');
     }
+    // and the other way round (17 Nov review): the live site with test keys would book clients who paid with a test card
+    if ($c['mode'] === 'live' && !preg_match('/^(sk|rk)_live_/', $c['stripe_sk'])) {
+        throw new RuntimeException('Live mode refuses Stripe keys that are not live keys.');
+    }
     if (strlen($c['secret']) < 32) throw new RuntimeException('booking-secret missing or too short.');
     return $c;
 }

@@ -152,7 +152,8 @@ function release_own_hold(?string $browser, string $slot): void
     if (!expire_hold($h, 'Platbu se teď nepodařilo obnovit. Zkuste to prosím za chvíli.')) {
         throw new ClientError('Tenhle termín už máte zaplacený. Potvrzení přijde e-mailem.', 409);
     }
-    db()->prepare('DELETE FROM holds WHERE slot = ? AND browser = ?')->execute([$slot, $browser]);
+    // only this hold: a newer one for the same time (another tab) is not this request's to end (17 Nov review)
+    db()->prepare('DELETE FROM holds WHERE slot = ? AND browser = ? AND pay_id IS ?')->execute([$slot, $browser, $h['pay_id']]);
     log_line('HOLD_RELEASED', ['slot' => $slot, 'pay' => $h['pay_id'], 'why' => 'same browser again']);
 }
 
@@ -180,7 +181,9 @@ function release_browser_holds(?string $browser, ?string $pay = null): array
         } catch (ClientError $e) {
             continue;   // Stripe unreachable: the hold simply runs out as before
         }
-        db()->prepare('DELETE FROM holds WHERE slot = ? AND browser = ?')->execute([$h['slot'], $browser]);
+        // only the hold of the Stripe page just ended (17 Nov review: a slow release deleted the newer hold that
+        // replaced it for the same time, and two Stripe pages for one time could both be paid)
+        db()->prepare('DELETE FROM holds WHERE slot = ? AND browser = ? AND pay_id = ?')->execute([$h['slot'], $browser, $h['pay_id']]);
         log_line('HOLD_RELEASED', ['slot' => $h['slot'], 'pay' => $h['pay_id'], 'why' => 'back from Stripe']);
         $freed[] = $h['slot'];
     }
@@ -199,7 +202,7 @@ function cap_holds(string $who, int $now): void
         if (hold_creating($h, $now)) continue;   // its request is still running: never pulled from under it
         // paid, being booked: its hold must stay
         if (!expire_hold($h, 'Máte rozpracovaných víc rezervací najednou. Dokončete prosím jednu z nich, nebo to zkuste za půl hodiny.')) continue;
-        db()->prepare('DELETE FROM holds WHERE slot = ? AND who = ?')->execute([$h['slot'], $who]);
+        db()->prepare('DELETE FROM holds WHERE slot = ? AND who = ? AND pay_id IS ?')->execute([$h['slot'], $who, $h['pay_id']]);
         log_line('HOLD_RELEASED', ['slot' => $h['slot'], 'pay' => $h['pay_id'], 'why' => 'visitor limit']);
     }
 }
@@ -462,7 +465,7 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     if ($hours >= cfg()['free_cancel_hours']) {
         [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
         if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Zrušení se teď nepovedlo. Stačí to zkusit znovu.', 502);
-        [$code, $r] = stripe_refund($s['payment_intent'], 'zruseni klientem', 'cancel-' . $payId);
+        [$code, $r] = stripe_refund($s['payment_intent'], (int)($s['amount_total'] ?? 0), 'zruseni klientem', 'cancel-' . $payId);
         if ($code !== 200 || !refund_alive($r)) {
             // the first request has cancelled it meanwhile: that is the answer, not an error
             if (($done = booking_get($payId)) && $done['status'] === 'cancelled') return $done;
@@ -475,7 +478,20 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     // requests gets here first, the other returns the cancelled booking without a second set of e-mails
     $set = db()->prepare("UPDATE bookings SET status = 'cancelled' WHERE pay_id = ? AND status = 'booked'");
     $set->execute([$payId]);
-    if ($set->rowCount() === 0) return booking_get($payId);
+    if ($set->rowCount() === 0) {
+        // the other request cancelled first. If it did so without a refund (it came after the 36 hours, this one just
+        // before) but this one's refund went through, the money is on its way back: the booking says so and the client
+        // gets the refund e-mail (17 Nov review: the refund vanished from the record)
+        if (isset($fields['refund_id'])) {
+            $r = db()->prepare('UPDATE bookings SET refund_id = ?, refund_status = ?, updated_at = ? WHERE pay_id = ? AND refund_id IS NULL');
+            $r->execute([$fields['refund_id'], $fields['refund_status'], time(), $payId]);
+            if ($r->rowCount() > 0) {
+                log_line('REFUND_AFTER_CANCEL', ['pay' => $payId, 'refund' => $fields['refund_id']]);
+                if (booking_get($payId)['email']) mail_queued($payId . '-refund-' . $fields['refund_id'], $payId, 'client_refund');
+            }
+        }
+        return booking_get($payId);
+    }
     booking_update($payId, $fields);
     if ($b['event_id']) event_gone($payId, $b['event_id']);
     log_line('CANCELLED', ['pay' => $payId, 'hours' => $fields['hours_before'], 'refund' => $fields['refund_id'] ?? null]);
@@ -539,8 +555,10 @@ function moving(array $b, ?int $now = null): bool
 
 /* One full refund. The idempotency key makes a double click, two tabs or her phone and laptop refund only once, as
    long as every try sends the same parameters (16 Nov review: the hours in the reason changed between tries, Stripe
-   refused the retry, and a refund that had gone through was reported as failed). */
-function stripe_refund(string $paymentIntent, string $why, string $key, ?string $failed = null): array
+   refused the retry, and a refund that had gone through was reported as failed).
+   $amount: what the client paid (the session's amount_total), so a refund found on Stripe counts only if it is the
+   whole payment (17 Nov review: an earlier partial refund from her Stripe dashboard was taken as the full one). */
+function stripe_refund(string $paymentIntent, int $amount, string $why, string $key, ?string $failed = null): array
 {
     $send = fn() => stripe('POST', 'refunds', ['payment_intent' => $paymentIntent, 'reason' => 'requested_by_customer',
         'metadata' => ['duvod' => $why]], $key);
@@ -556,14 +574,15 @@ function stripe_refund(string $paymentIntent, string $why, string $key, ?string 
         [$code, $r] = [0, ['error' => ['message' => $e->getMessage()]]];   // no answer: Stripe may have made it anyway
     }
     if ($code === 200) return [$code, $r];
-    // no answer, or a refusal: a refund Stripe already made for this payment is the answer (not the one that failed)
+    // no answer, or a refusal: a full refund Stripe already made for this payment is the answer (not the one that
+    // failed, and not a partial one: the rest of the money would never go back)
     try {
         [$lc, $list] = stripe('GET', 'refunds', ['payment_intent' => $paymentIntent, 'limit' => 10]);
     } catch (RuntimeException $e) {
         return [$code, $r];
     }
     foreach ($lc === 200 ? ($list['data'] ?? []) : [] as $x) {
-        if (($x['id'] ?? '') !== $failed && refund_alive($x)) {
+        if (($x['id'] ?? '') !== $failed && refund_alive($x) && $amount > 0 && (int)($x['amount'] ?? 0) === $amount) {
             log_line('REFUND_FOUND', ['refund' => $x['id'], 'code' => $code]);
             return [200, $x];
         }
@@ -578,7 +597,7 @@ function refund_full(string $payId, string $why, ?string $failed = null): array
     if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Platbu se teď nepodařilo najít. Zkus to prosím znovu.', 502);
     // after a failed refund the same key would only give back the same failed refund
     $key = 'cancel-' . $payId . ($failed ? '-after-' . $failed : '');
-    [$code, $r] = stripe_refund($s['payment_intent'], $why, $key, $failed);
+    [$code, $r] = stripe_refund($s['payment_intent'], (int)($s['amount_total'] ?? 0), $why, $key, $failed);
     if ($code !== 200) {
         log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
         throw new ClientError('Vrácení peněz se nepovedlo, nic se nezměnilo. Zkus to prosím znovu.', 502);
@@ -678,6 +697,12 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
     try {
         if ($b['event_id']) gcal_move($b['event_id'], $new);
     } catch (Throwable $e) {
+        if (move_landed($payId, $b, $new)) {
+            log_line('MOVE_LANDED', ['pay' => $payId, 'by' => $by, 'error' => $e->getMessage()]);   // Google moved it; its answer got lost
+            db()->prepare('UPDATE bookings SET lock_until = NULL WHERE pay_id = ?')->execute([$payId]);
+            log_line('MOVED', ['pay' => $payId, 'by' => $by, 'from' => $b['slot'], 'to' => $slot]);
+            return moved_mails(booking_get($payId), $old, $by);
+        }
         // back to the time before, only if the booking is still where this move put it
         db()->prepare('UPDATE bookings SET slot = ?, moves = ?, client_moves = ?, mail_sent = ?, reminded = ?, moved_at = ?, lock_until = NULL, updated_at = ? WHERE pay_id = ? AND slot = ?')
             ->execute([$b['slot'], $b['moves'], $b['client_moves'], $b['mail_sent'], $b['reminded'], $b['moved_at'], time(), $payId, $slot]);
@@ -713,6 +738,24 @@ function moved_mails(array $b, DateTimeImmutable $old, string $by): array
         }
     }
     return booking_get($payId);
+}
+
+/* Google answered a move with an error (or not at all): did the event move anyway? (17 Nov review: Google moved it,
+   its answer was lost, and the booking went back to the old time after someone else had paid for that time.)
+   Google's own event decides. If Google can't be read either: the old time already booked by someone else means
+   it was free in her calendar, so the event did move; otherwise it is taken as not moved, and if it did move after
+   all, the calendar sync moves the booking to it within a minute. */
+function move_landed(string $payId, array $b, DateTimeImmutable $new): bool
+{
+    if (!$b['event_id']) return false;
+    try {
+        $at = gcal_get($b['event_id'])['start']['dateTime'] ?? null;
+        return $at !== null && (new DateTimeImmutable($at))->getTimestamp() === $new->getTimestamp();
+    } catch (Throwable $e) {
+        $t = db()->prepare("SELECT COUNT(*) FROM bookings WHERE slot = ? AND status IN ('pending','booked','failed') AND pay_id != ?");
+        $t->execute([$b['slot'], $payId]);
+        return (int)$t->fetchColumn() > 0;
+    }
 }
 
 const OWNER_MOVE_FIRST = 7;    // her moves from the hours page: 7:00 ... 20:00 (owner, 16 Nov)
@@ -877,7 +920,7 @@ function sweep(): array
     // list and must not wait for it (16 Nov review: one failed list stopped them all)
     $stripeError = null;
     try {
-        foreach (paid_sessions_last_day() as $s) {
+        foreach (paid_sessions_recent() as $s) {
             // only this copy's payments: the test site and the lab share one Stripe test account (14 Nov: the test site's
             // first run booked the lab's payments again)
             if (($s['payment_status'] ?? '') === 'paid' && ($s['metadata']['zdroj'] ?? '') === 'web'
@@ -894,6 +937,16 @@ function sweep(): array
     foreach (db()->query('SELECT pay_id, stale_event FROM bookings WHERE stale_event IS NOT NULL')->fetchAll() as $row) {
         event_gone($row['pay_id'], $row['stale_event']);
         if (!booking_get($row['pay_id'])['stale_event']) $done['events_deleted'][] = $row['pay_id'];
+    }
+    // refunds still on their way: Stripe is asked how they ended, so a failure reaches her even when its webhook was
+    // lost or came before the refund was written down (17 Nov review)
+    foreach (refunds_to_check() as $refundId) {
+        try {
+            $b = refund_changed($refundId);
+            if ($b && refund_failed($b)) $done['refund_failed'][] = $b['pay_id'];
+        } catch (Throwable $e) {
+            log_line('SWEEP_REFUND_ERROR', ['refund' => $refundId, 'error' => $e->getMessage()]);   // asked again next run
+        }
     }
     // a payment for a time already taken whose refund did not go through yet
     foreach (db()->query("SELECT pay_id FROM bookings WHERE cancelled_by = 'double' AND refund_id IS NULL")->fetchAll(PDO::FETCH_COLUMN) as $payId) {
@@ -919,12 +972,23 @@ function sweep(): array
     return $done;
 }
 
-/* Every completed Checkout Session of the last 24 hours, all pages of Stripe's list (16 Nov review: only the first
-   100 were read). Stripe lists newest first; a page ends with has_more and the next starts after its last id. */
-function paid_sessions_last_day(): array
+/* Refunds Stripe has not finished (pending, or waiting for the client's bank): at most 20 a run, the oldest check first. */
+function refunds_to_check(): array
+{
+    $s = db()->query("SELECT refund_id FROM bookings WHERE refund_id IS NOT NULL
+        AND COALESCE(refund_status, '') NOT IN ('succeeded', 'failed', 'canceled') ORDER BY updated_at LIMIT 20");
+    return $s->fetchAll(PDO::FETCH_COLUMN);
+}
+
+/* Every completed Checkout Session of the last 3 days, all pages of Stripe's list (16 Nov review: only the first
+   100 were read). Stripe lists newest first; a page ends with has_more and the next starts after its last id.
+   3 days, as long as Stripe retries a webhook (17 Nov review: with 24 hours, a server down for over a day with the
+   webhook failing lost a paid booking). Still well inside BOOK_PAID_MAX_AGE_DAYS. */
+const SWEEP_LOOKBACK_DAYS = 3;
+function paid_sessions_recent(): array
 {
     $out = [];
-    $q = ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - 86400]];
+    $q = ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - SWEEP_LOOKBACK_DAYS * 86400]];
     for ($i = 0; $i < 50; $i++) {   // 5000 payments a day is far beyond this practice; a bound so a bad answer can't loop
         [$code, $page] = stripe('GET', 'checkout/sessions', $q);
         if ($code !== 200) throw new RuntimeException('Stripe list failed: HTTP ' . $code);
