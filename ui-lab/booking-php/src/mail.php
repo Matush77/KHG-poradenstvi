@@ -198,6 +198,12 @@ const MEET_LATER = 'Odkaz na videohovor přijde e-mailem v připomínce před se
 
 function text_foot(): array { return ['', '—', SENDER . ' · ' . PHONE . ' · ' . OWNER_MAIL . ' · khgporadenstvi.cz']; }
 
+const ICS_PRAGUE = ['BEGIN:VTIMEZONE', 'TZID:Europe/Prague',
+    'BEGIN:DAYLIGHT', 'TZOFFSETFROM:+0100', 'TZOFFSETTO:+0200', 'TZNAME:CEST', 'DTSTART:19700329T020000',
+    'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU', 'END:DAYLIGHT',
+    'BEGIN:STANDARD', 'TZOFFSETFROM:+0200', 'TZOFFSETTO:+0100', 'TZNAME:CET', 'DTSTART:19701025T030000',
+    'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU', 'END:STANDARD', 'END:VTIMEZONE'];
+
 /* The client's confirmation, and "Změna termínu" after a move ($old: the previous start). Plain text, HTML, .ics. */
 function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?DateTimeImmutable $old = null, bool $byClient = false): array
 {
@@ -228,11 +234,7 @@ function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?Date
     $desc = ($online && $meet ? "Připojit se: $meet\n" : '') . $linkLabel . ': ' . $cancelUrl;
     $lines = [
         'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//khgporadenstvi.cz//rezervace//CS', 'METHOD:PUBLISH',
-        'BEGIN:VTIMEZONE', 'TZID:Europe/Prague',
-        'BEGIN:DAYLIGHT', 'TZOFFSETFROM:+0100', 'TZOFFSETTO:+0200', 'TZNAME:CEST', 'DTSTART:19700329T020000',
-        'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU', 'END:DAYLIGHT',
-        'BEGIN:STANDARD', 'TZOFFSETFROM:+0200', 'TZOFFSETTO:+0100', 'TZNAME:CET', 'DTSTART:19701025T030000',
-        'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU', 'END:STANDARD', 'END:VTIMEZONE',
+        ...ICS_PRAGUE,
         'BEGIN:VEVENT', 'UID:' . ($b['pay_id'] ?? $start->format('U')) . '@khgporadenstvi.cz',
         'DTSTAMP:' . gmdate('Ymd\THis\Z'), 'SEQUENCE:' . (int)($b['moves'] ?? 0),
         'DTSTART;TZID=Europe/Prague:' . $f($start), 'DTEND;TZID=Europe/Prague:' . $f($end),
@@ -283,6 +285,47 @@ function owner_mail(array $b, DateTimeImmutable $start, string $subject, string 
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
 }
 
+/* The calendar event, like Google's booking pages write it. Description in Google's simple HTML (bold headings). */
+const ARRIVE_NOTE = 'Terapie v prostorách ordinace. Prosím, přicházejte a zvoňte až v čase vašeho objednaného sezení. Děkuji, že tento čas respektujete.';
+function event_title(array $b): string
+{
+    return 'Terapie ' . ($b['forma'] !== 'osobne' ? 'online' : 'osobně') . ' (' . ($b['name'] ?: 'klient') . ')';
+}
+function event_description(array $b): string
+{
+    $block = fn(string $head, array $lines) => '<b>' . h($head) . '</b><br>' . implode('<br>', array_map('h', $lines));
+    $note = trim((string)($b['note'] ?? ''));
+    return implode('<br><br>', array_filter([
+        $block('Rezervoval(a)', array_values(array_filter([$b['name'] ?: 'bez jména', $b['email'] ?? '', $b['phone'] ?? '']))),
+        $note !== '' ? $block('S čím přicházíte?', explode("\n", $note)) : '',
+        $block('Zaplacená částka', [number_format(cfg()['price'] / 100, 2, ',', "\u{00A0}") . "\u{00A0}Kč"]),
+        $b['forma'] === 'osobne' ? h(ARRIVE_NOTE) : '',
+        lab() ? h('Test webu, Stripe test.') : '',
+    ]));
+}
+
+/* Her copy of the session as a calendar file, so Gmail shows its event card at the top of "Schůzka byla rezervována".
+   The UID is the Google event's own (iCalUID of an event made with our id), so Gmail sees the event she already has
+   instead of offering a second one. PUBLISH: nothing to answer, nothing added on its own. */
+function owner_ics(array $b, DateTimeImmutable $start): ?string
+{
+    if (empty($b['event_id'])) return null;
+    $online = $b['forma'] !== 'osobne';
+    $f = fn(DateTimeImmutable $d) => $d->format('Ymd\THis');
+    $lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//khgporadenstvi.cz//rezervace//CS', 'METHOD:PUBLISH',
+        ...ICS_PRAGUE,
+        'BEGIN:VEVENT', 'UID:' . $b['event_id'] . '@google.com',
+        'DTSTAMP:' . gmdate('Ymd\THis\Z'), 'SEQUENCE:' . (int)($b['moves'] ?? 0),
+        'DTSTART;TZID=Europe/Prague:' . $f($start), 'DTEND;TZID=Europe/Prague:' . $f($start->modify('+50 minutes')),
+        'SUMMARY:' . ics_text((lab() ? 'TEST · ' : '') . event_title($b)),
+        'LOCATION:' . ics_text($online ? (string)($b['meet'] ?? '') : PLACE),
+        'DESCRIPTION:' . ics_text(implode("\n", array_filter([$b['name'] ?: '', $b['email'] ?? '', $b['phone'] ?? '']))),
+        'END:VEVENT', 'END:VCALENDAR',
+    ];
+    return implode("\r\n", array_map('ics_fold', $lines)) . "\r\n";
+}
+
 /* To the owner, for every new booking: who, when, what they wrote, and the two buttons. */
 function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): array
 {
@@ -293,7 +336,14 @@ function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): a
     $buttons = ['Přesunout termín' => $ownerUrl . '&akce=presunout', 'Zrušit a vrátit peníze' => $ownerUrl . '&akce=zrusit'];
     [$panel, $panelTxt] = owner_panel($b, $start);
     $btns = mail_btn('Přesunout termín', $buttons['Přesunout termín']) . mail_btn('Zrušit a vrátit peníze', $buttons['Zrušit a vrátit peníze'], 'outline');
+    // where the session is (owner, 16 Nov): the Meet link or the address, as Google's e-mail has "Lokalita"
+    $meet = (string)($b['meet'] ?? '');
+    // the Meet link as a pill (owner, 16 Nov: a plain link was easy to miss), coral like the client's own Meet button
+    $where = $online ? ($meet !== '' ? mail_btn('Připojit se přes Google Meet', $meet, 'coral') : '')
+        : '<span style="color:#163A55">' . h(PLACE) . '</span>';
+    $whereTxt = $online ? ($meet !== '' ? 'Google Meet: ' . $meet : null) : PLACE;
     $html = mail_page($subject, 'Nová rezervace', $panel, [
+        $where,
         $note !== '' ? mail_muted('S čím přichází') . '<br><span style="color:#163A55">' . nl2br(h($note)) . '</span>' : '',
         !empty($b['clash']) ? '<span style="color:#B5573F;font-weight:600">V kalendáři je ve stejnou dobu i jiná událost.</span>' : '',
         !$online && empty($b['email']) ? 'Klient nechal jen telefon, potvrzení e-mailem nedostal.' : '',
@@ -301,12 +351,13 @@ function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): a
         mail_muted('Odkazy fungují bez přihlášení, e-mail proto nepřeposílej.'),
     ], mail_tint($b), '', false);
     $text = implode("\n", array_filter(['Nová rezervace', '', ...$panelTxt, '',
+        $whereTxt !== null ? $whereTxt . "\n" : null,
         $note !== '' ? "S čím přichází:\n$note\n" : null,
         !empty($b['clash']) ? "V kalendáři je ve stejnou dobu i jiná událost.\n" : null,
         'Přesunout termín: ' . $buttons['Přesunout termín'],
         'Zrušit a vrátit peníze: ' . $buttons['Zrušit a vrátit peníze'],
     ], fn($l) => $l !== null));
-    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
+    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => owner_ics($b, $start), 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
 }
 
 /* To the owner when the client cancelled from their link. No refund button (owner, 14 Nov). */

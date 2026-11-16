@@ -85,9 +85,11 @@ function gcal_create(DateTimeImmutable $start, string $summary, string $descript
     $ev = ['id' => $id, 'summary' => $summary, 'description' => $description,
         'start' => ['dateTime' => $start->format('Y-m-d\TH:i:s'), 'timeZone' => 'Europe/Prague'],
         'end' => ['dateTime' => $end->format('Y-m-d\TH:i:s'), 'timeZone' => 'Europe/Prague'],
-        'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 10]]]];
+        'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 10]]],
+        // the payment, for looking it up; not shown (it used to stand in the description)
+        'extendedProperties' => ['private' => ['platba' => $payId]]];
     if (!$online) $ev['location'] = PLACE;
-    if ($online && $guest) {
+    if ($guest) {   // in person too, as Google's booking page does (sendUpdates=none: no Google invitation e-mail)
         $ev['attendees'] = [['email' => $guest, 'responseStatus' => 'accepted']];   // booked and paid: coming (as Google's booking page marks it)
         $ev['guestsCanSeeOtherGuests'] = false;
         $ev['guestsCanInviteOthers'] = false;
