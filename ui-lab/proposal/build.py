@@ -35,6 +35,25 @@ page = re.sub(r'IVF procesem, kterou můžete najít <a (href="https://www\.face
               page, count=1)
 assert "Skupinu najdete" in page, "IVF paragraph not found"
 
+# Schema = Google profile (owner, 16 Nov): the profile's description and its 4 services.
+DESC_OLD = '"description": "Psycholog ve zdravotnictví a psychoterapeutka pro děti a dospělé. Terapie online i osobně v Ostravě. Kandidátní členka ČAP a členka AKP.",'
+DESC_NEW = ('"description": "Individuální psychoterapie pro děti, dospívající i dospělé, osobně v Ostravě nebo online. '
+            'Psycholožka ve zdravotnictví ve FN Ostrava a psychoterapeutka, členka AKP a kandidátní členka ČAP. '
+            'Úzkost, deprese, vztahy, rodičovství, vyhoření, osobní krize. KHG Poradenství.",')
+END_OLD = ('Vítkovická 3299/3a, Ostrava"\n            },\n            "price": "1100",\n            "priceCurrency": "CZK"\n          }\n        ]')
+def offer(name, desc):
+    return (',\n          {\n            "@type": "Offer",\n            "itemOffered": {\n              "@type": "Service",\n'
+            f'              "name": "{name}",\n              "description": "{desc}"\n            }},\n'
+            '            "price": "1100",\n            "priceCurrency": "CZK"\n          }')
+END_NEW = END_OLD[:-len('\n        ]')] + offer('Individuální psychoterapie pro dospělé', 'Individuální terapeutické setkání pro dospělé, 50 minut, online nebo osobně v Ostravě') \
+        + offer('Terapie pro děti a dospívající', 'Terapie pro děti a dospívající, 50 minut, online nebo osobně v Ostravě') + '\n        ]'
+def ld_profile(html):
+    if DESC_OLD in html: html = html.replace(DESC_OLD, DESC_NEW, 1)
+    if END_OLD in html and 'Terapie pro děti a dospívající",' not in html: html = html.replace(END_OLD, END_NEW, 1)
+    return html
+page = ld_profile(page)
+assert 'Terapie pro děti a dospívající",' in page, "schema services not found"
+
 # lab page: resolve paths from site root, keep out of search
 sub("<head>", '<head>\n    <base href="/">\n    <meta name="robots" content="noindex">')
 
@@ -232,6 +251,13 @@ sub(CONTACT_ROWS, CONTACT_ROWS + '\n            <div class="contact-book">\n'
 
 # lab only: menu links point at "/#sluzby" (the live homepage); keep them on this page
 def lab_links(html):
+    # schema (owner, 16 Nov): the practice is named like the Google profile, "KHG Poradenství" stays as alternateName
+    def ld_name(m):
+        out = m.group(1) + '"name": "Mgr. Kristýna Hriciková Glattová"'
+        if '"@type": "LocalBusiness"' in html[max(0, m.start() - 120):m.start()]:
+            out += ',' + m.group(2) + '"alternateName": "KHG Poradenství"'
+        return out
+    html = re.sub(r'("@id": "https://khgporadenstvi\.cz/#practice",(\s*))"name": "KHG Poradenství"', ld_name, html)
     # footer address: the postcode never breaks across lines (tablet footer, 16 Nov)
     html = html.replace('>Vítkovická 3299/3a, 702 00 Ostrava</a></p>', '>Vítkovická 3299/3a, 702&nbsp;00&nbsp;Ostrava</a></p>')
     html = re.sub(r'href="/#(o-mne|sluzby|kontakt|faq)"', r'href="/ui-lab/proposal/#\1"', html)
