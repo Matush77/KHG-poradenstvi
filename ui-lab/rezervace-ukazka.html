@@ -687,7 +687,7 @@ label { scroll-margin-top: 84px; }
   // pay=0: our details, then off to Stripe's own page; it comes back with ?paid=cs_...
   function toCheckout(btn) {
     busy(btn, true, 'Přesměrování na platbu…');
-    api('/api/checkout', { mode: 'redirect' }).then(function (j) { try { sessionStorage.setItem('khg-pay', '1'); } catch (x) {} location.href = j.url; })
+    api('/api/checkout', { mode: 'redirect' }).then(function (j) { try { sessionStorage.setItem('khg-pay', j.pay || '1'); } catch (x) {} location.href = j.url; })
       .catch(function (e) {
         // the server's message is written for the client (e.g. someone else is paying for this time right now)
         busy(btn, false, 'Zaplatit 1 100 Kč');
@@ -842,7 +842,9 @@ label { scroll-margin-top: 84px; }
   function releaseHeld() {
     var was; try { was = sessionStorage.getItem('khg-pay'); sessionStorage.removeItem('khg-pay'); } catch (x) {}
     if (!was) return Promise.resolve();
-    return fetch('/api/release', { method: 'POST', keepalive: true }).catch(function () {});
+    // only this tab's Stripe page (its id is kept per tab): another tab may still be paying
+    return fetch('/api/release', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pay: was === '1' ? '' : was }) }).catch(function () {});
   }
 
   /* Real free times from the booking back end (lab ?stripe=1: ui-lab/booking-php, the owner's hours calendars). */
