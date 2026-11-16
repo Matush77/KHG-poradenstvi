@@ -64,6 +64,18 @@ function cut(string $s, int $chars): string
     return trim($m[0]);
 }
 
+/* One way of writing a Czech or Slovak number, so she can read and dial it (16 Nov test run: "600000000" was kept as typed):
+   "600000000", "600 000 000", "00420600000000", "420 600-000-000" all become "+420 600 000 000". Other numbers stay as typed. */
+function phone_pretty(string $phone): string
+{
+    $phone = trim($phone);
+    $d = (string)preg_replace('/[\s\-.\/()]/', '', $phone);
+    if (str_starts_with($d, '00')) $d = '+' . substr($d, 2);
+    if (preg_match('/^\d{9}$/', $d)) $d = '+420' . $d;
+    if (preg_match('/^\+?(42[01])(\d{3})(\d{3})(\d{3})$/', $d, $m)) return "+$m[1] $m[2] $m[3] $m[4]";
+    return $phone;
+}
+
 /* What the browser sends: {f, date, time, name, email, phone}. Checked here; the price is never taken from it. */
 function parse_choice(array $b): array
 {
@@ -82,7 +94,7 @@ function parse_choice(array $b): array
     }
     $meta = ['zdroj' => 'web', 'kopie' => site_copy(), 'forma' => $forma, 'den' => $start->format('Y-m-d'), 'cas' => $start->format('G:i'),
         'jmeno' => cut(trim((string)($b['name'] ?? '')), 100), 'email' => substr($email, 0, 200),
-        'telefon' => cut($phone, 40)];
+        'telefon' => cut(phone_pretty($phone), 40)];
     return [$start, $meta];
 }
 
@@ -353,7 +365,7 @@ function queued_mail(array $b, string $kind): array
     return match ($kind) {
         'owner_cancelled' => mail_owner_cancelled($b, $start, owner_url($b['pay_id'])),
         'client_cancelled' => mail_client_cancelled($b, $start, false, $refunded),       // the client cancelled
-        'client_cancel' => mail_client_cancelled($b, $start, false),                     // she cancelled, refunded
+        'client_cancel' => mail_client_cancelled($b, $start, false, true, true),         // she cancelled, refunded
         'client_refund' => mail_client_cancelled($b, $start, true),                      // refund after a cancellation
         'owner_refund_failed' => mail_owner_refund_failed($b, $start, owner_url($b['pay_id'])),
         'owner_double' => mail_owner_double($b, $start, $refunded),

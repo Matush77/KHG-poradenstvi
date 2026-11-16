@@ -753,6 +753,25 @@ file_put_contents("$lv/stripe-test.env", "STRIPE_SECRET_KEY=sk_test_dummy\n");
 ok(in_array('Live mode refuses Stripe keys that are not live keys.', $child($lv, 'cfg();'), true), 'review 17/5a: live mode with a test key refuses to start');
 file_put_contents("$lv/stripe-test.env", "STRIPE_SECRET_KEY=sk_live_dummy\n");
 ok($child($lv, 'cfg();')[0] === 'OK', 'review 17/5a: live mode with a live key starts');
+file_put_contents("$lv/booking.env", "BOOKING_MODE=live\n");
+ok(in_array('Live mode needs SITE_URL=https://… in booking.env.', $child($lv, 'cfg();'), true), 'run 16/2: live mode without SITE_URL refuses to start');
+file_put_contents("$lv/booking.env", "BOOKING_MODE=live\nSITE_URL=http://khgporadenstvi.cz\n");
+ok(in_array('Live mode needs SITE_URL=https://… in booking.env.', $child($lv, 'cfg();'), true), 'run 16/2: live mode refuses a plain http SITE_URL');
+
+// 16 Nov test run, 4: phone numbers in one shape
+foreach (['600000000', ' 600 000 000 ', '00420600000000', '420 600-000-000', '+420600000000', '+421 905 123 456'] as $in) {
+    ok(in_array(phone_pretty($in), ['+420 600 000 000', '+421 905 123 456'], true), "run 16/4: phone '$in' -> " . phone_pretty($in));
+}
+ok(phone_pretty('+44 20 7946 0958') === '+44 20 7946 0958', 'run 16/4: a foreign number stays as typed');
+
+// 16 Nov test run, 1: the client is told when the therapist moved or cancelled the session
+$tb = ['pay_id' => 'cs_run16', 'forma' => 'online', 'email' => 'k@example.com', 'meet' => 'https://meet.google.com/x', 'moves' => 1, 'name' => 'K'];
+$t0 = new DateTimeImmutable('2030-03-04 10:00', new DateTimeZone('Europe/Prague'));
+$t1 = $t0->modify('+1 day');
+ok(str_contains(mail_build($tb, $t1, 'u', $t0, false)['text'], 'Termín přesunula ' . SENDER), 'run 16/1: her move names her');
+ok(!str_contains(mail_build($tb, $t1, 'u', $t0, true)['text'], 'přesunula'), 'run 16/1: the client\'s own move does not');
+ok(str_contains(mail_client_cancelled($tb, $t0, false, true, true)['text'], 'Sezení zrušila ' . SENDER), 'run 16/1: her cancel names her');
+ok(!str_contains(mail_client_cancelled($tb, $t0, false, true)['text'], 'zrušila'), 'run 16/1: the client\'s own cancel does not');
 
 unset($GLOBALS['HTTP_FAKE']);
 
