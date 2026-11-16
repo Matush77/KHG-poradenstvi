@@ -207,7 +207,8 @@ function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?Date
     $email = (string)($b['email'] ?? '');
     $subject = ($old ? 'Změna termínu: sezení ' : 'Potvrzení: sezení ') . cz_at($start);
     $title = $old ? 'Změna termínu' : 'Potvrzení rezervace';
-    $oldTxt = $old ? 'Původní termín ' . cz_at($old) . ' už neplatí.' : '';
+    // who moved it (16 Nov test run): a client who did not move it must not wonder why the time changed
+    $oldTxt = $old ? ($byClient ? '' : 'Termín přesunula ' . SENDER . '. ') . 'Původní termín ' . cz_at($old) . ' už neplatí.' : '';
     // the amount from the config, never from the browser; on a move nothing new is paid, so only the confirmation
     $paid = $old ? '' : 'Platba ' . price_kc() . ' byla přijata.';
     $rule = 'Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením. Později se platba nevrací.';
@@ -410,18 +411,20 @@ function mail_reminder(array $b, DateTimeImmutable $start, string $kind, ?int $n
 
 /* To the client when the owner cancels (full refund), or refunds a session the client cancelled late. */
 /* $refunded false only when the client cancelled late themself (no refund): the money line says so instead. */
-function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly, bool $refunded = true): array
+function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundOnly, bool $refunded = true, bool $byOwner = false): array
 {
     $book = site() . cfg()['booking_page'];
     $subject = $refundOnly ? 'Vrácení platby za sezení ' . cz_at($start) : 'Zrušené sezení ' . cz_at($start);
     // passive, no "I" or "you" (owner, 14 Nov): one sentence about the money, the same in both
     $title = $refundOnly ? 'Vrácení platby' : 'Zrušení sezení';
+    // she cancelled (16 Nov test run: her page promised "Klient dostane e-mail, že sezení rušíš", the e-mail did not say so)
+    $who = $byOwner ? 'Sezení zrušila ' . SENDER . '.' : '';
     $money = $refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.'
         : 'Platba se nevrací, termín byl zrušen méně než ' . cfg()['free_cancel_hours'] . ' hodin předem.';
-    $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', $money,
+    $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', ...($who ? [$who] : []), $money,
         ...($refundOnly ? [] : ['', 'Vybrat jiný termín: ' . $book]), ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, false),
-        [h($money), $refundOnly ? '' : mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
+        [$who ? h($who) : '', h($money), $refundOnly ? '' : mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)$b['email']];
 }
 

@@ -1323,6 +1323,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         document.querySelector('.rez .bk-exit').hidden = state.step !== 1;
         document.getElementById('ttl').classList.toggle('quiet', state.step === 3);
         document.getElementById('ttl').classList.toggle('noexit', state.step !== 1);
+        // only step 1 keeps the hidden status line current; on the others an old "Načítám…" must not linger (16 Nov test run)
+        if (state.step !== 1) say('');
         if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else renderStep3();
         syncUrl();
       }

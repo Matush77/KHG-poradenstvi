@@ -93,6 +93,10 @@ function cfg(): array
     if ($c['mode'] === 'live' && !preg_match('/^(sk|rk)_live_/', $c['stripe_sk'])) {
         throw new RuntimeException('Live mode refuses Stripe keys that are not live keys.');
     }
+    // 16 Nov test run: without it every e-mail link would point at http://127.0.0.1:8820
+    if ($c['mode'] === 'live' && !preg_match('#^https://[^/]+#', $c['site'])) {
+        throw new RuntimeException('Live mode needs SITE_URL=https://… in booking.env.');
+    }
     if (strlen($c['secret']) < 32) throw new RuntimeException('booking-secret missing or too short.');
     return $c;
 }
