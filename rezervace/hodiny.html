@@ -61,6 +61,27 @@ h1 { white-space: nowrap; }
 .md:disabled { opacity: .35; cursor: default; background: none; border-color: transparent; }
 .md[aria-pressed="true"] { border: 2px solid var(--navy); }
 .md .dot { position: absolute; left: 50%; bottom: 4px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--navy); }
+.md i { display: none; }
+.monbtn:disabled { color: inherit; cursor: default; text-decoration: none; }
+/* a computer (owner, 16 Nov: "more information visible"): the month stays open on the left, the day on the right;
+   each day of the month shows its sessions or its free hours */
+@media (min-width: 900px) {
+  .wrap { max-width: 1040px; display: grid; grid-template-columns: 400px minmax(0, 1fr); column-gap: 40px;
+    grid-template-areas: "top list" "top foot"; align-items: start; }
+  .top { grid-area: top; position: sticky; top: 0; padding-top: 20px; }
+  #list { grid-area: list; padding-top: 10px; }
+  .foot { grid-area: foot; }
+  #list .dhead { border-top: 0; padding-top: 14px; }
+  .month { gap: 5px; }
+  .md { height: 62px; display: grid; justify-items: center; align-content: center; gap: 3px; }
+  .md b { font-size: 16px; line-height: 20px; }
+  .md .dot { display: none; }
+  .md i { display: block; font-style: normal; font-size: 11px; line-height: 16px; min-height: 16px; color: var(--mute); font-weight: 500; }
+  .md i.n { color: #fff; background: var(--navy); border-radius: 999px; padding: 0 7px; font-weight: 600; }
+  .md.today b { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .md[aria-pressed="true"] { box-shadow: 0 0 0 1px var(--navy) inset; }
+  .skel:first-child { margin-top: 24px; }
+}
 
 /* the day */
 .dhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; padding: 14px 0 8px; border-top: 1px solid var(--line); }
@@ -214,6 +235,8 @@ h1 { white-space: nowrap; }
   var week = { online: {}, osobne: {} }, over = { online: {}, osobne: {} }, booked = {};
   var savedWeek, savedOver, version = 0, now, today0, last, saving = false;
   var state = { sel: null, wk: null, month: false, my: null, reg: false, wd: 1 };
+  var wideMq = matchMedia('(min-width: 900px)');
+  function monthOpen() { return state.month || wideMq.matches; }   // on a computer the month is always open
 
   var $ = function (id) { return document.getElementById(id); };
   var bar = $('bar'), barN = $('barN'), list = $('list'), toastEl = $('toast'), toastT;
@@ -273,12 +296,13 @@ h1 { white-space: nowrap; }
       });
       $('strip').innerHTML = html; $('month').hidden = true; return;
     }
-    var mid = state.month ? state.my : addDays(state.wk, 3);
+    var mo = monthOpen(), mid = mo ? state.my : addDays(state.wk, 3);
     $('monbtn').textContent = MONTHS_1[mid.getMonth()] + ' ' + mid.getFullYear();
-    $('monbtn').setAttribute('aria-expanded', state.month);
-    $('monbtn').setAttribute('aria-label', (state.month ? 'Skrýt měsíc, ' : 'Ukázat celý měsíc, ') + MONTHS_1[mid.getMonth()] + ' ' + mid.getFullYear());
+    $('monbtn').disabled = wideMq.matches;
+    $('monbtn').setAttribute('aria-expanded', mo);
+    $('monbtn').setAttribute('aria-label', wideMq.matches ? MONTHS_1[mid.getMonth()] + ' ' + mid.getFullYear() : (mo ? 'Skrýt měsíc, ' : 'Ukázat celý měsíc, ') + MONTHS_1[mid.getMonth()] + ' ' + mid.getFullYear());
     var prev = $('prev'), next = $('next');
-    if (state.month) {
+    if (mo) {
       prev.disabled = new Date(mid.getFullYear(), mid.getMonth(), 1) <= today0; next.disabled = new Date(mid.getFullYear(), mid.getMonth() + 1, 1) > last;
       prev.setAttribute('aria-label', 'Předchozí měsíc'); next.setAttribute('aria-label', 'Další měsíc');
     } else {
@@ -287,13 +311,14 @@ h1 { white-space: nowrap; }
     }
     for (var i = 0; i < 7; i++) html += dayBtn(addDays(state.wk, i), 'wday', true);
     $('strip').innerHTML = html;
-    $('strip').hidden = state.month;   // the open month replaces the week, never both
-    var mm = $('month'); mm.hidden = !state.month;
-    if (state.month) {
+    $('strip').hidden = mo;   // the open month replaces the week, never both
+    var mm = $('month'); mm.hidden = !mo;
+    if (mo) {
       var first = new Date(mid.getFullYear(), mid.getMonth(), 1), start = monday(first), out = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'].map(function (x) { return '<span class="wd">' + x + '</span>'; }).join('');
       for (var j = 0; j < 42; j++) {
         var dd = addDays(start, j);
         if (j % 7 === 0 && j && dd.getMonth() !== mid.getMonth()) break;
+        if (j % 7 === 0 && addDays(dd, 6) < today0) { j += 6; continue; }   // weeks already over: left out
         out += dd.getMonth() !== mid.getMonth() ? '<span></span>' : dayBtn(dd, 'md', false);
       }
       mm.innerHTML = out;
@@ -306,7 +331,7 @@ h1 { white-space: nowrap; }
     return '<button class="' + cls + (open || n ? '' : ' closed') + (+d === +today0 ? ' today' : '') + (dayPend(k) ? ' pend' : '') + '" data-k="' + k + '" aria-pressed="' + (k === state.sel) +
       '" aria-label="' + label + '"' + (off ? ' disabled' : '') + '>' +
       (strip ? '<small>' + SH[d.getDay()] + '</small><b>' + d.getDate() + '</b><i' + (n ? ' class="n">' + n : '>' + (off ? '' : hol ? 'svátek' : open ? '' : 'zavř.')) + '</i>'
-        : d.getDate() + (n ? '<span class="dot"></span>' : '')) + '</button>';
+        : '<b>' + d.getDate() + '</b>' + (n ? '<span class="dot"></span>' : '') + '<i' + (n ? ' class="n">' + n : '>' + (off ? '' : hol ? 'svátek' : open ? open + ' h' : 'zavř.')) + '</i>') + '</button>';
   }
 
   /* --- the day: one row per hour */
@@ -370,7 +395,7 @@ h1 { white-space: nowrap; }
     return a;
   }
   function sameAsWeek(f, k) { return same(over[f][k], base(f, k, week)); }
-  function select(k) { state.sel = k; state.wk = monday(dateOf(k)); }
+  function select(k) { state.sel = k; state.wk = monday(dateOf(k)); state.my = dateOf(k); }
 
   /* --- taps */
   $('strip').addEventListener('click', function (e) {
@@ -382,9 +407,10 @@ h1 { white-space: nowrap; }
     var t = e.target.closest('[data-k]'); if (!t) return;
     select(t.dataset.k); state.month = false; render();
   });
+  wideMq.addEventListener('change', function () { if (savedWeek) { state.my = dateOf(state.sel); render(); } });
   $('monbtn').addEventListener('click', function () { state.month = !state.month; state.my = addDays(state.wk, 3); renderTop(); });
   function step(dir) {
-    if (state.month) {
+    if (monthOpen()) {
       state.my = new Date(state.my.getFullYear(), state.my.getMonth() + dir, 1);
       renderTop(); return;
     }
