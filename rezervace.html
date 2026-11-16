@@ -1271,9 +1271,14 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
       function renderStep3() {
         // the e-mail and phone come back from the payment: never put them into the page as HTML
-        var sent = state.email ? 'Potvrzení přišlo na ' + esc(state.email) + '. ' : 'Termín máte zapsaný na telefon ' + esc(state.phone) + '. ';
+        // "sent" only when the server says it went (17 Nov review): online, the e-mail waits a moment for the Meet link
+        var sent = !state.email ? 'Termín máte zapsaný na telefon ' + esc(state.phone) + '. '
+          : state.mailed ? 'Potvrzení odešlo na ' + esc(state.email) + '. '
+          : 'Potvrzení přijde na ' + esc(state.email) + ', obvykle do pár minut. ';
         view.innerHTML = '<div class="done"><h2>Termín je rezervovaný</h2>' + summary() +
           '<p>' + sent + FORMATS[state.f].after + '</p>' +
+          // test site only: the server gives the e-mail's link (live: only in the e-mail)
+          (state.cancel ? '<p class="hint">Test: <a href="' + esc(state.cancel) + '">odkaz na přesun a zrušení z e-mailu</a></p>' : '') +
           '<p>Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením, celá částka bude vrácena. Odkaz je v potvrzovacím e-mailu.</p>' +
           '<div><button type="button" class="bk-btn" id="again">Zpět na kalendář</button></div></div>';
         document.getElementById('again').onclick = function () {
@@ -1392,8 +1397,19 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
             // both showed "Termín je rezervovaný")
             if (j.paid && j.cancelled) {
               state.step = 1; state.time = null; render();
-              if (j.double) renderNotice('Termín se mezitím obsadil', 'Tenhle čas si chvíli před vámi zaplatil někdo jiný. Platba se vám vrací celá a podrobnosti přijdou e-mailem. Omlouvám se, vyberte si prosím jiný termín.');
+              if (j.double) renderNotice('Termín se mezitím obsadil', 'Tenhle čas si chvíli před vámi zaplatil někdo jiný. ' +
+                (j.refunded ? 'Platba se vám vrací celá a podrobnosti přijdou e-mailem.' : 'Platbu vám vrátím celou, podrobnosti přijdou e-mailem.') +
+                ' Omlouvám se, vyberte si prosím jiný termín.');
               else renderNotice('Rezervace je zrušená', 'Tahle rezervace už byla zrušena. Pokud chcete nový termín, vyberte si ho v kalendáři.');
+              return;
+            }
+            // paid, but the calendar entry is not made yet (17 Nov review: it said "reserved" and "the e-mail came"):
+            // the time is kept for them and the safety net finishes it; the confirmation e-mail is the answer
+            if (j.paid && j.processing) {
+              state.step = 1; state.time = null; render();
+              renderNotice('Platba proběhla', 'Termín je pro vás zablokovaný, jen ho ještě zapisuji do kalendáře. Potvrzení přijde e-mailem' +
+                (j.email ? ' na ' + esc(j.email) : '') + ', obvykle do pár minut. Znovu prosím neplaťte. Když nepřijde do hodiny, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
+                function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(back); });
               return;
             }
             // paid: the time comes from the booking, not the free times (it is taken now, by this very booking)
@@ -1403,6 +1419,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
               state.month = new Date(state.date.getFullYear(), state.date.getMonth(), 1);
             }
             if (m.den && state.time) { state.email = m.email || j.email || ''; state.phone = m.telefon; state.name = m.jmeno; }
+            state.mailed = !!j.mailed; state.cancel = j.cancel || '';
             state.step = j.paid && state.time ? 3 : (state.time ? 2 : 1);
             render();
             if (!j.paid) {
