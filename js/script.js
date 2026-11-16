@@ -339,7 +339,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
             window.scrollTo({
                 top: offsetPosition,
-                behavior: 'smooth'
+                behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
             });
         }
     });

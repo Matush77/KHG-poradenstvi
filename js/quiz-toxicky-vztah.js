@@ -479,10 +479,10 @@ class QuizController {
         // Avoid scrolling on mobile after selecting an option
         const isMobile = window.innerWidth <= 768;
         if (!isMobile) {
-            window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: 'smooth' });
+            window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
         } else {
             // On mobile, scroll to keep question in view
-            this.quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            this.quizSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
         }
     }
 
@@ -602,7 +602,7 @@ class QuizController {
         this.state.clearProgress();
 
         // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
 
     announceToScreenReader(message) {
