@@ -69,11 +69,20 @@ function gcal_busy(DateTimeImmutable $start, DateTimeImmutable $end): array
 }
 
 /* The session as an event. Online: Meet link, the client as a guest who can't invite or see others. No Google e-mails.
-   Its own reminder, a phone notification 10 minutes before (as her Google booking page sessions had), whatever the calendar's defaults. */
-function gcal_create(DateTimeImmutable $start, string $summary, string $description, bool $online, ?string $guest): array
+   Its own reminder, a phone notification 10 minutes before (as her Google booking page sessions had), whatever the calendar's defaults.
+   The event id comes from the payment: if Google made the event but its answer was lost, the retry gets "already
+   exists" instead of making a second event (16 Nov review: two events, only the second one known). */
+function gcal_event_id(string $payId): string
+{
+    // Google allows the letters a-v and digits, 5-1024 characters; hex fits
+    return 'khg' . substr(hash('sha256', site_copy() . ':' . $payId), 0, 40);
+}
+
+function gcal_create(DateTimeImmutable $start, string $summary, string $description, bool $online, ?string $guest, string $payId): array
 {
     $end = $start->modify('+50 minutes');
-    $ev = ['summary' => $summary, 'description' => $description,
+    $id = gcal_event_id($payId);
+    $ev = ['id' => $id, 'summary' => $summary, 'description' => $description,
         'start' => ['dateTime' => $start->format('Y-m-d\TH:i:s'), 'timeZone' => 'Europe/Prague'],
         'end' => ['dateTime' => $end->format('Y-m-d\TH:i:s'), 'timeZone' => 'Europe/Prague'],
         'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 10]]]];
@@ -85,8 +94,13 @@ function gcal_create(DateTimeImmutable $start, string $summary, string $descript
     }
     if ($online) $ev['conferenceData'] = ['createRequest' => ['requestId' => bin2hex(random_bytes(16)),
         'conferenceSolutionKey' => ['type' => 'hangoutsMeet']]];
-    return gcal('POST', 'calendars/' . rawurlencode(cfg()['calendar']) . '/events', $ev,
-        ['conferenceDataVersion' => 1, 'sendUpdates' => 'none']);
+    try {
+        return gcal('POST', 'calendars/' . rawurlencode(cfg()['calendar']) . '/events', $ev,
+            ['conferenceDataVersion' => 1, 'sendUpdates' => 'none']);
+    } catch (RuntimeException $e) {
+        if ($e->getCode() !== 409) throw $e;
+        return gcal_get($id);   // made by an earlier try whose answer never came: that one is the event
+    }
 }
 
 /* One event of the booking calendar (for its Meet link, which Google may add a moment after creating it). */

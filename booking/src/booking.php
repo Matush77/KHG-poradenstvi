@@ -149,7 +149,9 @@ function release_own_hold(?string $browser, string $slot): void
     if (!$browser) return;
     $s = db()->prepare('SELECT slot, pay_id, expires_at FROM holds WHERE slot = ? AND browser = ? AND expires_at >= ?');
     $s->execute([$slot, $browser, time()]);
-    if (!$h = $s->fetch()) return;
+    $h = $s->fetch();
+    $s->closeCursor();   // no read left open across Stripe and the write below (see owner_login)
+    if (!$h) return;
     if (hold_creating($h)) throw new ClientError('Platba za tenhle termín se právě zakládá v jiném okně. Pokračujte prosím tam, nebo to zkuste za minutu.', 409);
     if (!expire_hold($h, 'Platbu se teď nepodařilo obnovit. Zkuste to prosím za chvíli.')) {
         throw new ClientError('Tenhle termín už máte zaplacený. Potvrzení přijde e-mailem.', 409);
@@ -271,13 +273,21 @@ function create_checkout(array $b): array
 
 /* A paid Checkout Session (fetched from Stripe, never taken from the browser or the webhook body) -> booking.
    Safe to call any number of times, from any path, also at the same time. */
+const BOOK_PAID_MAX_AGE_DAYS = 7;
 function book_paid(array $s): ?array
 {
     if (($s['payment_status'] ?? '') !== 'paid' || empty($s['metadata']['den'])) return null;
     // the test site and the lab share one Stripe test account, and Stripe sends every webhook to every endpoint:
     // a payment made on another copy is never booked here
-    if (isset($s['metadata']['kopie']) && $s['metadata']['kopie'] !== site_copy()) return null;
+    if (session_copy($s) !== site_copy()) return null;
     $payId = $s['id'];
+    // a payment older than the last webhook retry and the safety net's day, with no booking: a booking deleted under
+    // the keep-for-3-years rule. Never brought back from an old link (16 Nov review: name, e-mail and a fresh
+    // confirmation came back). Stripe retries a webhook for 3 days; a week leaves room.
+    if (isset($s['created']) && (int)$s['created'] < time() - BOOK_PAID_MAX_AGE_DAYS * 86400 && !booking_get($payId)) {
+        log_line('OLD_PAYMENT_NOT_BOOKED', ['pay' => $payId]);
+        return null;
+    }
     $meta = $s['metadata'];
     // in person the form asks only for a phone, but Stripe's page always asks for an e-mail: use it, so the
     // client gets the confirmation and the cancel link
@@ -396,7 +406,7 @@ function finish_booking(string $payId): array
             $contact = $online ? $b['email'] : $b['phone'];
             $title = (lab() ? 'TEST · ' : '') . ($online ? 'Online' : 'Osobně') . ' · ' . ($b['name'] ?: 'klient');
             $note = 'Rezervace z webu' . (lab() ? ' (lab, Stripe test)' : '') . '. Kontakt: ' . ($contact ?: '-') . '. Platba: ' . $payId;
-            $ev = gcal_create($start, $title, $note, $online, $online ? $b['email'] : null);
+            $ev = gcal_create($start, $title, $note, $online, $online ? $b['email'] : null, $payId);
             $meet = $ev['hangoutLink'] ?? null;
             for ($i = 0; $online && !$meet && $i < 2; $i++) {   // usually there at once; else Google needs a moment
                 sleep(1);
@@ -456,16 +466,7 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     if ($hours >= cfg()['free_cancel_hours']) {
         [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
         if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Zrušení se teď nepovedlo. Stačí to zkusit znovu.', 502);
-        // the idempotency key makes a double click (or two tabs) refund only once
-        $refund = fn() => stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
-            'metadata' => ['duvod' => sprintf('zruseni klientem %.0f h predem', $hours)]], 'cancel-' . $payId);
-        [$code, $r] = $refund();
-        // two tabs or a double click: Stripe refuses the second request while the first is still running (409).
-        // A moment later the same key gives back the first request's answer, the same refund.
-        if ($code === 409) {
-            sleep(2);
-            [$code, $r] = $refund();
-        }
+        [$code, $r] = stripe_refund($s['payment_intent'], 'zruseni klientem', 'cancel-' . $payId);
         if ($code !== 200 || !refund_alive($r)) {
             // the first request has cancelled it meanwhile: that is the answer, not an error
             if (($done = booking_get($payId)) && $done['status'] === 'cancelled') return $done;
@@ -521,7 +522,9 @@ function refund_changed(string $refundId): ?array
     if ($code !== 200) throw new RuntimeException('Stripe refund read failed: HTTP ' . $code);
     $s = db()->prepare('SELECT * FROM bookings WHERE refund_id = ?');
     $s->execute([$refundId]);
-    if (!$b = $s->fetch()) return null;                                // another copy's refund, or an old one
+    $b = $s->fetch();
+    $s->closeCursor();   // before the writes below (see owner_login)
+    if (!$b) return null;                                              // another copy's refund, or an old one
     $was = refund_failed($b);
     booking_update($b['pay_id'], ['refund_status' => (string)($r['status'] ?? '')]);
     $b = booking_get($b['pay_id']);
@@ -538,22 +541,48 @@ function moving(array $b, ?int $now = null): bool
     return (int)($b['lock_until'] ?? 0) > ($now ?? time());
 }
 
-/* Full refund through Stripe; the idempotency key makes a second click (or a second tab) refund only once. */
+/* One full refund. The idempotency key makes a double click, two tabs or her phone and laptop refund only once, as
+   long as every try sends the same parameters (16 Nov review: the hours in the reason changed between tries, Stripe
+   refused the retry, and a refund that had gone through was reported as failed). */
+function stripe_refund(string $paymentIntent, string $why, string $key, ?string $failed = null): array
+{
+    $send = fn() => stripe('POST', 'refunds', ['payment_intent' => $paymentIntent, 'reason' => 'requested_by_customer',
+        'metadata' => ['duvod' => $why]], $key);
+    try {
+        [$code, $r] = $send();
+        // two requests at once: Stripe refuses the second while the first runs (409); a moment later the same key
+        // gives back the first one's refund
+        if ($code === 409) {
+            sleep(2);
+            [$code, $r] = $send();
+        }
+    } catch (RuntimeException $e) {
+        [$code, $r] = [0, ['error' => ['message' => $e->getMessage()]]];   // no answer: Stripe may have made it anyway
+    }
+    if ($code === 200) return [$code, $r];
+    // no answer, or a refusal: a refund Stripe already made for this payment is the answer (not the one that failed)
+    try {
+        [$lc, $list] = stripe('GET', 'refunds', ['payment_intent' => $paymentIntent, 'limit' => 10]);
+    } catch (RuntimeException $e) {
+        return [$code, $r];
+    }
+    foreach ($lc === 200 ? ($list['data'] ?? []) : [] as $x) {
+        if (($x['id'] ?? '') !== $failed && refund_alive($x)) {
+            log_line('REFUND_FOUND', ['refund' => $x['id'], 'code' => $code]);
+            return [200, $x];
+        }
+    }
+    return [$code, $r];
+}
+
+/* Full refund through Stripe (her cancel, her refund after a cancellation, a double payment). */
 function refund_full(string $payId, string $why, ?string $failed = null): array
 {
     [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
     if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Platbu se teď nepodařilo najít. Zkus to prosím znovu.', 502);
     // after a failed refund the same key would only give back the same failed refund
     $key = 'cancel-' . $payId . ($failed ? '-after-' . $failed : '');
-    $refund = fn() => stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
-        'metadata' => ['duvod' => $why]], $key);
-    [$code, $r] = $refund();
-    // her phone and laptop at once: Stripe refuses the second while the first runs (409); a moment later the
-    // same key gives back the first one's refund
-    if ($code === 409) {
-        sleep(2);
-        [$code, $r] = $refund();
-    }
+    [$code, $r] = stripe_refund($s['payment_intent'], $why, $key, $failed);
     if ($code !== 200) {
         log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
         throw new ClientError('Vrácení peněz se nepovedlo, nic se nezměnilo. Zkus to prosím znovu.', 502);
@@ -716,16 +745,26 @@ function sync_calendar(?int $now = null): array
     $since = (int)(state_get('calendar_sync') ?? ($now - 86400));
     $events = gcal_changed($since - 120);   // a little overlap: handling an event twice changes nothing
     $find = db()->prepare("SELECT * FROM bookings WHERE event_id = ? AND status = 'booked'");
+    $next = $now;   // where the next run starts looking: never past an event this run had to leave for later
     foreach ($events as $ev) {
         $find->execute([(string)($ev['id'] ?? '')]);
         $b = $find->fetch();
+        $find->closeCursor();   // before the writes below (see owner_login)
         if (!$b) continue;                                            // not ours, or already cancelled through the site
-        if ($b['updated_at'] > $now - 30 || moving($b, $now)) continue;   // the site is changing it right now; the next run looks again
+        if ($b['updated_at'] > $now - 30 || moving($b, $now)) {
+            // the site is changing it right now; the next run looks again, even if that run comes late
+            // (16 Nov review: an event left for later could fall behind the cursor and never be read again)
+            $next = min($next, (int)(strtotime((string)($ev['updated'] ?? '')) ?: $now - 60));
+            continue;
+        }
         $payId = $b['pay_id'];
         $old = prague($b['slot']);
         if (($ev['status'] ?? '') === 'cancelled') {
+            // when she deleted it (Google's time of the change), not when this run noticed: a run that comes late,
+            // after the session's start, must not block her refund (16 Nov review)
+            $deleted = min($now, (int)(strtotime((string)($ev['updated'] ?? '')) ?: $now));
             booking_update($payId, ['status' => 'cancelled', 'cancelled_by' => 'calendar',
-                'hours_before' => round(($old->getTimestamp() - $now) / 3600, 1)]);
+                'hours_before' => round(($old->getTimestamp() - $deleted) / 3600, 2)]);   // 2 places: a minute before is not 0
             log_line('DELETED_IN_CALENDAR', ['pay' => $payId]);
             try {
                 mail_send($payId . '-deleted', mail_owner_deleted(booking_get($payId), $old, owner_url($payId)));
@@ -758,7 +797,7 @@ function sync_calendar(?int $now = null): array
             }
         }
     }
-    state_set('calendar_sync', (string)$now);
+    state_set('calendar_sync', (string)$next);
     return $done;
 }
 
@@ -857,16 +896,22 @@ function sweep(): array
     }
     $paused = mail_paused();   // over the mailbox's limit: reminders and unsent e-mails wait (they go once it ends)
     if (!$paused && ($r = send_reminders())) $done['reminded'] = $r;
-    [$code, $page] = stripe('GET', 'checkout/sessions', ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - 86400]]);
-    if ($code !== 200) throw new RuntimeException('Stripe list failed: HTTP ' . $code);
-    foreach ($page['data'] ?? [] as $s) {
-        // only this copy's payments: the test site and the lab share one Stripe test account (14 Nov: the test site's
-        // first run booked the lab's payments again)
-        if (($s['payment_status'] ?? '') === 'paid' && ($s['metadata']['zdroj'] ?? '') === 'web'
-            && ($s['metadata']['kopie'] ?? 'khg') === site_copy() && !booking_get($s['id'])) {
-            book_paid($s);
-            $done['booked'][] = $s['id'];
+    // paid sessions nobody booked. A Stripe failure here is reported at the end: the retries below don't need Stripe's
+    // list and must not wait for it (16 Nov review: one failed list stopped them all)
+    $stripeError = null;
+    try {
+        foreach (paid_sessions_last_day() as $s) {
+            // only this copy's payments: the test site and the lab share one Stripe test account (14 Nov: the test site's
+            // first run booked the lab's payments again)
+            if (($s['payment_status'] ?? '') === 'paid' && ($s['metadata']['zdroj'] ?? '') === 'web'
+                && session_copy($s) === site_copy() && !booking_get($s['id'])) {
+                book_paid($s);
+                $done['booked'][] = $s['id'];
+            }
         }
+    } catch (Throwable $e) {
+        $stripeError = $e;
+        log_line('SWEEP_STRIPE_ERROR', ['error' => $e->getMessage()]);
     }
     // cancelled sessions whose calendar event Google did not delete: the time stays blocked until it goes
     foreach (db()->query('SELECT pay_id, stale_event FROM bookings WHERE stale_event IS NOT NULL')->fetchAll() as $row) {
@@ -893,5 +938,30 @@ function sweep(): array
         else $done['mail_failed'][] = $row['pay_id'];   // stays unsent: the next run tries again
     }
     if (array_filter(array_diff_key($done, ['mail_waiting' => 1]))) log_line('SWEEP', $done);
+    if ($stripeError) throw $stripeError;   // the rest is done; the cron's output still shows the failure
     return $done;
+}
+
+/* Every completed Checkout Session of the last 24 hours, all pages of Stripe's list (16 Nov review: only the first
+   100 were read). Stripe lists newest first; a page ends with has_more and the next starts after its last id. */
+function paid_sessions_last_day(): array
+{
+    $out = [];
+    $q = ['status' => 'complete', 'limit' => 100, 'created' => ['gte' => time() - 86400]];
+    for ($i = 0; $i < 50; $i++) {   // 5000 payments a day is far beyond this practice; a bound so a bad answer can't loop
+        [$code, $page] = stripe('GET', 'checkout/sessions', $q);
+        if ($code !== 200) throw new RuntimeException('Stripe list failed: HTTP ' . $code);
+        $data = $page['data'] ?? [];
+        array_push($out, ...$data);
+        if (empty($page['has_more']) || !$data) break;
+        $q['starting_after'] = end($data)['id'];
+    }
+    return $out;
+}
+
+/* Which copy of the site a payment belongs to. Payments made before the copies were marked came from the lab ("khg").
+   The webhook and the safety net decide the same way (16 Nov review: they disagreed about unmarked payments). */
+function session_copy(array $s): string
+{
+    return (string)($s['metadata']['kopie'] ?? 'khg');
 }

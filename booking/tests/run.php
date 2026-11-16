@@ -533,6 +533,109 @@ ok(booking_get('cs_rv_can')['stale_event'] === null, 'review 6: the next try del
 ok(mail_queued('rv-bad-kind', 'cs_rv_can', 'no_such_kind') === false && (bool)db()->query("SELECT 1 FROM mail_queue WHERE name = 'rv-bad-kind'")->fetchColumn(),
     'review 6: an e-mail that could not go stays queued for the safety net');
 db()->exec("DELETE FROM mail_queue WHERE name = 'rv-bad-kind'");
+
+// --- 16 Nov review, the open findings: each with the same kind of made-up answers
+// 7. Google made the event but the answer was lost: the retry finds it (same id), no second event
+$slotE = $at('+32 days');
+db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, status, owner_mailed, mail_sent, created_at, updated_at) VALUES ('cs_rv_ev', ?, 'osobne', NULL, 'Jana Nováková', 'failed', 1, 1, ?, ?)")
+    ->execute([$slotE, time(), time()]);
+$evId = gcal_event_id('cs_rv_ev');
+$posts = 0;
+$FAKE = ['#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), ['busy' => []])]],
+    '#POST .*/events\?#' => function ($m, $u, $b) use (&$posts, $evId) { $posts++; return json_decode($b, true)['id'] === $evId ? [409, ['error' => 'duplicate']] : [200, ['id' => 'wrong']]; },
+    '#GET .*/events/' . $evId . '#' => fn() => [200, ['id' => $evId, 'status' => 'confirmed']]];
+$e7 = finish_booking('cs_rv_ev');
+ok($e7['status'] === 'booked' && $e7['event_id'] === $evId && $posts === 1, 'open 7: a retry after a lost answer takes the event Google already made');
+ok(preg_match('/^[a-v0-9]{5,1024}$/', $evId) === 1 && $evId !== gcal_event_id('cs_rv_other'), 'open 7: the event id is one Google accepts, one per payment');
+
+// 11. her deletion counts from when she deleted it, also when the sync comes late; a skipped event is read again
+$slotS = (new DateTimeImmutable('+30 minutes'))->format(DATE_ATOM);
+$add->execute(['cs_rv_del', $slotS, 'online', 'booked', 'evDel', null, null, 0, 0]);
+$add->execute(['cs_rv_busy', $at('+33 days'), 'online', 'booked', 'evBusy', null, null, time(), time()]);   // the site just changed it
+$late = time() + 3600;   // the sync runs an hour late, after the session's start
+state_set('calendar_sync', (string)(time() - 60));
+$FAKE = ['#GET .*/events\?#' => fn() => [200, ['items' => [
+    ['id' => 'evDel', 'status' => 'cancelled', 'updated' => gmdate('Y-m-d\TH:i:s\Z', time() - 60)],
+    ['id' => 'evBusy', 'status' => 'confirmed', 'updated' => gmdate('Y-m-d\TH:i:s\Z', time() - 10), 'start' => ['dateTime' => $at('+34 days')]]]]],
+    '#POST .*/smtp#' => fn() => [200, []]];
+db()->exec("UPDATE bookings SET updated_at = $late WHERE pay_id = 'cs_rv_busy'");
+sync_calendar($late);
+$d11 = booking_get('cs_rv_del');
+ok($d11['status'] === 'cancelled' && (float)$d11['hours_before'] > 0, 'open 11: deleted before the start counts as before, though the sync came after it (' . $d11['hours_before'] . ' h)');
+ok((int)state_get('calendar_sync') <= time() - 10, 'open 11: the next sync starts no later than the event it had to leave for later');
+ok(booking_get('cs_rv_busy')['slot'] === $at('+33 days'), 'open 11: and that event was left alone this time');
+
+// 5. the safety net reads every page of Stripe's list; a failed list does not stop the other retries
+$pages = [];
+$FAKE = ['#GET .*/checkout/sessions\?#' => function ($m, $u) use (&$pages) {
+        $pages[] = $u;
+        return str_contains($u, 'starting_after=cs_p1_last') ? [200, ['data' => [['id' => 'cs_p2']], 'has_more' => false]]
+            : [200, ['data' => [['id' => 'cs_p1'], ['id' => 'cs_p1_last']], 'has_more' => true]];
+    }];
+ok(array_column(paid_sessions_last_day(), 'id') === ['cs_p1', 'cs_p1_last', 'cs_p2'] && count($pages) === 2, 'open 5: both pages of the list are read');
+db()->exec("UPDATE bookings SET stale_event = 'evStale' WHERE pay_id = 'cs_rv_can'");
+$FAKE = ['#GET .*/checkout/sessions\?#' => fn() => [500, ['error' => 'down']], '#DELETE .*/events/evStale#' => fn() => [204, []],
+    '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
+$threw = false;
+try { sweep(); } catch (RuntimeException $e) { $threw = str_contains($e->getMessage(), 'Stripe list failed'); }
+ok($threw && booking_get('cs_rv_can')['stale_event'] === null, 'open 5: Stripe down, the stale event is still deleted and the failure still reported');
+
+// 3. Stripe made the refund but the answer was lost; the retry is refused: the refund found on Stripe counts
+$add->execute(['cs_rv_lost', $at('+35 days'), 'osobne', 'booked', null, null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_lost#' => fn() => [200, ['id' => 'cs_rv_lost', 'payment_intent' => 'pi_lost']],
+    '#POST .*/v1/refunds#' => fn() => [400, ['error' => ['message' => 'Keys for idempotent requests can only be used with the same parameters']]],
+    '#GET .*/v1/refunds\?payment_intent=pi_lost#' => fn() => [200, ['data' => [['id' => 're_lost', 'status' => 'succeeded']]]]];
+$l3 = cancel_booking('cs_rv_lost', null, true);
+ok($l3['status'] === 'cancelled' && $l3['refund_id'] === 're_lost', 'open 3: a refund that went through is found and the booking cancelled');
+$add->execute(['cs_rv_lost2', $at('+36 days'), 'osobne', 'booked', null, null, null, 0, 0]);
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_lost2#' => fn() => [200, ['id' => 'cs_rv_lost2', 'payment_intent' => 'pi_lost2']],
+    '#POST .*/v1/refunds#' => fn() => throw new RuntimeException('HTTP POST failed: timeout'),
+    '#GET .*/v1/refunds\?payment_intent=pi_lost2#' => fn() => [200, ['data' => [['id' => 're_old', 'status' => 'failed']]]]];
+throws(fn() => cancel_booking('cs_rv_lost2', null, true), 502, 'open 3: no answer and no refund on Stripe (only a failed one): nothing is cancelled');
+ok(booking_get('cs_rv_lost2')['status'] === 'booked', 'open 3: the time stays booked');
+$keys = [];
+$FAKE = ['#GET .*/checkout/sessions/cs_rv_lost2#' => fn() => [200, ['id' => 'cs_rv_lost2', 'payment_intent' => 'pi_lost2']],
+    '#POST .*/v1/refunds#' => function ($m, $u, $b, $h) use (&$keys) { $keys[] = $b; return [200, ['id' => 're_ok', 'status' => 'pending']]; }];
+cancel_booking('cs_rv_lost2', new DateTimeImmutable('+1 hour'), true);
+ok(count($keys) === 1 && !preg_match('/\d+\+?h/', urldecode($keys[0])), 'open 3: the refund sends the same parameters at any hour (no hours in the reason)');
+
+// 13 + 18. an old payment with no booking is never brought back; an unmarked payment belongs to the lab ("khg")
+$old = ['id' => 'cs_rv_old', 'payment_status' => 'paid', 'created' => time() - 400 * 86400,
+    'metadata' => ['den' => substr($at('+37 days'), 0, 10), 'cas' => '10:00', 'forma' => 'online', 'email' => 'a@b.cz', 'jmeno' => 'Jana Nováková', 'telefon' => '', 'kopie' => site_copy()]];
+ok(book_paid($old) === null && booking_get('cs_rv_old') === null, 'open 13: a year-old payment whose booking was deleted is not booked again');
+$unmarked = $old; unset($unmarked['metadata']['kopie']); $unmarked['created'] = time(); $unmarked['id'] = 'cs_rv_unmarked';
+ok(session_copy($unmarked) === 'khg' && book_paid($unmarked) === null, 'open 18: an unmarked payment is the lab\'s, never booked by another copy');
+
+// 14 + 15. several PHP processes at once: a fresh deploy's new columns, and sign-ins with the right password
+$child = function (string $dir, string $code): array {
+    $boot = 'putenv(' . var_export("KHG_CONFIG_DIR=$dir", true) . ');'
+        . 'foreach ([\'config\',\'stripe\',\'google\',\'store\',\'mail\',\'booking\',\'slots\',\'hours\',\'owner\'] as $f) require ' . var_export(dirname(__DIR__) . '/src/', true) . ' . $f . \'.php\';';
+    $procs = [];
+    for ($i = 0; $i < 6; $i++) {
+        $procs[] = proc_open([PHP_BINARY, '-r', $boot . 'try {' . $code . ' echo "OK"; } catch (Throwable $e) { echo $e->getMessage(); }'],
+            [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        $outs[] = $pipes[1];
+    }
+    $res = array_map(fn($p) => trim(preg_replace('/^\S+ OWNER_LOGIN .*$/m', '', stream_get_contents($p))), $outs);
+    foreach ($procs as $p) proc_close($p);
+    return $res;
+};
+$mig = "$tmp/migrate";
+mkdir($mig, 0700);
+foreach (['stripe-test.env', 'booking-secret', 'owner-password', 'booking.env'] as $f) copy("$tmp/$f", "$mig/$f");
+$o = new PDO("sqlite:$mig/booking.sqlite");
+$o->exec('PRAGMA journal_mode = WAL');
+$o->exec('CREATE TABLE holds (slot TEXT PRIMARY KEY, pay_id TEXT, expires_at INTEGER NOT NULL)');
+$o->exec('CREATE TABLE bookings (pay_id TEXT PRIMARY KEY, slot TEXT NOT NULL, forma TEXT NOT NULL, email TEXT, phone TEXT, name TEXT, status TEXT NOT NULL, event_id TEXT, meet TEXT, clash INTEGER DEFAULT 0, mail_sent INTEGER DEFAULT 0, refund_id TEXT, refund_status TEXT, hours_before REAL, error TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)');
+$o->exec("INSERT INTO bookings (pay_id, slot, forma, status, created_at, updated_at) VALUES ('cs_old', '2026-01-01T10:00:00+01:00', 'online', 'booked', 0, 0)");
+$o = null;
+$r14 = $child($mig, 'db();');
+ok($r14 === array_fill(0, 6, 'OK'), 'open 14: six requests at once on an old database all start (' . implode(' | ', array_unique($r14)) . ')');
+$o = new PDO("sqlite:$mig/booking.sqlite");
+ok((int)$o->query("SELECT owner_mailed FROM bookings WHERE pay_id = 'cs_old'")->fetchColumn() === 1, 'open 14: existing bookings count as announced, once');
+$o = null;
+$r15 = $child($tmp, 'owner_login("spravne-heslo-42", "Chrome/1 Windows", "w" . getmypid());');
+ok($r15 === array_fill(0, 6, 'OK'), 'open 15: six sign-ins at once with the right password all go in (' . implode(' | ', array_unique($r15)) . ')');
 unset($GLOBALS['HTTP_FAKE']);
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";

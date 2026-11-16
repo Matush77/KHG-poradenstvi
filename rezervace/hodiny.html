@@ -285,6 +285,9 @@ h1 { white-space: nowrap; }
   function wdPend(wd) { return F.some(function (f) { return diff(week[f][wd] || [], savedWeek[f][wd] || []) > 0; }); }
   function at(k, h) { var d = dateOf(k); return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h); }
   function future(k, h) { return at(k, h) > now; }
+  // a session's own start: one she moved in Google Calendar can be at 16:30, and at 16:05 it hasn't begun
+  // (16 Nov review: it showed as running and lost its buttons)
+  function sesAt(k, b) { var p = String(b.cas).split(':'), d = dateOf(k); return new Date(d.getFullYear(), d.getMonth(), d.getDate(), +p[0], +p[1] || 0); }
   // busy in Google and not one of our own sessions (those show as the client's card)
   function calBusy(k, h) { return !!(cal[k] || {})[h] && !(booked[k] || {})[h]; }
   function openCount(k) { var s = {}; F.forEach(function (f) { hoursFor(f, k).forEach(function (h) { if (future(k, h) && !(booked[k] || {})[h] && !calBusy(k, h)) s[h] = 1; }); }); return Object.keys(s).length; }
@@ -362,13 +365,13 @@ h1 { white-space: nowrap; }
     var html = (calOk ? '' : '<p class="intro err">Google Kalendář se teď nepodařilo načíst, takže tu chybí časy, které máš obsazené v něm.</p>') +
       '<div class="dhead"><h2>' + dayLabel(k) + '</h2>' + side + '</div><div class="hrs">';
     rows.forEach(function (hr) {
-      var b = bk[hr], past = !future(k, hr);
+      var b = bk[hr], past = b ? sesAt(k, b) <= now : !future(k, hr);
       html += '<div class="hr' + (past ? ' past' : '') + '"><time>' + (b ? esc(b.cas) : hr + ':00') + '</time>';
       if (b) {
         var mine = hoursFor(b.f, k).indexOf(hr) > -1;
         html += '<div class="ses ' + b.f + '"><div class="who"><b>' + esc(b.n) + '</b><span class="tag">' + (b.f === 'online' ? 'online' : 'osobně') + '</span>' +
           (mine || past ? '' : '<span>mimo tvoje hodiny</span>') + '</div>' +
-          (past ? '<div class="note">' + (at(k, hr + 1) > now ? 'Právě probíhá.' : 'Proběhlo.') + '</div>'
+          (past ? '<div class="note">' + (sesAt(k, b).getTime() + 50 * 6e4 > now ? 'Právě probíhá.' : 'Proběhlo.') + '</div>'
             : '<div class="acts"><button class="pri" data-mv="' + hr + '">Přesunout</button><a href="' + esc(b.url) + '">Zrušit…</a></div>') + '</div>';
       } else if (calBusy(k, hr)) {
         // her hours under it stay as they are: if the hour frees up in Google, the switches come back
@@ -610,6 +613,13 @@ h1 { white-space: nowrap; }
     });
   }
 
+  // the hours this device opened or closed (old -> mine) applied to what the server has now
+  function onTop(server, old, mine) {
+    old = old || []; mine = mine || [];
+    var out = (server || []).filter(function (h) { return !(old.indexOf(h) > -1 && mine.indexOf(h) < 0); });
+    mine.forEach(function (h) { if (old.indexOf(h) < 0 && out.indexOf(h) < 0) out.push(h); });
+    return out.sort(function (a, b) { return a - b; });
+  }
   function load(keepDraft, then) {
     api('').then(function (j) {
       if (j._status === 401) { showLogin(); return; }
@@ -617,14 +627,18 @@ h1 { white-space: nowrap; }
       HOLIDAYS = j.holidays || {}; MIN_NOTICE_H = j.min_notice_hours; booked = j.booked || {};
       calOk = !!j.cal; cal = j.cal || {};
       version = j.version;
-      // keepDraft: only this device's own unsaved changes go on top of what the server has now
-      var mine = keepDraft && savedWeek && changes() ? payload() : null, oldWeek = savedWeek;
+      // keepDraft: only this device's own unsaved changes go on top of what the server has now, hour by hour, so the
+      // other device's changes on the same day stay (16 Nov review: saving again wrote this device's whole day over them)
+      var mine = keepDraft && savedWeek && changes() ? { week: clone(week), over: clone(over), oldWeek: savedWeek, oldOver: savedOver, days: payload().days } : null;
       savedWeek = { online: Object.assign({}, j.week.online), osobne: Object.assign({}, j.week.osobne) };
       savedOver = { online: Object.assign({}, j.days.online), osobne: Object.assign({}, j.days.osobne) };
       week = clone(savedWeek); over = clone(savedOver);
       if (mine) F.forEach(function (f) {
-        for (var wd = 0; wd < 7; wd++) if (!same(mine.week[f][wd], oldWeek[f][wd])) week[f][wd] = (mine.week[f][wd] || []).slice();
-        Object.keys(mine.days[f]).forEach(function (k) { if (mine.days[f][k] === null) delete over[f][k]; else over[f][k] = mine.days[f][k].slice(); });
+        for (var wd = 0; wd < 7; wd++) week[f][wd] = onTop(week[f][wd], mine.oldWeek[f][wd], mine.week[f][wd]);
+        Object.keys(mine.days[f]).forEach(function (k) {
+          var res = onTop(hoursFor(f, k), mine.oldOver[f][k] || base(f, k, mine.oldWeek), mine.over[f][k] || base(f, k, mine.week));
+          if (same(res, base(f, k, week))) delete over[f][k]; else over[f][k] = res;
+        });
       });
       now = new Date();
       today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
