@@ -93,6 +93,10 @@ try {
             'email' => $b['email'] ?? null,                                                   // also the one typed on Stripe's page
             'meet' => lab() ? ($b['meet'] ?? null) : null,                                   // live: the link goes only by e-mail
             'cancelled' => ($b['status'] ?? '') === 'cancelled',
+            'double' => ($b['cancelled_by'] ?? '') === 'double',                              // paid for a time just taken: refunded
+            // the time now (the booking may have been moved since; the payment's metadata keeps the first one)
+            'den' => $b ? prague($b['slot'])->format('Y-m-d') : null, 'cas' => $b ? prague($b['slot'])->format('G:i') : null,
+            'mailed' => (bool)($b['mail_sent'] ?? false),
             'cancel' => $paid && lab() ? substr(cancel_url($s['id']), strlen(site())) : null]);  // live: only in the e-mail
     }
 
@@ -110,6 +114,10 @@ try {
             if ($code !== 200) out(500, ['error' => 'stripe']);           // 5xx: Stripe retries later
             $b = book_paid($s);
             log_line('WEBHOOK', ['type' => $type, 'pay' => $id, 'status' => $b['status'] ?? (($s['metadata']['kopie'] ?? site_copy()) !== site_copy() ? 'other copy' : 'unpaid')]);
+        } elseif (in_array($type, ['refund.failed', 'refund.updated', 'charge.refund.updated'], true) && str_starts_with($id, 're_')) {
+            // a refund that fails days later (16 Nov review: this was ignored); 5xx makes Stripe retry
+            try { $b = refund_changed($id); } catch (Throwable $e) { out(500, ['error' => 'stripe']); }
+            log_line('WEBHOOK', ['type' => $type, 'refund' => $id, 'status' => $b['refund_status'] ?? 'not ours']);
         } elseif ($type === 'checkout.session.expired' && $id !== '') {
             db()->prepare('DELETE FROM holds WHERE pay_id = ?')->execute([$id]);
             log_line('WEBHOOK', ['type' => $type, 'pay' => $id]);
@@ -143,7 +151,7 @@ try {
         $j = body_json();
         $b = cancel_booking(signed((string)($j['b'] ?? ''), (string)($j['t'] ?? '')), null, ($j['refund'] ?? null) === true);
         out(200, ['cancelled' => true, 'refund' => $b['refund_id'] ? ['id' => $b['refund_id'], 'status' => $b['refund_status']] : null,
-            'hours_before' => $b['hours_before']]);
+            'hours_before' => $b['hours_before'], 'mailed' => $b['mailed'] ?? true]);
     }
 
     if ($method === 'GET' && $route === 'terminy') {
@@ -175,7 +183,10 @@ try {
         if ($method === 'POST' && $route === 'sprava/presunout') {
             out(200, owner_view(owner_move($payId, (string)($j['date'] ?? ''), (string)($j['time'] ?? ''))));
         }
-        if ($method === 'POST' && $route === 'sprava/zrusit') out(200, owner_view(owner_cancel($payId)));
+        if ($method === 'POST' && $route === 'sprava/zrusit') {
+            $b = owner_cancel($payId);
+            out(200, owner_view($b) + ['mailed' => $b['mailed'] ?? true]);
+        }
     }
 
     if ($route === 'hodiny' || str_starts_with($route, 'hodiny/')) {

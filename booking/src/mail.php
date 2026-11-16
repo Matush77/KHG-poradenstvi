@@ -176,7 +176,9 @@ function session_panel(array $b, DateTimeImmutable $start, bool $action, ?string
     if (!$action) return $html;
     $meet = (string)($b['meet'] ?? '');
     return $html . ($online
-        ? '<div style="margin-top:24px">' . mail_btn('Připojit se k videohovoru', $meet ?: '#', 'coral') . '</div>'
+        // no link yet (Google still making it): never a button that leads nowhere (16 Nov review)
+        ? ($meet !== '' ? '<div style="margin-top:24px">' . mail_btn('Připojit se k videohovoru', $meet, 'coral') . '</div>'
+            : '<div style="margin-top:16px">' . mail_muted(h(MEET_LATER)) . '</div>')
         // the address is our own link to the same route, plain-looking: left as text, Gmail and Seznam linked it
         // themselves (to a map search), sometimes only half of it
         : '<div style="margin-top:16px;color:#163A55"><a href="' . h(NAVIGATE) . '" style="color:#163A55;text-decoration:none">'
@@ -188,9 +190,11 @@ function session_text(array $b, DateTimeImmutable $start, bool $action): array
 {
     $online = $b['forma'] !== 'osobne';
     $lines = [cz_day_short($start) . ', ' . hm($start) . '–' . hm($start->modify('+50 minutes')), session_meta($b)];
-    if ($action) $lines[] = $online ? 'Připojit se: ' . (($b['meet'] ?? '') ?: '(doplní se)') : PLACE . "\nNavigace: " . NAVIGATE;
+    if ($action) $lines[] = $online ? (($b['meet'] ?? '') ? 'Připojit se: ' . $b['meet'] : MEET_LATER) : PLACE . "\nNavigace: " . NAVIGATE;
     return $lines;
 }
+
+const MEET_LATER = 'Odkaz na videohovor přijde e-mailem v připomínce před sezením.';
 
 function text_foot(): array { return ['', '—', SENDER . ' · ' . PHONE . ' · ' . OWNER_MAIL . ' · khgporadenstvi.cz']; }
 
@@ -314,6 +318,36 @@ function mail_owner_cancelled(array $b, DateTimeImmutable $start, string $ownerU
         : "Zrušeno jen $ahead předem, peníze se nevrátily.";
     return owner_mail($b, $start, 'Zrušeno klientem: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Zrušeno klientem',
         [$money, 'Událost z kalendáře je smazaná, termín je zase volný.']);
+}
+
+/* To the owner when Stripe refused a refund (at once or later): the client was told the money comes back. */
+function mail_owner_refund_failed(array $b, DateTimeImmutable $start, string $ownerUrl): array
+{
+    return owner_mail($b, $start, 'Vrácení peněz selhalo: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Vrácení peněz selhalo',
+        ['Stripe vrácení 1 100 Kč odmítl, peníze se klientovi nevrátily. Klient přitom dostal zprávu, že se vrací.',
+         'Zkus to tlačítkem znovu, nebo to vyřeš ve Stripe (Platby → tahle platba) a klientovi napiš.'],
+        ['Vrátit peníze znovu' => $ownerUrl . '&akce=zrusit']);
+}
+
+/* To the owner when two payments arrived for one time (should never happen): the later one was refunded. */
+function mail_owner_double(array $b, DateTimeImmutable $start, bool $refunded): array
+{
+    return owner_mail($b, $start, 'Dvě platby za jeden termín: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Dvě platby za jeden termín',
+        [($refunded ? 'Tenhle klient zaplatil termín, který už měl někdo jiný. Rezervace nevznikla, 1 100 Kč se mu vrací a dostal e-mail.'
+            : 'Tenhle klient zaplatil termín, který už měl někdo jiný. Rezervace nevznikla, ale vrácení peněz se zatím nepovedlo: vyřeš ho prosím ve Stripe.'),
+         'Kdyby chtěl jiný termín, ozve se, nebo mu napiš.']);
+}
+
+/* To the client whose payment came for a time someone else had just booked: no booking, the money goes back. */
+function mail_client_double(array $b, DateTimeImmutable $start): array
+{
+    $book = site() . cfg()['booking_page'];
+    $subject = 'Termín ' . cz_at($start) . ' se mezitím obsadil';
+    $title = 'Termín se mezitím obsadil';
+    $money = 'Platba za tenhle termín se vrací celá na kartu použitou k platbě, obvykle do 5–10 pracovních dnů. Omlouvám se za komplikaci.';
+    $text = implode("\n", [$title, '', ...session_text($b, $start, false), '', $money, '', 'Vybrat jiný termín: ' . $book, ...text_foot()]);
+    $html = mail_page($subject, $title, session_panel($b, $start, false), [h($money), mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
+    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)$b['email']];
 }
 
 /* To the owner when the client moved the session from their link; from the second move with the count. */

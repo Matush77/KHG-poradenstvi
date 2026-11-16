@@ -12,8 +12,11 @@ RewriteRule ^(README\.md|\.gitignore)$ - [R=404,L]
 
 # Booking back end: its folder is never served (code, tests, tools); only /api/... reaches it,
 # through booking/api.php. Secrets and the database live outside public_html (~/.config/khg).
-RewriteCond %{THE_REQUEST} \s/+booking(/|\s|\?) [NC]
-RewriteRule ^ - [R=404,L]
+# Matched on the path Apache has already decoded and tidied, so /%62ooking/ and /./booking/ are caught too
+# (16 Nov review: the raw request line let both through). REDIRECT_STATUS is empty only on the visitor's own
+# request, so the internal hop from /api/ to booking/api.php below still passes.
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteRule ^booking(/|$) - [R=404,L,NC]
 
 RewriteCond %{HTTP_HOST} ^www\.khgporadenstvi\.cz$ [NC]
 RewriteRule ^ https://khgporadenstvi.cz%{REQUEST_URI} [R=301,L]
@@ -23,7 +26,7 @@ RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html\ HTTP/
 RewriteRule ^index\.html$ https://khgporadenstvi.cz/ [R=301,L]
 
 # Booking API (rezervace.html, rezervace/*.html, Stripe's webhook)
-RewriteRule ^api/ booking/api.php [L]
+RewriteRule ^api/ booking/api.php [END]
 
 # Basic security headers for the static website
 <IfModule mod_headers.c>

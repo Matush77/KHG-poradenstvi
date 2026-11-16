@@ -1359,25 +1359,63 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
           });
       }
 
+      /* A message in place of the steps, for a return from Stripe that can't show "Termín je rezervovaný". */
+      function renderNotice(title, text, retry) {
+        view.innerHTML = '<div class="done" role="status"><h2>' + title + '</h2><p>' + text + '</p>' +
+          '<div>' + (retry ? '<button type="button" class="bk-btn" id="recheck">Ověřit znovu</button> ' : '') +
+          '<button type="button" class="' + (retry ? 'link' : 'bk-btn') + '" id="again">Zpět na kalendář</button></div></div>';
+        say(title);
+        if (retry) document.getElementById('recheck').onclick = retry;
+        document.getElementById('again').onclick = function () {
+          state.step = 1; state.time = null;
+          loadSlots().then(function () { LOADING = ''; if (state.date && !slotsFor(state.date).length) state.date = null; render(); }, render);
+        };
+      }
+
       function start() {
         readUrl(); // a refresh or a shared link restores format, day, time and step; otherwise the first free month, no day chosen
         // back from Stripe: ask the server whether it was paid
         var back = new URLSearchParams(location.search).get('paid');
         if (!back) { render(); return; }
-        fetch('/api/checkout?id=' + encodeURIComponent(back)).then(function (r) { return r.json(); }).then(function (j) {
-          var m = j.meta || {}, md = /^(\d{4})-(\d{2})-(\d{2})$/.exec(m.den || '');
-          // paid: the time comes from the payment, not the free times (it is taken now, by this very booking)
-          if (j.paid && md && m.cas) {
-            state.f = m.forma === 'osobne' ? 'osobne' : 'online';
-            state.date = new Date(+md[1], md[2] - 1, +md[3]); state.time = m.cas;
-            state.month = new Date(state.date.getFullYear(), state.date.getMonth(), 1);
-          }
-          if (m.den && state.time) { state.email = m.email || j.email || ''; state.phone = m.telefon; state.name = m.jmeno; }
-          if (j.paid) try { sessionStorage.removeItem('khg-form'); } catch (x) {}
-          state.step = j.paid && state.time ? 3 : (state.time ? 2 : 1);
-          render();
-          if (!j.paid) say('Platba neproběhla, můžete to zkusit znovu.');
-        }, function () { render(); });
+        checkPaid(back);
+      }
+
+      function checkPaid(back) {
+        fetch('/api/checkout?id=' + encodeURIComponent(back))
+          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
+          .then(function (j) {
+            var m = j.meta || {};
+            // the time now: the booking may have been moved since the payment (the payment keeps the first time)
+            var den = j.den || m.den, cas = j.cas || m.cas, md = /^(\d{4})-(\d{2})-(\d{2})$/.exec(den || '');
+            if (j.paid) try { sessionStorage.removeItem('khg-form'); } catch (x) {}
+            // paid but not booked: cancelled since, or paid for a time someone else had just taken (16 Nov review:
+            // both showed "Termín je rezervovaný")
+            if (j.paid && j.cancelled) {
+              state.step = 1; state.time = null; render();
+              if (j.double) renderNotice('Termín se mezitím obsadil', 'Tenhle čas si chvíli před vámi zaplatil někdo jiný. Platba se vám vrací celá a podrobnosti přijdou e-mailem. Omlouvám se, vyberte si prosím jiný termín.');
+              else renderNotice('Rezervace je zrušená', 'Tahle rezervace už byla zrušena. Pokud chcete nový termín, vyberte si ho v kalendáři.');
+              return;
+            }
+            // paid: the time comes from the booking, not the free times (it is taken now, by this very booking)
+            if (j.paid && md && cas) {
+              state.f = m.forma === 'osobne' ? 'osobne' : 'online';
+              state.date = new Date(+md[1], md[2] - 1, +md[3]); state.time = cas;
+              state.month = new Date(state.date.getFullYear(), state.date.getMonth(), 1);
+            }
+            if (m.den && state.time) { state.email = m.email || j.email || ''; state.phone = m.telefon; state.name = m.jmeno; }
+            state.step = j.paid && state.time ? 3 : (state.time ? 2 : 1);
+            render();
+            if (!j.paid) {
+              say('Platba neproběhla, můžete to zkusit znovu.');
+              var out = document.getElementById('go-err'); if (out) out.textContent = 'Platba neproběhla, můžete to zkusit znovu.';
+            }
+          }, function () {
+            // we could not ask (Stripe or our server did not answer): never "it did not go through" (16 Nov review),
+            // and no pay button, which would invite paying twice
+            state.step = 1; state.time = null; render();
+            renderNotice('Platbu se teď nepodařilo ověřit', 'Pokud platba proběhla, potvrzení přijde e-mailem během několika minut. Znovu prosím neplaťte. Když e-mail nepřijde, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
+              function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(back); });
+          });
       }
 
       // the calendar is drawn at once (same size, so nothing moves) and filled when the times arrive
@@ -1393,7 +1431,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       });
       released.then(loadSlots).then(function () { LOADING = ''; slide = 'fade'; start(); }, function () {
         LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
-        renderStep1();
+        // back from Stripe: the payment is checked even without the free times (16 Nov review: it was not checked at all)
+        if (new URLSearchParams(location.search).get('paid')) start(); else renderStep1();
       });
     })();
     </script>

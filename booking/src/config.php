@@ -115,6 +115,8 @@ function log_line(string $what, array $data = []): void
 /* One small HTTP client for Stripe and Google. Returns [status, decoded body]. */
 function http(string $method, string $url, array $headers = [], ?string $body = null): array
 {
+    // tests only (booking/tests/run.php, command line): Stripe and Google answers made up on purpose
+    if (PHP_SAPI === 'cli' && isset($GLOBALS['HTTP_FAKE'])) return ($GLOBALS['HTTP_FAKE'])($method, $url, $body, $headers);
     $c = curl_init($url);
     curl_setopt_array($c, [
         CURLOPT_CUSTOMREQUEST => $method, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20,
