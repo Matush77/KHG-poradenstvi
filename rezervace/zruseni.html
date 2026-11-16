@@ -85,13 +85,20 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
     document.body.classList.toggle('f-osobne', !online);
     return '<div class="summary"><b>' + esc(when(d)) + '</b><span>' + (online ? 'Online · Google Meet' : 'Osobně · Vítkovická 3299/3a, Ostrava') + ' · 50 minut · 1 100 Kč</span></div>';
   }
+  // why the money does or does not come back (review 17 Nov: every unrefunded cancellation blamed the 36 hours)
+  function moneyLine(d) {
+    if (d.refunded) return 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.';
+    if (d.refund_failed) return 'Vrácení platby se zdrželo a řeší se. Jakmile bude vyřízené, přijde e-mail.';
+    if (d.cancelled_by && d.cancelled_by !== 'client') return 'Sezení bylo zrušeno ze strany terapeutky. O vrácení platby přijde zpráva e-mailem.';
+    return 'Platba se nevrací, termín byl zrušen méně než 36 hodin předem.';
+  }
   function show(html) { card.innerHTML = html; card.setAttribute('aria-busy', 'false'); }
 
   function render() {
     var d = data;
     if (d.cancelled) {
       show('<h1>Termín zrušen</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) +
-        '<p class="ok">' + (d.refunded ? 'Částka bude vrácena na kartu použitou k platbě, obvykle do 5–10 pracovních dnů.' : 'Platba se nevrací, termín byl zrušen méně než 36 hodin předem.') + '</p>' +
+        '<p class="ok">' + moneyLine(d) + '</p>' +
         '<p>Nový termín lze kdykoli <a href="/rezervace.html">vybrat v kalendáři</a>.</p>' + CONTACT);
       return;
     }
@@ -192,9 +199,11 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
           });
         }
         if (!r.ok) throw new Error(r.j.error || 'Zrušení se nepovedlo.');
-        data.cancelled = true; data.refunded = !!r.j.refund;
+        data.cancelled = true; data.refund_failed = !!r.j.refund_failed; data.refunded = !!r.j.refund && !data.refund_failed;
+        data.cancelled_by = r.j.cancelled_by;
         // only "sent" when it was (16 Nov review); otherwise the safety net sends it a little later
-        flash = r.j.mailed === false ? 'Hotovo. Potvrzení pošlu e-mailem, jakmile to půjde (teď se odeslat nepovedlo).' : 'Hotovo. Potvrzení bylo odesláno e-mailem.'; render();
+        flash = r.j.already ? 'Termín už byl zrušený dřív.'
+          : r.j.mailed === false ? 'Hotovo. Potvrzení pošlu e-mailem, jakmile to půjde (teď se odeslat nepovedlo).' : 'Hotovo. Potvrzení bylo odesláno e-mailem.'; render();
         document.querySelector('h1').setAttribute('tabindex', '-1'); document.querySelector('h1').focus();
       })
       .catch(function (e) {

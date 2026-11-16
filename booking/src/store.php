@@ -35,6 +35,8 @@ function db(): PDO
     // what the client wrote in "S čím přicházíte": kept here only (not in Stripe, not in the calendar event,
     // which online clients can read as guests), from the checkout until the booking takes it over
     $pdo->exec('CREATE TABLE IF NOT EXISTS notes (pay_id TEXT PRIMARY KEY, note TEXT NOT NULL, created_at INTEGER NOT NULL)');
+    // e-mails that must reach someone (cancellations, alerts to her): kept until sent, the safety net retries
+    $pdo->exec('CREATE TABLE IF NOT EXISTS mail_queue (name TEXT PRIMARY KEY, pay_id TEXT NOT NULL, kind TEXT NOT NULL, created_at INTEGER NOT NULL)');
     // columns added after the first version. Several requests may start at once on a fresh deploy and all see the
     // same column missing (16 Nov review: "duplicate column" errors): the check is repeated under the write lock,
     // so one request adds them and the others find them there.
@@ -53,8 +55,6 @@ function db(): PDO
             throw $e;
         }
     }
-    // e-mails that must reach someone (cancellations, alerts to her): kept until sent, the safety net retries
-    $pdo->exec('CREATE TABLE IF NOT EXISTS mail_queue (name TEXT PRIMARY KEY, pay_id TEXT NOT NULL, kind TEXT NOT NULL, created_at INTEGER NOT NULL)');
     // small settings the cron keeps between runs (the calendar sync's last check)
     $pdo->exec('CREATE TABLE IF NOT EXISTS state (k TEXT PRIMARY KEY, v TEXT NOT NULL)');
     // the owner's hours (src/hours.php) and the devices signed in to her hours page (src/owner.php)
@@ -76,7 +76,12 @@ function db_columns_missing(PDO $pdo): array
         // booking's calendar event that Google did not delete yet (the safety net tries again)
         'bookings' => ['note' => 'TEXT', 'owner_mailed' => 'INTEGER DEFAULT 0', 'moves' => 'INTEGER DEFAULT 0', 'cancelled_by' => 'TEXT',
             'client_moves' => 'INTEGER DEFAULT 0', 'declined_mailed' => 'INTEGER DEFAULT 0', 'moved_at' => 'INTEGER',
-            'lock_until' => 'INTEGER', 'stale_event' => 'TEXT', 'reminded' => 'INTEGER DEFAULT 0'],
+            'lock_until' => 'INTEGER', 'stale_event' => 'TEXT', 'reminded' => 'INTEGER DEFAULT 0',
+            // mail_try / owner_try: when a request or the safety net started sending the client's / her e-mail (only one
+            // sends it, see mail_claim); mail_dead: the client's address refused the confirmation for good
+            'mail_try' => 'INTEGER', 'owner_try' => 'INTEGER', 'mail_dead' => 'INTEGER DEFAULT 0'],
+        // tried_at: someone is sending this queued e-mail right now (see mail_claim)
+        'mail_queue' => ['tried_at' => 'INTEGER'],
         // who: keyed hash of the visitor's IP (never the IP itself), to cap open holds per visitor; browser: keyed hash
         // of the paying browser's cookie, so its own hold does not block it (see browser_id); nonce: which request made
         // the hold, so a request only ever fills in or removes its own

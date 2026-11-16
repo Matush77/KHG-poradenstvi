@@ -1440,6 +1440,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
             // we could not ask (Stripe or our server did not answer): never "it did not go through" (16 Nov review),
             // and no pay button, which would invite paying twice
             state.step = 1; state.time = null; render();
+            // a refresh asks again (review 17 Nov: render() had dropped the payment from the address)
+            try { var u = new URL(location.href); u.searchParams.set('paid', back); history.replaceState(history.state, '', u); } catch (x) {}
             renderNotice('Platbu se teď nepodařilo ověřit', 'Pokud platba proběhla, potvrzení přijde e-mailem během několika minut. Znovu prosím neplaťte. Když e-mail nepřijde, zavolejte na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.',
               function () { view.innerHTML = '<p class="hint"><span class="spin" aria-hidden="true"></span>Ověřuji platbu…</p>'; checkPaid(back); });
           });

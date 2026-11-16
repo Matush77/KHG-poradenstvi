@@ -4,6 +4,9 @@
    address rezervace@khgporadenstvi.cz. No library: openssl and streams only. */
 declare(strict_types=1);
 
+/* The server refused this message for good (5xx to the address or the message). */
+class SmtpRejected extends RuntimeException {}
+
 function smtp_send(array $smtp, string $from, string $to, string $message): void
 {
     $host = $smtp['host'];
@@ -12,18 +15,24 @@ function smtp_send(array $smtp, string $from, string $to, string $message): void
     $s = @stream_socket_client(($port === 465 ? 'ssl://' : 'tcp://') . "$host:$port", $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $ctx);
     if (!$s) throw new RuntimeException("SMTP connect $host:$port failed: $errstr");
     stream_set_timeout($s, 20);
-    $read = function (int $want) use ($s): string {
+    // $final: a 5xx here is the server refusing this message or this address for good (RCPT, DATA), not a setup
+    // problem like a wrong password: retrying it would only repeat the refusal
+    $read = function (int $want, bool $final = false) use ($s): string {
         $all = '';
         while (($line = fgets($s, 1024)) !== false) {
             $all .= $line;
             if (strlen($line) < 4 || $line[3] !== '-') break;   // the last line of a reply has a space after the code
         }
-        if ((int)substr($all, 0, 3) !== $want) throw new RuntimeException('SMTP: expected ' . $want . ', got ' . trim(substr($all, 0, 200)));
+        $got = (int)substr($all, 0, 3);
+        if ($got !== $want) {
+            $msg = 'SMTP: expected ' . $want . ', got ' . trim(substr($all, 0, 200));
+            throw $final && $got >= 500 && $got < 600 ? new SmtpRejected($msg) : new RuntimeException($msg);
+        }
         return $all;
     };
-    $cmd = function (string $line, int $want) use ($s, $read): string {
+    $cmd = function (string $line, int $want, bool $final = false) use ($s, $read): string {
         fwrite($s, $line . "\r\n");
-        return $read($want);
+        return $read($want, $final);
     };
     try {
         $read(220);
@@ -41,13 +50,13 @@ function smtp_send(array $smtp, string $from, string $to, string $message): void
         $cmd(base64_encode($smtp['user']), 334);
         $cmd(base64_encode($smtp['pass']), 235);
         $cmd("MAIL FROM:<$from>", 250);
-        $cmd("RCPT TO:<$to>", 250);
-        $cmd('DATA', 354);
+        $cmd("RCPT TO:<$to>", 250, true);
+        $cmd('DATA', 354, true);
         // CRLF line ends, a leading dot doubled (RFC 5321 4.5.2)
         $body = preg_replace('/(?<!\r)\n/', "\r\n", $message);
         $body = preg_replace('/^\./m', '..', $body);
         fwrite($s, rtrim($body, "\r\n") . "\r\n.\r\n");
-        $read(250);
+        $read(250, true);
         @fwrite($s, "QUIT\r\n");
     } finally {
         fclose($s);

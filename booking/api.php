@@ -89,7 +89,10 @@ try {
         if ($code !== 200) throw new ClientError('Platbu se nepodařilo ověřit.', 502);
         $paid = ($s['payment_status'] ?? '') === 'paid';
         $b = $paid ? book_paid($s) : null;
-        out(200, ['status' => $s['status'] ?? null, 'paid' => $paid, 'meta' => $s['metadata'] ?? [], 'id' => $s['id'],
+        // the client's own details only for a payment made on this copy, and only what the page fills back in
+        // (review 17 Nov: the lab and the test site share one Stripe test account)
+        $meta = session_copy($s) === site_copy() ? array_intersect_key($s['metadata'] ?? [], array_flip(['den', 'cas', 'forma', 'email', 'telefon', 'jmeno'])) : [];
+        out(200, ['status' => $s['status'] ?? null, 'paid' => $paid, 'meta' => (object)$meta, 'id' => $s['id'],
             'email' => $b['email'] ?? null,                                                   // also the one typed on Stripe's page
             'meet' => lab() ? ($b['meet'] ?? null) : null,                                   // live: the link goes only by e-mail
             'cancelled' => ($b['status'] ?? '') === 'cancelled',
@@ -158,8 +161,11 @@ try {
     if ($method === 'POST' && $route === 'cancel') {
         $j = body_json();
         $b = cancel_booking(signed((string)($j['b'] ?? ''), (string)($j['t'] ?? '')), null, ($j['refund'] ?? null) === true);
+        // already: it was cancelled before this click, nothing was sent now (review 17 Nov: the page said "sent");
+        // mailed missing only when a second click raced the first, whose e-mail is on its way
         out(200, ['cancelled' => true, 'refund' => $b['refund_id'] ? ['id' => $b['refund_id'], 'status' => $b['refund_status']] : null,
-            'hours_before' => $b['hours_before'], 'mailed' => $b['mailed'] ?? true]);
+            'hours_before' => $b['hours_before'], 'mailed' => $b['mailed'] ?? true, 'already' => $b['already'] ?? false,
+            'refund_failed' => refund_failed($b), 'cancelled_by' => $b['cancelled_by'] ?: 'client']);
     }
 
     if ($method === 'GET' && $route === 'terminy') {
@@ -193,7 +199,7 @@ try {
         }
         if ($method === 'POST' && $route === 'sprava/zrusit') {
             $b = owner_cancel($payId);
-            out(200, owner_view($b) + ['mailed' => $b['mailed'] ?? true]);
+            out(200, owner_view($b) + ['mailed' => $b['mailed'] ?? true, 'already' => $b['already'] ?? false]);
         }
     }
 
