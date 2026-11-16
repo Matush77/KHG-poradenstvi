@@ -96,6 +96,10 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
         '<p>Nový termín lze kdykoli <a href="/ui-lab/rezervace-ukazka.html">vybrat v kalendáři</a>.</p>' + CONTACT);
       return;
     }
+    if (d.processing) {
+      show('<h1>Rezervace se zpracovává</h1>' + summary(d) + '<p>Rezervaci ještě dokončujeme. Stačí stránku obnovit za pár minut.</p>' + CONTACT);
+      return;
+    }
     if (d.started) {
       show('<h1>Sezení už začalo nebo proběhlo</h1>' + summary(d) + '<p>Zrušit ho už nejde.</p>' + CONTACT);
       return;

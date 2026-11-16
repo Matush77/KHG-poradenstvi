@@ -75,9 +75,14 @@ function parse_choice(array $b): array
     $email = trim((string)($b['email'] ?? ''));
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new ClientError('E-mail nevypadá správně.', 400);
     if ($forma === 'online' && $email === '') throw new ClientError('Vyplňte prosím e-mail, pošlu na něj odkaz na videohovor.', 400);
+    // in person the phone is how she reaches the client (the page checks the same: at least 9 digits)
+    $phone = trim((string)($b['phone'] ?? ''));
+    if ($forma === 'osobne' && strlen((string)preg_replace('/\D/', '', $phone)) < 9) {
+        throw new ClientError($phone === '' ? 'Vyplňte prosím telefon.' : 'Telefon nevypadá správně.', 400);
+    }
     $meta = ['zdroj' => 'web', 'kopie' => site_copy(), 'forma' => $forma, 'den' => $start->format('Y-m-d'), 'cas' => $start->format('G:i'),
         'jmeno' => cut(trim((string)($b['name'] ?? '')), 100), 'email' => substr($email, 0, 200),
-        'telefon' => cut(trim((string)($b['phone'] ?? '')), 40)];
+        'telefon' => cut($phone, 40)];
     return [$start, $meta];
 }
 
@@ -321,15 +326,29 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null): array
         [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
         if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Zrušení se teď nepovedlo. Stačí to zkusit znovu.', 502);
         // the idempotency key makes a double click (or two tabs) refund only once
-        [$code, $r] = stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
+        $refund = fn() => stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
             'metadata' => ['duvod' => sprintf('zruseni klientem %.0f h predem', $hours)]], 'cancel-' . $payId);
+        [$code, $r] = $refund();
+        // two tabs or a double click: Stripe refuses the second request while the first is still running (409).
+        // A moment later the same key gives back the first request's answer, the same refund.
+        if ($code === 409) {
+            sleep(2);
+            [$code, $r] = $refund();
+        }
         if ($code !== 200) {
+            // the first request has cancelled it meanwhile: that is the answer, not an error
+            if (($done = booking_get($payId)) && $done['status'] === 'cancelled') return $done;
             log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
             throw new ClientError('Vrácení peněz se nepovedlo, termín zůstává. Pomůže telefon: ' . PHONE . '.', 502);
         }
         $fields += ['refund_id' => $r['id'], 'refund_status' => $r['status']];
     }
-    booking_update($payId, $fields);   // before the event goes, so the calendar sync never reads it as her deletion
+    // before the event goes, so the calendar sync never reads it as her deletion; only one of two parallel
+    // requests gets here first, the other returns the cancelled booking without a second set of e-mails
+    $set = db()->prepare("UPDATE bookings SET status = 'cancelled' WHERE pay_id = ? AND status = 'booked'");
+    $set->execute([$payId]);
+    if ($set->rowCount() === 0) return booking_get($payId);
+    booking_update($payId, $fields);
     if ($b['event_id']) event_gone($payId, $b['event_id']);
     log_line('CANCELLED', ['pay' => $payId, 'hours' => $fields['hours_before'], 'refund' => $fields['refund_id'] ?? null]);
     $b = booking_get($payId);

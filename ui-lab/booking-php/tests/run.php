@@ -61,6 +61,8 @@ throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'time' => '9:00
 throws(fn() => parse_choice(['f' => 'online', 'date' => $future, 'time' => '9:00', 'email' => 'nope']), 400, 'bad e-mail refused');
 [$s, $meta] = parse_choice(['f' => 'osobne', 'date' => $future, 'time' => '9:00', 'phone' => '+420 777 123 456', 'price' => 1]);
 ok($meta['forma'] === 'osobne' && $meta['cas'] === '9:00' && !isset($meta['price']), 'in person without e-mail accepted, price from the browser ignored');
+throws(fn() => parse_choice(['f' => 'osobne', 'date' => $future, 'time' => '9:00', 'email' => 'a@b.cz']), 400, 'in person without a phone refused');
+throws(fn() => parse_choice(['f' => 'osobne', 'date' => $future, 'time' => '9:00', 'phone' => '777 12']), 400, 'in person with a too short phone refused');
 [, $meta] = parse_choice(['f' => 'hack', 'date' => $future, 'time' => '9:00', 'email' => 'a@b.cz']);
 ok($meta['forma'] === 'online', 'unknown format falls back to online');
 
@@ -349,7 +351,9 @@ throws(fn() => owner_login('spravne-heslo-42', 'x', 'w2'), 429, 'after 5 wrong p
 ok(owner_login('spravne-heslo-42', 'x', 'w3')['id'] !== '', 'another visitor is not locked by them');
 db()->exec('DELETE FROM login_fails');
 for ($i = 0; $i < 30; $i++) { try { owner_login('spatne', 'x', 'wx' . $i); } catch (ClientError $e) {} }
-throws(fn() => owner_login('spravne-heslo-42', 'x', 'w4'), 429, '30 wrong passwords from many addresses lock everyone for a while');
+ok(owner_login('spravne-heslo-42', 'x', 'w4')['id'] !== '', '30 wrong passwords from strangers do not lock her out of a new sign-in');
+for ($i = 30; $i < LOGIN_FAILS_ALL; $i++) { try { owner_login('spatne', 'x', 'wx' . $i); } catch (ClientError $e) {} }
+throws(fn() => owner_login('spravne-heslo-42', 'x', 'w4b'), 429, LOGIN_FAILS_ALL . ' wrong passwords from many addresses lock everyone for a while');
 db()->exec('DELETE FROM login_fails');
 $d2 = owner_login('spravne-heslo-42', 'x', 'w5');
 ok(count(array_filter(owner_devices($d1['id']), fn($x) => $x['current'])) === 1, 'the device list marks this device');
