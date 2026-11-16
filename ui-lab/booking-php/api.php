@@ -122,10 +122,20 @@ try {
             if ($code !== 200) out(500, ['error' => 'stripe']);           // 5xx: Stripe retries later
             $b = book_paid($s);
             log_line('WEBHOOK', ['type' => $type, 'pay' => $id, 'status' => $b['status'] ?? (session_copy($s) !== site_copy() ? 'other copy' : 'unpaid')]);
-        } elseif (in_array($type, ['refund.failed', 'refund.updated', 'charge.refund.updated'], true) && str_starts_with($id, 're_')) {
-            // a refund that fails days later (16 Nov review: this was ignored); 5xx makes Stripe retry
+        } elseif (in_array($type, ['refund.created', 'refund.failed', 'refund.updated', 'charge.refund.updated'], true) && str_starts_with($id, 're_')) {
+            // a refund that fails days later (16 Nov review: this was ignored), or one she made in her Stripe dashboard
+            // (17 Nov review, second list); 5xx makes Stripe retry
             try { $b = refund_changed($id); } catch (Throwable $e) { out(500, ['error' => 'stripe']); }
             log_line('WEBHOOK', ['type' => $type, 'refund' => $id, 'status' => $b['refund_status'] ?? 'not ours']);
+        } elseif ($type === 'charge.refunded' && str_starts_with($id, 'ch_')) {
+            // the same for Stripe accounts that send only this one: the charge read from Stripe names the payment
+            try {
+                [$code, $ch] = stripe('GET', 'charges/' . rawurlencode($id));
+                if ($code !== 200) throw new RuntimeException('Stripe charge read failed: HTTP ' . $code);
+                $b = booking_of_payment(null, (string)payment_intent_id($ch));
+                if ($b) $b = refund_reconcile($b['pay_id']);
+            } catch (Throwable $e) { out(500, ['error' => 'stripe']); }
+            log_line('WEBHOOK', ['type' => $type, 'charge' => $id, 'status' => $b['refund_status'] ?? 'not ours']);
         } elseif ($type === 'checkout.session.expired' && $id !== '') {
             db()->prepare('DELETE FROM holds WHERE pay_id = ?')->execute([$id]);
             log_line('WEBHOOK', ['type' => $type, 'pay' => $id]);

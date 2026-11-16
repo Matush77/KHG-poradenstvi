@@ -220,7 +220,7 @@ ok(str_contains($oc['text'], 'vrací automaticky') && !str_contains($oc['html'],
 db()->prepare('INSERT INTO notes (pay_id, note, created_at) VALUES (?, ?, ?)')->execute(['cs_test_old', 'x', time() - 3 * 86400]);
 db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([time() - 2 * 86400]);
 ok(!db()->query("SELECT COUNT(*) FROM notes WHERE pay_id = 'cs_test_old'")->fetchColumn(), 'notes of unpaid checkouts are forgotten after 2 days');
-ok(cz_ahead(10.2) === '10 h' && cz_ahead(47.6) === '48 h' && cz_ahead(50) === '2 dny' && cz_ahead(771) === '32 dní', 'cancel lead time in hours or days');
+ok(cz_ahead(10.2) === '10 h' && cz_ahead(47.6) === '47 h' && cz_ahead(35.96) === '35 h' && cz_ahead(50) === '2 dny' && cz_ahead(771) === '32 dní', 'cancel lead time in hours or days');
 throws(fn() => owner_move('cs_test_late', $future, '10:00'), 409, 'a cancelled booking can not be moved');
 $long = 'a' . str_repeat('ž', 900);
 ok(cut($long, 1500) === $long && strlen(cut('a' . str_repeat('ž', 1600), 1500)) === 1 + 1499 * 2, 'a long Czech note is cut by letters, not dropped');
@@ -664,19 +664,20 @@ ok(str_contains((string)file_get_contents(cfg()['dir'] . '/booking.log'), 'REFUN
 
 // 3b. the safety net asks Stripe about refunds still on their way: a failure reaches her without the webhook
 $add->execute(['cs_rv_chk', $at('+48 days'), 'osobne', 'cancelled', null, 're_chk', 'pending', 0, 0]);
-ok(in_array('re_chk', refunds_to_check(), true) && !in_array('re_lost', refunds_to_check(), true), 'review 17/3b: pending refunds are rechecked, finished ones are not');
+ok(in_array('cs_rv_chk', refunds_to_check(), true) && !in_array('cs_rv_lost', refunds_to_check(), true), 'review 17/3b: pending refunds are rechecked, finished ones are not');
 $FAKE = ['#GET .*/checkout/sessions\?#' => fn() => [200, ['data' => [], 'has_more' => false]],
-    '#GET .*/v1/refunds/re_chk#' => fn() => [200, ['id' => 're_chk', 'status' => 'failed', 'failure_reason' => 'expired_or_canceled_card']],
+    '#GET .*/checkout/sessions/cs_rv_chk#' => fn() => [200, ['id' => 'cs_rv_chk', 'payment_intent' => 'pi_chk', 'amount_total' => 110000]],
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => [['id' => 're_chk', 'payment_intent' => 'pi_chk', 'amount' => 110000, 'status' => 'failed']]]],
     '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
 $sw = sweep();
 ok(booking_get('cs_rv_chk')['refund_status'] === 'failed' && in_array('cs_rv_chk', $sw['refund_failed'] ?? [], true), 'review 17/3b: a refund that failed is found by the safety net');
-ok((int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_chk'")->fetchColumn() === 0 && !in_array('re_chk', refunds_to_check(), true), 'review 17/3b: she got the e-mail, and it is not asked again');
+ok((int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_chk'")->fetchColumn() === 0 && !in_array('cs_rv_chk', refunds_to_check(), true), 'review 17/3b: she got the e-mail, and it is not asked again');
 
 // 6. the safety net looks back 3 days, as long as Stripe retries a webhook
 $gte = null;
 $FAKE = ['#GET .*/checkout/sessions\?#' => function ($m, $u) use (&$gte) { parse_str((string)parse_url($u, PHP_URL_QUERY), $q); $gte = (int)$q['created']['gte']; return [200, ['data' => [], 'has_more' => false]]; }];
 paid_sessions_recent();
-ok($gte !== null && abs($gte - (time() - 3 * 86400)) < 10, 'review 17/6: a payment made 25 hours ago is still looked for');
+ok($gte !== null && abs($gte - (time() - 7 * 86400)) < 10, 'review 17/6 + second list: payments of the last 7 days are looked for');
 
 // 2b. Google moved the event but its answer was lost: the booking keeps the new time
 $evPath = '/calendars/' . rawurlencode(cfg()['calendar']) . '/events/';
@@ -740,6 +741,7 @@ ok(book_paid($late2)['refund_id'] === null, 'review 17b/2: Stripe down: not refu
 $FAKE = ['#GET .*/checkout/sessions/cs_rv_missed2#' => fn() => [200, ['id' => 'cs_rv_missed2', 'payment_intent' => 'pi_missed2', 'amount_total' => 110000]],
     '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_missed2', 'status' => 'pending']],
     '#GET .*/checkout/sessions\?#' => fn() => [200, ['data' => [], 'has_more' => false]],
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]],
     '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
 $sw2 = sweep();
 ok(booking_get('cs_rv_missed2')['refund_id'] === 're_missed2' && in_array('cs_rv_missed2', $sw2['double_refunded'] ?? [], true), 'review 17b/2: the safety net refunds it later');
@@ -910,6 +912,127 @@ $FAKE = ['#POST .*/events\?#' => function ($m, $u, $body) use (&$sentEv) { $sent
 gcal_create(prague($gb['slot']), 't', 'd', false, 'j@example.com', 'cs_g1');
 ok(($sentEv['attendees'][0]['email'] ?? '') === 'j@example.com' && ($sentEv['extendedProperties']['private']['platba'] ?? '') === 'cs_g1' && !isset($sentEv['conferenceData']),
     'google: in person the client is a guest too, the payment kept out of sight');
+
+// --- 17 Nov review, second list: Stripe is the truth about refunds
+$SENT = [];
+$GLOBALS['SMTP_FAKE'] = $smtpOk;
+$queued = fn(string $pay) => db()->query("SELECT kind FROM mail_queue WHERE pay_id = " . db()->quote($pay))->fetchAll(PDO::FETCH_COLUMN);
+$addPi = function (string $pay, string $rel, string $status, ?string $refund = null, ?string $rst = null, ?string $ev = 'evX') use ($add, $at) {
+    $add->execute([$pay, $at($rel), 'online', $status, $ev, $refund, $rst, time(), time()]);
+    db()->prepare('UPDATE bookings SET payment_intent = ?, amount = 110000 WHERE pay_id = ?')->execute(['pi_' . $pay, $pay]);
+};
+$refundsAre = function (array $list) use (&$FAKE) {
+    $FAKE = ['#GET .*/v1/refunds/(re_\w+)#' => function ($m, $u) use ($list) { preg_match('#refunds/(re_\w+)#', $u, $x);
+            foreach ($list as $r) if ($r['id'] === $x[1]) return [200, $r]; return [404, []]; },
+        '#GET .*/v1/refunds\?#' => function ($m, $u) use ($list) { parse_str((string)parse_url($u, PHP_URL_QUERY), $q);
+            return [200, ['data' => array_values(array_filter($list, fn($r) => !isset($q['payment_intent']) || $r['payment_intent'] === $q['payment_intent']))]]; },
+        '#DELETE .*/events/#' => fn() => [204, []], '#PATCH .*/events/#' => fn() => [200, []]];
+};
+
+// 1. she refunded a booked session in her Stripe dashboard: recorded, the session stays, she gets a cancel button
+$addPi('cs_s2_dash', '+60 days', 'booked');
+$refundsAre([['id' => 're_dash', 'payment_intent' => 'pi_cs_s2_dash', 'amount' => 110000, 'status' => 'pending', 'metadata' => []]]);
+$d1 = refund_changed('re_dash');
+ok($d1['status'] === 'booked' && $d1['refund_id'] === 're_dash' && booking_view($d1)['refunded'], 's2/1: a dashboard refund is recorded, the session still booked');
+ok($sentOnce('cs_s2_dash-refund-found') === 1 && str_contains(mail_owner_refund_found($d1, prague($d1['slot']), 'u')['text'], 'Zrušit sezení: u&akce=zrusit'), 's2/1: she gets "Platba vrácená, sezení ale platí" with a cancel button');
+$CALLS = [];
+$d1c = owner_cancel('cs_s2_dash');
+ok($d1c['status'] === 'cancelled' && $d1c['cancelled_by'] === 'owner' && $d1c['refund_id'] === 're_dash' && !preg_grep('#POST .*/v1/refunds#', $CALLS), 's2/1: her cancel then cancels without a second refund');
+ok(owner_cancel('cs_s2_dash')['already'] === true, 's2/1: a second click changes nothing');
+
+// 2. the client's cancel: Stripe refunded, but the answer was lost and the page showed an error; the next click is late
+$addPi('cs_s2_lost', '+35 hours', 'booked');
+db()->prepare("UPDATE bookings SET slot = ? WHERE pay_id = 'cs_s2_lost'")->execute([(new DateTimeImmutable('+35 hours'))->format(DATE_ATOM)]);
+$refundsAre([['id' => 're_lostc', 'payment_intent' => 'pi_cs_s2_lost', 'amount' => 110000, 'status' => 'succeeded', 'created' => time() - 3600, 'metadata' => ['duvod' => 'zruseni klientem']]]);
+$d2 = cancel_booking('cs_s2_lost');
+ok($d2['status'] === 'cancelled' && $d2['cancelled_by'] === 'client' && $d2['refund_id'] === 're_lostc' && $d2['stale_event'] === null, 's2/2: the late click finishes the first cancel, with its refund, and the event goes');
+ok(abs((float)$d2['hours_before'] - 36) < 0.1 && $sentOnce('cs_s2_lost-client-cancelled') === 1 && $sentOnce('cs_s2_lost-cancelled') === 1 && $d2['mailed'] === true, 's2/2: counted from when Stripe refunded; both e-mails once');
+// the same found by the safety net alone (the client never clicked again)
+$addPi('cs_s2_lost2', '+40 days', 'booked');
+$refundsAre([['id' => 're_lost2', 'payment_intent' => 'pi_cs_s2_lost2', 'amount' => 110000, 'status' => 'pending', 'created' => time(), 'metadata' => ['duvod' => 'zruseni klientem']]]);
+ok(in_array('cs_s2_lost2', refunds_unmatched(20), true), 's2/2: the safety net sees a refund the booking does not show');
+ok(refund_reconcile('cs_s2_lost2')['status'] === 'cancelled' && !in_array('cs_s2_lost2', refunds_unmatched(20), true), 's2/2: and finishes the cancel; then it is in order');
+// her own cancel whose answer was lost
+$addPi('cs_s2_lost3', '+41 days', 'booked');
+$refundsAre([['id' => 're_lost3', 'payment_intent' => 'pi_cs_s2_lost3', 'amount' => 110000, 'status' => 'pending', 'created' => time(), 'metadata' => ['duvod' => 'zruseno terapeutkou']]]);
+$d3 = refund_reconcile('cs_s2_lost3');
+ok($d3['cancelled_by'] === 'owner' && $sentOnce('cs_s2_lost3-cancel') === 1 && !$sentOnce('cs_s2_lost3-cancelled'), 's2/2: her lost cancel is finished too (the client hears, she is not told her own cancel)');
+
+// 3. refunded in two parts, the older one fails: no longer the whole payment
+$addPi('cs_s2_split', '+42 days', 'cancelled', 're_p2', 'succeeded', null);
+$refundsAre([['id' => 're_p2', 'payment_intent' => 'pi_cs_s2_split', 'amount' => 50000, 'status' => 'succeeded'],
+    ['id' => 're_p1', 'payment_intent' => 'pi_cs_s2_split', 'amount' => 60000, 'status' => 'failed']]);
+ok(in_array('cs_s2_split', refunds_unmatched(20), true), 's2/3: the failed part is noticed by the safety net');
+$d4 = refund_reconcile('cs_s2_split');
+ok($d4['refund_status'] === 'partial' && refund_failed($d4) && !booking_view($d4)['refunded'] && $sentOnce('cs_s2_split-refund-failed-re_p2') === 1, 's2/3: shown as not refunded, she is told once');
+ok(str_contains(mail_owner_refund_failed($d4, prague($d4['slot']), 'u')['text'], 'jen část'), 's2/3: her e-mail says only a part went back');
+refund_reconcile('cs_s2_split');
+ok($sentOnce('cs_s2_split-refund-failed-re_p2') === 1, 's2/3: asking again sends nothing new');
+
+// 4. a refund that succeeded and failed later, its webhook lost: found by the safety net
+$addPi('cs_s2_late', '+43 days', 'cancelled', 're_late2', 'succeeded', null);
+$refundsAre([['id' => 're_late2', 'payment_intent' => 'pi_cs_s2_late', 'amount' => 110000, 'status' => 'failed']]);
+ok(!in_array('cs_s2_late', refunds_to_check(), true) && in_array('cs_s2_late', refunds_unmatched(20), true), 's2/4: a "succeeded" refund is not polled, but its later failure is seen');
+$FAKE += ['#GET .*/checkout/sessions\?#' => fn() => [200, ['data' => [], 'has_more' => false]], '#GET .*/events\?#' => fn() => [200, ['items' => []]], '#POST .*/freeBusy#' => fn() => [200, ['calendars' => []]]];
+$sw3 = sweep();
+ok(booking_get('cs_s2_late')['refund_status'] === 'failed' && in_array('cs_s2_late', $sw3['refund_failed'] ?? [], true) && $sentOnce('cs_s2_late-refund-failed-re_late2') === 1, 's2/4: recorded and she is told');
+
+// 5. requires_action: not shown as refunded, she is told
+$addPi('cs_s2_act', '+44 days', 'booked');
+$FAKE = ['#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_act', 'status' => 'requires_action']], '#DELETE .*/events/#' => fn() => [204, []],
+    '#GET .*/checkout/sessions/cs_s2_act#' => fn() => [200, ['id' => 'cs_s2_act', 'payment_intent' => 'pi_cs_s2_act', 'amount_total' => 110000]]];
+$d5 = cancel_booking('cs_s2_act', null, true);
+ok($d5['status'] === 'cancelled' && refund_failed($d5) && !booking_view($d5)['refunded'] && $sentOnce('cs_s2_act-refund-failed-re_act') === 1, 's2/5: a refund waiting for an action is not shown as refunded, she is told');
+
+// 6. a cancelled booking with no refund that Stripe shows refunded (her dashboard after a late cancel): the client hears
+$addPi('cs_s2_after', '+45 days', 'cancelled', null, null, null);
+db()->exec("UPDATE bookings SET cancelled_by = 'client' WHERE pay_id = 'cs_s2_after'");
+$refundsAre([['id' => 're_after', 'payment_intent' => 'pi_cs_s2_after', 'amount' => 110000, 'status' => 'succeeded', 'metadata' => []]]);
+ok(refund_reconcile('cs_s2_after')['refund_id'] === 're_after' && $sentOnce('cs_s2_after-refund-re_after') === 1, 's2/6: a refund found later is recorded and the client gets the refund e-mail');
+
+// 7. refunded before the site booked it (webhook lost, found by the safety net days later): never confirmed
+$old = ['id' => 'cs_s2_pre', 'payment_status' => 'paid', 'payment_intent' => 'pi_pre', 'amount_total' => 110000, 'created' => time() - 86400,
+    'metadata' => ['den' => substr($at('+46 days'), 0, 10), 'cas' => '10:00', 'forma' => 'online', 'email' => 'a@example.com', 'telefon' => '', 'jmeno' => 'Jana Nováková', 'zdroj' => 'web', 'kopie' => site_copy()]];
+$refundsAre([['id' => 're_pre', 'payment_intent' => 'pi_pre', 'amount' => 110000, 'status' => 'succeeded']]);
+$CALLS = [];
+$d7 = book_paid($old);
+ok($d7['status'] === 'cancelled' && $d7['cancelled_by'] === 'refunded' && $d7['refund_id'] === 're_pre' && !$d7['mail_sent'] && !preg_grep('#googleapis.com/calendar#', $CALLS), 's2/7: a payment refunded before booking is not booked, no event, no confirmation');
+ok($sentOnce('cs_s2_pre-refund-found') === 1 && str_contains(mail_owner_refund_found($d7, prague($d7['slot']), 'u')['subject'], 'nezarezervovala'), 's2/7: she is told');
+$CALLS = [];
+$fresh = ['id' => 'cs_s2_fresh', 'created' => time()] + $old;
+$FAKE = ['#POST .*/freeBusy#' => fn() => [500, []]];
+book_paid($fresh);
+ok(!preg_grep('#/v1/refunds#', $CALLS), 's2/7: a fresh payment is booked without asking Stripe about refunds');
+
+// 8. her hours page shows a paid booking whose calendar entry failed (the time is taken)
+db()->exec("UPDATE bookings SET status = 'failed' WHERE pay_id = 'cs_s2_fresh'");
+$hv = hours_view();
+$fd = prague(booking_get('cs_s2_fresh')['slot']);
+ok(isset(json_decode(json_encode($hv), true)['booked'][$fd->format('Y-m-d')][(int)$fd->format('G')]), 's2/8: a failed booking is on her hours page');
+
+// 9. the calendar comes back only after the session start: refunded, never confirmed
+$add->execute(['cs_s2_gone', (new DateTimeImmutable('-10 minutes'))->format(DATE_ATOM), 'online', 'failed', null, null, null, time() - 7200, time() - 7200]);
+$FAKE = ['#GET .*/checkout/sessions/cs_s2_gone#' => fn() => [200, ['id' => 'cs_s2_gone', 'payment_intent' => 'pi_gone', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_gone', 'status' => 'pending']]];
+$CALLS = [];
+$d9 = finish_booking('cs_s2_gone');
+ok($d9['status'] === 'cancelled' && $d9['cancelled_by'] === 'missed' && $d9['refund_id'] === 're_gone' && !preg_grep('#googleapis.com/calendar#', $CALLS) && !$d9['mail_sent'], 's2/9: a calendar retry after the start refunds instead of confirming');
+ok($sentOnce('cs_s2_gone-double') === 1 && $sentOnce('cs_s2_gone-double-owner') === 1, 's2/9: the client and she are told');
+
+// 10. the cancel is one write: status, refund and the event to delete together; hours with two decimals
+$addPi('cs_s2_one', '+47 days', 'booked');
+$FAKE = ['#GET .*/checkout/sessions/cs_s2_one#' => fn() => [200, ['id' => 'cs_s2_one', 'payment_intent' => 'pi_cs_s2_one', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_one', 'status' => 'pending']], '#DELETE .*/events/#' => fn() => [503, []]];
+$d10 = owner_cancel('cs_s2_one', (new DateTimeImmutable($at('+47 days')))->modify('-35 hours -58 minutes'));
+ok($d10['status'] === 'cancelled' && $d10['refund_id'] === 're_one' && $d10['refund_status'] === 'pending' && $d10['stale_event'] === 'evX', 's2/10: cancelled with its refund and the event marked for deletion in one go');
+ok(abs((float)$d10['hours_before'] - 35.97) < 0.001, 's2/10: hours before kept with two decimals (35.97, not 36.0)');
+
+// 11. a second click while the first is still sending the client's e-mail: told it follows, not "sent"
+db()->prepare('INSERT INTO mail_queue (name, pay_id, kind, created_at) VALUES (?, ?, ?, ?)')->execute(['cs_s2_one-client-cancelled', 'cs_s2_one', 'client_cancelled', time()]);
+ok(cancel_answer('cs_s2_one')['mailed'] === false, 's2/11: the racing click hears the e-mail is not out yet');
+db()->exec("DELETE FROM mail_queue WHERE name = 'cs_s2_one-client-cancelled'");
+ok(cancel_answer('cs_s2_one')['mailed'] === true, 's2/11: and that it went once it did');
+unset($GLOBALS['SMTP_FAKE']);
 
 unset($GLOBALS['HTTP_FAKE']);
 

@@ -159,7 +159,7 @@ function hours_view(?DateTimeImmutable $now = null): array
     $now = ($now ?? new DateTimeImmutable())->setTimezone($tz);
     $to = $now->setTime(0, 0)->modify('+' . cfg()['book_ahead_days'] . ' days');
     $booked = [];
-    $s = db()->prepare("SELECT pay_id, slot, forma, name, email FROM bookings WHERE status IN ('pending','booked') AND slot >= ? ORDER BY slot");
+    $s = db()->prepare("SELECT pay_id, slot, forma, name, email FROM bookings WHERE status IN ('pending','booked','failed') AND slot >= ? ORDER BY slot");
     $s->execute([$now->setTime(0, 0)->format(DATE_ATOM)]);
     foreach ($s as $r) {
         $t = prague($r['slot']);

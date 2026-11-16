@@ -251,7 +251,7 @@ function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?Date
 /* '10 h' under two days, else '3 dny' / '32 dní' */
 function cz_ahead(float $hours): string
 {
-    if ($hours < 48) return max(0, (int)round($hours)) . ' h';
+    if ($hours < 48) return max(0, (int)floor($hours)) . ' h';   // 35.96 h reads 35, never 36 (17 Nov review, second list)
     $d = (int)round($hours / 24);
     return $d . ($d < 5 ? ' dny' : ' dní');
 }
@@ -373,10 +373,31 @@ function mail_owner_cancelled(array $b, DateTimeImmutable $start, string $ownerU
 /* To the owner when Stripe refused a refund (at once or later): the client was told the money comes back. */
 function mail_owner_refund_failed(array $b, DateTimeImmutable $start, string $ownerUrl): array
 {
+    // what Stripe says (17 Nov review, second list: a part failed, the refund vanished, it waits for an action)
+    $what = match ($b['refund_status']) {
+        'partial' => 'Ve Stripe se z 1 100 Kč vrátila jen část, zbytek se klientovi nevrátil.',
+        'missing' => 'Vrácení 1 100 Kč ve Stripe není, peníze se klientovi nevracejí.',
+        'requires_action' => 'Vrácení 1 100 Kč čeká ve Stripe na doplnění údajů, peníze zatím neodešly.',
+        default => 'Stripe vrácení 1 100 Kč odmítl, peníze se klientovi nevrátily.',
+    };
     return owner_mail($b, $start, 'Vrácení peněz selhalo: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Vrácení peněz selhalo',
-        ['Stripe vrácení 1 100 Kč odmítl, peníze se klientovi nevrátily. Klient přitom dostal zprávu, že se vrací.',
-         'Zkus to tlačítkem znovu, nebo to vyřeš ve Stripe (Platby → tahle platba) a klientovi napiš.'],
+        [$what, 'Zkus to tlačítkem znovu (vrátí se, co chybí), nebo to vyřeš ve Stripe (Platby → tahle platba) a klientovi napiš.'],
         ['Vrátit peníze znovu' => $ownerUrl . '&akce=zrusit']);
+}
+
+/* To the owner when Stripe shows the payment refunded although the site did not refund it (her Stripe dashboard):
+   the session still booked, or a payment that was refunded before the site booked it (17 Nov review, second list). */
+function mail_owner_refund_found(array $b, DateTimeImmutable $start, string $ownerUrl): array
+{
+    if ($b['status'] !== 'booked') {
+        return owner_mail($b, $start, 'Vrácená platba se nezarezervovala: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Platba už byla vrácená',
+            ['Platba za tenhle termín se k webu dostala až po tom, co byla ve Stripe vrácená. Rezervace proto nevznikla, termín je volný a klient od webu nic nedostal.',
+             'Kdyby měl klient přesto přijít, ozvi se mu.']);
+    }
+    return owner_mail($b, $start, 'Platba vrácená, sezení ale platí: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Platba vrácená, sezení ale platí',
+        ['Ve Stripe je tahle platba vrácená, rezervace na webu ale dál platí a sezení je v kalendáři.',
+         'Pokud se nekoná, zruš ho tlačítkem: událost zmizí, termín se uvolní a klient dostane e-mail. Peníze se podruhé nevracejí.'],
+        ['Zrušit sezení' => $ownerUrl . '&akce=zrusit']);
 }
 
 /* To the owner when two payments arrived for one time (should never happen): the later one was refunded. */

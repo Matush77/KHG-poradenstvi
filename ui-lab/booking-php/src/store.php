@@ -79,7 +79,10 @@ function db_columns_missing(PDO $pdo): array
             'lock_until' => 'INTEGER', 'stale_event' => 'TEXT', 'reminded' => 'INTEGER DEFAULT 0',
             // mail_try / owner_try: when a request or the safety net started sending the client's / her e-mail (only one
             // sends it, see mail_claim); mail_dead: the client's address refused the confirmation for good
-            'mail_try' => 'INTEGER', 'owner_try' => 'INTEGER', 'mail_dead' => 'INTEGER DEFAULT 0'],
+            'mail_try' => 'INTEGER', 'owner_try' => 'INTEGER', 'mail_dead' => 'INTEGER DEFAULT 0',
+            // payment_intent / amount: the Stripe payment behind the booking and what was paid (in hellers), to compare
+            // all its refunds with (17 Nov review, second list); older bookings get them from Stripe on first need
+            'payment_intent' => 'TEXT', 'amount' => 'INTEGER'],
         // tried_at: someone is sending this queued e-mail right now (see mail_claim)
         'mail_queue' => ['tried_at' => 'INTEGER'],
         // who: keyed hash of the visitor's IP (never the IP itself), to cap open holds per visitor; browser: keyed hash
