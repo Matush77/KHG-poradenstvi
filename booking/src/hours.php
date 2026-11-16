@@ -123,13 +123,13 @@ function hours_view(?DateTimeImmutable $now = null): array
     $now = ($now ?? new DateTimeImmutable())->setTimezone($tz);
     $to = $now->setTime(0, 0)->modify('+' . cfg()['book_ahead_days'] . ' days');
     $booked = [];
-    $s = db()->prepare("SELECT pay_id, slot, forma, name FROM bookings WHERE status IN ('pending','booked') AND slot >= ? ORDER BY slot");
+    $s = db()->prepare("SELECT pay_id, slot, forma, name, email FROM bookings WHERE status IN ('pending','booked') AND slot >= ? ORDER BY slot");
     $s->execute([$now->setTime(0, 0)->format(DATE_ATOM)]);
     foreach ($s as $r) {
         $t = prague($r['slot']);
         if ($t > $to->setTime(23, 59)) continue;
         $booked[$t->format('Y-m-d')][(int)$t->format('G')] = ['n' => $r['name'] ?: 'Bez jména', 'f' => $r['forma'],
-            'cas' => $t->format('G:i'), 'url' => substr(owner_url($r['pay_id']), strlen(site()))];
+            'cas' => $t->format('G:i'), 'e' => (bool)$r['email'], 'url' => substr(owner_url($r['pay_id']), strlen(site()))];
     }
     return ['version' => hours_version(), 'today' => $now->format('Y-m-d'), 'now' => $now->format(DATE_ATOM), 'to' => $to->format('Y-m-d'),
         'first_hour' => OWNER_FIRST_HOUR, 'last_hour' => OWNER_LAST_HOUR, 'min_notice_hours' => cfg()['min_notice_hours'],

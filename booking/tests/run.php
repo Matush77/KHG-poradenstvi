@@ -268,6 +268,24 @@ ok(str_starts_with($od['text'], 'Smazáno v kalendáři') && str_contains($od['t
 $dl = mail_owner_declined($fb, $w, owner_url('cs_test_free'));
 ok(str_contains($dl['text'], 'Rezervace platí dál') && $dl['reply_to'] === 'a@example.com', 'owner told about a declined invitation');
 
+// --- her move from the hours page (16 Nov): any whole hour 7-20 in the window, outside her hours too, never onto another session
+$d6 = (new DateTimeImmutable('+6 days', new DateTimeZone('Europe/Prague')))->format('Y-m-d');
+$ins->execute(['cs_test_other', (new DateTimeImmutable($d6 . ' 18:30', new DateTimeZone('Europe/Prague')))->format(DATE_ATOM), 0]);
+throws(fn() => owner_move('cs_test_free', $d6, '6:00'), 400, 'owner move before 7:00 refused');
+throws(fn() => owner_move('cs_test_free', $d6, '21:00'), 400, 'owner move after 20:00 refused');
+throws(fn() => owner_move('cs_test_free', $d6, '9:30'), 400, 'owner move off the hour refused');
+throws(fn() => owner_move('cs_test_free', (new DateTimeImmutable('-1 day'))->format('Y-m-d'), '10:00'), 400, 'owner move into the past refused');
+throws(fn() => owner_move('cs_test_free', (new DateTimeImmutable('+200 days'))->format('Y-m-d'), '10:00'), 400, 'owner move beyond the booking window refused');
+throws(fn() => owner_move('cs_test_free', $d6, '18:00'), 409, 'owner move next to a session at 18:30 refused (18:00)');
+throws(fn() => owner_move('cs_test_free', $d6, '19:00'), 409, 'owner move next to a session at 18:30 refused (19:00)');
+db()->prepare('INSERT INTO holds (slot, expires_at, who, browser) VALUES (?, ?, ?, ?)')
+    ->execute([(new DateTimeImmutable($d6 . ' 8:00', new DateTimeZone('Europe/Prague')))->format(DATE_ATOM), time() + 600, 'v-x', 'b-x']);
+throws(fn() => owner_move('cs_test_free', $d6, '8:00'), 409, 'owner move onto a time someone is paying for refused');
+$mv = owner_move('cs_test_free', $d6, '20:00');
+ok(prague($mv['slot'])->format('Y-m-d G:i') === $d6 . ' 20:00' && (int)$mv['moves'] === 1 && (int)$mv['client_moves'] === 0, 'owner moves outside her hours (20:00, no hours set at all)');
+db()->exec("DELETE FROM bookings WHERE pay_id = 'cs_test_other'"); db()->exec("DELETE FROM holds WHERE browser = 'b-x'");
+booking_update('cs_test_free', ['slot' => $in5d, 'moves' => 0]);
+
 // --- hold limit per visitor (holds without a Stripe session yet: no Stripe call needed)
 $_SERVER['REMOTE_ADDR'] = '203.0.113.7';
 $me = visitor();

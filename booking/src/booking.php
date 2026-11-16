@@ -455,9 +455,12 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
 
 /* A move to another free time of the same format. The calendar event (and its Meet link) moves with it;
    the client gets "Změna termínu" with a new .ics. No new payment, the client's link stays the same.
-   The owner moves any time. The client (decision 14 Nov): as often as they like, but only while a free
+   The client (decision 14 Nov): only to a free time, as often as they like, but only while a free
    cancel is still possible (36+ hours before the time booked now); later it is a cancellation. She gets
-   an e-mail every time, with the count, so a client who keeps postponing stands out. */
+   an e-mail every time, with the count, so a client who keeps postponing stands out.
+   The owner (16 Nov): her hours are the baseline, not a limit. Any whole hour OWNER_MOVE_FIRST..LAST within the
+   booking window, outside her hours too (as a drag in Google Calendar can), but never onto another session
+   (any format, within an hour either side) or a time someone is paying for right now. */
 function move_booking(string $payId, string $den, string $cas, string $by, ?DateTimeImmutable $now = null): array
 {
     $client = $by === 'client';
@@ -473,13 +476,27 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
     $new = slot_start($den, $cas);
     if ($new == $old) throw new ClientError('To je stejný termín.', 400);
     $taken = $client ? 'Tenhle termín už není volný, je potřeba vybrat jiný.' : 'Tenhle termín už není volný. Vyber prosím jiný.';
-    if (!in_array($new->format('G:i'), free_slots($new)[$b['forma']][$new->format('Y-m-d')] ?? [], true)) throw new ClientError($taken, 409);
+    if ($client) {
+        if (!in_array($new->format('G:i'), free_slots($new)[$b['forma']][$new->format('Y-m-d')] ?? [], true)) throw new ClientError($taken, 409);
+    } else {
+        $h = (int)$new->format('G');
+        if ($new->format('i') !== '00' || $h < OWNER_MOVE_FIRST || $h > OWNER_MOVE_LAST) throw new ClientError('Přesunout jde na celou hodinu mezi ' . OWNER_MOVE_FIRST . ':00 a ' . OWNER_MOVE_LAST . ':00.', 400);
+        if ($new <= $now) throw new ClientError('Tenhle čas už proběhl.', 400);
+        if ($new > slot_window($now)[1]) throw new ClientError('Tak daleko dopředu se zatím rezervovat nedá.', 400);
+    }
     $slot = $new->format(DATE_ATOM);
-    db_tx(function (PDO $pdo) use ($slot, $payId, $taken, $client) {
+    $at = $new->getTimestamp();
+    db_tx(function (PDO $pdo) use ($slot, $at, $payId, $taken, $client) {
         $s = $pdo->prepare("SELECT (SELECT COUNT(*) FROM holds WHERE slot = :s AND expires_at >= :now)
             + (SELECT COUNT(*) FROM bookings WHERE slot = :s AND status IN ('pending','booked','failed') AND pay_id != :p)");
         $s->execute(['s' => $slot, 'now' => time(), 'p' => $payId]);
         if ((int)$s->fetchColumn() > 0) throw new ClientError($taken, 409);
+        // a session moved off the hour (in Google Calendar, 18:30) still blocks the hours it touches
+        $o = $pdo->prepare("SELECT slot FROM bookings WHERE status IN ('pending','booked','failed') AND pay_id != ? AND slot LIKE ?");
+        $o->execute([$payId, substr($slot, 0, 10) . '%']);
+        foreach ($o->fetchAll(PDO::FETCH_COLUMN) as $other) {
+            if (abs(prague($other)->getTimestamp() - $at) < 3600) throw new ClientError($taken, 409);
+        }
         $pdo->prepare('UPDATE bookings SET slot = ?, moves = moves + 1, client_moves = client_moves + ?, mail_sent = 0, clash = 0, reminded = 0, moved_at = ?, updated_at = ? WHERE pay_id = ?')
             ->execute([$slot, $client ? 1 : 0, time(), time(), $payId]);
     });
@@ -522,9 +539,12 @@ function moved_mails(array $b, DateTimeImmutable $old, string $by): array
     return booking_get($payId);
 }
 
-function owner_move(string $payId, string $den, string $cas): array
+const OWNER_MOVE_FIRST = 7;    // her moves from the hours page: 7:00 ... 20:00 (owner, 16 Nov)
+const OWNER_MOVE_LAST = 20;
+
+function owner_move(string $payId, string $den, string $cas, ?DateTimeImmutable $now = null): array
 {
-    return move_booking($payId, $den, $cas, 'owner');
+    return move_booking($payId, $den, $cas, 'owner', $now);
 }
 
 function client_move(string $payId, string $den, string $cas, ?DateTimeImmutable $now = null): array
