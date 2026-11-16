@@ -356,5 +356,22 @@ ok(count(array_filter(owner_devices($d1['id']), fn($x) => $x['current'])) === 1,
 owner_logout($d2['id'], $d1['id']);
 ok(owner_device($d2['token']) === null && owner_device($d1['token']) !== null, 'signing out one device leaves the others');
 
+// --- 16 Nov bug hunt
+ok(smtp_over_limit("SMTP: expected 250, got 550-You have reached your daily limit for sending email. Please try again\r\n550 later."), 'the mailbox limit error is recognised');
+ok(!smtp_over_limit('SMTP: expected 235, got 535 Authentication failed'), 'a wrong password is not a limit');
+ok(mail_paused() === 0, 'mail not paused at first');
+state_set('mail_paused_until', (string)(time() + 600));
+ok(mail_paused() > time(), 'mail paused after a limit error');
+state_set('mail_paused_until', (string)(time() - 1));
+ok(mail_paused() === 0, 'the pause ends by itself');
+ok(book_paid(['id' => 'cs_test_othercopy', 'payment_status' => 'paid', 'metadata' => ['den' => $future, 'cas' => '10:00', 'forma' => 'online', 'kopie' => 'khg-elsewhere', 'email' => 'a@b.cz', 'jmeno' => 'Jana Nováková', 'telefon' => '']]) === null
+    && booking_get('cs_test_othercopy') === null, "another copy's payment (shared Stripe test account) is never booked here");
+db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, status, created_at, updated_at) VALUES ('cs_test_bh2_past', ?, 'online', 'a@b.cz', 'booked', 0, 0)")
+    ->execute([(new DateTimeImmutable('-2 hours'))->format(DATE_ATOM)]);
+throws(fn() => owner_cancel('cs_test_bh2_past'), 409, 'no refund once the session has taken place');
+db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, status, cancelled_by, hours_before, created_at, updated_at) VALUES ('cs_test_bh_delafter', ?, 'online', 'a@b.cz', 'cancelled', 'calendar', -1.5, 0, 0)")
+    ->execute([(new DateTimeImmutable('-3 hours'))->format(DATE_ATOM)]);
+throws(fn() => owner_cancel('cs_test_bh_delafter'), 409, 'no refund for a session deleted from the calendar after it started');
+
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";
 exit($fails ? 1 : 0);

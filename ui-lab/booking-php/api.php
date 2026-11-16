@@ -105,7 +105,7 @@ try {
             [$code, $s] = stripe('GET', 'checkout/sessions/' . $id);      // trust Stripe's API, not the body
             if ($code !== 200) out(500, ['error' => 'stripe']);           // 5xx: Stripe retries later
             $b = book_paid($s);
-            log_line('WEBHOOK', ['type' => $type, 'pay' => $id, 'status' => $b['status'] ?? 'unpaid']);
+            log_line('WEBHOOK', ['type' => $type, 'pay' => $id, 'status' => $b['status'] ?? (($s['metadata']['kopie'] ?? site_copy()) !== site_copy() ? 'other copy' : 'unpaid')]);
         } elseif ($type === 'checkout.session.expired' && $id !== '') {
             db()->prepare('DELETE FROM holds WHERE pay_id = ?')->execute([$id]);
             log_line('WEBHOOK', ['type' => $type, 'pay' => $id]);
