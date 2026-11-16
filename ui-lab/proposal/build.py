@@ -29,6 +29,12 @@ sub("https://share.google/GunHQdaRB3wMknJMA", "https://maps.google.com/?cid=1783
 sub('<img src="images/terapie-do-kapsy.webp"\n                             alt="Obálka knihy Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě"\n                             width="590"\n                             height="834"',
     '<img src="ui-lab/proposal/img/terapie-do-kapsy-240.webp"\n                             alt="Obálka knihy Terapie do kapsy: Jak se vyznat ve vztazích i sám v sobě"\n                             width="240"\n                             height="339"')
 
+# O mně (UI audit 16 Nov): the IVF group link said only "zde" and the next sentence hung on a <br>; two paragraphs, descriptive link
+page = re.sub(r'IVF procesem, kterou můžete najít <a (href="https://www\.facebook\.com/groups/1472251740565204/\?ref=share" target="_blank" rel="noopener")>zde</a>\.\n\s*<br>Skupina vznikla',
+              lambda m: 'IVF procesem. Skupinu najdete <a ' + m.group(1) + '>na Facebooku</a>.\n                        </p>\n                        <p class="highlighted-text">\n                            Skupina vznikla',
+              page, count=1)
+assert "Skupinu najdete" in page, "IVF paragraph not found"
+
 # lab page: resolve paths from site root, keep out of search
 sub("<head>", '<head>\n    <base href="/">\n    <meta name="robots" content="noindex">')
 

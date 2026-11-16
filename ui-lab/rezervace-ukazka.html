@@ -233,7 +233,7 @@ input[aria-invalid="true"] { border-color: var(--coral-ink); }
 .pay { font-size: 13px; color: var(--mute); }
 .done { display: grid; gap: 16px; max-width: 560px; }
 .done p { margin: 0; color: var(--slate); }
-.step { display: grid; gap: 20px; }
+.step { display: grid; gap: 20px; max-width: 520px; } /* UI audit 16 Nov, owner: the details step is one column at one width (the booking card no longer stretches past the fields) */
 
 /* Lab: payment inside the page (?pay=1|2|3). A mockup of Stripe's fields, nothing is loaded from Stripe or charged.
    pay=1 card fields in the details form, pay=2 their own step after the details, pay=3 Stripe's own embedded form. */
@@ -343,6 +343,25 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
 .p-6 .done .summary b { font-family: var(--f-head); font-weight: 500; font-size: 21px; line-height: 1.2; font-variation-settings: "SOFT" 100; }
 @media (min-width: 720px) { .p-7 .wrap { max-width: 760px; } .p-7 .cols { grid-template-columns: 320px 1fr; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* UI audit 16 Nov (same as redesign-ship): (1) an error field scrolls into view below the fixed header, label included;
+   (5) a visible page title with the back arrow beside it; on desktop the empty right column is a soft card. */
+label { scroll-margin-top: 84px; }
+.ttl { order: 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; margin: -6px -12px 0; }
+.ttl h1 { font-size: 28px; line-height: 1.2; text-align: center; grid-column: 2; }
+.ttl .bk-exit { grid-column: 1; grid-row: 1; }
+.ttl.quiet { display: none; }
+.ttl.noexit { display: block; margin-left: 0; margin-right: 0; }
+.bar { display: block; margin: 0; }
+@media (min-width: 720px) {
+  .ttl { grid-template-columns: 44px auto; justify-content: start; }
+  .ttl h1 { font-size: 34px; text-align: left; }
+  .bar { padding-left: 32px; }
+  .slots:has(> .hint) { align-content: stretch; }
+  .slots > .hint { display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center; background: var(--tint); border-radius: 20px; padding: 32px 24px; min-height: 300px; color: var(--slate); }
+  .slots > .hint .link { justify-self: center; text-align: center; }
+}
+@media (min-width: 1000px) { .ttl { margin-left: -56px; } .bar { padding-left: 0; } }
 </style>
 
 <script>(function(){var s=new URLSearchParams(location.search).get("sw");document.documentElement.classList.add("sw-"+(/^([1-9]|10)$/.test(s)?s:"8"));var d=new URLSearchParams(location.search).get("d");if(/^[1-3]$/.test(d))document.documentElement.classList.add("d-"+d);(new URLSearchParams(location.search).get("p")||"2,3,4,5").split(",").forEach(function(n){if(/^[1-7]$/.test(n))document.documentElement.classList.add("p-"+n);});var c=new URLSearchParams(location.search).get("c");document.documentElement.classList.add("c-"+(/^[1-6]$/.test(c)?c:"2"));})();</script>
@@ -351,13 +370,15 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
 
   <section class="panel">
     <div class="head">
-      <h1 id="title" class="sr">Objednat sezení</h1><!-- kept for screen readers and the page outline, not shown (owner 13 Nov) -->
+      <div class="ttl" id="ttl">
+        <a class="bk-exit" href="/ui-lab/proposal/" aria-label="Zpět"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <h1 id="title">Objednat sezení</h1>
+      </div>
       <div class="switch" role="group" aria-label="Forma sezení">
         <button class="fmt" data-f="online" aria-pressed="true"><span class="fmt-t">Online</span><small class="fmt-s">Videohovor Google Meet</small></button>
         <button class="fmt" data-f="osobne" aria-pressed="false"><span class="fmt-t">Osobně<span class="fmt-x"> v Ostravě</span></span><small class="fmt-s">Vítkovická 3299/3a</small></button>
       </div>
       <div class="bar" id="bar">
-        <a class="bk-exit" href="/ui-lab/proposal/" aria-label="Zpět"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
         <p class="facts" id="facts"></p>
       </div>
     </div>
@@ -552,7 +573,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
       document.getElementById(id + '-err').textContent = msg;
       if (msg && !first) first = el;
     });
-    if (first) first.focus();
+    if (first) { first.focus({ preventScroll: true }); first.closest('label').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
     return !first;
   }
   function clearOnInput(form) {
@@ -620,7 +641,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
         document.getElementById(id + '-err').textContent = msg;
         if (msg && !first) first = el;
       });
-      if (first) { first.focus(); return; }
+      if (first) { first.focus({ preventScroll: true }); first.closest('label').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); return; }
       if (PAY === 1 && !check(CARD_CHECKS)) return;
       var e = document.getElementById('e');
       state.email = e ? e.value.trim() : '';
@@ -795,7 +816,9 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
     renderHead();
     document.querySelector('.switch').hidden = state.step !== 1;
     document.getElementById('bar').hidden = state.step !== 1;
-    document.getElementById('title').hidden = state.step === 3;
+    document.querySelector('.bk-exit').hidden = state.step !== 1;
+    document.getElementById('ttl').classList.toggle('quiet', state.step === 3);
+    document.getElementById('ttl').classList.toggle('noexit', state.step !== 1);
     if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else if (state.step === 4) renderPay(); else renderStep3();
     syncUrl();
   }
