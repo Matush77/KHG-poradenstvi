@@ -911,6 +911,26 @@ ok(!in_array('cs_test_p2', db()->query("SELECT pay_id FROM holds WHERE who = 'wh
 db()->exec("DELETE FROM holds WHERE who = 'whoP'");
 unset($GLOBALS['SMTP_FAKE']);
 
+// --- 16 Nov (owner): the event and her e-mail like Google's booking pages
+$gb = ['pay_id' => 'cs_g1', 'forma' => 'osobne', 'name' => 'Jana <b>Nováková</b>', 'email' => 'j@example.com', 'phone' => '+420 600 000 000',
+    'note' => "Úzkosti\npřed zkouškami", 'slot' => '2030-03-04T10:00:00+01:00', 'event_id' => 'khgabc123', 'meet' => null, 'moves' => 0];
+ok(event_title($gb) === 'Terapie osobně (Jana <b>Nováková</b>)' && event_title(['forma' => 'online'] + $gb) === 'Terapie online (Jana <b>Nováková</b>)', 'google: event title "Terapie osobně (Jméno)"');
+$gd = event_description($gb);
+ok(str_contains($gd, '<b>Rezervoval(a)</b><br>Jana &lt;b&gt;Nováková&lt;/b&gt;<br>j@example.com<br>+420 600 000 000'), 'google: "Rezervoval(a)" with name, e-mail and phone, escaped');
+ok(str_contains($gd, '<b>S čím přicházíte?</b><br>Úzkosti<br>před zkouškami') && str_contains($gd, "1\u{00A0}100,00\u{00A0}Kč") && str_contains($gd, 'zvoňte až v čase'), 'google: the note, the paid amount and the arrival note');
+ok(!str_contains(event_description(['forma' => 'online'] + $gb), 'zvoňte') && !str_contains($gd, 'cs_g1'), 'google: no arrival note online, no payment id in the text');
+$om2 = mail_owner_new($gb, prague($gb['slot']), 'https://x/?b=1');
+ok(str_contains($om2['ics'], 'UID:khgabc123@google.com') && str_contains($om2['ics'], 'METHOD:PUBLISH') && str_contains($om2['ics'], 'LOCATION:' . ics_text(PLACE)), 'google: her e-mail carries the event (same UID as the Google event)');
+ok(str_contains($om2['text'], PLACE) && str_contains($om2['html'], h(PLACE)), 'google: her e-mail names the address in person');
+$om3 = mail_owner_new(['forma' => 'online', 'meet' => 'https://meet.google.com/abc-defg-hij'] + $gb, prague($gb['slot']), 'https://x/?b=1');
+ok(str_contains($om3['html'], 'background:#E8927C;border:1.5px solid #E8927C;color:#163A55">Připojit se přes Google Meet</a>') && str_contains($om3['text'], 'Google Meet: https://meet.google.com/abc-defg-hij') && str_contains($om3['ics'], 'LOCATION:https://meet.google.com/abc-defg-hij'), 'google: her e-mail has the Meet link online');
+ok(mail_owner_new(['event_id' => null] + $gb, prague($gb['slot']), 'u')['ics'] === null, 'google: no event yet, no calendar file');
+$sentEv = null;
+$FAKE = ['#POST .*/events\?#' => function ($m, $u, $body) use (&$sentEv) { $sentEv = json_decode($body, true); return [200, ['id' => 'x']]; }];
+gcal_create(prague($gb['slot']), 't', 'd', false, 'j@example.com', 'cs_g1');
+ok(($sentEv['attendees'][0]['email'] ?? '') === 'j@example.com' && ($sentEv['extendedProperties']['private']['platba'] ?? '') === 'cs_g1' && !isset($sentEv['conferenceData']),
+    'google: in person the client is a guest too, the payment kept out of sight');
+
 unset($GLOBALS['HTTP_FAKE']);
 
 echo "\n$n checks, $fails failed. Test e-mail: $tmp/test.eml\n";

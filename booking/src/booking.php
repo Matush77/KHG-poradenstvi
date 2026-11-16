@@ -507,10 +507,10 @@ function finish_booking(string $payId): array
     try {
         if (!$b['event_id']) {
             $clash = (bool)gcal_busy($start, $start->modify('+50 minutes'));
-            $contact = $online ? $b['email'] : $b['phone'];
-            $title = (lab() ? 'TEST · ' : '') . ($online ? 'Online' : 'Osobně') . ' · ' . ($b['name'] ?: 'klient');
-            $note = 'Rezervace z webu' . (lab() ? ' (lab, Stripe test)' : '') . '. Kontakt: ' . ($contact ?: '-') . '. Platba: ' . $payId;
-            $ev = gcal_create($start, $title, $note, $online, $online ? $b['email'] : null, $payId);
+            // worded like the events of Google's booking pages (owner, 16 Nov): "Terapie osobně (Jméno)", who booked,
+            // what they wrote, the amount; the client is a guest in both formats, as there
+            $title = (lab() ? 'TEST · ' : '') . event_title($b);
+            $ev = gcal_create($start, $title, event_description($b), $online, $b['email'] ?: null, $payId);
             $meet = $ev['hangoutLink'] ?? null;
             for ($i = 0; $online && !$meet && $i < 2; $i++) {   // usually there at once; else Google needs a moment
                 sleep(1);
