@@ -287,7 +287,8 @@ function owner_mail(array $b, DateTimeImmutable $start, string $subject, string 
 function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): array
 {
     $online = $b['forma'] !== 'osobne';
-    $subject = 'Nová rezervace: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start) . ' · ' . ($online ? 'online' : 'osobně');
+    // worded like Google's booking pages (owner, 16 Nov), so her inbox filters and habits keep working
+    $subject = 'Schůzka byla rezervována: Terapie ' . ($online ? 'online' : 'osobně') . ' (' . ($b['name'] ?: 'klient') . ') ' . cz_at($start);
     $note = trim((string)($b['note'] ?? ''));
     $buttons = ['Přesunout termín' => $ownerUrl . '&akce=presunout', 'Zrušit a vrátit peníze' => $ownerUrl . '&akce=zrusit'];
     [$panel, $panelTxt] = owner_panel($b, $start);

@@ -199,7 +199,7 @@ $ob = ['pay_id' => 'cs_test_abc', 'forma' => 'online', 'name' => 'Jana <b>Novák
     'note' => "Úzkosti\npřed zkouškami & <script>", 'clash' => 1];
 $om = mail_owner_new($ob, $w, owner_url('cs_test_abc'));
 ok($om['to'] === OWNER_MAIL && $om['reply_to'] === 'jana@example.com' && $om['ics'] === null, 'owner e-mail: to her, replies go to the client, no .ics');
-ok($om['subject'] === 'Nová rezervace: Jana <b>Nováková</b> · út 22. 12. v 13:00 · online', 'owner e-mail subject');
+ok($om['subject'] === 'Schůzka byla rezervována: Terapie online (Jana <b>Nováková</b>) v úterý 22. prosince v 13:00', 'owner e-mail subject, worded like Google\'s');
 ok(str_contains($om['html'], 'Jana &lt;b&gt;Nováková&lt;/b&gt;') && str_contains($om['html'], '&amp; &lt;script&gt;') && !str_contains($om['html'], '<script>'), 'owner e-mail: client text escaped');
 ok(str_contains($om['html'], 'Úzkosti<br />') && str_contains($om['html'], 'jiná událost') && str_contains($om['html'], '&amp;akce=presunout') && str_contains($om['html'], '&amp;akce=zrusit'), 'owner e-mail: note, clash warning, both buttons');
 $eml = mail_eml($om);
