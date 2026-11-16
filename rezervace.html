@@ -1259,7 +1259,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         var body = { f: state.f, date: key(state.date), time: state.time, name: state.name || '', email: state.email || '', phone: state.phone || '', note: state.note || '', pay: 0, mode: 'redirect' };
         fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
           .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
-          .then(function (j) { try { sessionStorage.setItem('khg-pay', '1'); } catch (x) {} location.href = j.url; })
+          .then(function (j) { try { sessionStorage.setItem('khg-pay', j.pay || '1'); } catch (x) {} location.href = j.url; })
           .catch(function (e) {
             // the server's message is written for the client (e.g. someone else is paying for this time right now)
             busy(btn, false, PRICE);
@@ -1337,11 +1337,13 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       });
 
       /* Back from Stripe's page without paying (its back arrow, or the phone's back button): end that Stripe page,
-         so the time is free for everyone at once, not after Stripe's 30 minutes. What the client typed stays. */
+         so the time is free for everyone at once, not after Stripe's 30 minutes. What the client typed stays.
+         Only this tab's Stripe page (its id is kept per tab): another tab may still be paying. */
       function releaseHeld() {
         var was; try { was = sessionStorage.getItem('khg-pay'); sessionStorage.removeItem('khg-pay'); } catch (x) {}
         if (!was) return Promise.resolve();
-        return fetch('/api/release', { method: 'POST', keepalive: true }).catch(function () {});
+        return fetch('/api/release', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pay: was === '1' ? '' : was }) }).catch(function () {});
       }
 
       function loadSlots() {

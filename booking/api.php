@@ -73,10 +73,14 @@ try {
         out(200, ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d')] + free_slots(null, true, browser_id()));
     }
 
-    if ($method === 'POST' && $route === 'checkout') out(200, ['url' => create_checkout(body_json())]);
+    if ($method === 'POST' && $route === 'checkout') out(200, create_checkout(body_json()));
 
-    // back from Stripe unpaid: end this browser's open Stripe pages (cookie-scoped, SameSite=Lax: no cross-site use)
-    if ($method === 'POST' && $route === 'release') out(200, ['freed' => release_browser_holds(browser_id())]);
+    // back from Stripe unpaid: end this tab's Stripe page, only within this browser's own holds
+    // (cookie-scoped, SameSite=Lax: no cross-site use)
+    if ($method === 'POST' && $route === 'release') {
+        $pay = (string)(body_json()['pay'] ?? '');
+        out(200, ['freed' => release_browser_holds(browser_id(), preg_match('/^cs_(test|live)_\w{1,200}$/', $pay) ? $pay : null)]);
+    }
 
     if ($method === 'GET' && $route === 'checkout') {
         $id = (string)($_GET['id'] ?? '');

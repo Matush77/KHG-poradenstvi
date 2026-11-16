@@ -40,9 +40,8 @@ a { color: var(--blue); text-underline-offset: 3px; }
 .keep { min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; }
 .ok { background: var(--tint); border-radius: 16px; padding: 14px 18px; color: var(--navy) !important; }
 .err { color: var(--coral-ink) !important; }
-.skel { height: 1.2em; border-radius: 8px; background: linear-gradient(90deg, #EFE9E1, #F6F1EA, #EFE9E1); }
+.skel { height: 1.2em; border-radius: 8px; background: #EFE9E1; }
 .skel.h { height: 34px; width: 60%; } .skel.s { height: 74px; border-radius: 16px; }
-@media (prefers-reduced-motion: no-preference) { .skel { background-size: 200% 100%; animation: sh 1.4s linear infinite; } @keyframes sh { to { background-position: -200% 0; } } }
 .contact { font-size: 15px; }
 a[href^="tel:"] { white-space: nowrap; }   /* the number never breaks in the middle */
 .btn.ghost { background: var(--card); border: 1.5px solid var(--line); }

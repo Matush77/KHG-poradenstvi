@@ -303,6 +303,12 @@ $hb->execute(['2027-01-13T11:00:00+01:00', 'cs_test_otherbrowser', time() + 600,
 $hb->execute(['2027-01-13T13:00:00+01:00', 'cs_test_gone', time() - 5, $me, $mine]);              // already run out
 ok(release_browser_holds($mine) === [] && (int)db()->query("SELECT COUNT(*) FROM holds WHERE slot LIKE '2027-01-13%'")->fetchColumn() === 3, 'a hold still being created, another browser\'s and an expired one are left alone');
 db()->exec("DELETE FROM holds WHERE slot LIKE '2027-01-13%'");
+$hb->execute(['2027-01-14T10:00:00+01:00', 'cs_test_tab_a', time() + 600, $me, $mine]);
+$hb->execute(['2027-01-14T11:00:00+01:00', 'cs_test_tab_b', time() + 600, $me, $mine]);
+ok(array_column(holds_to_release($mine, 'cs_test_tab_a'), 'pay_id') === ['cs_test_tab_a'], 'back in one tab: only that tab\'s Stripe page is ended, the other tab keeps paying');
+ok(holds_to_release('otherbrowser0000', 'cs_test_tab_a') === [], 'a Stripe id from another browser releases nothing');
+ok(count(holds_to_release($mine)) === 2, 'without an id (page from before): all of this browser\'s open Stripe pages, as before');
+db()->exec("DELETE FROM holds WHERE slot LIKE '2027-01-14%'");
 
 // --- reminders: 24 hours and 10 minutes before
 $now = time();

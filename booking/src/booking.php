@@ -147,16 +147,24 @@ function release_own_hold(?string $browser, string $slot): void
 }
 
 /* The client came back from Stripe's page to ours without paying (Stripe's back arrow or the phone's back button):
-   every open Stripe page of this browser is ended, so its time is free for everyone at once instead of after
-   Stripe's 30 minutes. A page already paid keeps its hold (the booking is on its way); one still being created
-   (no Stripe id yet) is left alone. Returns the times freed. */
-function release_browser_holds(?string $browser): array
+   that tab's Stripe page is ended, so its time is free for everyone at once instead of after Stripe's 30 minutes.
+   $pay is the Stripe page the tab opened; another tab of the same browser may still be paying on its own page
+   (16 Nov: going back in one tab ended the other's). Without $pay (a page opened before this change) every open
+   Stripe page of this browser goes, as before. A page already paid keeps its hold (the booking is on its way);
+   one still being created (no Stripe id yet) is left alone. Returns the times freed. */
+function holds_to_release(?string $browser, ?string $pay = null): array
 {
     if (!$browser) return [];
-    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE browser = ? AND pay_id IS NOT NULL AND expires_at >= ?');
-    $s->execute([$browser, time()]);
+    $s = db()->prepare('SELECT slot, pay_id FROM holds WHERE browser = ? AND pay_id IS NOT NULL AND expires_at >= ?'
+        . ($pay !== null ? ' AND pay_id = ?' : ''));
+    $s->execute($pay !== null ? [$browser, time(), $pay] : [$browser, time()]);
+    return $s->fetchAll();
+}
+
+function release_browser_holds(?string $browser, ?string $pay = null): array
+{
     $freed = [];
-    foreach ($s->fetchAll() as $h) {
+    foreach (holds_to_release($browser, $pay) as $h) {
         try {
             if (!expire_hold($h, 'later')) continue;
         } catch (ClientError $e) {
@@ -186,7 +194,7 @@ function cap_holds(string $who, int $now): void
 }
 
 /* Step 2 -> Stripe. Holds the slot for as long as the Stripe page lives (30 min), so two people can't pay for it. */
-function create_checkout(array $b): string
+function create_checkout(array $b): array
 {
     [$start, $meta] = parse_choice($b);
     $c = cfg();
@@ -231,7 +239,7 @@ function create_checkout(array $b): string
             db()->prepare('INSERT OR REPLACE INTO notes (pay_id, note, created_at) VALUES (?, ?, ?)')->execute([$s['id'], $note, time()]);
         }
         log_line('HOLD', ['slot' => $slot, 'pay' => $s['id']]);
-        return $s['url'];
+        return ['url' => $s['url'], 'pay' => $s['id']];   // the page keeps the id to end only its own Stripe page
     } catch (Throwable $e) {
         $release();
         if ($e instanceof ClientError) throw $e;
