@@ -8,7 +8,8 @@ declare(strict_types=1);
 const OWNER_COOKIE = 'khg_hodiny';
 const OWNER_DEVICE_DAYS = 365;
 const LOGIN_FAILS_VISITOR = 5;     // per visitor in 15 minutes
-const LOGIN_FAILS_ALL = 30;        // everyone together in an hour (many addresses guessing)
+const LOGIN_FAILS_ALL = 300;       // everyone together in an hour (many addresses guessing); high, so a stranger
+                                   // can't lock her out of a new sign-in with 30 guesses (16 Nov)
 
 /* "Chrome · Windows": enough to tell her devices apart in the list, nothing more is kept. */
 function device_label(string $ua): string
