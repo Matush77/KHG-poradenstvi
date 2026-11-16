@@ -198,7 +198,9 @@ try {
         if (!$dev) out(401, ['error' => 'Přihlas se.', 'login' => true]);
         if ($method === 'GET' && $route === 'hodiny') {
             owner_cookie($_COOKIE[OWNER_COOKIE], OWNER_DEVICE_DAYS);   // a device in use stays signed in
-            out(200, hours_view() + ['devices' => owner_devices($dev['id'])]);
+            $busy = hours_busy();
+            out(200, hours_view() + ['cal' => $busy === null ? null : (object)array_map(fn($x) => (object)$x, $busy),
+                'devices' => owner_devices($dev['id'])]);
         }
         if ($method === 'POST' && $route === 'hodiny/ulozit') {
             $v = hours_save(is_array($j['week'] ?? null) ? $j['week'] : [], is_array($j['days'] ?? null) ? $j['days'] : [],

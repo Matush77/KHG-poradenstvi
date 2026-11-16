@@ -118,6 +118,11 @@ h1 { white-space: nowrap; }
 .ses.osobne .acts > * { border-color: rgba(22,58,85,.3); }
 .ses.osobne .acts .pri { background: var(--navy); color: #fff; border-color: var(--navy); }
 .ses .note { font-size: 13px; opacity: .85; }
+/* busy in her Google calendar (a client booked there, her own event): no name, only that the hour is taken */
+.cal { border-radius: 14px; background: var(--soft); color: var(--slate); padding: 7px 12px; min-height: 52px; display: grid; align-content: center; }
+.cal b { font-size: 15px; font-weight: 600; color: var(--navy); line-height: 20px; }
+.cal span { font-size: 13px; line-height: 18px; }
+.past .cal b { color: var(--mute); }
 .quick { display: flex; flex-wrap: wrap; gap: 0 20px; padding: 6px 0 0 60px; min-height: 46px; }
 .link { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 40px; font-weight: 500; font-size: 15px; text-align: left; }
 .foot { margin: 24px 0 0; padding-top: 8px; border-top: 1px solid var(--line); display: grid; justify-items: start; }
@@ -168,11 +173,13 @@ h1 { white-space: nowrap; }
 .slot.free.online { background: var(--sky); border-color: var(--sky); }
 .slot.free.osobne { background: var(--peach); border-color: var(--peach); }
 .slots .slot:disabled { background: var(--soft); border-color: transparent; color: var(--mute); cursor: default; }
+.slot.cal { background: var(--soft); border: 1.5px dashed rgba(22,58,85,.3); }
 .slot[aria-pressed="true"] { border: 2px solid var(--navy); box-shadow: 0 0 0 1px var(--navy) inset; }
 .key { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--slate); margin: 8px 0 0; }
 .key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 1.5px solid var(--line); }
 .key i.f { background: var(--sky); border-color: var(--sky); } .osobne-key .key i.f { background: var(--peach); border-color: var(--peach); }
 .key i.t { background: var(--soft); border-color: var(--soft); }
+.key i.c { background: var(--soft); border: 1.5px dashed rgba(22,58,85,.3); }
 .warn { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--peach); font-size: 14px; min-height: 0; }
 .warn[hidden] { display: none; }
 .warn.err { background: #FBE3DC; }
@@ -216,7 +223,7 @@ h1 { white-space: nowrap; }
     <p class="from" id="mvFrom"></p>
     <div class="mdays" id="mvDays" role="group" aria-label="Den"></div>
     <div class="slots" id="mvSlots" role="group" aria-label="Čas"></div>
-    <div class="key" aria-hidden="true"><span><i class="f"></i>tvoje hodiny</span><span><i></i>mimo hodiny, jde taky</span><span><i class="t"></i>obsazeno</span></div>
+    <div class="key" aria-hidden="true"><span><i class="f"></i>tvoje hodiny</span><span><i></i>mimo hodiny, jde taky</span><span><i class="c"></i>v kalendáři</span><span><i class="t"></i>obsazeno</span></div>
     <p class="warn" id="mvWarn" role="status" hidden></p>
     <div class="go"><button class="b" id="mvGo" disabled>Vyber nový čas</button>
       <p id="mvNote"></p>
@@ -233,6 +240,7 @@ h1 { white-space: nowrap; }
   var MOVE_FIRST = 7, MOVE_LAST = 20;   // booking.php OWNER_MOVE_FIRST / LAST
   var HOURS = [], HOLIDAYS = {}, MIN_NOTICE_H = 24;
   var week = { online: {}, osobne: {} }, over = { online: {}, osobne: {} }, booked = {};
+  var cal = {}, calOk = true;   // hours busy in her Google calendar ('Y-m-d' -> {hour: 1}); calOk false: Google not read
   var savedWeek, savedOver, version = 0, now, today0, last, saving = false;
   var state = { sel: null, wk: null, month: false, my: null, reg: false, wd: 1 };
   var wideMq = matchMedia('(min-width: 900px)');
@@ -277,7 +285,9 @@ h1 { white-space: nowrap; }
   function wdPend(wd) { return F.some(function (f) { return diff(week[f][wd] || [], savedWeek[f][wd] || []) > 0; }); }
   function at(k, h) { var d = dateOf(k); return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h); }
   function future(k, h) { return at(k, h) > now; }
-  function openCount(k) { var s = {}; F.forEach(function (f) { hoursFor(f, k).forEach(function (h) { if (future(k, h) && !(booked[k] || {})[h]) s[h] = 1; }); }); return Object.keys(s).length; }
+  // busy in Google and not one of our own sessions (those show as the client's card)
+  function calBusy(k, h) { return !!(cal[k] || {})[h] && !(booked[k] || {})[h]; }
+  function openCount(k) { var s = {}; F.forEach(function (f) { hoursFor(f, k).forEach(function (h) { if (future(k, h) && !(booked[k] || {})[h] && !calBusy(k, h)) s[h] = 1; }); }); return Object.keys(s).length; }
   function nBooked(k) { return Object.keys(booked[k] || {}).length; }
   function inRange(d) { return d >= today0 && d <= last; }
   function dayLabel(k) { var d = dateOf(k); return cap(DAYS[d.getDay()]) + ' ' + d.getDate() + '. ' + MONTHS[d.getMonth()]; }
@@ -326,12 +336,14 @@ h1 { white-space: nowrap; }
   }
   function dayBtn(d, cls, strip) {
     var k = key(d), n = nBooked(k), open = openCount(k), hol = HOLIDAYS[k], off = !inRange(d);
+    // open hours, but every one taken in Google Calendar: full, not closed
+    var full = !open && F.some(function (f) { return hoursFor(f, k).some(function (h) { return future(k, h); }); });
     var label = DAYS[d.getDay()] + ' ' + d.getDate() + '. ' + MONTHS[d.getMonth()] + ', ' + (n ? plural(n, 'sezení', 'sezení', 'sezení') + ', ' : '') +
-      (open ? 'volno ' + open + ' h' : hol ? 'svátek, zavřeno' : 'zavřeno') + (dayPend(k) ? ', neuloženo' : '');
-    return '<button class="' + cls + (open || n ? '' : ' closed') + (+d === +today0 ? ' today' : '') + (dayPend(k) ? ' pend' : '') + '" data-k="' + k + '" aria-pressed="' + (k === state.sel) +
+      (open ? 'volno ' + open + ' h' : full ? 'plno' : hol ? 'svátek, zavřeno' : 'zavřeno') + (dayPend(k) ? ', neuloženo' : '');
+    return '<button class="' + cls + (open || n || full ? '' : ' closed') + (+d === +today0 ? ' today' : '') + (dayPend(k) ? ' pend' : '') + '" data-k="' + k + '" aria-pressed="' + (k === state.sel) +
       '" aria-label="' + label + '"' + (off ? ' disabled' : '') + '>' +
-      (strip ? '<small>' + SH[d.getDay()] + '</small><b>' + d.getDate() + '</b><i' + (n ? ' class="n">' + n : '>' + (off ? '' : hol ? 'svátek' : open ? '' : 'zavř.')) + '</i>'
-        : '<b>' + d.getDate() + '</b>' + (n ? '<span class="dot"></span>' : '') + '<i' + (n ? ' class="n">' + n : '>' + (off ? '' : hol ? 'svátek' : open ? open + ' h' : 'zavř.')) + '</i>') + '</button>';
+      (strip ? '<small>' + SH[d.getDay()] + '</small><b>' + d.getDate() + '</b><i' + (n ? ' class="n">' + n : '>' + (off ? '' : open ? '' : full ? 'plno' : hol ? 'svátek' : 'zavř.')) + '</i>'
+        : '<b>' + d.getDate() + '</b>' + (n ? '<span class="dot"></span>' : '') + '<i' + (n ? ' class="n">' + n : '>' + (off ? '' : open ? open + ' h' : full ? 'plno' : hol ? 'svátek' : 'zavř.')) + '</i>') + '</button>';
   }
 
   /* --- the day: one row per hour */
@@ -347,7 +359,8 @@ h1 { white-space: nowrap; }
     rows.sort(function (a, b) { return a - b; });
     var n = nBooked(k), changed = F.some(function (f) { return !!over[f][k]; }), anyOpen = F.some(function (f) { return hoursFor(f, k).some(function (h) { return future(k, h); }); });
     var side = changed ? '<span class="chg">' + (anyOpen ? 'upravený den' : 'zavřeno') + '</span>' : hol ? '<span>' + esc(hol) + ', běžně zavřeno</span>' : n ? '<span>' + plural(n, 'sezení', 'sezení', 'sezení') + '</span>' : '';
-    var html = '<div class="dhead"><h2>' + dayLabel(k) + '</h2>' + side + '</div><div class="hrs">';
+    var html = (calOk ? '' : '<p class="intro err">Google Kalendář se teď nepodařilo načíst, takže tu chybí časy, které máš obsazené v něm.</p>') +
+      '<div class="dhead"><h2>' + dayLabel(k) + '</h2>' + side + '</div><div class="hrs">';
     rows.forEach(function (hr) {
       var b = bk[hr], past = !future(k, hr);
       html += '<div class="hr' + (past ? ' past' : '') + '"><time>' + (b ? esc(b.cas) : hr + ':00') + '</time>';
@@ -357,6 +370,9 @@ h1 { white-space: nowrap; }
           (mine || past ? '' : '<span>mimo tvoje hodiny</span>') + '</div>' +
           (past ? '<div class="note">' + (at(k, hr + 1) > now ? 'Právě probíhá.' : 'Proběhlo.') + '</div>'
             : '<div class="acts"><button class="pri" data-mv="' + hr + '">Přesunout</button><a href="' + esc(b.url) + '">Zrušit…</a></div>') + '</div>';
+      } else if (calBusy(k, hr)) {
+        // her hours under it stay as they are: if the hour frees up in Google, the switches come back
+        html += '<div class="cal"><b>Obsazeno v Google Kalendáři</b><span>Klient nebo tvoje událost.</span></div>';
       } else {
         html += toggles(hr, F.map(function (f) { return hoursFor(f, k).indexOf(hr) > -1; }),
           F.map(function (f) { return (hoursFor(f, k).indexOf(hr) > -1) !== (savedFor(f, k).indexOf(hr) > -1); }), past);
@@ -508,11 +524,11 @@ h1 { white-space: nowrap; }
   function renderSlots() {
     var k = mv.day, b = mv.b, d = dateOf(k), h = '';
     for (var hr = MOVE_FIRST; hr <= MOVE_LAST; hr++) {
-      var self = k === mv.k && hr === mv.h, other = takenBy(k, hr, b), mine = hoursFor(b.f, k).indexOf(hr) > -1;
+      var self = k === mv.k && hr === mv.h, other = takenBy(k, hr, b), mine = hoursFor(b.f, k).indexOf(hr) > -1, inCal = !self && calBusy(k, hr);
       var why = !future(k, hr) ? 'proběhlo' : self ? 'teď' : other ? other.n.split(' ')[0] : '';
-      h += '<button class="slot ' + b.f + (mine ? ' free' : '') + '" data-h="' + hr + '" aria-pressed="' + (mv.to === hr) + '"' + (why ? ' disabled' : '') +
-        ' aria-label="' + hr + ':00, ' + (why ? (why === 'teď' ? 'současný čas' : why === 'proběhlo' ? 'proběhlo' : 'obsazeno') : mine ? 'tvoje hodina' : 'mimo tvoje hodiny') + '"><b>' + hr + ':00</b><small>' +
-        esc(why || (mine ? 'volno' : 'mimo')) + '</small></button>';
+      h += '<button class="slot ' + b.f + (inCal && !why ? ' cal' : mine ? ' free' : '') + '" data-h="' + hr + '" aria-pressed="' + (mv.to === hr) + '"' + (why ? ' disabled' : '') +
+        ' aria-label="' + hr + ':00, ' + (why ? (why === 'teď' ? 'současný čas' : why === 'proběhlo' ? 'proběhlo' : 'obsazeno') : inCal ? 'obsazeno v Google Kalendáři' : mine ? 'tvoje hodina' : 'mimo tvoje hodiny') + '"><b>' + hr + ':00</b><small>' +
+        esc(why || (inCal ? 'kalendář' : mine ? 'volno' : 'mimo')) + '</small></button>';
     }
     $('mvSlots').innerHTML = h;
     var go = $('mvGo');
@@ -531,7 +547,8 @@ h1 { white-space: nowrap; }
     var t = e.target.closest('[data-h]'); if (!t || t.disabled || mv.busy) return;
     mv.to = +t.dataset.h; renderSlots();
     var mine = hoursFor(mv.b.f, mv.day).indexOf(mv.to) > -1;
-    warn(mine ? '' : 'Tohle je mimo tvoje ' + (mv.b.f === 'online' ? 'online' : 'osobní') + ' hodiny. Jde to, jen ať je to schválně. Soukromé události z Google Kalendáře tu nevidíš.');
+    warn(calBusy(mv.day, mv.to) ? 'V tuhle dobu už máš něco v Google Kalendáři (klienta nebo svou událost). Přesuň sem jen, když víš, že to jde.'
+      : mine ? '' : 'Tohle je mimo tvoje ' + (mv.b.f === 'online' ? 'online' : 'osobní') + ' hodiny. Jde to, jen ať je to schválně.');
   });
   function closeMove() { if (!mv || mv.busy) return; $('mv').classList.remove('open'); mv = null; }
   $('mvX').addEventListener('click', closeMove); $('scrim').addEventListener('click', closeMove);
@@ -595,6 +612,7 @@ h1 { white-space: nowrap; }
       if (j._status === 401) { showLogin(); return; }
       HOURS = []; for (var h = j.first_hour; h <= j.last_hour; h++) HOURS.push(h);
       HOLIDAYS = j.holidays || {}; MIN_NOTICE_H = j.min_notice_hours; booked = j.booked || {};
+      calOk = !!j.cal; cal = j.cal || {};
       version = j.version;
       // keepDraft: only this device's own unsaved changes go on top of what the server has now
       var mine = keepDraft && savedWeek && changes() ? payload() : null, oldWeek = savedWeek;
