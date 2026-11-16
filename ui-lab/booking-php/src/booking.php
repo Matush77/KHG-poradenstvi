@@ -319,8 +319,10 @@ function finish_booking(string $payId): array
     return booking_get($payId);
 }
 
-/* Client cancels from the e-mail link. 36+ hours before: full refund. Later: no refund. Always: the slot frees up. */
-function cancel_booking(string $payId, ?DateTimeImmutable $now = null): array
+/* Client cancels from the e-mail link. 36+ hours before: full refund. Later: no refund. Always: the slot frees up.
+   $expectRefund: the page told the client the money comes back. If the 36 hours ran out while they were reading it,
+   nothing is cancelled (16 Nov test: a click at 35:59 cancelled without the promised refund). */
+function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $expectRefund = false): array
 {
     $b = booking_get($payId);
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
@@ -329,6 +331,9 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null): array
     $now ??= new DateTimeImmutable();
     $hours = (prague($b['slot'])->getTimestamp() - $now->getTimestamp()) / 3600;
     if ($hours <= 0) throw new ClientError('Sezení už začalo nebo proběhlo, zrušit ho nejde.', 400);
+    if ($expectRefund && $hours < cfg()['free_cancel_hours']) {
+        throw new ClientError('Mezitím uplynula lhůta 36 hodin, platba by se už nevrátila. Termín zůstává, nic se nezměnilo.', 409);
+    }
     $fields = ['status' => 'cancelled', 'cancelled_by' => 'client', 'hours_before' => round($hours, 1)];
     if ($hours >= cfg()['free_cancel_hours']) {
         [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
@@ -391,8 +396,15 @@ function refund_full(string $payId, string $why): array
 {
     [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
     if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Platbu se teď nepodařilo najít. Zkus to prosím znovu.', 502);
-    [$code, $r] = stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
+    $refund = fn() => stripe('POST', 'refunds', ['payment_intent' => $s['payment_intent'], 'reason' => 'requested_by_customer',
         'metadata' => ['duvod' => $why]], 'cancel-' . $payId);
+    [$code, $r] = $refund();
+    // her phone and laptop at once: Stripe refuses the second while the first runs (409); a moment later the
+    // same key gives back the first one's refund
+    if ($code === 409) {
+        sleep(2);
+        [$code, $r] = $refund();
+    }
     if ($code !== 200) {
         log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'error' => $r['error']['message'] ?? null]);
         throw new ClientError('Vrácení peněz se nepovedlo, nic se nezměnilo. Zkus to prosím znovu.', 502);
@@ -415,6 +427,9 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
         throw new ClientError('Sezení už proběhlo, platba se nevrací.', 409);
     }
     $fields = refund_full($payId, $refundOnly ? 'vraceno terapeutkou po zruseni' : 'zruseno terapeutkou');
+    $set = db()->prepare('UPDATE bookings SET refund_id = ? WHERE pay_id = ? AND refund_id IS NULL');
+    $set->execute([$fields['refund_id'], $payId]);
+    if ($set->rowCount() === 0) return booking_get($payId);   // the other request got there first
     if (!$refundOnly) {
         $fields += ['status' => 'cancelled', 'cancelled_by' => 'owner',
             'hours_before' => round((prague($b['slot'])->getTimestamp() - $now->getTimestamp()) / 3600, 1)];

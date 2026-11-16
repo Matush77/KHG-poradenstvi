@@ -141,7 +141,7 @@ try {
 
     if ($method === 'POST' && $route === 'cancel') {
         $j = body_json();
-        $b = cancel_booking(signed((string)($j['b'] ?? ''), (string)($j['t'] ?? '')));
+        $b = cancel_booking(signed((string)($j['b'] ?? ''), (string)($j['t'] ?? '')), null, ($j['refund'] ?? null) === true);
         out(200, ['cancelled' => true, 'refund' => $b['refund_id'] ? ['id' => $b['refund_id'], 'status' => $b['refund_status']] : null,
             'hours_before' => $b['hours_before']]);
     }

@@ -140,6 +140,9 @@ ok(is_file($f) && str_contains(file_get_contents($f), 'To: <a@b.cz>'), 'client c
 ok(!is_file(cfg()['outbox'] . '/cs_test_late-client-cancelled.eml'), 'no e-mail address: no client e-mail');
 db()->prepare("INSERT INTO bookings (pay_id, slot, forma, status, created_at, updated_at) VALUES ('cs_test_past', ?, 'online', 'booked', 0, 0)")->execute([(new DateTimeImmutable('-5 minutes'))->format(DATE_ATOM)]);
 throws(fn() => cancel_booking('cs_test_past'), 400, 'started session can not be cancelled');
+db()->prepare("INSERT INTO bookings (pay_id, slot, forma, status, created_at, updated_at) VALUES ('cs_test_promised', ?, 'online', 'booked', 0, 0)")->execute([date(DATE_ATOM, time() + 20 * 3600)]);
+throws(fn() => cancel_booking('cs_test_promised', null, true), 409, 'the page promised a refund but 36 h ran out meanwhile: nothing is cancelled');
+ok(booking_get('cs_test_promised')['status'] === 'booked', '...and the booking stays');
 db()->prepare("INSERT INTO bookings (pay_id, slot, forma, status, created_at, updated_at) VALUES ('cs_test_pend', ?, 'online', 'pending', 0, 0)")->execute([$soon]);
 throws(fn() => cancel_booking('cs_test_pend'), 409, 'booking still processing can not be cancelled yet');
 throws(fn() => cancel_booking('cs_test_none'), 404, 'unknown booking');
