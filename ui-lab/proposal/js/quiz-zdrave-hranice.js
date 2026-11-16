@@ -185,7 +185,7 @@ class BoundariesQuiz {
         this.liveRegion.textContent = `Otázka ${this.currentQuestion + 1} z ${quizConfig.questions.length}: ${question.text}`;
 
         if (shouldScroll) {
-            this.quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            this.quizSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
             this.questionText.focus({ preventScroll: true });
         }
     }
@@ -257,7 +257,7 @@ class BoundariesQuiz {
 
         title.setAttribute('tabindex', '-1');
         title.focus();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
 
     saveProgress() {

@@ -481,9 +481,10 @@ def build_page(name, layer):
                            r'<h2 class="blog-card-title"><a href="\3" class="blog-card-link">\1</a></h2>\2', p, flags=re.S)
             assert n >= 10, name
         # the title band is shorter now, so the first row of illustrations is on the first screen: load it eagerly
-        # (the LCP image must not be lazy); the first one, the only one visible on a phone, gets priority
+        # (the LCP image must not be lazy); the first one, the only one visible on a phone, gets priority.
+        # 16 Nov: Blog = the lead card + the first row of three (desktop); Kvízy = all four (two rows on a tablet)
         lazy = 'loading="lazy" decoding="async"'
-        first_row = 3 if name == "blog.html" else 2
+        first_row = 4
         assert p.count(lazy) >= first_row, name
         p = p.replace(lazy, 'fetchpriority="high" decoding="async"', 1).replace(lazy, 'decoding="async"', first_row - 1)
         # the logo already leads home, as on Ceník
@@ -555,6 +556,9 @@ def build_page(name, layer):
         # result tips: the first three, not seven
         js, n = re.subn(r'result\.recommendations\.forEach', 'result.recommendations.slice(0, 3).forEach', js)
         assert n == 1, name
+        # no smooth scrolling for visitors who turned animations off (16 Nov)
+        js, n = re.subn(r"behavior: 'smooth'", "behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'", js)
+        assert n >= 2, name
         (here / "js" / m.group(1)).write_text(re.sub(VY, lambda k: k.group(1).lower(), js), encoding="utf-8")
         p = p.replace(m.group(0), "ui-lab/proposal/js/" + m.group(1) + "?v=lab1")
 
