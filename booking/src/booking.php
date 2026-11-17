@@ -331,9 +331,16 @@ function book_paid(array $s): ?array
     // she may have refunded it in her Stripe dashboard before the site booked it (webhook late or lost). Such a payment
     // is never confirmed (17 Nov review, second list). Asked for every new booking, however fresh the payment (third
     // list: a refund within 10 minutes was confirmed): one Stripe call, only when a booking is made.
+    // Stripe not answering: not confirmed yet either. It waits as a paid booking not in the calendar ('failed': the time
+    // is held, the page says it is being processed) and the safety net asks again before the event and the confirmation
+    // (17 Nov retest: with the lookup down a refunded payment was confirmed, and recovery left it booked)
     $refund = null;
+    $unchecked = false;
     if ($pi && !booking_get($payId)) {
-        try { $refund = refunds_of($pi, $amount)['full']; } catch (Throwable $e) { /* not known: booked as usual, the safety net compares later */ }
+        try { $refund = refunds_of($pi, $amount)['full']; } catch (Throwable $e) {
+            $unchecked = true;
+            log_line('REFUND_CHECK_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
+        }
     }
     $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start, $past, $pi, $amount, $refund) {
         if (booking_get($payId)) return false;
@@ -364,6 +371,10 @@ function book_paid(array $s): ?array
     if ($claimed !== true) {
         log_line($claimed === 'double' ? 'DOUBLE_PAYMENT' : 'PAID_TOO_LATE', ['pay' => $payId, 'slot' => $start->format(DATE_ATOM)]);
         return refund_double($payId);
+    }
+    if ($unchecked) {
+        booking_update($payId, ['status' => 'failed', 'error' => 'refund check: Stripe did not answer']);
+        return booking_get($payId);
     }
     return finish_booking($payId);
 }
@@ -554,6 +565,29 @@ function finish_booking(string $payId): array
         log_line('PAID_TOO_LATE', ['pay' => $payId, 'slot' => $b['slot'], 'after' => 'calendar retry']);
         return refund_double($payId);
     }
+    if (!$b['event_id'] && $b['status'] === 'failed') {
+        // before a late event and confirmation: the money may have gone back meanwhile (her dashboard), and the first
+        // try may not have been able to ask (book_paid with Stripe down). Not known: it waits for the next run
+        try {
+            [$pi, $amount] = booking_payment($b);
+            $full = refunds_of($pi, $amount)['full'];
+        } catch (Throwable $e) {
+            booking_update($payId, ['error' => substr('refund check: ' . $e->getMessage(), 0, 500)]);
+            log_line('REFUND_CHECK_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
+            return booking_get($payId);
+        }
+        if ($full) {
+            // paid, refunded before it was ever confirmed: never booked, as in book_paid
+            $s = db()->prepare("UPDATE bookings SET status = 'cancelled', cancelled_by = 'refunded', owner_mailed = 1, refund_id = ?,
+                refund_status = ?, error = NULL, updated_at = ? WHERE pay_id = ? AND status = 'failed' AND event_id IS NULL");
+            $s->execute([$full['id'], (string)$full['status'], time(), $payId]);
+            if ($s->rowCount()) {
+                log_line('PAID_ALREADY_REFUNDED', ['pay' => $payId, 'refund' => $full['id'], 'after' => 'retry']);
+                mail_queued($payId . '-refund-found', $payId, 'owner_refund_found');
+            }
+            return booking_get($payId);
+        }
+    }
     try {
         if (!$b['event_id']) {
             $clash = (bool)gcal_busy($start, $start->modify('+50 minutes'));
@@ -619,6 +653,12 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
             // the first request has cancelled it meanwhile: that is the answer, not an error
             if (($done = booking_get($payId)) && $done['status'] === 'cancelled') return cancel_answer($payId);
             log_line('REFUND_FAILED', ['pay' => $payId, 'code' => $code, 'status' => $r['status'] ?? null, 'error' => $r['error']['message'] ?? null]);
+            if (refund_unknown($code) && empty($r['checked'])) {
+                // no answer from Stripe: the refund may have gone through. Never "failed" then (17 Nov retest: the client was
+                // told it failed, then recovery cancelled it with the money back). The same key never refunds twice, and the
+                // safety net finishes a refund Stripe did make (refund_reconcile: cancelled, the client gets the e-mail)
+                throw new ClientError('Platební brána teď neodpověděla, nevíme jistě, jestli se vrácení provedlo. Pokud ano, do pár minut přijde e-mail o zrušení. Pokud ne, stačí to zkusit znovu, peníze se vrátí jen jednou.', 503);
+            }
             throw new ClientError('Vrácení peněz se nepovedlo, termín zůstává. Pomůže telefon: ' . PHONE . '.', 502);
         }
         $fields += ['refund_id' => $r['id'], 'refund_status' => $r['status']];
@@ -873,6 +913,12 @@ function stripe_refund(string $paymentIntent, int $amount, string $why, string $
     } catch (RuntimeException $e) {
         [$code, $r] = [0, ['error' => ['message' => $e->getMessage()]]];   // no answer: Stripe may have made it anyway
     }
+    if (refund_unknown($code)) {
+        // no answer (or Stripe's own error): once more with the same key. Stripe gives back the refund it made, or makes
+        // it now; never a second one (17 Nov retest: a refund whose answer was lost was reported as failed)
+        sleep(1);
+        try { [$code, $r] = $send(); } catch (RuntimeException $e) { [$code, $r] = [0, ['error' => ['message' => $e->getMessage()]]]; }
+    }
     if ($code === 200) return [$code, $r];
     // no answer, or a refusal: a full refund Stripe already made for this payment is the answer (not the one that
     // failed, and not a partial one: the rest of the money would never go back)
@@ -889,7 +935,15 @@ function stripe_refund(string $paymentIntent, int $amount, string $why, string $
         log_line('REFUND_FOUND', ['refund' => $alive[0]['id'], 'code' => $code, 'refunds' => count($alive), 'total' => $total]);
         return [200, $alive[0]];
     }
+    // Stripe's list was read and holds no such refund: the answer is known after all (no refund)
+    if ($lc === 200) $r['checked'] = true;
     return [$code, $r];
+}
+
+/* Stripe's answer says nothing about whether the refund was made: no answer, a timeout or Stripe's own error. */
+function refund_unknown(int $code): bool
+{
+    return $code === 0 || $code === 409 || $code === 429 || $code >= 500;
 }
 
 /* Full refund through Stripe (her cancel, her refund after a cancellation, a double payment). */
