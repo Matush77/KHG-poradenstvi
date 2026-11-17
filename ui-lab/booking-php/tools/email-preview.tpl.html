@@ -37,6 +37,8 @@ main{padding:20px 16px 48px;background:var(--stage);overflow:hidden}
 .meta .subj{font-size:17px;font-weight:600;color:#111;margin-bottom:4px}
 .meta .att{margin-top:6px;display:inline-block;background:#f1f1f1;border-radius:8px;padding:3px 10px;font-size:13px}
 iframe{display:block;width:100%;border:0}
+.client.dark .screen,.client.dark .meta{background:#1F1F1F;color:#E3E3E3}
+.client.dark .meta *{color:inherit}
 .scaler{margin:0 auto}
 details{max-width:640px;margin:20px auto 0;background:#fff;border-radius:12px;padding:12px 16px}
 details pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,monospace;margin:12px 0 0}
@@ -65,6 +67,10 @@ details pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,monospace;marg
     <button data-v="online" aria-pressed="true">Online</button>
     <button data-v="osobne" aria-pressed="false">In person</button>
   </div>
+  <div class="seg" id="theme" role="group" aria-label="Mail app theme">
+    <button data-v="light" aria-pressed="true">Light</button>
+    <button data-v="dark" aria-pressed="false">Dark</button>
+  </div>
 </header>
 <div class="layout">
   <nav id="list"></nav>
@@ -91,7 +97,9 @@ details pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,monospace;marg
 const DATA = /*DATA*/null;
 const WIDTHS = {phone: 412, tablet: 768, desktop: 1024};
 const BEZEL = {phone: 12, tablet: 24, desktop: 0};
-const state = {who: 'client', device: 'phone', forma: 'online', id: 'confirm'};
+const state = {who: 'client', device: 'phone', forma: 'online', id: 'confirm', theme: 'light'};
+// Dark: what a dark mail app gives an e-mail that sets no colours of its own (Gmail app: dark ground, light text, light-blue links)
+const DARK = '<style>html{color-scheme:dark}body{background:#1F1F1F;color:#E3E3E3}a{color:#A8C7FA}</style>';
 const $ = id => document.getElementById(id);
 $('from').textContent = DATA.from;
 
@@ -106,6 +114,7 @@ function seg(el, key) {
 seg($('who'), 'who');
 seg($('device'), 'device');
 seg($('forma'), 'forma');
+seg($('theme'), 'theme');
 
 function fit() {
   const f = $('frame');
@@ -139,12 +148,12 @@ function render() {
   $('to').textContent = m.to || 'jana.novakova@example.com';
   $('att').hidden = !m.ics;
   $('text').textContent = m.text;
-  $('client').className = 'client ' + state.device;
+  $('client').className = 'client ' + state.device + (state.theme === 'dark' ? ' dark' : '');
   $('client').style.width = (WIDTHS[state.device] + BEZEL[state.device]) + 'px';
   const f = $('frame');
   $('screen').scrollTop = 0;
   f.onload = () => { fit(); f.contentDocument.fonts.ready.then(fit); };
-  f.srcdoc = m.html;
+  f.srcdoc = state.theme === 'dark' ? m.html.replace('</head>', DARK + '</head>') : m.html;
 }
 addEventListener('resize', fit);
 render();

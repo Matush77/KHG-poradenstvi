@@ -909,7 +909,7 @@ $om2 = mail_owner_new($gb, prague($gb['slot']), 'https://x/?b=1');
 ok(str_contains($om2['ics'], 'UID:khgabc123@google.com') && str_contains($om2['ics'], 'METHOD:PUBLISH') && str_contains($om2['ics'], 'LOCATION:' . ics_text(PLACE)), 'google: her e-mail carries the event (same UID as the Google event)');
 ok(str_contains($om2['text'], PLACE) && str_contains($om2['html'], h(PLACE)), 'google: her e-mail names the address in person');
 $om3 = mail_owner_new(['forma' => 'online', 'meet' => 'https://meet.google.com/abc-defg-hij'] + $gb, prague($gb['slot']), 'https://x/?b=1');
-ok(str_contains($om3['html'], 'background:#E8927C;border:1.5px solid #E8927C;color:#163A55">Připojit se přes Google Meet</a>') && str_contains($om3['text'], 'Google Meet: https://meet.google.com/abc-defg-hij') && str_contains($om3['ics'], 'LOCATION:https://meet.google.com/abc-defg-hij'), 'google: her e-mail has the Meet link online');
+ok(str_contains($om3['html'], 'href="https://meet.google.com/abc-defg-hij"') && str_contains($om3['html'], '>Připojit se přes Google Meet</a>') && !str_contains($om3['html'], 'background:#FBF8F3') && !str_contains($om3['html'], '<img') && str_contains($om3['text'], 'Google Meet: https://meet.google.com/abc-defg-hij') && str_contains($om3['ics'], 'LOCATION:https://meet.google.com/abc-defg-hij'), 'google: her e-mail has the Meet link online, no page colour or image (dark mode)');
 ok(mail_owner_new(['event_id' => null] + $gb, prague($gb['slot']), 'u')['ics'] === null, 'google: no event yet, no calendar file');
 $sentEv = null;
 $FAKE = ['#POST .*/events\?#' => function ($m, $u, $body) use (&$sentEv) { $sentEv = json_decode($body, true); return [200, ['id' => 'x']]; }];
