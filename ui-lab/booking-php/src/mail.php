@@ -459,7 +459,7 @@ function mail_owner_double(array $b, DateTimeImmutable $start, bool $refunded): 
 function mail_owner_calendar_failed(array $b, DateTimeImmutable $start): array
 {
     return owner_mail($b, $start, 'Rezervace se nezapsala do kalendáře: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Rezervace se nezapsala do kalendáře',
-        ['Klient zaplatil, ale zápis do kalendáře se zatím nepovedl (Google neodpovídá). Klient zatím nedostal potvrzení.',
+        ['Klient zaplatil, ale zápis do kalendáře se zatím nepovedl (Google nebo platební brána Stripe neodpovídá). Klient zatím nedostal potvrzení.',
          'Termín je pro klienta držený, nikdo jiný ho nezarezervuje. Web to zkouší dál každých pár minut; jakmile se to povede, přijde ti obvyklá „Nová rezervace“ a klientovi potvrzení.',
          'Kdyby se to do začátku sezení nepovedlo, platba se klientovi vrátí sama a oba dostanete e-mail.']);
 }

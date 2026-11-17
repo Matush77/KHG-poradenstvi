@@ -527,7 +527,9 @@ $evId = gcal_event_id('cs_rv_ev');
 $posts = 0;
 $FAKE = ['#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), ['busy' => []])]],
     '#POST .*/events\?#' => function ($m, $u, $b) use (&$posts, $evId) { $posts++; return json_decode($b, true)['id'] === $evId ? [409, ['error' => 'duplicate']] : [200, ['id' => 'wrong']]; },
-    '#GET .*/events/' . $evId . '#' => fn() => [200, ['id' => $evId, 'status' => 'confirmed']]];
+    '#GET .*/events/' . $evId . '#' => fn() => [200, ['id' => $evId, 'status' => 'confirmed']],
+    '#GET .*/checkout/sessions/cs_rv_ev#' => fn() => [200, ['id' => 'cs_rv_ev', 'payment_intent' => 'pi_ev', 'amount_total' => 110000]],
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]]];
 $e7 = finish_booking('cs_rv_ev');
 ok($e7['status'] === 'booked' && $e7['event_id'] === $evId && $posts === 1, 'open 7: a retry after a lost answer takes the event Google already made');
 ok(preg_match('/^[a-v0-9]{5,1024}$/', $evId) === 1 && $evId !== gcal_event_id('cs_rv_other'), 'open 7: the event id is one Google accepts, one per payment');
@@ -1013,7 +1015,51 @@ $FAKE = ['#POST .*/freeBusy#' => fn() => [500, []], '#GET .*/v1/refunds\?#' => f
 ok(book_paid($fresh)['status'] === 'failed', 's3/2: a payment with no refund is booked as usual (here Google is down: retried later)');
 $FAKE = ['#POST .*/freeBusy#' => fn() => [500, []], '#GET .*/v1/refunds\?#' => fn() => [500, []]];
 ok(book_paid(['id' => 'cs_s3_fresh2', 'payment_intent' => 'pi_fresh2', 'metadata' => ['den' => substr($at('+49 days'), 0, 10)] + $old['metadata']] + $fresh)['status'] === 'failed',
-    's3/2: Stripe not answering about refunds never stops a booking');
+    's3/2: Stripe not answering about refunds: not confirmed, it waits as not yet in the calendar');
+// 17 Nov retest, 1: refund lookup down, the payment was already refunded. Never confirmed; the retry finds the refund
+$CALLS = [];
+$FAKE = ['#GET .*/v1/refunds\?#' => fn() => [500, []]];
+$u1 = book_paid(['id' => 'cs_rt_unk', 'payment_intent' => 'pi_rt_unk', 'metadata' => ['den' => substr($at('+57 days'), 0, 10)] + $old['metadata']] + $fresh);
+ok($u1['status'] === 'failed' && !$u1['event_id'] && !$u1['mail_sent'] && !preg_grep('#googleapis.com/calendar#', $CALLS), 'retest 1: lookup down: no event, no confirmation');
+$u1b = finish_booking('cs_rt_unk');
+ok($u1b['status'] === 'failed' && !preg_grep('#googleapis.com/calendar#', $CALLS), 'retest 1: still down on the retry: still waiting');
+$refundsAre([['id' => 're_rt_unk', 'payment_intent' => 'pi_rt_unk', 'amount' => 110000, 'status' => 'succeeded', 'metadata' => []]]);
+$u1c = finish_booking('cs_rt_unk');
+ok($u1c['status'] === 'cancelled' && $u1c['cancelled_by'] === 'refunded' && $u1c['refund_id'] === 're_rt_unk' && !$u1c['mail_sent'] && !preg_grep('#googleapis.com/calendar#', $CALLS),
+    'retest 1: once Stripe answers, the refunded payment is never booked');
+ok($sentOnce('cs_rt_unk-refund-found') === 1, 'retest 1: she is told');
+// and with no refund, the retry books it as usual
+$FAKE = ['#GET .*/v1/refunds\?#' => fn() => [500, []]];
+book_paid(['id' => 'cs_rt_unk2', 'payment_intent' => 'pi_rt_unk2', 'metadata' => ['den' => substr($at('+58 days'), 0, 10)] + $old['metadata']] + $fresh);
+$FAKE = ['#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]],
+    '#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), ['busy' => []])]],
+    '#POST .*/events\?#' => fn() => [200, ['id' => 'evRt', 'hangoutLink' => 'https://meet.google.com/rt']]];
+ok(finish_booking('cs_rt_unk2')['status'] === 'booked', 'retest 1: no refund found on the retry: booked and confirmed as usual');
+// 17 Nov retest, 2: Stripe makes the refund but its answer is lost. A second try with the same key gets it back
+$addPi('cs_rt_lost', '+59 days', 'booked');
+$keys = [];
+$FAKE = ['#GET .*/checkout/sessions/cs_rt_lost#' => fn() => [200, ['id' => 'cs_rt_lost', 'payment_intent' => 'pi_cs_rt_lost', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => function ($m, $u, $b, $h) use (&$keys) {
+        $keys[] = implode(',', preg_grep('/^Idempotency-Key/', $h));
+        if (count($keys) === 1) throw new RuntimeException('HTTP POST refunds failed: Operation timed out');
+        return [200, ['id' => 're_rt_lost', 'status' => 'pending']]; },
+    '#GET .*/v1/refunds\?#' => fn() => [500, []], '#DELETE .*/events/#' => fn() => [204, []]];
+$l1 = cancel_booking('cs_rt_lost', null, true);
+ok($l1['status'] === 'cancelled' && $l1['refund_id'] === 're_rt_lost' && count($keys) === 2 && $keys[0] === $keys[1],
+    'retest 2: a lost answer is asked again with the same key: cancelled with its refund, never a second refund');
+// no answer at all, list down too: the client is not told it failed; recovery finishes it
+$addPi('cs_rt_lost2', '+60 days', 'booked');
+$FAKE = ['#GET .*/checkout/sessions/cs_rt_lost2#' => fn() => [200, ['id' => 'cs_rt_lost2', 'payment_intent' => 'pi_cs_rt_lost2', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => throw new RuntimeException('HTTP POST refunds failed: Operation timed out'),
+    '#GET .*/v1/refunds\?#' => fn() => [500, []]];
+$msg = '';
+try { cancel_booking('cs_rt_lost2', null, true); } catch (ClientError $e) { $msg = $e->getMessage(); $ecode = $e->getCode(); }
+ok($ecode === 503 && !str_contains($msg, 'nepovedlo') && str_contains($msg, 'jen jednou') && booking_get('cs_rt_lost2')['status'] === 'booked',
+    'retest 2: Stripe silent: "not known yet", never "the refund failed"');
+$refundsAre([['id' => 're_rt_lost2', 'payment_intent' => 'pi_cs_rt_lost2', 'amount' => 110000, 'status' => 'succeeded', 'created' => time(), 'metadata' => ['duvod' => 'zruseni klientem']]]);
+$l2 = refund_reconcile('cs_rt_lost2');
+ok($l2['status'] === 'cancelled' && $l2['cancelled_by'] === 'client' && $l2['refund_id'] === 're_rt_lost2' && $sentOnce('cs_rt_lost2-client-cancelled') === 1,
+    'retest 2: recovery cancels it with the refund and the client gets the cancellation e-mail');
 
 // 8. her hours page shows a paid booking whose calendar entry failed (the time is taken)
 db()->exec("UPDATE bookings SET status = 'failed' WHERE pay_id = 'cs_s2_fresh'");
