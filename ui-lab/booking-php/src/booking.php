@@ -666,7 +666,9 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
         $fields += ['refund_id' => $r['id'], 'refund_status' => $r['status']];
     }
     // only one of two parallel requests gets here first, the other returns the cancelled booking without a second set of e-mails
-    if (!cancel_record($payId, $fields)) {
+    $mails = [$payId . '-cancelled' => 'owner_cancelled' . ($via === 'calendar' ? '|calendar' : '')]
+        + ($b['email'] ? [$payId . '-client-cancelled' => 'client_cancelled'] : []);
+    if (!cancel_record($payId, $fields, $mails)) {
         // the other request cancelled first. If it did so without a refund (it came after the 36 hours, this one just
         // before) but this one's refund went through, the money is on its way back: the booking says so and the client
         // gets the refund e-mail (17 Nov review: the refund vanished from the record)
@@ -702,15 +704,24 @@ function cancel_answer(string $payId): array
 
 /* Marks a booked session cancelled, with its refund, in one write (17 Nov review, second list: a request that died
    between two writes left a cancellation without its refund). The event is written down as stale in the same write,
-   so the safety net deletes it even if this request dies before Google answers. False: it was no longer booked. */
-function cancel_record(string $payId, array $fields): bool
+   so the safety net deletes it even if this request dies before Google answers. False: it was no longer booked.
+   $mails (name => kind): the e-mails this cancellation owes, queued in the same transaction, so a request that dies
+   afterwards (in the Google call, say) still leaves them for the safety net (17 Nov review: the cancellation was
+   saved, its e-mails were not, and nobody heard). The caller still calls mail_queued() to try them at once. */
+function cancel_record(string $payId, array $fields, array $mails = []): bool
 {
     $b = booking_get($payId);
     $fields = ['status' => 'cancelled', 'stale_event' => $b['event_id'] ?? null, 'updated_at' => time()] + $fields;
     $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
-    $s = db()->prepare("UPDATE bookings SET $set WHERE pay_id = :pay_id_ AND status = 'booked'");
-    $s->execute($fields + ['pay_id_' => $payId]);
-    if ($s->rowCount() === 0) return false;
+    $done = db_tx(function (PDO $pdo) use ($set, $fields, $payId, $mails): bool {
+        $s = $pdo->prepare("UPDATE bookings SET $set WHERE pay_id = :pay_id_ AND status = 'booked'");
+        $s->execute($fields + ['pay_id_' => $payId]);
+        if ($s->rowCount() === 0) return false;
+        $q = $pdo->prepare('INSERT OR IGNORE INTO mail_queue (name, pay_id, kind, created_at) VALUES (?, ?, ?, ?)');
+        foreach ($mails as $name => $kind) $q->execute([$name, $payId, $kind, time()]);
+        return true;
+    });
+    if (!$done) return false;
     if ($b['event_id']) event_gone($payId, $b['event_id']);
     return true;
 }
@@ -871,7 +882,9 @@ function refund_reconcile(string $payId): ?array
             $s->execute([time(), $payId]);
             if ($s->rowCount()) mail_queued($payId . '-refund-found', $payId, 'owner_refund_found');
         } elseif ($by && cancel_record($payId, ['cancelled_by' => $by,
-                'hours_before' => round(($start->getTimestamp() - (int)($r['full']['created'] ?? time())) / 3600, 2)])) {
+                'hours_before' => round(($start->getTimestamp() - (int)($r['full']['created'] ?? time())) / 3600, 2)],
+                ($by === 'client' ? [$payId . '-cancelled' => 'owner_cancelled'] : [])
+                + ($now['email'] ? [$payId . ($by === 'client' ? '-client-cancelled' : '-cancel') => $by === 'client' ? 'client_cancelled' : 'client_cancel'] : []))) {
             // a cancellation whose request died after Stripe refunded: finished now, the same e-mails as it would have sent
             log_line($by === 'client' ? 'CANCELLED' : 'OWNER_CANCELLED', ['pay' => $payId, 'refund' => $now['refund_id'], 'found' => true]);
             if ($by === 'client') mail_queued($payId . '-cancelled', $payId, 'owner_cancelled');
@@ -996,7 +1009,8 @@ function owner_cancel(string $payId, ?DateTimeImmutable $now = null): array
     if ($refundOnly) {
         if (!$setRefund()) return booking_get($payId);   // the other request got there first
     } elseif (!cancel_record($payId, $fields + ['cancelled_by' => 'owner',
-            'hours_before' => round((prague($b['slot'])->getTimestamp() - $now->getTimestamp()) / 3600, 2)])) {
+            'hours_before' => round((prague($b['slot'])->getTimestamp() - $now->getTimestamp()) / 3600, 2)],
+            $b['email'] ? [$payId . '-cancel' . ($failed ? '-' . ($fields['refund_id'] ?? '') : '') => 'client_cancel'] : [])) {
         // no longer booked: the other click, or the client cancelling late at the same moment. This refund went
         // through, so the booking keeps it and the client hears about it
         if ($fields && $setRefund() && booking_get($payId)['email']) mail_queued($payId . '-refund-' . $fields['refund_id'], $payId, 'client_refund');
@@ -1083,6 +1097,18 @@ function move_booking(string $payId, string $den, string $cas, string $by, ?Date
     return moved_mails(booking_get($payId), $old, $by);
 }
 
+/* Other sessions (any format, any state that holds a time) less than 50 minutes from $start, on either side. */
+function sessions_near(string $payId, DateTimeImmutable $start): array
+{
+    $s = db()->prepare("SELECT pay_id, slot FROM bookings WHERE status IN ('pending','booked','failed') AND pay_id != ? AND slot LIKE ?");
+    $s->execute([$payId, $start->format('Y-m-d') . '%']);
+    $near = [];
+    foreach ($s->fetchAll() as $o) {
+        if (abs(prague($o['slot'])->getTimestamp() - $start->getTimestamp()) < 50 * 60) $near[] = $o['pay_id'];
+    }
+    return $near;
+}
+
 /* After any move (her button, the client's, or her drag in Google Calendar): the client's "Změna termínu";
    if the client moved, also a note to her. */
 function moved_mails(array $b, DateTimeImmutable $old, string $by): array
@@ -1163,8 +1189,12 @@ function sync_calendar(?int $now = null): array
             // when she deleted it (Google's time of the change), not when this run noticed: a run that comes late,
             // after the session's start, must not block her refund (16 Nov review)
             $deleted = min($now, (int)(strtotime((string)($ev['updated'] ?? '')) ?: $now));
-            booking_update($payId, ['status' => 'cancelled', 'cancelled_by' => 'calendar',
-                'hours_before' => round(($old->getTimestamp() - $deleted) / 3600, 2)]);   // 2 places: a minute before is not 0
+            db_tx(function (PDO $pdo) use ($payId, $old, $deleted) {   // the cancellation and its e-mail in one write
+                booking_update($payId, ['status' => 'cancelled', 'cancelled_by' => 'calendar',
+                    'hours_before' => round(($old->getTimestamp() - $deleted) / 3600, 2)]);   // 2 places: a minute before is not 0
+                $pdo->prepare('INSERT OR IGNORE INTO mail_queue (name, pay_id, kind, created_at) VALUES (?, ?, ?, ?)')
+                    ->execute([$payId . '-deleted', $payId, 'owner_deleted', time()]);
+            });
             log_line('DELETED_IN_CALENDAR', ['pay' => $payId]);
             // queued (review 17 Nov: when this one e-mail failed, a paid client was left cancelled, unrefunded and untold)
             mail_queued($payId . '-deleted', $payId, 'owner_deleted');
@@ -1173,7 +1203,12 @@ function sync_calendar(?int $now = null): array
         }
         $start = isset($ev['start']['dateTime']) ? (new DateTimeImmutable($ev['start']['dateTime']))->setTimezone(new DateTimeZone('Europe/Prague')) : null;
         if ($start && $start->getTimestamp() !== $old->getTimestamp()) {
-            booking_update($payId, ['slot' => $start->format(DATE_ATOM), 'moves' => $b['moves'] + 1, 'mail_sent' => 0, 'clash' => 0, 'reminded' => 0, 'moved_at' => $now]);
+            // her calendar decides, so the move stands; onto another session it is flagged on both (17 Nov review:
+            // two sessions at one time and no warning anywhere). The management page shows the warning.
+            $others = sessions_near($payId, $start);
+            booking_update($payId, ['slot' => $start->format(DATE_ATOM), 'moves' => $b['moves'] + 1, 'mail_sent' => 0, 'clash' => $others ? 1 : 0, 'reminded' => 0, 'moved_at' => $now]);
+            foreach ($others as $other) booking_update($other, ['clash' => 1]);
+            if ($others) log_line('MOVED_ONTO_SESSION', ['pay' => $payId, 'others' => $others]);
             log_line('MOVED_IN_CALENDAR', ['pay' => $payId, 'from' => $b['slot'], 'to' => $start->format(DATE_ATOM)]);
             if ($start->getTimestamp() > $now) moved_mails(booking_get($payId), $old, 'calendar');
             else booking_update($payId, ['mail_sent' => 1]);         // moved into the past (a record): nobody to tell
@@ -1275,13 +1310,66 @@ function send_reminders(?int $now = null): array
     return $done;
 }
 
+/* How long the site keeps what clients typed (owner, 15 Nov; the privacy page says the same):
+   the "S čím přicházíte" text 30 days after the session, the whole booking (name, contact)
+   3 years after it, the general limitation period for claims. Payment records stay in Stripe. */
+const KEEP_NOTE_DAYS = 30, KEEP_BOOKING_YEARS = 3;
+function forget_old(?int $now = null): array
+{
+    $now ??= time();
+    $noteCut = date(DATE_ATOM, $now - KEEP_NOTE_DAYS * 86400);
+    $bookCut = (new DateTimeImmutable('@' . $now))->setTimezone(new DateTimeZone('Europe/Prague'))
+        ->modify('-' . KEEP_BOOKING_YEARS . ' years')->format(DATE_ATOM);
+    // slots are stored with their Prague offset; julianday() reads the offset, so winter and summer times compare right.
+    // The note is in the calendar event too (event_description): it leaves there first, and the booking forgets it
+    // only once Google has it out, so a Google outage just means the next run tries again (17 Nov review).
+    $n = db()->prepare("SELECT pay_id, event_id, note FROM bookings WHERE note IS NOT NULL AND julianday(slot) < julianday(?)");
+    $n->execute([$noteCut]);
+    $forgot = 0;
+    foreach ($n->fetchAll() as $r) {
+        if ($r['event_id'] && !note_out_of_event($r['event_id'], (string)$r['note'])) continue;
+        db()->prepare('UPDATE bookings SET note = NULL WHERE pay_id = ?')->execute([$r['pay_id']]);
+        $forgot++;
+    }
+    $b = db()->prepare("DELETE FROM bookings WHERE julianday(slot) < julianday(?) AND status <> 'pending'");
+    $b->execute([$bookCut]);
+    db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([$now - 2 * 86400]);   // never paid: forget what they wrote
+    return array_filter(['notes_forgotten' => $forgot, 'bookings_forgotten' => $b->rowCount()]);
+}
+
+/* Takes the client's note out of the calendar event's description, the rest of it as it is (her own additions too).
+   True when the event no longer has it: taken out, the event gone, or the text not there any more (she rewrote the
+   description herself: logged, nothing to take out). False: Google did not answer, try again next run. */
+function note_out_of_event(string $eventId, string $note): bool
+{
+    $path = 'calendars/' . rawurlencode(cfg()['calendar']) . '/events/' . rawurlencode($eventId);
+    try {
+        $ev = gcal('GET', $path);
+        if (($ev['status'] ?? '') === 'cancelled') return true;
+        $desc = (string)($ev['description'] ?? '');
+        $block = event_note_block($note);
+        $left = str_replace([$block . '<br><br>', '<br><br>' . $block, $block], '', $desc);
+        if ($left === $desc) {
+            log_line('NOTE_NOT_IN_EVENT', ['event' => $eventId]);
+            return true;
+        }
+        gcal('PATCH', $path, ['description' => $left], ['sendUpdates' => 'none']);   // no e-mail to the client
+        log_line('NOTE_OUT_OF_EVENT', ['event' => $eventId]);
+        return true;
+    } catch (RuntimeException $e) {
+        if (in_array($e->getCode(), [404, 410], true)) return true;   // the event is gone
+        log_line('NOTE_EVENT_FAILED', ['event' => $eventId, 'error' => $e->getMessage()]);
+        return false;
+    }
+}
+
 /* Safety net (cron every few minutes, next to the webhook): books paid sessions nobody booked (closed tab,
-   lost webhook), retries failed bookings and unsent e-mails, clears old holds. */
+   lost webhook), retries failed bookings and unsent e-mails, clears old holds and old client data. */
 function sweep(): array
 {
     $done = ['booked' => [], 'retried' => [], 'mailed' => []];
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([time()]);
-    db()->prepare('DELETE FROM notes WHERE created_at < ?')->execute([time() - 2 * 86400]);   // never paid: forget what they wrote
+    $done += forget_old();
     // first her calendar edits (a session she just moved gets its reminders at the new time), then the reminders:
     // neither needs Stripe, so a Stripe outage below doesn't hold them back
     try {
@@ -1342,9 +1430,12 @@ function sweep(): array
             if (mail_queue_send($m['name'], $m['pay_id'], $m['kind'])) $done['queued_sent'][] = $m['name'];
         }
     }
-    $s = db()->prepare("SELECT pay_id, status FROM bookings WHERE status = 'failed' OR (status = 'pending' AND updated_at < ?)
-        OR (status = 'booked' AND mail_sent = 0 AND email IS NOT NULL AND COALESCE(mail_dead, 0) = 0) OR (status = 'booked' AND owner_mailed = 0)");
-    $s->execute([time() - 300]);
+    // a booking whose move is talking to Google is left alone: its new time is not certain yet, and if Google refuses,
+    // it goes back to the old one (17 Nov review: the sweep confirmed a time that never became valid)
+    $s = db()->prepare("SELECT pay_id, status FROM bookings WHERE (status = 'failed' OR (status = 'pending' AND updated_at < ?)
+        OR (status = 'booked' AND mail_sent = 0 AND email IS NOT NULL AND COALESCE(mail_dead, 0) = 0) OR (status = 'booked' AND owner_mailed = 0))
+        AND (lock_until IS NULL OR lock_until < ?)");
+    $s->execute([time() - 300, time()]);
     foreach ($s->fetchAll() as $row) {
         if ($paused && $row['status'] === 'booked') { $done['mail_waiting'][] = $row['pay_id']; continue; }
         $b = finish_booking($row['pay_id']);
