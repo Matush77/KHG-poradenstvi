@@ -173,7 +173,7 @@ button, a, label { -webkit-tap-highlight-color: transparent; }
 .dow { font-size: 12px; color: var(--mute); padding-bottom: 2px; }
 .day { aspect-ratio: 1; max-width: 100%; border: 0; border-radius: 50%; background: transparent; font-size: 16px; color: var(--mute); opacity: .45; display: grid; place-items: center; }
 .day.free { background: var(--tint); color: var(--navy); opacity: 1; cursor: pointer; font-weight: 600; }
-@media (hover: hover) { .day.free:hover { background: var(--tint-deep); } }
+@media (hover: hover) { .day.free:not(.sel):hover { background: var(--tint-deep); } }
 .day.sel { background: var(--navy); color: var(--paper); }
 .day.out { visibility: hidden; }
 /* month change by swipe on phones: the grid lets vertical scrolling through, the new month slides in from the swipe side */
@@ -287,27 +287,27 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
 .c-3 input, .c-3 textarea { background: var(--card); }
 @media (max-width: 719px) {
   .c-3 .day.free, .c-3 .empty, .c-3 .summary { background: var(--card); }
-  @media (hover: hover) { .c-3 .day.free:hover, .c-3 .time:hover { background: var(--tint-strong); } }
+  @media (hover: hover) { .c-3 .day.free:not(.sel):hover, .c-3 .time:hover { background: var(--tint-strong); } }
   .c-3 .day.sel { background: var(--navy); }
   .c-3 .time { border-color: transparent; }
 }
 /* 4 Sytější: free days in the deeper tint, times are tinted chips without a border */
 .c-4 .day.free { background: var(--tint-strong); }
-@media (hover: hover) { .c-4 .day.free:hover { background: var(--tint-deep); } }
+@media (hover: hover) { .c-4 .day.free:not(.sel):hover { background: var(--tint-deep); } }
 .c-4 .day.sel { background: var(--navy); }
 .c-4 .time { background: var(--tint); border-color: transparent; }
 @media (hover: hover) { .c-4 .time:hover { background: var(--tint-strong); } }
 .c-4 .time[aria-pressed="true"] { background: var(--navy); }
 /* 5 Obrysy: free days are tinted rings, almost no fill, the chosen day and time navy */
 .c-5 .day.free { background: transparent; box-shadow: inset 0 0 0 2px var(--tint-strong); }
-@media (hover: hover) { .c-5 .day.free:hover { background: var(--tint); } }
+@media (hover: hover) { .c-5 .day.free:not(.sel):hover { background: var(--tint); } }
 .c-5 .day.sel { background: var(--navy); box-shadow: none; }
 .c-5 .time { border-color: var(--tint-strong); border-width: 2px; }
 /* 6 Barevný blok: calendar and times sit in one tinted block (like the peach panel on Ceník), white days and times inside */
 .c-6 .cols { background: var(--tint); border-radius: 24px; padding: 16px 12px 20px; transition: background .2s; }
 @media (min-width: 720px) { .c-6 .cols { padding: 24px; } }
 .c-6 .day.free, .c-6 .empty { background: var(--card); }
-@media (hover: hover) { .c-6 .day.free:hover, .c-6 .time:hover { background: var(--tint-strong); } }
+@media (hover: hover) { .c-6 .day.free:not(.sel):hover, .c-6 .time:hover { background: var(--tint-strong); } }
 .c-6 .day.sel { background: var(--navy); }
 .c-6 .time { border-color: transparent; }
 
@@ -317,7 +317,7 @@ html.c-3, .c-3 body { background: var(--tint); transition: background .2s; }
   .d-1 .panel { background: var(--tint); border-radius: 28px; padding: 32px; transition: background .2s; }
   .d-1 .switch { border-color: transparent; }
   .d-1 .day.free, .d-1 .empty, .d-1 .summary, .d-1 input, .d-1 textarea { background: var(--card); }
-  @media (hover: hover) { .d-1 .day.free:hover, .d-1 .time:hover { background: var(--tint-strong); } }
+  @media (hover: hover) { .d-1 .day.free:not(.sel):hover, .d-1 .time:hover { background: var(--tint-strong); } }
   .d-1 .day.sel { background: var(--coral); }
   .d-1 .time { border-color: transparent; }
   /* 2 Karta pro výběr: title and switch on the page, the calendar with the times in one white card */
