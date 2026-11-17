@@ -345,29 +345,9 @@ function event_description(array $b): string
     ]));
 }
 
-/* Her copy of the session as a calendar file, so Gmail shows its event card at the top of "Schůzka byla rezervována".
-   The UID is the Google event's own (iCalUID of an event made with our id), so Gmail sees the event she already has
-   instead of offering a second one. PUBLISH: nothing to answer, nothing added on its own. */
-function owner_ics(array $b, DateTimeImmutable $start): ?string
-{
-    if (empty($b['event_id'])) return null;
-    $online = $b['forma'] !== 'osobne';
-    $f = fn(DateTimeImmutable $d) => $d->format('Ymd\THis');
-    $lines = [
-        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//khgporadenstvi.cz//rezervace//CS', 'METHOD:PUBLISH',
-        ...ICS_PRAGUE,
-        'BEGIN:VEVENT', 'UID:' . $b['event_id'] . '@google.com',
-        'DTSTAMP:' . gmdate('Ymd\THis\Z'), 'SEQUENCE:' . (int)($b['moves'] ?? 0),
-        'DTSTART;TZID=Europe/Prague:' . $f($start), 'DTEND;TZID=Europe/Prague:' . $f($start->modify('+50 minutes')),
-        'SUMMARY:' . ics_text((lab() ? 'TEST · ' : '') . event_title($b)),
-        'LOCATION:' . ics_text($online ? (string)($b['meet'] ?? '') : PLACE),
-        'DESCRIPTION:' . ics_text(implode("\n", array_filter([$b['name'] ?: '', $b['email'] ?? '', $b['phone'] ?? '']))),
-        'END:VEVENT', 'END:VCALENDAR',
-    ];
-    return implode("\r\n", array_map('ics_fold', $lines)) . "\r\n";
-}
-
-/* To the owner, for every new booking: who, when, what they wrote, and the two buttons. */
+/* To the owner, for every new booking: who, when, what they wrote, and the two buttons.
+   No calendar file (17 Nov e2e test): the session is already in her calendar, and Gmail offered "Přidat do Kalendáře",
+   which would add a second copy that no move or cancellation ever updates. */
 function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): array
 {
     $online = $b['forma'] !== 'osobne';
@@ -396,7 +376,7 @@ function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): a
         'Přesunout termín: ' . $buttons['Přesunout termín'],
         'Zrušit a vrátit peníze: ' . $buttons['Zrušit a vrátit peníze'],
     ], fn($l) => $l !== null));
-    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => owner_ics($b, $start), 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
+    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
 }
 
 /* To the owner when the client cancelled: from their link, or ($calendar) by declining the invitation in their Google
@@ -544,6 +524,25 @@ function mail_reminder(array $b, DateTimeImmutable $start, string $kind, ?int $n
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)($b['email'] ?? '')];
 }
 
+/* The client's saved copy of the session goes away (17 Nov e2e test: it stayed in their calendar after a
+   cancellation). Same UID as the confirmation's file, SEQUENCE one past the last move; ORGANIZER because RFC 5546
+   needs it for CANCEL. */
+function client_ics_cancel(array $b, DateTimeImmutable $start): string
+{
+    $f = fn(DateTimeImmutable $d) => $d->format('Ymd\THis');
+    $lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//khgporadenstvi.cz//rezervace//CS', 'METHOD:CANCEL',
+        ...ICS_PRAGUE,
+        'BEGIN:VEVENT', 'UID:' . ($b['pay_id'] ?? $start->format('U')) . '@khgporadenstvi.cz',
+        'DTSTAMP:' . gmdate('Ymd\THis\Z'), 'SEQUENCE:' . ((int)($b['moves'] ?? 0) + 1), 'STATUS:CANCELLED',
+        'ORGANIZER;CN="' . SENDER . '":mailto:' . FROM_MAIL,
+        'DTSTART;TZID=Europe/Prague:' . $f($start), 'DTEND;TZID=Europe/Prague:' . $f($start->modify('+50 minutes')),
+        'SUMMARY:' . ics_text('Zrušeno: Sezení s Kristýnou Hricikovou Glattovou'),
+        'END:VEVENT', 'END:VCALENDAR',
+    ];
+    return implode("\r\n", array_map('ics_fold', $lines)) . "\r\n";
+}
+
 /* To the client when the owner cancels (full refund), or refunds a session the client cancelled late. */
 /* $refunded false only when the client cancelled late themself (no refund): the money line says so instead.
    $delayed: the refund was started but Stripe refused it (she is told separately and sorts it out): the e-mail
@@ -563,7 +562,9 @@ function mail_client_cancelled(array $b, DateTimeImmutable $start, bool $refundO
         ...($refundOnly ? [] : ['', 'Vybrat jiný termín: ' . $book]), ...text_foot()]);
     $html = mail_page($subject, $title, session_panel($b, $start, false),
         [$who ? h($who) : '', h($money), $refundOnly ? '' : mail_btn('Vybrat jiný termín', $book, 'coral')], mail_tint($b));
-    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => (string)$b['email']];
+    // a refund on its own changes nothing in the calendar: the session was already cancelled before
+    return ['subject' => $subject, 'text' => $text, 'html' => $html, 'to' => (string)$b['email'],
+        'ics' => $refundOnly ? null : client_ics_cancel($b, $start), 'ics_method' => 'CANCEL'];
 }
 
 /* RFC 2047 for headers with Czech letters. */
@@ -614,7 +615,7 @@ function mail_eml(array $m): string
         ''] : []),
         ...(empty($m['ics']) ? [] : [
             '--' . $outer,
-            'Content-Type: text/calendar; charset=utf-8; method=PUBLISH; name="sezeni.ics"',
+            'Content-Type: text/calendar; charset=utf-8; method=' . ($m['ics_method'] ?? 'PUBLISH') . '; name="sezeni.ics"',
             'Content-Disposition: attachment; filename="sezeni.ics"',
             'Content-Transfer-Encoding: base64',
             '', $b64($m['ics'])]),

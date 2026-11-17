@@ -209,7 +209,14 @@ ok($mv['subject'] === 'Změna termínu: sezení v úterý 22. prosince v 13:00' 
 ok(str_contains($mv['ics'], 'SEQUENCE:2') && str_contains($mv['ics'], 'UID:cs_test_abc@'), 'moved: same calendar UID, higher SEQUENCE');
 $cc = mail_client_cancelled($ob, $w, false);
 ok($cc['subject'] === 'Zrušené sezení v úterý 22. prosince v 13:00' && str_contains($cc['text'], 'Částka bude vrácena na kartu použitou k platbě') && str_contains($cc['text'], 'rezervace-ukazka.html'), 'owner cancels: client e-mail with a link to book again');
+$ccIcs = (string)$cc['ics'];
+ok(str_contains($ccIcs, 'METHOD:CANCEL') && str_contains($ccIcs, 'STATUS:CANCELLED') && str_contains($ccIcs, 'UID:cs_test_abc@khgporadenstvi.cz')
+    && str_contains($ccIcs, 'DTSTART;TZID=Europe/Prague:20261222T130000') && str_contains($ccIcs, 'ORGANIZER;CN="'), 'cancelled: the calendar file removes the saved session (same UID, CANCEL)');
+ok(str_contains(mail_client_cancelled($ob + ['moves' => 2], $w, false)['ics'], 'SEQUENCE:3') && str_contains($ccIcs, 'SEQUENCE:1'), 'cancelled: SEQUENCE one past the last move');
+ok(str_contains(mail_eml($cc), 'text/calendar; charset=utf-8; method=CANCEL') && str_contains(mail_eml(mail_build($ob, $w, 'http://x')), 'method=PUBLISH'), 'eml: CANCEL on the cancellation, PUBLISH on the confirmation');
+ok(mail_client_cancelled($ob, $w, false, false)['ics'] !== null && mail_client_cancelled($ob, $w, false, true, true)['ics'] !== null, 'cancelled: late and by her also remove it');
 $cr = mail_client_cancelled($ob, $w, true);
+ok($cr['ics'] === null, 'refund only: no calendar file (the session was cancelled before)');
 ok(str_starts_with($cr['subject'], 'Vrácení platby za sezení') && str_starts_with($cr['text'], 'Vrácení platby') && str_contains($cr['text'], 'Částka bude vrácena na kartu použitou k platbě') && !str_contains($cr['text'], 'Vybrat jiný termín'), 'refund after a late cancellation: own wording');
 $cl = mail_client_cancelled($ob, $w, false, false);
 ok(str_contains($cl['text'], 'Platba se nevrací, termín byl zrušen méně než 36 hodin předem.') && !str_contains($cl['text'], 'Částka bude vrácena') && str_contains($cl['text'], 'Vybrat jiný termín'), 'client cancelled late: e-mail says no refund, offers a new time');
@@ -911,11 +918,10 @@ ok(str_contains($gd, '<b>Rezervoval(a)</b><br>Jana &lt;b&gt;Nováková&lt;/b&gt;
 ok(str_contains($gd, '<b>S čím přicházíte?</b><br>Úzkosti<br>před zkouškami') && str_contains($gd, "1\u{00A0}100,00\u{00A0}Kč") && str_contains($gd, 'zvoňte až v čase'), 'google: the note, the paid amount and the arrival note');
 ok(!str_contains(event_description(['forma' => 'online'] + $gb), 'zvoňte') && !str_contains($gd, 'cs_g1'), 'google: no arrival note online, no payment id in the text');
 $om2 = mail_owner_new($gb, prague($gb['slot']), 'https://x/?b=1');
-ok(str_contains($om2['ics'], 'UID:khgabc123@google.com') && str_contains($om2['ics'], 'METHOD:PUBLISH') && str_contains($om2['ics'], 'LOCATION:' . ics_text(PLACE)), 'google: her e-mail carries the event (same UID as the Google event)');
+ok($om2['ics'] === null && !str_contains(mail_eml($om2), 'text/calendar'), 'her new-booking e-mail: no calendar file (Gmail offered a second copy, 17 Nov)');
 ok(str_contains($om2['text'], PLACE) && str_contains($om2['html'], h(PLACE)), 'google: her e-mail names the address in person');
 $om3 = mail_owner_new(['forma' => 'online', 'meet' => 'https://meet.google.com/abc-defg-hij'] + $gb, prague($gb['slot']), 'https://x/?b=1');
-ok(str_contains($om3['html'], 'href="https://meet.google.com/abc-defg-hij"') && str_contains($om3['html'], '>Připojit se přes Google Meet</a>') && !str_contains($om3['html'], 'background:#FBF8F3') && !str_contains($om3['html'], '<img') && str_contains($om3['text'], 'Google Meet: https://meet.google.com/abc-defg-hij') && str_contains($om3['ics'], 'LOCATION:https://meet.google.com/abc-defg-hij'), 'google: her e-mail has the Meet link online, no page colour or image (dark mode)');
-ok(mail_owner_new(['event_id' => null] + $gb, prague($gb['slot']), 'u')['ics'] === null, 'google: no event yet, no calendar file');
+ok(str_contains($om3['html'], 'href="https://meet.google.com/abc-defg-hij"') && str_contains($om3['html'], '>Připojit se přes Google Meet</a>') && !str_contains($om3['html'], 'background:#FBF8F3') && !str_contains($om3['html'], '<img') && str_contains($om3['text'], 'Google Meet: https://meet.google.com/abc-defg-hij'), 'google: her e-mail has the Meet link online, no page colour or image (dark mode)');
 $sentEv = null;
 $FAKE = ['#POST .*/events\?#' => function ($m, $u, $body) use (&$sentEv) { $sentEv = json_decode($body, true); return [200, ['id' => 'x']]; }];
 gcal_create(prague($gb['slot']), 't', 'd', false, 'j@example.com', 'cs_g1');
