@@ -265,24 +265,65 @@ function cz_short(DateTimeImmutable $d): string
     return ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'][(int)$d->format('w')] . ' ' . $d->format('j. n.') . ' v ' . hm($d);
 }
 
-/* The owner's panel: the session and the client with contacts. [html, text lines] */
+/* ---- Kristýna's own e-mails: plain on purpose (owner, 17 Nov: they serve a function, and she reads them in dark mode).
+   No colours at all, no background, no image, no web fonts: the text, links and borders take the mail app's own
+   theme, so Gmail, Apple Mail and Seznam show them right in light and in dark without inverting anything we set.
+   Hierarchy by size and weight only; text 15 px (owner, 17 Nov: a bit smaller), buttons stay 17 px. The one fixed colour is the button border, a mid grey that shows on white and
+   on black. Facts first (when, who, where), then what happened, then the actions as large tap targets. */
+const OWNER_FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+/* Filled for the action the e-mail is about (owner, 17 Nov: highlight them): Meet in deep coral, the rest in blue 500, both
+   with white text. Both are mid-tones, so a button shows on white and on
+   black, and an app that inverts colours (Gmail on iPhone) still keeps text and ground apart. The second action
+   (refund) is outlined, so the eye and a thumb land on the first one. */
+function owner_btn(string $label, string $url, string $kind = 'fill'): string
+{
+    // the colour sits on a table cell (bgcolor too), not on the link: Gmail dropped a link's background and left
+    // white text on white (17 Nov test). Text on a filled button is white: Gmail's dark mode turned navy text light
+    // on the coral (17 Nov, owner's phone), white it leaves alone. So the coral is a deeper one, 4.5:1 with white.
+    [$bg, $fg] = ['fill' => ['#2D5A7B', '#FFFFFF'], 'meet' => ['#B85C44', '#FFFFFF'], 'outline' => ['', '']][$kind];
+    $cell = $bg ? ' bgcolor="' . $bg . '" style="background-color:' . $bg . ';border:2px solid ' . $bg . ';border-radius:10px"'
+        : ' style="border:2px solid #8C8C8C;border-radius:10px"';
+    return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;margin:0 0 10px">'
+        . '<tr><td align="center"' . $cell . '><a href="' . h($url) . '" style="display:block;padding:13px 12px;' . ($fg ? 'color:' . $fg . ';' : '')
+        . 'text-align:center;font-weight:700;font-size:17px;line-height:22px;text-decoration:none">' . h($label) . '</a></td></tr></table>';
+}
+
+function owner_small(string $html): string { return '<span style="font-size:13px;line-height:1.5">' . $html . '</span>'; }
+
+/* $top: the facts (when, client); $blocks: paragraphs and buttons, each its own block. */
+function owner_page(string $subject, string $title, string $top, array $blocks): string
+{
+    $p = fn(string $x) => '<div style="margin:0 0 18px">' . $x . '</div>';
+    return '<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        . '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><title>' . h($subject) . '</title></head>'
+                // the type sits on the wrapper: Gmail drops the body's style (its 13 px default took over, 17 Nov)
+        . '<body style="margin:0;padding:0">'
+        . '<div style="max-width:560px;margin:0 auto;padding:16px 16px 24px;font-family:' . OWNER_FONT . ';font-size:15px;line-height:1.5">'
+        . '<h1 style="margin:0 0 14px;font-size:21px;line-height:1.25;font-weight:700">' . h($title) . '</h1>'
+        . $p($top) . implode('', array_map($p, array_filter($blocks))) . '</div></body></html>';
+}
+
+/* The facts at the top of every owner e-mail: when (large), what, then the client with contacts. [html, text lines] */
 function owner_panel(array $b, DateTimeImmutable $start): array
 {
     $who = (string)($b['name'] ?: 'bez jména');
-    $html = session_panel($b, $start, false)
-        . '<div style="margin-top:16px"><b style="color:#163A55;font-weight:600">' . h($who) . '</b>'
-        . (!empty($b['email']) ? '<br>' . mail_link($b['email'], 'mailto:' . $b['email']) : '')
-        . (!empty($b['phone']) ? '<br>' . mail_link($b['phone'], 'tel:' . preg_replace('/[^\d+]/', '', $b['phone'])) : '') . '</div>';
+    $hours = hm($start) . '–' . hm($start->modify('+50 minutes'));
+    $html = '<div style="font-size:17px;line-height:1.35;font-weight:700">' . h(cz_day_short($start)) . ', <span style="white-space:nowrap">' . $hours . '</span></div>'
+        . '<div>' . h(session_meta($b)) . '</div>'
+        . '<div style="margin-top:14px"><b>' . h($who) . '</b>'
+        . (!empty($b['email']) ? '<br><a href="mailto:' . h($b['email']) . '">' . h($b['email']) . '</a>' : '')
+        . (!empty($b['phone']) ? '<br><a href="tel:' . h(preg_replace('/[^\d+]/', '', $b['phone'])) . '">' . h($b['phone']) . '</a>' : '') . '</div>';
     return [$html, [...session_text($b, $start, false), $who, ...array_filter([$b['email'] ?? null, $b['phone'] ?? null])]];
 }
 
-/* Owner e-mails share this: title, panel with the client, paragraphs, buttons [label => url]. */
+/* Owner e-mails share this: title, the facts, paragraphs, buttons [label => url]. */
 function owner_mail(array $b, DateTimeImmutable $start, string $subject, string $title, array $paras, array $buttons = [], array $textExtra = []): array
 {
     [$panel, $panelTxt] = owner_panel($b, $start);
     $btns = '';
-    foreach ($buttons as $label => $url) $btns .= mail_btn($label, $url, $btns === '' ? 'navy' : 'outline');
-    $html = mail_page($subject, $title, $panel, [...array_map('h', $paras), $btns], mail_tint($b), '', false);   // her own e-mails: no footer
+    foreach ($buttons as $label => $url) $btns .= owner_btn($label, $url, $btns === '' ? 'fill' : 'outline');
+    $html = owner_page($subject, $title, $panel, [...array_map('h', $paras), $btns]);
     $text = implode("\n", [$title, '', ...$panelTxt, '', ...$paras, ...$textExtra,
         ...array_map(fn($l, $u) => "$l: $u", array_keys($buttons), $buttons)]);
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => null, 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
@@ -338,21 +379,19 @@ function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): a
     $note = trim((string)($b['note'] ?? ''));
     $buttons = ['Přesunout termín' => $ownerUrl . '&akce=presunout', 'Zrušit a vrátit peníze' => $ownerUrl . '&akce=zrusit'];
     [$panel, $panelTxt] = owner_panel($b, $start);
-    $btns = mail_btn('Přesunout termín', $buttons['Přesunout termín']) . mail_btn('Zrušit a vrátit peníze', $buttons['Zrušit a vrátit peníze'], 'outline');
     // where the session is (owner, 16 Nov): the Meet link or the address, as Google's e-mail has "Lokalita"
     $meet = (string)($b['meet'] ?? '');
-    // the Meet link as a pill (owner, 16 Nov: a plain link was easy to miss), coral like the client's own Meet button
-    $where = $online ? ($meet !== '' ? mail_btn('Připojit se přes Google Meet', $meet, 'coral') : '')
-        : '<span style="color:#163A55">' . h(PLACE) . '</span>';
+    $where = $online ? ($meet !== '' ? owner_btn('Připojit se přes Google Meet', $meet, 'meet') : '')
+        : h(PLACE) . '<br><a href="' . h(NAVIGATE) . '">Navigovat</a>';
     $whereTxt = $online ? ($meet !== '' ? 'Google Meet: ' . $meet : null) : PLACE;
-    $html = mail_page($subject, 'Nová rezervace', $panel, [
+    $html = owner_page($subject, 'Nová rezervace', $panel, [
+        !empty($b['clash']) ? '<b>⚠️ V kalendáři je ve stejnou dobu i jiná událost.</b>' : '',
         $where,
-        $note !== '' ? mail_muted('S čím přichází') . '<br><span style="color:#163A55">' . nl2br(h($note)) . '</span>' : '',
-        !empty($b['clash']) ? '<span style="color:#B5573F;font-weight:600">V kalendáři je ve stejnou dobu i jiná událost.</span>' : '',
+        $note !== '' ? '<b>S čím přichází</b><br>' . nl2br(h($note)) : '',
         !$online && empty($b['email']) ? 'Klient nechal jen telefon, potvrzení e-mailem nedostal.' : '',
-        $btns,
-        mail_muted('Odkazy fungují bez přihlášení, e-mail proto nepřeposílej.'),
-    ], mail_tint($b), '', false);
+        owner_btn('Přesunout termín', $buttons['Přesunout termín']) . owner_btn('Zrušit a vrátit peníze', $buttons['Zrušit a vrátit peníze'], 'outline'),
+        owner_small('Odkazy fungují bez přihlášení, e-mail proto nepřeposílej.'),
+    ]);
     $text = implode("\n", array_filter(['Nová rezervace', '', ...$panelTxt, '',
         $whereTxt !== null ? $whereTxt . "\n" : null,
         $note !== '' ? "S čím přichází:\n$note\n" : null,
@@ -539,6 +578,7 @@ function mail_eml(array $m): string
     $alt = 'alt-' . bin2hex(random_bytes(8));
     $rel = 'rel-' . bin2hex(random_bytes(8));
     $domain = substr(FROM_MAIL, strpos(FROM_MAIL, '@') + 1);
+    $brand = str_contains($m['html'], 'cid:' . BRAND_CID);   // her own e-mails have no image
     return implode("\r\n", [
         'From: ' . mime_header(SENDER) . ' <' . FROM_MAIL . '>',
         'To: <' . $m['to'] . '>',
@@ -550,9 +590,7 @@ function mail_eml(array $m): string
         'Content-Type: multipart/mixed; boundary="' . $outer . '"',
         '',
         '--' . $outer,
-        'Content-Type: multipart/related; boundary="' . $rel . '"',
-        '',
-        '--' . $rel,
+        ...($brand ? ['Content-Type: multipart/related; boundary="' . $rel . '"', '', '--' . $rel] : []),
         'Content-Type: multipart/alternative; boundary="' . $alt . '"',
         '',
         '--' . $alt,
@@ -565,14 +603,14 @@ function mail_eml(array $m): string
         '', $b64($m['html']),
         '--' . $alt . '--',
         '',
-        '--' . $rel,
+        ...($brand ? ['--' . $rel,
         'Content-Type: image/png; name="srdce.png"',
         'Content-ID: <' . BRAND_CID . '>',
         'Content-Disposition: inline; filename="srdce.png"',
         'Content-Transfer-Encoding: base64',
         '', $b64(brand_png()),
         '--' . $rel . '--',
-        '',
+        ''] : []),
         ...(empty($m['ics']) ? [] : [
             '--' . $outer,
             'Content-Type: text/calendar; charset=utf-8; method=PUBLISH; name="sezeni.ics"',
