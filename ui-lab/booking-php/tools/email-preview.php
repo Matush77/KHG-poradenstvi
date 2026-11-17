@@ -50,10 +50,11 @@ foreach (['online', 'osobne'] as $forma) {
     $add('client', $forma, $list);
     // Kristýna's e-mails (to her own address; replying goes to the client)
     $own = owner_url('cs_preview');
-    $note = $b + ['note' => "Poslední měsíce špatně spím a v práci mě přepadá úzkost.\nChtěla bych to zkusit řešit."];
+    // her new-booking e-mail carries the calendar file once the Google event exists (it always does by then)
+    $note = $b + ['event_id' => 'preview', 'note' => "Poslední měsíce špatně spím a v práci mě přepadá úzkost.\nChtěla bych to zkusit řešit."];
     $add('owner', $forma, [
         ['new', 'New booking', 'Right after the client pays', mail_owner_new($note, $start, $own)],
-        ['new-clash', 'New booking, clash', 'She had something else in the calendar meanwhile', mail_owner_new($b + ['clash' => 1], $start, $own)],
+        ['new-clash', 'New booking, clash', 'She had something else in the calendar meanwhile', mail_owner_new($b + ['clash' => 1, 'event_id' => 'preview'], $start, $own)],
         ['cancelled', 'Cancelled by the client', 'Client cancels 36+ hours before; refunded automatically',
             mail_owner_cancelled($b + ['hours_before' => 50.0, 'refund_id' => 're_preview'], $start, $own)],
         ['cancelled-late', 'Cancelled late by the client', 'Client cancels under 36 hours before; no refund',
