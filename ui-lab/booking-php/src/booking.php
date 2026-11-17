@@ -338,7 +338,7 @@ function book_paid(array $s): ?array
             log_line('REFUND_CHECK_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
         }
     }
-    $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start, $past, $pi, $amount, $refund) {
+    $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start, $past, $pi, $amount, $refund, $unchecked) {
         if (booking_get($payId)) return false;
         // the last check: someone else's payment already has this time. The holds should make this impossible;
         // if it happens anyway, this payment is not booked but refunded, and both of them are told
@@ -348,12 +348,15 @@ function book_paid(array $s): ?array
         $why = $refund ? 'refunded' : ($taken ? 'double' : ($past ? 'missed' : null));
         $n = $pdo->prepare('SELECT note FROM notes WHERE pay_id = ?');
         $n->execute([$payId]);
+        // the refund check that got no answer is saved with the booking, in the same step: an interruption right after
+        // must not leave a plain 'pending' (17 Nov retest, 3)
         $pdo->prepare('INSERT INTO bookings (pay_id, slot, forma, email, phone, name, note, status, cancelled_by, owner_mailed,
-            payment_intent, amount, refund_id, refund_status, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([$payId, $start->format(DATE_ATOM), $meta['forma'],
+            payment_intent, amount, refund_id, refund_status, error, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([$payId, $start->format(DATE_ATOM), $meta['forma'],
             $meta['email'] ?: null, $meta['telefon'] ?: null, $meta['jmeno'] ?: null, $n->fetchColumn() ?: null,
-            $why ? 'cancelled' : 'pending', $why, $why ? 1 : 0, $pi, $amount ?: null,
-            $refund['id'] ?? null, isset($refund) ? (string)$refund['status'] : null, time(), time()]);
+            $why ? 'cancelled' : ($unchecked ? 'failed' : 'pending'), $why, $why ? 1 : 0, $pi, $amount ?: null,
+            $refund['id'] ?? null, isset($refund) ? (string)$refund['status'] : null,
+            !$why && $unchecked ? 'refund check: Stripe did not answer' : null, time(), time()]);
         $pdo->prepare('DELETE FROM notes WHERE pay_id = ?')->execute([$payId]);
         if (!$why) $pdo->prepare('DELETE FROM holds WHERE pay_id = ? OR slot = ?')->execute([$payId, $start->format(DATE_ATOM)]);
         return $why ?? true;
@@ -368,11 +371,8 @@ function book_paid(array $s): ?array
         log_line($claimed === 'double' ? 'DOUBLE_PAYMENT' : 'PAID_TOO_LATE', ['pay' => $payId, 'slot' => $start->format(DATE_ATOM)]);
         return refund_double($payId);
     }
-    if ($unchecked) {
-        booking_update($payId, ['status' => 'failed', 'error' => 'refund check: Stripe did not answer']);
-        return booking_get($payId);
-    }
-    return finish_booking($payId);
+    if ($unchecked) return booking_get($payId);
+    return finish_booking($payId, true);   // just asked Stripe: no second call on the client's way back
 }
 
 /* A payment that is not booked but refunded, the client and she get an e-mail: a time that was already booked
@@ -546,7 +546,9 @@ function with_meet(array $b): array
 }
 
 /* Calendar event (+ Meet) and the e-mail. A failure is recorded and retried by the safety net. */
-function finish_booking(string $payId): array
+/* $refundChecked: book_paid asked Stripe a moment ago. Anything else (the safety net, a retry) asks again before the
+   event and the confirmation. */
+function finish_booking(string $payId, bool $refundChecked = false): array
 {
     $b = booking_get($payId);
     $start = prague($b['slot']);
@@ -561,21 +563,22 @@ function finish_booking(string $payId): array
         log_line('PAID_TOO_LATE', ['pay' => $payId, 'slot' => $b['slot'], 'after' => 'calendar retry']);
         return refund_double($payId);
     }
-    if (!$b['event_id'] && $b['status'] === 'failed') {
+    if (!$b['event_id'] && !$refundChecked && in_array($b['status'], ['pending', 'failed'], true)) {
         // before a late event and confirmation: the money may have gone back meanwhile (her dashboard), and the first
-        // try may not have been able to ask (book_paid with Stripe down). Not known: it waits for the next run
+        // try may not have been able to ask (book_paid with Stripe down, or stopped before it could finish: 17 Nov
+        // retest, 3, a 'pending' booking was confirmed unchecked). Not known: it waits for the next run, held, as 'failed'
         try {
             [$pi, $amount] = booking_payment($b);
             $full = refunds_of($pi, $amount)['full'];
         } catch (Throwable $e) {
-            booking_update($payId, ['error' => substr('refund check: ' . $e->getMessage(), 0, 500)]);
+            booking_update($payId, ['status' => 'failed', 'error' => substr('refund check: ' . $e->getMessage(), 0, 500)]);
             log_line('REFUND_CHECK_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
             return booking_get($payId);
         }
         if ($full) {
             // paid, refunded before it was ever confirmed: never booked, as in book_paid
             $s = db()->prepare("UPDATE bookings SET status = 'cancelled', cancelled_by = 'refunded', owner_mailed = 1, refund_id = ?,
-                refund_status = ?, error = NULL, updated_at = ? WHERE pay_id = ? AND status = 'failed' AND event_id IS NULL");
+                refund_status = ?, error = NULL, updated_at = ? WHERE pay_id = ? AND status IN ('pending', 'failed') AND event_id IS NULL");
             $s->execute([$full['id'], (string)$full['status'], time(), $payId]);
             if ($s->rowCount()) {
                 log_line('PAID_ALREADY_REFUNDED', ['pay' => $payId, 'refund' => $full['id'], 'after' => 'retry']);
