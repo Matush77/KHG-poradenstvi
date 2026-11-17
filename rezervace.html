@@ -857,7 +857,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .dow { font-size: 12px; color: var(--mute); padding-bottom: 2px; }
     .rez .day { aspect-ratio: 1; max-width: 100%; border: 0; border-radius: 50%; background: transparent; font-size: 14px; color: var(--mute); opacity: .28; display: grid; place-items: center; }
     .rez .day.free { background: var(--tint); color: var(--navy); opacity: 1; cursor: pointer; font-weight: 600; font-size: 16px; }
-    @media (hover: hover) { .rez .day.free:hover { background: var(--tint-deep); } }
+    @media (hover: hover) { .rez .day.free:not(.sel):hover { background: var(--tint-deep); } }
     .rez .day.sel { background: var(--coral); color: var(--on-coral); }
     .rez .day.out { visibility: hidden; }
     /* month change by swipe on phones: the new month slides in from the swipe side.
