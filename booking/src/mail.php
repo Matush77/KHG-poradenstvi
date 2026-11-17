@@ -335,14 +335,22 @@ function event_title(array $b): string
 {
     return 'Terapie ' . ($b['forma'] !== 'osobne' ? 'online' : 'osobně') . ' (' . ($b['name'] ?: 'klient') . ')';
 }
+function event_block(string $head, array $lines): string
+{
+    return '<b>' . h($head) . '</b><br>' . implode('<br>', array_map('h', $lines));
+}
+/* The client's note as the event shows it; forget_old() takes exactly this out again after 30 days. */
+function event_note_block(string $note): string
+{
+    return event_block('S čím přicházíte?', explode("\n", trim($note)));
+}
 function event_description(array $b): string
 {
-    $block = fn(string $head, array $lines) => '<b>' . h($head) . '</b><br>' . implode('<br>', array_map('h', $lines));
     $note = trim((string)($b['note'] ?? ''));
     return implode('<br><br>', array_filter([
-        $block('Rezervoval(a)', array_values(array_filter([$b['name'] ?: 'bez jména', $b['email'] ?? '', $b['phone'] ?? '']))),
-        $note !== '' ? $block('S čím přicházíte?', explode("\n", $note)) : '',
-        $block('Zaplacená částka', [number_format(cfg()['price'] / 100, 2, ',', "\u{00A0}") . "\u{00A0}Kč"]),
+        event_block('Rezervoval(a)', array_values(array_filter([$b['name'] ?: 'bez jména', $b['email'] ?? '', $b['phone'] ?? '']))),
+        $note !== '' ? event_note_block($note) : '',
+        event_block('Zaplacená částka', [number_format(cfg()['price'] / 100, 2, ',', "\u{00A0}") . "\u{00A0}Kč"]),
         $b['forma'] === 'osobne' ? h(ARRIVE_NOTE) : '',
         lab() ? h('Test webu, Stripe test.') : '',
     ]));

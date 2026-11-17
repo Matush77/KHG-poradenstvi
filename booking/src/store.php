@@ -32,8 +32,10 @@ function db(): PDO
         hours_before REAL,
         error TEXT,
         created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)");
-    // what the client wrote in "S čím přicházíte": kept here only (not in Stripe, not in the calendar event,
-    // which online clients can read as guests), from the checkout until the booking takes it over
+    // what the client wrote in "S čím přicházíte", from the checkout until the booking takes it over (never in Stripe).
+    // Since 16 Nov the booking also copies it into the calendar event's description, as Google's booking pages did
+    // (event_description); the client, the only guest, sees their own words there. forget_old() clears the booking's
+    // copy, not the event's (17 Nov review: owner to decide).
     $pdo->exec('CREATE TABLE IF NOT EXISTS notes (pay_id TEXT PRIMARY KEY, note TEXT NOT NULL, created_at INTEGER NOT NULL)');
     // e-mails that must reach someone (cancellations, alerts to her): kept until sent, the safety net retries
     $pdo->exec('CREATE TABLE IF NOT EXISTS mail_queue (name TEXT PRIMARY KEY, pay_id TEXT NOT NULL, kind TEXT NOT NULL, created_at INTEGER NOT NULL)');

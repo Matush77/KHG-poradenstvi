@@ -1243,6 +1243,82 @@ sync_calendar();
 $dp = booking_get('cs_dc_past');
 ok($dp['status'] === 'booked' && $sentOnce('cs_dc_past-declined') === 1, 'decline: after the session started, nothing is cancelled; she is told');
 
+
+// --- 17 Nov architecture review: three gaps
+$inQueue = fn(string $name) => (int)db()->query('SELECT COUNT(*) FROM mail_queue WHERE name = ' . db()->quote($name))->fetchColumn();
+$GLOBALS['SMTP_FAKE'] = $smtpOk;
+// 1. a move still talking to Google: the safety net sends no confirmation of a time that may never become valid
+$add->execute(['cs_ar_lock', $at('+48 days'), 'osobne', 'booked', 'evArLock', null, null, time(), time()]);
+db()->exec("UPDATE bookings SET mail_sent = 0, owner_mailed = 1, lock_until = " . (time() + 50) . " WHERE pay_id = 'cs_ar_lock'");
+$FAKE = [];
+try { sweep(); } catch (Throwable $e) { /* no Stripe fakes: the rest of the run is done */ }
+ok(!(int)booking_get('cs_ar_lock')['mail_sent'] && !array_filter($SENT, fn($x) => str_starts_with($x, 'cs_ar_lock')),
+    'ar/1: the sweep leaves a booking alone while its move talks to Google');
+db()->exec("UPDATE bookings SET lock_until = NULL WHERE pay_id = 'cs_ar_lock'");
+try { sweep(); } catch (Throwable $e) {}
+ok((int)booking_get('cs_ar_lock')['mail_sent'] === 1, 'ar/1: once the move is over, the sweep sends it');
+
+// 2. the cancellation and the e-mails it owes are one write: a request that dies right after still leaves them queued
+$add->execute(['cs_ar_cancel', $at('+49 days'), 'osobne', 'booked', null, null, null, time(), time()]);
+ok(cancel_record('cs_ar_cancel', ['cancelled_by' => 'client', 'hours_before' => 100.0],
+        ['cs_ar_cancel-cancelled' => 'owner_cancelled', 'cs_ar_cancel-client-cancelled' => 'client_cancelled'])
+    && $inQueue('cs_ar_cancel-cancelled') === 1 && $inQueue('cs_ar_cancel-client-cancelled') === 1,
+    'ar/2: cancelled, and both e-mails are in the queue before anything is sent');
+ok(!cancel_record('cs_ar_cancel', ['cancelled_by' => 'owner'], ['cs_ar_cancel-cancel' => 'client_cancel']) && $inQueue('cs_ar_cancel-cancel') === 0,
+    'ar/2: a second cancellation queues nothing');
+$add->execute(['cs_ar_cancel2', $at('+49 days'), 'osobne', 'booked', null, null, null, time(), time()]);
+db()->exec("UPDATE bookings SET slot = '" . (new DateTimeImmutable('+50 days'))->setTime(11, 0)->format(DATE_ATOM) . "' WHERE pay_id = 'cs_ar_cancel2'");
+$FAKE = ['#GET .*/checkout/sessions/cs_ar_cancel2#' => fn() => [200, ['id' => 'cs_ar_cancel2', 'payment_intent' => 'pi_ar2', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_ar2', 'status' => 'pending']]];
+$GLOBALS['SMTP_FAKE'] = $smtpDown;
+$c2 = cancel_booking('cs_ar_cancel2', null, true);
+ok($c2['status'] === 'cancelled' && !$c2['mailed'] && $inQueue('cs_ar_cancel2-cancelled') === 1 && $inQueue('cs_ar_cancel2-client-cancelled') === 1,
+    'ar/2: the client\'s cancel with the mail down: both e-mails wait in the queue');
+$GLOBALS['SMTP_FAKE'] = $smtpOk;
+
+// 3. her drag in Google Calendar onto another session: the move stands, both are flagged
+$slotA = (new DateTimeImmutable('+51 days'))->setTime(9, 0);
+$add->execute(['cs_ar_dragA', $slotA->format(DATE_ATOM), 'osobne', 'booked', 'evArA', null, null, 0, 0]);
+$add->execute(['cs_ar_dragB', $slotA->modify('+2 hours')->format(DATE_ATOM), 'osobne', 'booked', 'evArB', null, null, 0, 0]);
+db()->exec("UPDATE bookings SET mail_sent = 1, owner_mailed = 1 WHERE pay_id IN ('cs_ar_dragA', 'cs_ar_dragB')");
+$drag = fn(string $id, DateTimeImmutable $to) => ['#GET .*/events\?#' => fn() => [200, ['items' => [['id' => $id, 'status' => 'confirmed',
+    'start' => ['dateTime' => $to->format(DATE_ATOM)], 'updated' => gmdate('Y-m-d\TH:i:s\Z', time() - 40)]]]]];
+state_set('calendar_sync', (string)(time() - 60));
+$FAKE = $drag('evArA', $slotA->modify('+2 hours 30 minutes'));
+sync_calendar();
+$dA = booking_get('cs_ar_dragA');
+ok($dA['slot'] === $slotA->modify('+2 hours 30 minutes')->format(DATE_ATOM) && (int)$dA['clash'] === 1 && (int)booking_get('cs_ar_dragB')['clash'] === 1,
+    'ar/3: dragged onto another session: her move stands, both sessions carry the warning');
+ok(owner_view($dA)['clash'] === true, 'ar/3: her management page gets the warning');
+db()->exec("UPDATE bookings SET updated_at = 0 WHERE pay_id = 'cs_ar_dragA'");   // not "being changed right now"
+state_set('calendar_sync', (string)(time() - 60));
+$FAKE = $drag('evArA', $slotA->modify('+5 hours'));
+sync_calendar();
+ok((int)booking_get('cs_ar_dragA')['clash'] === 0, 'ar/3: dragged on to a free time: no warning');
+
+// 5. the note leaves the calendar event 30 days after the session, as the privacy page says; the rest of the event stays
+$noteB = "Úzkost\npřed zkouškami";
+$addN = db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, note, status, event_id, created_at, updated_at) VALUES (?, ?, 'osobne', 'a@example.com', 'Jana Nováková', ?, 'booked', ?, 0, 0)");
+$addN->execute(['cs_ar_note', (new DateTimeImmutable('-31 days'))->format(DATE_ATOM), $noteB, 'evArNote']);
+$descB = event_description(booking_get('cs_ar_note')) . '<br><br>Moje poznámka: přinést formulář';
+$patched = null;
+$FAKE = ['#GET .*/events/evArNote$#' => fn() => [200, ['id' => 'evArNote', 'status' => 'confirmed', 'description' => $descB]],
+    '#PATCH .*/events/evArNote\?sendUpdates=none#' => function ($m, $u, $b) use (&$patched) { $patched = json_decode($b, true); return [200, ['id' => 'evArNote']]; }];
+ok(str_contains($descB, 'zkouškami'), 'ar/5: the event has the note to begin with');
+forget_old();
+ok($patched !== null && !str_contains($patched['description'], 'zkouškami') && !str_contains($patched['description'], 'S čím')
+    && str_contains($patched['description'], 'Rezervoval') && str_contains($patched['description'], 'Moje poznámka'),
+    'ar/5: 30 days after: the note is taken out of the event, the rest of it (her own lines too) stays');
+ok(booking_get('cs_ar_note')['note'] === null, 'ar/5: and then the booking forgets it');
+$addN->execute(['cs_ar_note2', (new DateTimeImmutable('-31 days'))->format(DATE_ATOM), $noteB, 'evArNote2']);
+$FAKE = ['#GET .*/events/evArNote2#' => fn() => [503, ['error' => 'backend']]];
+forget_old();
+ok(booking_get('cs_ar_note2')['note'] === $noteB, 'ar/5: Google not answering: the booking keeps the note, the next run tries again');
+$FAKE = ['#GET .*/events/evArNote2#' => fn() => [404, ['error' => 'gone']]];
+forget_old();
+ok(booking_get('cs_ar_note2')['note'] === null, 'ar/5: an event that is gone: the booking forgets it');
+db()->exec("DELETE FROM bookings WHERE pay_id IN ('cs_ar_note', 'cs_ar_note2')");
+
 unset($GLOBALS['SMTP_FAKE']);
 
 unset($GLOBALS['HTTP_FAKE']);
