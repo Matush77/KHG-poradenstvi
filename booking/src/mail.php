@@ -402,14 +402,17 @@ function mail_owner_new(array $b, DateTimeImmutable $start, string $ownerUrl): a
     return ['subject' => $subject, 'text' => $text, 'html' => $html, 'ics' => owner_ics($b, $start), 'to' => OWNER_MAIL, 'reply_to' => $b['email'] ?: null];
 }
 
-/* To the owner when the client cancelled from their link. No refund button (owner, 14 Nov). */
-function mail_owner_cancelled(array $b, DateTimeImmutable $start, string $ownerUrl): array
+/* To the owner when the client cancelled: from their link, or ($calendar) by declining the invitation in their Google
+   Calendar. No refund button (owner, 14 Nov). Subject worded like Google's cancellation e-mail, as the new-booking one. */
+function mail_owner_cancelled(array $b, DateTimeImmutable $start, string $ownerUrl, bool $calendar = false): array
 {
     $ahead = cz_ahead((float)$b['hours_before']);
     $money = $b['refund_id'] ? "Zrušeno $ahead předem, 1 100 Kč se klientovi vrací automaticky."
         : "Zrušeno jen $ahead předem, peníze se nevrátily.";
-    return owner_mail($b, $start, 'Zrušeno klientem: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Zrušeno klientem',
-        [$money, 'Událost z kalendáře je smazaná, termín je zase volný.']);
+    $subject = 'Schůzka byla zrušena: Terapie ' . ($b['forma'] !== 'osobne' ? 'online' : 'osobně') . ' (' . ($b['name'] ?: 'klient') . ') ' . cz_at($start);
+    return owner_mail($b, $start, $subject, 'Zrušeno klientem',
+        array_values(array_filter([$calendar ? 'Klient sezení zrušil v kalendáři (odmítl pozvánku).' : '', $money,
+            'Událost z kalendáře je smazaná, termín je zase volný.'])));
 }
 
 /* To the owner when Stripe refused a refund (at once or later): the client was told the money comes back. */
@@ -511,11 +514,12 @@ function mail_owner_undeliverable(array $b, DateTimeImmutable $start, string $ow
         ['Otevřít rezervaci' => $ownerUrl]);
 }
 
-/* To the owner when an online client declined the calendar invitation. Nothing else changes. */
+/* To the owner when a client declined the calendar invitation and it could not be cancelled automatically. */
 function mail_owner_declined(array $b, DateTimeImmutable $start, string $ownerUrl): array
 {
     return owner_mail($b, $start, 'Klient odmítl pozvánku: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Klient odmítl pozvánku',
-        ['Klient v kalendáři odmítl pozvánku nebo si sezení smazal. Rezervace platí dál: termín zůstává obsazený, peníze se nevrátily.'],
+        // only where the decline could not cancel it (the session started, Stripe refused the refund): she decides
+        ['Klient v kalendáři odmítl pozvánku nebo si sezení smazal. Zrušit ho automaticky nešlo, rezervace proto platí dál: termín zůstává obsazený, peníze se nevrátily.'],
         ['Zrušit a vrátit peníze' => $ownerUrl . '&akce=zrusit']);
 }
 

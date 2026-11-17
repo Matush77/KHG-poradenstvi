@@ -269,7 +269,7 @@ ok(str_contains(mail_owner_moved(['client_moves' => 3] + $fb, $w, $w->modify('-1
 $od = mail_owner_deleted($fb, $w, owner_url('cs_test_free'));
 ok(str_starts_with($od['text'], 'Smazáno v kalendáři') && str_contains($od['text'], 'akce=zrusit'), 'owner told about her calendar deletion, with the refund button');
 $dl = mail_owner_declined($fb, $w, owner_url('cs_test_free'));
-ok(str_contains($dl['text'], 'Rezervace platí dál') && $dl['reply_to'] === 'a@example.com', 'owner told about a declined invitation');
+ok(str_contains($dl['text'], 'rezervace proto platí dál') && $dl['reply_to'] === 'a@example.com', 'owner told about a declined invitation');
 
 // --- her move from the hours page (16 Nov): any whole hour 7-20 in the window, outside her hours too, never onto another session
 $d6 = (new DateTimeImmutable('+6 days', new DateTimeZone('Europe/Prague')))->format('Y-m-d');
@@ -1184,6 +1184,58 @@ $cf = mail_owner_calendar_failed(booking_get('cs_v_cal'), prague($at('+53 days')
 ok(str_contains($cf['subject'], 'nezapsala do kalendáře') && str_contains($cf['text'], 'vrátí sama'), 'visible: the e-mail says the time is held and the money goes back by itself if it never works');
 db()->exec("UPDATE bookings SET status = 'booked', event_id = 'evV' WHERE pay_id = 'cs_v_cal'");
 ok(queued_mail(booking_get('cs_v_cal'), 'owner_calendar_failed') === null, 'visible: once it is in the calendar, a late alert is not sent');
+
+// --- 17 Nov, owner's test of Google's booking pages: a client who declines the invitation in Google Calendar has
+// cancelled. Here too: as from their link, the 36 hours counted from the decline
+state_set('mail_paused_until', '0');
+$decline = function (string $pay, string $ev, string $slot, array $more = []) use ($add, &$FAKE) {
+    $add->execute([$pay, $slot, 'online', 'booked', $ev, null, null, time() - 3600, time() - 3600]);
+    db()->prepare('UPDATE bookings SET payment_intent = ?, amount = 110000 WHERE pay_id = ?')->execute(['pi_' . $pay, $pay]);
+    state_set('calendar_sync', (string)(time() - 300));
+    $FAKE = $more + [
+        '#GET .*/events\?#' => fn() => [200, ['items' => [['id' => $ev, 'status' => 'confirmed', 'updated' => gmdate('Y-m-d\TH:i:s\Z', time() - 60),
+            'start' => ['dateTime' => $slot], 'attendees' => [['email' => 'a@example.com', 'responseStatus' => 'declined']]]]]],
+        '#GET .*/checkout/sessions/' . $pay . '#' => fn() => [200, ['id' => $pay, 'payment_intent' => 'pi_' . $pay, 'amount_total' => 110000]],
+        '#DELETE .*/events/#' => fn() => [204, []]];
+};
+$posted = 0;
+$decline('cs_dc_free', 'evDcFree', $at('+10 days'), ['#POST .*/v1/refunds#' => function () use (&$posted) { $posted++; return [200, ['id' => 're_dc_free', 'status' => 'pending']]; }]);
+$r = sync_calendar();
+$dc = booking_get('cs_dc_free');
+ok($dc['status'] === 'cancelled' && $dc['cancelled_by'] === 'client' && $dc['refund_id'] === 're_dc_free' && $posted === 1 && in_array('cs_dc_free', $r['declined'], true),
+    'decline: 36+ hours ahead, a decline in Google Calendar cancels and refunds like the link');
+ok($sentOnce('cs_dc_free-cancelled') === 1 && $sentOnce('cs_dc_free-client-cancelled') === 1 && !$sentOnce('cs_dc_free-declined'), 'decline: both are told, as after the link; no "declined" e-mail');
+$oc = queued_mail($dc, 'owner_cancelled|calendar');
+ok(str_starts_with($oc['subject'], 'Schůzka byla zrušena: Terapie online (Jana Nováková)') && str_contains($oc['text'], 'zrušil v kalendáři') && str_contains($oc['text'], 'vrací automaticky'),
+    'decline: her e-mail worded like Google\'s, says it came from the calendar and that the money goes back');
+ok(!str_contains(queued_mail($dc, 'owner_cancelled')['text'], 'v kalendáři'), 'decline: a cancel from the link does not say "calendar"');
+
+$posted = 0;
+$decline('cs_dc_late', 'evDcLate', (new DateTimeImmutable('+20 hours'))->format(DATE_ATOM), ['#POST .*/v1/refunds#' => function () use (&$posted) { $posted++; return [200, ['id' => 're_x', 'status' => 'pending']]; },
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]]]);
+sync_calendar();
+$dl2 = booking_get('cs_dc_late');
+ok($dl2['status'] === 'cancelled' && !$dl2['refund_id'] && $posted === 0 && $sentOnce('cs_dc_late-cancelled') === 1,
+    'decline: under 36 hours, cancelled without a refund, like a late cancel from the link');
+
+$decline('cs_dc_refused', 'evDcRef', $at('+11 days'), ['#POST .*/v1/refunds#' => fn() => [402, ['error' => ['message' => 'card closed']]],
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]]]);
+sync_calendar();
+$dr = booking_get('cs_dc_refused');
+ok($dr['status'] === 'booked' && (int)$dr['declined_mailed'] === 1 && $sentOnce('cs_dc_refused-declined') === 1,
+    'decline: Stripe refuses the refund: the session stays, she gets "Klient odmítl pozvánku" with the button');
+
+$decline('cs_dc_down', 'evDcDown', $at('+12 days'), ['#POST .*/v1/refunds#' => fn() => [500, []], '#GET .*/v1/refunds\?#' => fn() => [500, []]]);
+$before = (int)state_get('calendar_sync');
+sync_calendar();
+$dd = booking_get('cs_dc_down');
+ok($dd['status'] === 'booked' && !(int)$dd['declined_mailed'] && !$sentOnce('cs_dc_down-declined') && (int)state_get('calendar_sync') <= time() - 60,
+    'decline: Stripe not answering: nothing decided, the next run reads the decline again');
+
+$decline('cs_dc_past', 'evDcPast', (new DateTimeImmutable('-10 minutes'))->format(DATE_ATOM));
+sync_calendar();
+$dp = booking_get('cs_dc_past');
+ok($dp['status'] === 'booked' && $sentOnce('cs_dc_past-declined') === 1, 'decline: after the session started, nothing is cancelled; she is told');
 
 unset($GLOBALS['SMTP_FAKE']);
 
