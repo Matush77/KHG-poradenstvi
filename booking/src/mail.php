@@ -418,6 +418,16 @@ function mail_owner_double(array $b, DateTimeImmutable $start, bool $refunded): 
          'Kdyby chtěl jiný termín, ozve se, nebo mu napiš.']);
 }
 
+/* To the owner when a paid booking still has no calendar event after half an hour (Google refusing): the time is
+   held, the site keeps trying, and the money goes back by itself if it never works before the session. */
+function mail_owner_calendar_failed(array $b, DateTimeImmutable $start): array
+{
+    return owner_mail($b, $start, 'Rezervace se nezapsala do kalendáře: ' . ($b['name'] ?: 'klient') . ' · ' . cz_short($start), 'Rezervace se nezapsala do kalendáře',
+        ['Klient zaplatil, ale zápis do kalendáře se zatím nepovedl (Google neodpovídá). Klient zatím nedostal potvrzení.',
+         'Termín je pro klienta držený, nikdo jiný ho nezarezervuje. Web to zkouší dál každých pár minut; jakmile se to povede, přijde ti obvyklá „Nová rezervace“ a klientovi potvrzení.',
+         'Kdyby se to do začátku sezení nepovedlo, platba se klientovi vrátí sama a oba dostanete e-mail.']);
+}
+
 /* To the client whose payment came for a time someone else had just booked: no booking, the money goes back. */
 function mail_client_double(array $b, DateTimeImmutable $start): array
 {

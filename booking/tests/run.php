@@ -1082,6 +1082,34 @@ ok($o['refund_status'] === 'partial' && $sentOnce('cs_s3_old-refund-failed-re_o2
 $FAKE['#GET .*/v1/events\?#'] = fn() => [403, ['error' => ['message' => 'restricted key']]];
 ok(refunds_unmatched(20) !== null, 's3/1: a key that may not read events still checks the refund list');
 
+// every paid booking ends visible: an automatic refund that keeps failing, a booking the calendar keeps refusing
+$add->execute(['cs_v_dbl', $at('+51 days'), 'online', 'cancelled', null, null, null, time() - 3600, time() - 3600]);
+db()->exec("UPDATE bookings SET cancelled_by = 'double' WHERE pay_id = 'cs_v_dbl'");
+$FAKE = ['#GET .*/checkout/sessions/cs_v_dbl#' => fn() => [200, ['id' => 'cs_v_dbl', 'payment_intent' => 'pi_v_dbl', 'amount_total' => 110000]],
+    '#POST .*/v1/refunds#' => fn() => [200, ['id' => 're_v_dbl', 'status' => 'failed', 'failure_reason' => 'expired_or_canceled_card']]];
+refund_double('cs_v_dbl');
+refund_double('cs_v_dbl');
+ok($sentOnce('cs_v_dbl-double-failed') === 1 && booking_get('cs_v_dbl')['refund_id'] === null, 'visible: a refund Stripe keeps refusing tells her once (no booking, money not back)');
+ok(str_contains(mail_owner_double(booking_get('cs_v_dbl'), prague($at('+51 days')), false)['text'], 'vyřeš ho prosím ve Stripe'), 'visible: and asks her to sort it out in Stripe');
+$add->execute(['cs_v_dbl2', $at('+52 days'), 'online', 'cancelled', null, null, null, time() - 60, time() - 60]);
+db()->exec("UPDATE bookings SET cancelled_by = 'double' WHERE pay_id = 'cs_v_dbl2'");
+$FAKE['#GET .*/checkout/sessions/cs_v_dbl2#'] = fn() => [200, ['id' => 'cs_v_dbl2', 'payment_intent' => 'pi_v_dbl2', 'amount_total' => 110000]];
+refund_double('cs_v_dbl2');
+ok(!$sentOnce('cs_v_dbl2-double-failed'), 'visible: a fresh failure is retried first, no alert yet');
+$add->execute(['cs_v_cal', $at('+53 days'), 'online', 'failed', null, null, null, time() - 3600, time() - 3600]);
+$add->execute(['cs_v_cal2', $at('+54 days'), 'online', 'failed', null, null, null, time() - 60, time() - 60]);
+$FAKE = ['#GET .*/checkout/sessions\?#' => fn() => [200, ['data' => [], 'has_more' => false]], '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]],
+    '#GET .*/v1/events\?#' => fn() => [200, ['data' => []]], '#GET .*/events\?#' => fn() => [200, ['items' => []]],
+    '#POST .*/freeBusy#' => fn() => [503, []], '#POST .*/v1/refunds#' => fn() => [500, []]];
+$swv = sweep();
+sweep();
+ok($sentOnce('cs_v_cal-calendar-failed') === 1 && in_array('cs_v_cal', $swv['calendar_failed'] ?? [], true) && !$sentOnce('cs_v_cal2-calendar-failed'),
+    'visible: a paid booking out of the calendar for 30 min tells her once; a fresh one not yet');
+$cf = mail_owner_calendar_failed(booking_get('cs_v_cal'), prague($at('+53 days')));
+ok(str_contains($cf['subject'], 'nezapsala do kalendáře') && str_contains($cf['text'], 'vrátí sama'), 'visible: the e-mail says the time is held and the money goes back by itself if it never works');
+db()->exec("UPDATE bookings SET status = 'booked', event_id = 'evV' WHERE pay_id = 'cs_v_cal'");
+ok(queued_mail(booking_get('cs_v_cal'), 'owner_calendar_failed') === null, 'visible: once it is in the calendar, a late alert is not sent');
+
 unset($GLOBALS['SMTP_FAKE']);
 
 unset($GLOBALS['HTTP_FAKE']);

@@ -379,6 +379,9 @@ function refund_double(string $payId): array
         log_line('DOUBLE_REFUNDED', ['pay' => $payId, 'refund' => $fields['refund_id']]);
     } catch (Throwable $e) {
         log_line('DOUBLE_REFUND_FAILED', ['pay' => $payId, 'error' => $e->getMessage()]);
+        // the safety net keeps trying; after half an hour she hears once that no booking was made and the money has
+        // not gone back (17 Nov, every payment must end visible: a card Stripe can't refund was retried silently for ever)
+        if ((int)booking_get($payId)['created_at'] < time() - STUCK_ALERT_MINUTES * 60) mail_once($payId . '-double-failed', $payId, 'owner_double_failed');
         return booking_get($payId);
     }
     refund_watch($payId);
@@ -389,6 +392,18 @@ function double_mails(string $payId): void
 {
     if (booking_get($payId)['email']) mail_queued($payId . '-double', $payId, 'client_double');
     mail_queued($payId . '-double-owner', $payId, 'owner_double');
+}
+
+/* A paid booking still not sorted out after this long (no calendar event, or an automatic refund that keeps failing):
+   she gets one e-mail, so no payment waits unseen. */
+const STUCK_ALERT_MINUTES = 30;
+
+/* Queues an e-mail only the first time (state key "once:<name>"); later calls do nothing, also after it was sent. */
+function mail_once(string $name, string $payId, string $kind): void
+{
+    if (state_get('once:' . $name) !== null) return;
+    state_set('once:' . $name, (string)time());
+    mail_queued($name, $payId, $kind);
 }
 
 /* --- e-mails that must arrive (16 Nov review: a failed cancellation e-mail was only logged). Each is written down
@@ -414,6 +429,8 @@ function queued_mail(array $b, string $kind): ?array
         'owner_refund_found' => $b['refund_id'] && !$delayed && ($b['status'] === 'booked' || $b['cancelled_by'] === 'refunded')
             ? mail_owner_refund_found($b, $start, $url) : null,
         'owner_double' => mail_owner_double($b, $start, $refunded),
+        'owner_double_failed' => $refunded ? null : mail_owner_double($b, $start, false),   // refunded since: nothing to say
+        'owner_calendar_failed' => $b['status'] === 'failed' && !$b['event_id'] ? mail_owner_calendar_failed($b, $start) : null,
         'client_double' => mail_client_double($b, $start),
         // she deleted it in her calendar; once she has refunded it there is nothing to ask her any more
         'owner_deleted' => $b['refund_id'] && !$delayed ? null : mail_owner_deleted($b, $start, $url),
@@ -1274,6 +1291,11 @@ function sweep(): array
     foreach ($s->fetchAll() as $row) {
         if ($paused && $row['status'] === 'booked') { $done['mail_waiting'][] = $row['pay_id']; continue; }
         $b = finish_booking($row['pay_id']);
+        if ($b['status'] === 'failed' && (int)$b['created_at'] < time() - STUCK_ALERT_MINUTES * 60) {
+            // paid, but the calendar still refuses: she hears once, so the payment doesn't wait unseen
+            mail_once($row['pay_id'] . '-calendar-failed', $row['pay_id'], 'owner_calendar_failed');
+            $done['calendar_failed'][] = $row['pay_id'];
+        }
         if ($row['status'] !== 'booked') $done['retried'][] = $row['pay_id'];
         elseif (($b['mail_sent'] || !$b['email']) && $b['owner_mailed']) $done['mailed'][] = $row['pay_id'];
         else $done['mail_failed'][] = $row['pay_id'];   // stays unsent: the next run tries again
