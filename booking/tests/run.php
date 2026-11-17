@@ -478,7 +478,10 @@ db()->prepare("INSERT INTO bookings (pay_id, slot, forma, email, name, status, o
 $link = null;
 $FAKE = ['#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), ['busy' => []])]],
     '#POST .*/events\?#' => fn() => [200, ['id' => 'evMeet', 'conferenceData' => ['createRequest' => ['status' => ['statusCode' => 'pending']]]]],
-    '#GET .*/events/evMeet#' => function () use (&$link) { return [200, ['id' => 'evMeet'] + ($link ? ['hangoutLink' => $link] : [])]; }];
+    '#GET .*/events/evMeet#' => function () use (&$link) { return [200, ['id' => 'evMeet'] + ($link ? ['hangoutLink' => $link] : [])]; },
+    // a booking without an event is checked for a refund first (retest 3): none here
+    '#GET .*/checkout/sessions/cs_rv_meet#' => fn() => [200, ['id' => 'cs_rv_meet', 'payment_intent' => 'pi_rv_meet', 'amount_total' => 110000]],
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]]];
 $m1 = finish_booking('cs_rv_meet');
 ok($m1['status'] === 'booked' && !$m1['meet'] && !$m1['mail_sent'], 'review 2: without the Meet link the confirmation waits');
 ok(!str_contains(session_panel($m1, prague($m1['slot']), true), 'href="#"') && str_contains(session_panel($m1, prague($m1['slot']), true), MEET_LATER),
@@ -1055,6 +1058,32 @@ $FAKE = ['#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]],
     '#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]), ['busy' => []])]],
     '#POST .*/events\?#' => fn() => [200, ['id' => 'evRt', 'hangoutLink' => 'https://meet.google.com/rt']]];
 ok(finish_booking('cs_rt_unk2')['status'] === 'booked', 'retest 1: no refund found on the retry: booked and confirmed as usual');
+// 17 Nov retest, 3: stopped right after the payment was saved, before anything else. The booking is 'pending' with no
+// event; the payment was refunded meanwhile. The safety net must ask Stripe before the event and the confirmation
+$addPi('cs_rt_int', '+60 days', 'pending', null, null, null);
+db()->prepare('UPDATE bookings SET updated_at = ? WHERE pay_id = ?')->execute([time() - 600, 'cs_rt_int']);
+$refundsAre([['id' => 're_rt_int', 'payment_intent' => 'pi_cs_rt_int', 'amount' => 110000, 'status' => 'succeeded', 'metadata' => []]]);
+$CALLS = [];
+try { sweep(); } catch (RuntimeException $e) { /* no fake for the list of recent payments: the rest of the run is done */ }
+$i3 = booking_get('cs_rt_int');
+ok($i3['status'] === 'cancelled' && $i3['cancelled_by'] === 'refunded' && $i3['refund_id'] === 're_rt_int' && !$i3['event_id'] && !$i3['mail_sent']
+    && !preg_grep('#^POST .*/events\?#', $CALLS), 'retest 3: an interrupted booking refunded meanwhile: the safety net never books it');
+ok($sentOnce('cs_rt_int-refund-found') === 1, 'retest 3: she is told');
+// the same with Stripe still not answering: held as not yet in the calendar, no event
+$addPi('cs_rt_int2', '+61 days', 'pending', null, null, null);
+db()->prepare('UPDATE bookings SET updated_at = ? WHERE pay_id = ?')->execute([time() - 600, 'cs_rt_int2']);
+$FAKE = ['#GET .*/v1/refunds\?#' => fn() => [500, []]];
+$CALLS = [];
+$i3b = finish_booking('cs_rt_int2');
+ok($i3b['status'] === 'failed' && !$i3b['event_id'] && str_starts_with((string)$i3b['error'], 'refund check') && !preg_grep('#googleapis.com/calendar#', $CALLS),
+    'retest 3: interrupted and Stripe down: held, no event, no confirmation');
+// the lookup that got no answer is saved with the booking itself, never as a later step
+$FAKE = ['#GET .*/v1/refunds\?#' => fn() => [500, []]];
+$i3c = book_paid(['id' => 'cs_rt_int3', 'payment_intent' => 'pi_rt_int3', 'metadata' => ['den' => substr($at('+62 days'), 0, 10)] + $old['metadata']] + $fresh);
+ok($i3c['status'] === 'failed' && $i3c['error'] === 'refund check: Stripe did not answer' && (int)$i3c['updated_at'] === (int)$i3c['created_at'],
+    'retest 3: lookup down: saved as held in the same step as the payment');
+ok(!str_contains((string)file_get_contents(__DIR__ . '/../src/booking.php'), "booking_update(\$payId, ['status' => 'failed', 'error' => 'refund check: Stripe did not answer'])"),
+    'retest 3: no separate step left that an interruption could skip');
 // 17 Nov retest, 2: Stripe makes the refund but its answer is lost. A second try with the same key gets it back
 $addPi('cs_rt_lost', '+59 days', 'booked');
 $keys = [];
