@@ -427,7 +427,7 @@ function queued_mail(array $b, string $kind): ?array
     // the refund Stripe refused since (review 17 Nov: an e-mail that went late still promised the money)
     $delayed = refund_failed($b);
     return match ($kind) {
-        'owner_cancelled' => mail_owner_cancelled($b, $start, $url),
+        'owner_cancelled' => mail_owner_cancelled($b, $start, $url, $arg === 'calendar'),
         'client_cancelled' => mail_client_cancelled($b, $start, false, $refunded, false, $delayed),   // the client cancelled
         'client_cancel' => mail_client_cancelled($b, $start, false, $refunded, true, $delayed),       // she cancelled, with a refund
         'client_refund' => mail_client_cancelled($b, $start, true, $refunded, false, $delayed),       // refund after a cancellation
@@ -624,7 +624,9 @@ function finish_booking(string $payId, bool $refundChecked = false): array
 /* Client cancels from the e-mail link. 36+ hours before: full refund. Later: no refund. Always: the slot frees up.
    $expectRefund: the page told the client the money comes back. If the 36 hours ran out while they were reading it,
    nothing is cancelled (16 Nov test: a click at 35:59 cancelled without the promised refund). */
-function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $expectRefund = false): array
+/* $via 'calendar': the client declined or deleted the invitation in their Google Calendar. Google's own booking
+   pages treat that as a cancellation (owner's test, 17 Nov), so it is one here too, with the same 36-hour rule. */
+function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $expectRefund = false, string $via = 'link'): array
 {
     $b = booking_get($payId);
     if (!$b) throw new ClientError('Rezervace nenalezena.', 404);
@@ -647,7 +649,8 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     } else {
         [$code, $s] = stripe('GET', 'checkout/sessions/' . rawurlencode($payId));
         if ($code !== 200 || empty($s['payment_intent'])) throw new ClientError('Zrušení se teď nepovedlo. Stačí to zkusit znovu.', 502);
-        [$code, $r] = stripe_refund($s['payment_intent'], (int)($s['amount_total'] ?? 0), 'zruseni klientem', 'cancel-' . $payId);
+        [$code, $r] = stripe_refund($s['payment_intent'], (int)($s['amount_total'] ?? 0),
+            $via === 'calendar' ? 'zruseni klientem v kalendari' : 'zruseni klientem', 'cancel-' . $payId);
         if ($code !== 200 || !refund_alive($r)) {
             // the first request has cancelled it meanwhile: that is the answer, not an error
             if (($done = booking_get($payId)) && $done['status'] === 'cancelled') return cancel_answer($payId);
@@ -679,7 +682,7 @@ function cancel_booking(string $payId, ?DateTimeImmutable $now = null, bool $exp
     }
     log_line('CANCELLED', ['pay' => $payId, 'hours' => $fields['hours_before'], 'refund' => $fields['refund_id'] ?? null]);
     refund_watch($payId);
-    mail_queued($payId . '-cancelled', $payId, 'owner_cancelled');
+    mail_queued($payId . '-cancelled', $payId, 'owner_cancelled' . ($via === 'calendar' ? '|calendar' : ''));
     // the client gets it in writing too (owner, 14 Nov): refunded or not. 'mailed': the page says it was sent only if it was
     $mailed = booking_get($payId)['email'] ? mail_queued($payId . '-client-cancelled', $payId, 'client_cancelled') : false;
     return booking_get($payId) + ['mailed' => $mailed];
@@ -1131,8 +1134,10 @@ function client_move(string $payId, string $den, string $cas, ?DateTimeImmutable
    - she dragged a session to another time: the booking follows, the client gets "Změna termínu";
    - she deleted it: the booking is cancelled (time free again), no refund yet; she gets an e-mail with
      a button to refund and tell the client;
-   - an online client declined the invitation in their own calendar: she gets an e-mail, nothing else
-     changes (a decline is not a cancellation: no refund, the time stays booked). */
+   - the client declined (or deleted) the invitation in their own Google Calendar: cancelled as from their link,
+     like Google's booking pages do (owner's test, 17 Nov): refunded 36+ hours ahead, not later, both told.
+     Where that cannot be done (the session started, Stripe refused the refund) she gets "Klient odmítl pozvánku"
+     with the refund button instead. */
 function sync_calendar(?int $now = null): array
 {
     $now ??= time();
@@ -1177,11 +1182,29 @@ function sync_calendar(?int $now = null): array
         $guest = $b['email'] ? strtolower($b['email']) : null;
         foreach ($ev['attendees'] ?? [] as $a) {
             if ($guest && strtolower($a['email'] ?? '') === $guest && ($a['responseStatus'] ?? '') === 'declined' && !$b['declined_mailed']) {
+                // when the client declined (Google's time of the change), not when this run noticed: the 36 hours
+                // count from the decline, as her deletion does
+                $at = min($now, (int)(strtotime((string)($ev['updated'] ?? '')) ?: $now));
+                try {
+                    cancel_booking($payId, new DateTimeImmutable('@' . $at), false, 'calendar');
+                    log_line('GUEST_DECLINED', ['pay' => $payId, 'cancelled' => true]);
+                    $done['declined'][] = $payId;
+                    break;
+                } catch (Throwable $e) {
+                    if (!$e instanceof ClientError || in_array($e->getCode(), [409, 503], true)) {
+                        // being changed right now, Stripe gave no answer (the refund may have gone) or anything unexpected:
+                        // read again next run, the rest of this run goes on
+                        $next = min($next, (int)(strtotime((string)($ev['updated'] ?? '')) ?: $now - 60));
+                        log_line('GUEST_DECLINED_LATER', ['pay' => $payId, 'error' => $e->getMessage()]);
+                        break;
+                    }
+                    // the session has started, or Stripe refused the refund: she decides, with the refund button
+                    log_line('GUEST_DECLINED', ['pay' => $payId, 'cancelled' => false, 'error' => $e->getMessage()]);
+                }
                 // queued: a failed e-mail was retried only if Google listed the event again, which it need not
                 booking_update($payId, ['declined_mailed' => 1]);
                 mail_queued($payId . '-declined', $payId, 'owner_declined');
                 $b = booking_get($payId);
-                log_line('GUEST_DECLINED', ['pay' => $payId]);
                 $done['declined'][] = $payId;
             }
         }
