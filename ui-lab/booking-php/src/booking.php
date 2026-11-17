@@ -324,11 +324,11 @@ function book_paid(array $s): ?array
     $past = $start->getTimestamp() <= time();
     $pi = payment_intent_id($s);
     $amount = (int)($s['amount_total'] ?? 0);
-    // booked late (webhook lost, the safety net found it): she may have refunded it in her Stripe dashboard meanwhile.
-    // Such a payment is never confirmed (17 Nov review, second list: a confirmation for money already returned).
-    // A fresh payment can't have been refunded yet, so the usual path doesn't ask Stripe once more.
+    // she may have refunded it in her Stripe dashboard before the site booked it (webhook late or lost). Such a payment
+    // is never confirmed (17 Nov review, second list). Asked for every new booking, however fresh the payment (third
+    // list: a refund within 10 minutes was confirmed): one Stripe call, only when a booking is made.
     $refund = null;
-    if ($pi && (int)($s['created'] ?? time()) < time() - 600 && !booking_get($payId)) {
+    if ($pi && !booking_get($payId)) {
         try { $refund = refunds_of($pi, $amount)['full']; } catch (Throwable $e) { /* not known: booked as usual, the safety net compares later */ }
     }
     $claimed = db_tx(function (PDO $pdo) use ($payId, $meta, $start, $past, $pi, $amount, $refund) {
@@ -702,16 +702,19 @@ function refund_changed(string $refundId): ?array
     } catch (Throwable $e) {
         // Stripe's list or the payment not readable now: at least this refund's own state, as before
         log_line('REFUND_CHECK_FAILED', ['pay' => $b['pay_id'], 'error' => $e->getMessage()]);
-        if ($b['refund_id'] !== $refundId || in_array($b['refund_status'], ['partial', 'missing'], true)) return $b;
+        if ($b['refund_id'] === $refundId && !in_array($b['refund_status'], ['partial', 'missing'], true)) {
+            $was = refund_failed($b);
+            booking_update($b['pay_id'], ['refund_status' => (string)($r['status'] ?? '')]);
+            if (!$was && refund_failed(booking_get($b['pay_id']))) {
+                log_line('REFUND_FAILED_LATER', ['pay' => $b['pay_id'], 'refund' => $refundId, 'reason' => $r['failure_reason'] ?? null]);
+                mail_queued($b['pay_id'] . '-refund-failed-' . $refundId, $b['pay_id'], 'owner_refund_failed');
+            }
+        }
+        // never "done" while the comparison is missing: the webhook answers 5xx and Stripe sends the event again
+        // (for up to 3 days). A 200 here lost it for good (17 Nov review, third list: an older refund failing later
+        // stayed "refunded", out of the safety net's 7 days)
+        throw $e;
     }
-    $was = refund_failed($b);
-    booking_update($b['pay_id'], ['refund_status' => (string)($r['status'] ?? '')]);
-    $b = booking_get($b['pay_id']);
-    if (!$was && refund_failed($b)) {
-        log_line('REFUND_FAILED_LATER', ['pay' => $b['pay_id'], 'refund' => $refundId, 'reason' => $r['failure_reason'] ?? null]);
-        mail_queued($b['pay_id'] . '-refund-failed-' . $refundId, $b['pay_id'], 'owner_refund_failed');
-    }
-    return $b;
 }
 
 /* --- Stripe is the truth about refunds (17 Nov review, second list). The site records the refunds it makes, but money
@@ -1276,8 +1279,28 @@ function refunds_unmatched(int $max): array
     }
     [$code, $list] = stripe('GET', 'refunds', ['limit' => 100, 'created' => ['gte' => time() - SWEEP_LOOKBACK_DAYS * 86400]]);
     if ($code !== 200) throw new RuntimeException('Stripe refund list failed: HTTP ' . $code);
+    // also every refund that changed in those days, however old: Stripe's events name it (17 Nov review, third list:
+    // a refund made two weeks ago that failed today, its webhook lost, was outside the list above). The refund as the
+    // event saw it is only a hint; refund_reconcile reads the current state.
+    [$code, $ev] = stripe('GET', 'events', ['limit' => 100, 'types' => ['refund.updated', 'refund.failed', 'charge.refund.updated'],
+        'created' => ['gte' => time() - SWEEP_LOOKBACK_DAYS * 86400]]);
+    if ($code !== 200) {   // a key without access to events (a restricted key): the refund list above still counts
+        if ((int)(state_get('events_error_logged') ?? 0) < time() - 3600) {   // once an hour, not every run
+            log_line('SWEEP_EVENTS_ERROR', ['code' => $code, 'error' => substr((string)($ev['error']['message'] ?? ''), 0, 160)]);
+            state_set('events_error_logged', (string)time());
+        }
+        $ev = [];
+    }
+    $seen = [];
+    $refunds = [];
+    // the refund list first (the current state), then the events (newest first: the newest state counts)
+    foreach (array_merge($list['data'] ?? [], array_map(fn($e) => $e['data']['object'] ?? [], $ev['data'] ?? [])) as $r) {
+        if (empty($r['id']) || isset($seen[$r['id']])) continue;
+        $seen[$r['id']] = true;
+        $refunds[] = $r;
+    }
     $out = [];
-    foreach ($list['data'] ?? [] as $r) {
+    foreach ($refunds as $r) {
         $b = booking_of_payment($r['id'] ?? null, (string)($r['payment_intent'] ?? ''));
         if (!$b || $b['status'] === 'pending') continue;   // another copy's payment, or being booked right now
         $same = $b['refund_id'] === ($r['id'] ?? null) && $b['refund_status'] === ($r['status'] ?? null);

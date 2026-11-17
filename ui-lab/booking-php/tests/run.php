@@ -475,10 +475,14 @@ throws(fn() => cancel_booking('cs_rv_ref', null, true), 502, 'review 3: a refund
 ok(booking_get('cs_rv_ref')['status'] === 'booked', 'review 3: and the booking stays');
 $add->execute(['cs_rv_ref2', $at('+28 days'), 'online', 'cancelled', null, 're_later', 'pending', 0, 0]);
 $FAKE = ['#GET .*/v1/refunds/re_later#' => fn() => [200, ['id' => 're_later', 'status' => 'failed', 'failure_reason' => 'lost_or_stolen_card']]];
-$rf = refund_changed('re_later');
+$retry = false;
+try { refund_changed('re_later'); } catch (RuntimeException $e) { $retry = true; }
+$rf = booking_get('cs_rv_ref2');
+ok($retry, 'r3: Stripe could not be compared: the webhook answers an error so Stripe sends it again');
 ok($rf['refund_status'] === 'failed' && !booking_view($rf)['refunded'] && booking_view($rf)['refund_failed'], 'review 3: a refund failing later (webhook) is recorded');
 ok(str_contains(mail_owner_refund_failed($rf, prague($rf['slot']), owner_url('cs_rv_ref2'))['text'], 'nevrátily'), 'review 3: she gets an e-mail about it');
-ok(refund_changed('re_later')['refund_status'] === 'failed' && (int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_ref2'")->fetchColumn() === 0, 'review 3: a repeated webhook changes nothing');
+try { refund_changed('re_later'); } catch (RuntimeException $e) {}
+ok(booking_get('cs_rv_ref2')['refund_status'] === 'failed' && (int)db()->query("SELECT COUNT(*) FROM mail_queue WHERE pay_id = 'cs_rv_ref2'")->fetchColumn() === 0, 'review 3: a repeated webhook changes nothing');
 $FAKE = ['#GET .*/checkout/sessions/cs_rv_ref2#' => fn() => [200, ['id' => 'cs_rv_ref2', 'payment_intent' => 'pi_r2']],
     '#POST .*/v1/refunds#' => fn($m, $u, $b, $h) => [200, ['id' => in_array('Idempotency-Key: cancel-cs_rv_ref2-after-re_later', $h, true) ? 're_again' : 're_samekey', 'status' => 'pending']]];
 ok(owner_cancel('cs_rv_ref2')['refund_id'] === 're_again', 'review 3: after a failed refund she can refund again (a new Stripe key)');
@@ -998,11 +1002,18 @@ $CALLS = [];
 $d7 = book_paid($old);
 ok($d7['status'] === 'cancelled' && $d7['cancelled_by'] === 'refunded' && $d7['refund_id'] === 're_pre' && !$d7['mail_sent'] && !preg_grep('#googleapis.com/calendar#', $CALLS), 's2/7: a payment refunded before booking is not booked, no event, no confirmation');
 ok($sentOnce('cs_s2_pre-refund-found') === 1 && str_contains(mail_owner_refund_found($d7, prague($d7['slot']), 'u')['subject'], 'nezarezervovala'), 's2/7: she is told');
+// third list, 2: the same for a payment a minute old (refunded before its webhook came)
+$fresh0 = ['id' => 'cs_s3_fresh', 'created' => time() - 60] + $old;
+$refundsAre([['id' => 're_fresh', 'payment_intent' => 'pi_pre', 'amount' => 110000, 'status' => 'pending']]);
 $CALLS = [];
-$fresh = ['id' => 'cs_s2_fresh', 'created' => time()] + $old;
-$FAKE = ['#POST .*/freeBusy#' => fn() => [500, []]];
-book_paid($fresh);
-ok(!preg_grep('#/v1/refunds#', $CALLS), 's2/7: a fresh payment is booked without asking Stripe about refunds');
+$d7b = book_paid($fresh0);
+ok($d7b['status'] === 'cancelled' && $d7b['cancelled_by'] === 'refunded' && !preg_grep('#googleapis.com/calendar#', $CALLS), 's3/2: a fresh payment already refunded is not booked either');
+$fresh = ['id' => 'cs_s2_fresh', 'created' => time(), 'payment_intent' => 'pi_fresh'] + $old;
+$FAKE = ['#POST .*/freeBusy#' => fn() => [500, []], '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]]];
+ok(book_paid($fresh)['status'] === 'failed', 's3/2: a payment with no refund is booked as usual (here Google is down: retried later)');
+$FAKE = ['#POST .*/freeBusy#' => fn() => [500, []], '#GET .*/v1/refunds\?#' => fn() => [500, []]];
+ok(book_paid(['id' => 'cs_s3_fresh2', 'payment_intent' => 'pi_fresh2', 'metadata' => ['den' => substr($at('+49 days'), 0, 10)] + $old['metadata']] + $fresh)['status'] === 'failed',
+    's3/2: Stripe not answering about refunds never stops a booking');
 
 // 8. her hours page shows a paid booking whose calendar entry failed (the time is taken)
 db()->exec("UPDATE bookings SET status = 'failed' WHERE pay_id = 'cs_s2_fresh'");
@@ -1032,6 +1043,25 @@ db()->prepare('INSERT INTO mail_queue (name, pay_id, kind, created_at) VALUES (?
 ok(cancel_answer('cs_s2_one')['mailed'] === false, 's2/11: the racing click hears the e-mail is not out yet');
 db()->exec("DELETE FROM mail_queue WHERE name = 'cs_s2_one-client-cancelled'");
 ok(cancel_answer('cs_s2_one')['mailed'] === true, 's2/11: and that it went once it did');
+// third list, 1: an older refund that fails later. A webhook that can't compare with Stripe must not answer "done";
+// and the safety net finds such a refund through Stripe's events, however old the refund is
+$addPi('cs_s3_old', '+50 days', 'cancelled', 're_o2', 'succeeded', null);
+$FAKE = ['#GET .*/v1/refunds/re_o1#' => fn() => [200, ['id' => 're_o1', 'payment_intent' => 'pi_cs_s3_old', 'amount' => 60000, 'status' => 'failed']],
+    '#GET .*/v1/refunds\?#' => fn() => [503, []]];
+$threw = false;
+try { refund_changed('re_o1'); } catch (RuntimeException $e) { $threw = true; }
+ok($threw && booking_get('cs_s3_old')['refund_status'] === 'succeeded', 's3/1: Stripe list down: the webhook answers an error (Stripe retries), nothing is changed blindly');
+$parts = [['id' => 're_o2', 'payment_intent' => 'pi_cs_s3_old', 'amount' => 50000, 'status' => 'succeeded'],
+    ['id' => 're_o1', 'payment_intent' => 'pi_cs_s3_old', 'amount' => 60000, 'status' => 'failed']];
+$FAKE = ['#GET .*/v1/refunds\?.*payment_intent#' => fn() => [200, ['data' => $parts]],
+    '#GET .*/v1/refunds\?#' => fn() => [200, ['data' => []]],    // both refunds older than 7 days
+    '#GET .*/v1/events\?#' => fn() => [200, ['data' => [['type' => 'refund.failed', 'data' => ['object' => $parts[1]]]]]]];
+ok(in_array('cs_s3_old', refunds_unmatched(20), true), 's3/1: the safety net finds an old refund that failed now, through the events');
+$o = refund_reconcile('cs_s3_old');
+ok($o['refund_status'] === 'partial' && $sentOnce('cs_s3_old-refund-failed-re_o2') === 1, 's3/1: recorded as only partly refunded, she is told');
+$FAKE['#GET .*/v1/events\?#'] = fn() => [403, ['error' => ['message' => 'restricted key']]];
+ok(refunds_unmatched(20) !== null, 's3/1: a key that may not read events still checks the refund list');
+
 unset($GLOBALS['SMTP_FAKE']);
 
 unset($GLOBALS['HTTP_FAKE']);
