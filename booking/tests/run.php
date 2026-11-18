@@ -967,6 +967,9 @@ $FAKE = ['#POST .*/events\?#' => function ($m, $u, $body) use (&$sentEv) { $sent
 gcal_create(prague($gb['slot']), 't', 'd', false, 'j@example.com', 'cs_g1');
 ok(($sentEv['attendees'][0]['email'] ?? '') === 'j@example.com' && ($sentEv['extendedProperties']['private']['platba'] ?? '') === 'cs_g1' && !isset($sentEv['conferenceData']),
     'google: in person the client is a guest too, the payment kept out of sight');
+ok(($sentEv['colorId'] ?? '') === '4', 'google: in person in Flamingo (peach)');
+gcal_create(prague($gb['slot']), 't', 'd', true, 'j@example.com', 'cs_g2');
+ok(($sentEv['colorId'] ?? '') === '7', 'google: online in Peacock (blue)');
 
 // --- 17 Nov review, second list: Stripe is the truth about refunds
 $SENT = [];
