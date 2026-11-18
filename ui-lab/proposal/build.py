@@ -199,7 +199,8 @@ page = page[:m.start()] + """<div class="why-online-content">
 # the publication moves to "Profesní členství a reference", next to the ČAP membership
 m = re.search(r'(<div class="about-description">\s*<p>.*?</p>)(.*?)(\n\s*</div>\n\s*</div>\n\s*<div class="credentials">)', page, flags=re.S)
 # the IVF group stays in view, right under the first paragraph (owner, 13 Nov)
-ivf = re.search(r'\n\s*<p class="highlighted-text">.*?IVF.*?</p>', m.group(2), flags=re.S)
+# both IVF paragraphs move together: since the 16 Nov split, "Skupina vznikla…" was left behind inside "Číst dál" (owner, 18 Nov)
+ivf = re.search(r'\n\s*<p class="highlighted-text">.*?IVF.*?</p>\s*<p class="highlighted-text">\s*Skupina vznikla.*?</p>', m.group(2), flags=re.S)
 assert ivf
 # closing portrait card (owner, 13 Nov): a peach card with the studio portrait and a quote, at the end of "Číst dál"
 PERSONAL_NOTE = ('\n                        <div class="about-personal-note">'
@@ -207,22 +208,18 @@ PERSONAL_NOTE = ('\n                        <div class="about-personal-note">'
                   '\n                            <img src="ui-lab/proposal/img/portrait-avatar-192.webp" srcset="ui-lab/proposal/img/portrait-avatar-192.webp 192w, ui-lab/proposal/img/portrait-avatar-384.webp 384w" sizes="130px" alt="Mgr. Kristýna Hriciková Glattová" width="130" height="130" loading="lazy" decoding="async">'
                   '\n                            <p class="about-personal-quote">„Naší největší svobodou je svoboda zvolit si svůj postoj.“<cite>Viktor E. Frankl</cite></p>'
                   '\n                        </div>')
-# credentials back in view (owner, 18 Nov): the 13 Nov cut hid the degree, training and clinic from visitors and Google;
-# one quiet label | value list at the end of "Číst dál" (owner, 18 Nov), no lines (owner, 13 Nov), and the supervision sentence
-# leaves "Číst dál" because the list now says it
-CREDENTIALS = ('\n                        <dl class="about-facts">'
-               + ''.join(f'\n                            <div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in [
-                   ('Vzdělání', 'Mgr.&nbsp;psychologie, PVŠPS Praha'),
-                   ('Výcvik', 'Pětiletý výcvik v daseinsanalýze'),
-                   ('Praxe', 'Fakultní nemocnice Ostrava, Klinika dětského lékařství'),
-                   ('Specializace', 'Klinická psychologie, pod vedením Mgr.&nbsp;Marcely Kvardové'),
-                   ('Supervize', 'PhDr.&nbsp;Marek Hošek, MUDr.&nbsp;Michal Kryl (individuální)'),
-               ]) + '\n                        </dl>')
+# education back in the text (owner, 18 Nov): the 13 Nov cut had dropped the degree, the training and the clinic.
+# Not a list (owner tried one, 18 Nov: "not a dashboard"): one paragraph in her voice, just before the supervision one.
 SUPERVISION = re.search(r'\n\s*<p>\s*Terapeuticky pracuji pod supervizí.*?</p>', m.group(2), flags=re.S)
 assert SUPERVISION
+EDUCATION = ('\n\n                        <p>'
+             '\n                            Vystudovala jsem psychologii na Pražské vysoké škole psychosociálních studií (PVŠPS) '
+             'a absolvovala pětiletý psychoterapeutický výcvik v daseinsanalýze. Ve Fakultní nemocnici Ostrava pracuji '
+             'na Klinice dětského lékařství.'
+             '\n                        </p>')
 page = (page[:m.start()] + m.group(1) + ivf.group(0) +
         '\n                        <details class="about-more">\n                            <summary><span class="about-more-open">Číst dál</span><span class="about-more-close">Skrýt</span></summary>' +
-        m.group(2).replace(ivf.group(0), '', 1).replace(SUPERVISION.group(0), '', 1) + CREDENTIALS + '\n                        </details>' + PERSONAL_NOTE + m.group(3) + page[m.end():])
+        m.group(2).replace(ivf.group(0), '', 1).replace(SUPERVISION.group(0), EDUCATION + SUPERVISION.group(0), 1) + '\n                        </details>' + PERSONAL_NOTE + m.group(3) + page[m.end():])
 # no credential summaries (owner, 13 Nov): the supervisors are in the text, the rest in the article author boxes
 page, n = re.subn(r'\n\s*<div class="credentials">.*?\n                </div>\n', '\n', page, count=1, flags=re.S)
 assert n == 1
