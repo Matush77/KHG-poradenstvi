@@ -221,6 +221,16 @@ ok(str_contains(mail_client_cancelled($ob + ['moves' => 2], $w, false)['ics'], '
 ok(str_contains(mail_eml($cc), 'text/calendar; charset=utf-8; method=CANCEL') && str_contains(mail_eml(mail_build($ob, $w, 'http://x')), 'method=PUBLISH'), 'eml: CANCEL on the cancellation, PUBLISH on the confirmation');
 ok(mail_client_cancelled($ob, $w, false, false)['ics'] !== null && mail_client_cancelled($ob, $w, false, true, true)['ics'] !== null, 'cancelled: late and by her also remove it');
 $cr = mail_client_cancelled($ob, $w, true);
+// the calendar file shares the Google event's UID, so Google Calendar keeps one copy (owner, 18 Nov); older bookings keep theirs
+state_set('ics_google_uid_from', '1000');
+$gb = $ob + ['event_id' => 'khgabc123', 'created_at' => 2000];
+ok(str_contains(mail_build($gb, $w, 'http://x')['ics'], "UID:khgabc123@google.com\r\n"), 'ics UID: the Google event\'s iCalUID');
+ok(str_contains(mail_client_cancelled($gb, $w, false)['ics'], "UID:khgabc123@google.com\r\n") && str_contains(mail_build($gb + ['moves' => 1], $w, 'http://x', $w)['ics'], "UID:khgabc123@google.com\r\n"), 'ics UID: the move and cancel files match it');
+ok(str_contains(mail_build(['created_at' => 999] + $gb, $w, 'http://x')['ics'], 'UID:cs_test_abc@khgporadenstvi.cz') && str_contains(mail_client_cancelled(['created_at' => 999] + $gb, $w, false)['ics'], 'UID:cs_test_abc@khgporadenstvi.cz'), 'ics UID: a booking from before keeps the old one');
+ok(str_contains(mail_build(['event_id' => null] + $gb, $w, 'http://x')['ics'], 'UID:cs_test_abc@khgporadenstvi.cz'), 'ics UID: no Google event yet, the old one');
+db()->exec("DELETE FROM state WHERE k = 'ics_google_uid_from'");
+mail_build($gb, $w, 'http://x');
+ok(abs((int)state_get('ics_google_uid_from') - time()) < 5, 'ics UID: the switch-over time is set on first use');
 ok($cr['ics'] === null, 'refund only: no calendar file (the session was cancelled before)');
 ok(str_starts_with($cr['subject'], 'Vrácení platby za sezení') && str_starts_with($cr['text'], 'Vrácení platby') && str_contains($cr['text'], 'Částka bude vrácena na kartu použitou k platbě') && !str_contains($cr['text'], 'Vybrat jiný termín'), 'refund after a late cancellation: own wording');
 $cl = mail_client_cancelled($ob, $w, false, false);
