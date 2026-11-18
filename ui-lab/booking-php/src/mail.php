@@ -70,6 +70,18 @@ function ics_fold(string $line): string
     return implode("\r\n ", $out);
 }
 
+/* The calendar file's UID. The same as the Google event's iCalUID (an event made with our own id gets
+   '<id>@google.com'), so a client on Google Calendar, who has the event already as its guest, does not get a
+   second copy from the file (owner, 18 Nov: two events in Gmail). Bookings made before this change keep the old
+   UID, so a later move or cancel file still matches the copy they saved. */
+function ics_uid(array $b, DateTimeImmutable $start): string
+{
+    $from = state_get('ics_google_uid_from');
+    if ($from === null) { $from = (string)time(); state_set('ics_google_uid_from', $from); }
+    if (!empty($b['event_id']) && (int)($b['created_at'] ?? 0) >= (int)$from) return $b['event_id'] . '@google.com';
+    return ($b['pay_id'] ?? $start->format('U')) . '@khgporadenstvi.cz';
+}
+
 function ics_text(string $s): string
 {
     return str_replace(['\\', ';', ',', "\n"], ['\\\\', '\\;', '\\,', '\\n'], $s);
@@ -235,7 +247,7 @@ function mail_build(array $b, DateTimeImmutable $start, string $cancelUrl, ?Date
     $lines = [
         'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//khgporadenstvi.cz//rezervace//CS', 'METHOD:PUBLISH',
         ...ICS_PRAGUE,
-        'BEGIN:VEVENT', 'UID:' . ($b['pay_id'] ?? $start->format('U')) . '@khgporadenstvi.cz',
+        'BEGIN:VEVENT', 'UID:' . ics_uid($b, $start),
         'DTSTAMP:' . gmdate('Ymd\THis\Z'), 'SEQUENCE:' . (int)($b['moves'] ?? 0),
         'DTSTART;TZID=Europe/Prague:' . $f($start), 'DTEND;TZID=Europe/Prague:' . $f($end),
         'SUMMARY:' . ics_text('Sezení s Kristýnou Hricikovou Glattovou'),
@@ -541,7 +553,7 @@ function client_ics_cancel(array $b, DateTimeImmutable $start): string
     $lines = [
         'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//khgporadenstvi.cz//rezervace//CS', 'METHOD:CANCEL',
         ...ICS_PRAGUE,
-        'BEGIN:VEVENT', 'UID:' . ($b['pay_id'] ?? $start->format('U')) . '@khgporadenstvi.cz',
+        'BEGIN:VEVENT', 'UID:' . ics_uid($b, $start),
         'DTSTAMP:' . gmdate('Ymd\THis\Z'), 'SEQUENCE:' . ((int)($b['moves'] ?? 0) + 1), 'STATUS:CANCELLED',
         'ORGANIZER;CN="' . SENDER . '":mailto:' . FROM_MAIL,
         'DTSTART;TZID=Europe/Prague:' . $f($start), 'DTEND;TZID=Europe/Prague:' . $f($start->modify('+50 minutes')),
