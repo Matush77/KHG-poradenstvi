@@ -14,7 +14,13 @@ function db(): PDO
     $pdo = new PDO('sqlite:' . $path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::ATTR_TIMEOUT => 10]);
     if ($new) @chmod($path, 0600);
-    $pdo->exec('PRAGMA journal_mode = WAL');
+    // Rollback journal, not WAL: the hosting keeps files on network storage, and its SSH, web and cron run on different
+    // machines. WAL's shared memory works on one machine only; on 18 Nov a write over SSH while a webhook wrote
+    // corrupted the test database. The rollback journal locks through the file itself. A database still in WAL
+    // switches only while no one else has it open: if it is busy, a later request does it.
+    if (strtolower((string)$pdo->query('PRAGMA journal_mode')->fetchColumn()) !== 'delete') {
+        try { $pdo->exec('PRAGMA journal_mode = DELETE'); } catch (PDOException $e) {}
+    }
     $pdo->exec('CREATE TABLE IF NOT EXISTS holds (
         slot TEXT PRIMARY KEY,            -- session start, Prague time ISO
         pay_id TEXT,                      -- Checkout Session id, set once Stripe answered

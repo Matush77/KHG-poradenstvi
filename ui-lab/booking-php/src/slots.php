@@ -61,9 +61,9 @@ function compute_slots(array $open, array $busy, DateTimeImmutable $from, DateTi
 /* The booking window: from now + minimum notice to the end of the last bookable day. */
 function slot_window(?DateTimeImmutable $now = null): array
 {
-    $c = cfg();
+    $c = booking_rules();
     $now = ($now ?? new DateTimeImmutable())->setTimezone(new DateTimeZone('Europe/Prague'));
-    return [$now->modify('+' . $c['min_notice_hours'] . ' hours'), $now->setTime(23, 59, 59)->modify('+' . $c['book_ahead_days'] . ' days')];
+    return [$now->modify('+' . $c['notice'] . ' hours'), $now->setTime(23, 59, 59)->modify('+' . $c['ahead'] . ' days')];
 }
 
 /* Free times read from Google now. $day: only that day (checkout re-check). $withTaken: also leave out slots
