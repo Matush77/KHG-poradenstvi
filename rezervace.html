@@ -886,6 +886,14 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .time { min-height: 52px; border-radius: 14px; border: 1.5px solid transparent; background: var(--tint); cursor: pointer; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; transition: background .15s, border-color .15s; }
     @media (hover: hover) { .rez .time:hover { background: var(--tint-strong); } }
     .rez .time[aria-pressed="true"] { background: var(--coral); color: var(--on-coral); border-color: var(--coral); }
+    /* the therapist moving a session: every hour 7–20 is offered; her regular free times stay filled,
+       the others are outlined and say why they are not regular */
+    .rez .day.free.extra { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tint-deep); font-weight: 500; }
+    .rez .time.k-out, .rez .time.k-busy { background: transparent; border-color: var(--tint-deep); display: grid; place-content: center; line-height: 1.15; }
+    .rez .time small { font-size: 12px; font-weight: 500; color: var(--mute); }
+    .rez .time.k-busy small { color: var(--coral-ink); }
+    .rez .time[aria-pressed="true"] small { color: inherit; }
+    .rez .warn { background: var(--peach); border-radius: 12px; padding: 10px 14px; font-size: 15px; }
     .rez .tz { color: var(--mute); font-size: 13px; } /* online clients abroad: whose 14:00 it is */
     .rez .hint { color: var(--mute); font-size: 15px; }
     .rez .hint a { color: var(--blue); }
@@ -1094,6 +1102,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       }
       // the page the move started from: it shows the booking as it is now
       function moveHome() { return '/rezervace/' + (MOVE.owner ? 'sprava' : 'zruseni') + '.html?' + new URLSearchParams({ b: MOVE.b, t: MOVE.t }); }
+      // owner moves: what kind of time it is ('' = a regular free time, 'out' = outside her hours, 'busy' = another event in her calendar)
+      var KIND = { out: 'mimo hodiny', busy: 'jiná událost' };
+      function kind(d, t) { var k = MOVE && MOVE.kinds && (MOVE.kinds[key(d)] || {})[t]; return k && k !== 'free' ? k : ''; }
+      function regular(d) { var k = MOVE.kinds[key(d)] || {}; return Object.keys(k).some(function (t) { return k[t] === 'free'; }); }
       function moveWas() { var d = MOVE.d, p = d.den.split('-'), x = new Date(+p[0], p[1] - 1, +p[2]); return cap(long(x)) + ', ' + d.cas + '–' + endTime(d.cas); }
 
       function key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -1158,7 +1170,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         for (var i = 0; i < start; i++) cells.push('<span class="day out"></span>');
         for (var n = 1; n <= len; n++) {
           var d = new Date(y, mo, n), free = slotsFor(d).length > 0;
-          var cls = 'day' + (free ? ' free' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
+          var cls = 'day' + (free ? ' free' : '') + (free && MOVE && MOVE.kinds && !regular(d) ? ' extra' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
           cells.push(free
             ? '<button type="button" class="' + cls + '" data-d="' + n + '" aria-label="' + long(d) + '" aria-pressed="' + (cls.indexOf(' sel') > 0) + '">' + n + '</button>'
             : '<span class="' + cls + '"' + (LOADING === WAITING ? ' style="--i:' + n + '"' : '') + '>' + n + '</span>');
@@ -1167,8 +1179,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         var right = LOADING ? '<p class="hint" id="loading">' + (LOADING === WAITING ? '<span class="spin" aria-hidden="true"></span>' : '') + LOADING + '</p>'
           : (state.date && slots.length)
           ? '<h2>' + cap(long(state.date)) + '</h2><div class="times">' +
-            slots.map(function (t) { return '<button type="button" class="time" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + '</button>'; }).join('') + '</div>' +
-            (state.f === 'online' ? '<p class="tz">' + TZ + '</p>' : '')
+            slots.map(function (t) { var k = kind(state.date, t); return '<button type="button" class="time' + (k ? ' k-' + k : '') + '" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + (k ? '<small>' + KIND[k] + '</small>' : '') + '</button>'; }).join('') + '</div>' +
+            (MOVE && MOVE.kinds ? '<p class="tz">Plné = tvoje běžné volné časy. Ostatní jsou mimo ně, i ty můžeš vybrat.</p>' : state.f === 'online' ? '<p class="tz">' + TZ + '</p>' : '')
           : !state.date && hasFree(m) ? '<p class="hint">Vyberte den v kalendáři, nebo<br><button type="button" class="link" id="jump">nejbližší volný: ' + long(firstFree(TODAY)) + ' →</button></p>'
           : '<div class="empty">' + (state.date ? 'V tento den nejsou volné termíny.' : 'V ' + MONTHS_LOC[mo] + ' už nejsou volné termíny.') + (firstFree(TODAY) ? '<button type="button" class="link" id="jump">Nejbližší volný termín</button>' : '') + '</div>';
 
@@ -1295,6 +1307,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       function renderMoveConfirm() {
         view.innerHTML = '<div class="bk-step">' +
           '<button type="button" class="link" id="back">‹ Změnit termín</button>' + summary() +
+          (kind(state.date, state.time) === 'out' ? '<p class="warn">Tenhle čas je mimo tvoje běžné hodiny.</p>' : kind(state.date, state.time) === 'busy' ? '<p class="warn">V kalendáři máš v tu dobu jinou událost.</p>' : '') +
           '<p>Původní termín: <b>' + esc(moveWas()) + '</b>. ' + (MOVE.owner ? 'Klient dostane e-mail s novým termínem.' : 'Přesun je bez doplácení, potvrzení přijde e-mailem.') + '</p>' +
           '<div class="bk-cta"><button class="bk-btn" type="button" id="go">Přesunout</button></div>' +
           '<p class="err" id="go-err" role="alert"></p></div>';
@@ -1428,6 +1441,11 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
           return moveApi(MOVE_API.slots);
         }).then(function (j) {
           AV = { online: {}, osobne: {} }; AV[MOVE.d.forma === 'osobne' ? 'osobne' : 'online'] = j.slots || {};
+          if (MOVE.owner && j.times) {   // she may pick any hour 7–20, not only her free times
+            MOVE.kinds = j.times; var all = {};
+            Object.keys(j.times).forEach(function (d) { all[d] = Object.keys(j.times[d]).sort(function (x, y) { return parseInt(x, 10) - parseInt(y, 10); }); });   // '7:00' before '10:00'
+            AV[MOVE.d.forma === 'osobne' ? 'osobne' : 'online'] = all;
+          }
           var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(j.to || '');
           if (m) LAST = new Date(+m[1], m[2] - 1, +m[3]);
         });

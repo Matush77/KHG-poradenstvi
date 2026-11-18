@@ -1155,6 +1155,46 @@ function owner_move(string $payId, string $den, string $cas, ?DateTimeImmutable 
     return move_booking($payId, $den, $cas, 'owner', $now);
 }
 
+/* Her move page (owner, 18 Nov: "she should be able to choose times outside her hours too"): every time
+   owner_move() accepts, not only her free times. Per day, in order: time => 'free' (in her hours and free),
+   'out' (outside her hours) or 'busy' (another event in her Google Calendar then: she decides). Times next to
+   another session (an hour either side, as owner_move() refuses) and times someone is paying for are left out. */
+function owner_move_times(string $payId, ?DateTimeImmutable $now = null): array
+{
+    $b = booking_get($payId) ?? throw new ClientError('Rezervace nenalezena.', 404);
+    $c = cfg();
+    $now = ($now ?? new DateTimeImmutable())->setTimezone(new DateTimeZone('Europe/Prague'));
+    [, $to] = slot_window($now);
+    $free = free_slots()[$b['forma']] ?? [];
+    $own = prague($b['slot'])->getTimestamp();
+    $busy = [];
+    foreach (gcal_freebusy(array_merge($c['busy_calendars'], [$c['calendar']]), $now->setTime(0, 0), $to) as $list) {
+        foreach ($list as [$bs, $be]) if (!($bs === $own && $be === $own + SESSION_MIN * 60)) $busy[] = [$bs, $be];   // not its own event
+    }
+    $s = db()->prepare("SELECT slot FROM bookings WHERE status IN ('pending','booked','failed') AND pay_id != ?");
+    $s->execute([$payId]);
+    $sessions = array_map(fn($x) => prague($x)->getTimestamp(), $s->fetchAll(PDO::FETCH_COLUMN));
+    $h = db()->prepare('SELECT slot FROM holds WHERE expires_at >= ?');
+    $h->execute([time()]);
+    $held = array_flip(array_map(fn($x) => prague($x)->getTimestamp(), $h->fetchAll(PDO::FETCH_COLUMN)));
+    $out = [];
+    for ($d = $now->setTime(0, 0); $d <= $to; $d = $d->modify('+1 day')) {
+        for ($hour = OWNER_MOVE_FIRST; $hour <= OWNER_MOVE_LAST; $hour++) {
+            $t = $d->setTime($hour, 0);
+            $ts = $t->getTimestamp();
+            if ($t <= $now || $t > $to || $ts === $own || isset($held[$ts])) continue;
+            foreach ($sessions as $o) if (abs($o - $ts) < 3600) continue 2;
+            $day = $t->format('Y-m-d');
+            $time = $t->format('G:i');
+            $kind = 'out';
+            if (in_array($time, $free[$day] ?? [], true)) $kind = 'free';
+            else foreach ($busy as [$bs, $be]) if ($bs < $ts + SESSION_MIN * 60 && $be > $ts) { $kind = 'busy'; break; }
+            $out[$day][$time] = $kind;
+        }
+    }
+    return $out;
+}
+
 function client_move(string $payId, string $den, string $cas, ?DateTimeImmutable $now = null): array
 {
     return move_booking($payId, $den, $cas, 'client', $now);

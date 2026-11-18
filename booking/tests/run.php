@@ -1319,6 +1319,28 @@ forget_old();
 ok(booking_get('cs_ar_note2')['note'] === null, 'ar/5: an event that is gone: the booking forgets it');
 db()->exec("DELETE FROM bookings WHERE pay_id IN ('cs_ar_note', 'cs_ar_note2')");
 
+// 18 Nov, owner: her move page offers every hour 7–20 she may use, not only her free times
+$dayO = (new DateTimeImmutable('+12 days'))->format('Y-m-d');
+$tsO = fn(string $hm) => (new DateTimeImmutable("$dayO $hm", new DateTimeZone('Europe/Prague')))->format(DATE_ATOM);
+$add->execute(['cs_omt', $tsO('10:00'), 'online', 'booked', 'evOmt', null, null, time(), time()]);
+$add->execute(['cs_omt_other', $tsO('14:30'), 'osobne', 'booked', 'evOmt2', null, null, time(), time()]);
+db()->prepare('INSERT INTO holds (slot, pay_id, expires_at, who, browser, nonce) VALUES (?, NULL, ?, ?, ?, ?)')
+    ->execute([$tsO('19:00'), time() + 600, 'whoO', 'browserO', 'nO']);
+$busyO = [[strtotime($tsO('17:00')), strtotime($tsO('17:00')) + 3600], [strtotime($tsO('10:00')), strtotime($tsO('10:00')) + SESSION_MIN * 60]];
+$FAKE = ['#POST .*/freeBusy#' => fn() => [200, ['calendars' => array_fill_keys(array_merge(cfg()['busy_calendars'], [cfg()['calendar']]),
+    ['busy' => array_map(fn($x) => ['start' => date(DATE_ATOM, $x[0]), 'end' => date(DATE_ATOM, $x[1])], $busyO)])]]];
+$omt = owner_move_times('cs_omt')[$dayO] ?? [];
+ok(isset($omt['7:00'], $omt['20:00']) && !isset($omt['6:00']) && !isset($omt['21:00']), 'owner times: every hour 7:00–20:00, nothing outside');
+ok(!isset($omt['10:00']), 'owner times: not its own time');
+ok(!isset($omt['14:00']) && !isset($omt['15:00']) && isset($omt['13:00']) && isset($omt['16:00']), 'owner times: not within an hour of another session (any format, 14:30 blocks 14:00 and 15:00)');
+ok(!isset($omt['19:00']), 'owner times: not a time someone is paying for');
+ok(($omt['17:00'] ?? '') === 'busy', 'owner times: another event in her calendar is marked busy, still offered');
+ok(($omt['9:00'] ?? '') !== 'busy' && ($omt['11:00'] ?? '') !== 'busy', 'owner times: the session\'s own event does not mark the hours around it busy');
+$freeO = free_slots()['online'][$dayO] ?? [];
+ok(!array_filter($omt, fn($k, $t) => ($k === 'free') !== in_array($t, $freeO, true) && $k !== 'busy', ARRAY_FILTER_USE_BOTH), 'owner times: "free" exactly where a client sees a free time');
+db()->exec("DELETE FROM bookings WHERE pay_id IN ('cs_omt', 'cs_omt_other')");
+db()->exec("DELETE FROM holds WHERE who = 'whoO'");
+
 unset($GLOBALS['SMTP_FAKE']);
 
 unset($GLOBALS['HTTP_FAKE']);
