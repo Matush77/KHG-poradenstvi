@@ -252,6 +252,7 @@ input[aria-invalid="true"] { border-color: var(--coral-ink); }
 .summary.mini { padding: 12px 16px; }
 .summary.mini b { font-size: 16px; }
 .btn[aria-busy="true"] { opacity: .75; cursor: progress; }
+a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; } /* the move's way back is a link */
 .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; margin-right: 10px; vertical-align: -2px; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
@@ -432,6 +433,27 @@ label { scroll-margin-top: 84px; }
 
   var view = document.getElementById('view');
 
+  /* Moving a paid booking (owner, 18 Nov: the same calendar as booking, not a long list of days).
+     ?presun=&t= comes from the client's move page (rezervace/zruseni.html), with kdo=k from the therapist's
+     page (rezervace/sprava.html). Same calendar in the booking's format, then a confirmation instead of the
+     details and the payment. Lab: always with the real back end, as ?stripe=1. */
+  function esc(v) { return String(v || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var MOVE = (function () {
+    var p = new URLSearchParams(location.search), b = p.get('presun');
+    // amp;t: a link whose & arrived escaped as &amp; (seen once from a phone)
+    return b ? { b: b, t: p.get('t') || p.get('amp;t') || '', owner: p.get('kdo') === 'k', d: null, done: null } : null;
+  })();
+  var MOVE_API = MOVE && (MOVE.owner ? { view: 'sprava', slots: 'sprava/terminy', move: 'sprava/presunout' } : { view: 'booking', slots: 'terminy', move: 'presunout' });
+  function moveApi(path, body) {
+    var auth = { b: MOVE.b, t: MOVE.t };
+    return fetch('/api/' + path + (body ? '' : '?' + new URLSearchParams(auth)), body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign(auth, body)) } : { cache: 'no-store' })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) { var e = new Error(j.error || 'Chyba ' + r.status); e.api = true; throw e; } return j; }); });
+  }
+  // the page the move started from: it shows the booking as it is now
+  function moveHome() { return '/ui-lab/rezervace/' + (MOVE.owner ? 'sprava' : 'zruseni') + '.html?' + new URLSearchParams({ b: MOVE.b, t: MOVE.t }); }
+  function moveWas() { var d = MOVE.d, p = d.den.split('-'), x = new Date(+p[0], p[1] - 1, +p[2]); return cap(long(x)) + ', ' + d.cas + '–' + endTime(d.cas); }
+
   // Swipe left / right on the calendar changes the month (same as the arrows, so it stops at the first and last month)
   var slide = null, sx = 0, sy = 0, swiping = false;
   view.addEventListener('touchstart', function (e) {
@@ -448,7 +470,7 @@ label { scroll-margin-top: 84px; }
 
   function renderHead() {
     document.body.className = 'f-' + state.f;
-    document.getElementById('facts').innerHTML = FORMATS[state.f].facts;
+    document.getElementById('facts').innerHTML = MOVE && MOVE.d ? 'Teď: <b>' + esc(moveWas()) + '</b>' : FORMATS[state.f].facts;
     document.querySelectorAll('.fmt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.f === state.f); });
   }
 
@@ -661,7 +683,7 @@ label { scroll-margin-top: 84px; }
   /* Lab, real Stripe TEST payments (?stripe=1, only with ui-lab/stripe-demo/server.py on port 8810):
      pay=0 redirect to Stripe Checkout, pay=3 Checkout embedded in the page, pay=2 Payment Element in our design.
      Stripe.js is loaded only when the payment is shown, never with the calendar. */
-  var STRIPE = new URLSearchParams(location.search).get('stripe') === '1';
+  var STRIPE = new URLSearchParams(location.search).get('stripe') === '1' || !!MOVE;   // a move always uses the real back end
   var stripeP = null, embedded = null;
   function loadStripe() {
     if (!stripeP) stripeP = Promise.all([
@@ -766,6 +788,45 @@ label { scroll-margin-top: 84px; }
     document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 2; render(); } };
   }
 
+  // moving: the chosen time, the old one, and one button; nothing is paid or asked again
+  function renderMoveConfirm() {
+    view.innerHTML = '<div class="step">' +
+      '<button type="button" class="link" id="back">‹ Změnit termín</button>' + summary() +
+      '<p>Původní termín: <b>' + esc(moveWas()) + '</b>. ' + (MOVE.owner ? 'Klient dostane e-mail s novým termínem.' : 'Přesun je bez doplácení, potvrzení přijde e-mailem.') + '</p>' +
+      '<div class="cta"><button class="btn" type="button" id="go">Přesunout</button></div>' +
+      '<p class="err" id="go-err" role="alert"></p></div>';
+    document.getElementById('back').onclick = function () { if (history.state && history.state.pushed) history.back(); else { state.step = 1; render(); } };
+    document.getElementById('go').onclick = function () {
+      var btn = this, out = document.getElementById('go-err');
+      busy(btn, true, 'Přesouvám…'); out.textContent = '';
+      moveApi(MOVE_API.move, { date: key(state.date), time: state.time }).then(function (j) {
+        MOVE.done = j; state.step = 3; render();
+        var h = view.querySelector('h2'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+      }, function (e) {
+        busy(btn, false, 'Přesunout');
+        out.textContent = e.api ? e.message : 'Přesun se teď nepovedl. Stačí to zkusit znovu, případně zavolat na 605 990 980.';
+        loadSlots().catch(function () {});   // the time may have been taken meanwhile
+      });
+    };
+  }
+  function renderMoved() {
+    var j = MOVE.done, owner = MOVE.owner;
+    var told = owner
+      ? 'Událost v kalendáři se posunula. ' + (!j.email ? 'Klient e-mail nemá, dej mu vědět sám.' : j.mailed === false ? 'E-mail klientovi se teď odeslat nepovedl, odejde sám o něco později.' : 'Klient dostal e-mail s novým termínem.')
+      : j.mailed === false ? 'Potvrzení s novým časem pošlu e-mailem, jakmile to půjde (teď se odeslat nepovedlo).' : 'Potvrzení s novým časem bylo odesláno e-mailem.';
+    view.innerHTML = '<div class="done"><h2>Termín přesunut</h2>' + summary() + '<p role="status">' + told + '</p>' +
+      (owner ? '' : '<p>Přesunout znovu nebo zdarma zrušit lze nejpozději 36 hodin před sezením, přes stejný odkaz z e-mailu.</p>') +
+      '<div><a class="btn" href="' + esc(moveHome()) + '">' + (owner ? 'Zpět na rezervaci' : 'Zobrazit rezervaci') + '</a></div></div>';
+    say('Termín přesunut');
+  }
+  // moving is not possible (any more): why, and the way back
+  function renderMoveStop(text) {
+    view.innerHTML = '<div class="done" role="status"><h2>Termín teď přesunout nejde</h2><p>' + esc(text) + '</p>' +
+      '<p>V případě potíží: <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>, <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.</p>' +
+      '<div><a class="btn" href="' + esc(moveHome()) + '">Zpět na rezervaci</a></div></div>';
+    say('Termín teď přesunout nejde');
+  }
+
   function renderStep3() {
     // the e-mail and phone come back from the payment: never put them into the page as HTML
     var esc = function (v) { return String(v || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -804,7 +865,7 @@ label { scroll-margin-top: 84px; }
   }
   function readUrl() {
     var p = new URLSearchParams(location.search);
-    state.f = p.get('forma') === 'osobne' ? 'osobne' : 'online';
+    state.f = MOVE && MOVE.d ? (MOVE.d.forma === 'osobne' ? 'osobne' : 'online') : p.get('forma') === 'osobne' ? 'osobne' : 'online';
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(p.get('den') || ''), d = m && new Date(+m[1], m[2] - 1, +m[3]);
     var slots = d ? slotsFor(d) : [];
     state.date = slots.length ? d : null;
@@ -818,19 +879,23 @@ label { scroll-margin-top: 84px; }
   function render() {
     if (embedded) { embedded.destroy(); embedded = null; } // Stripe allows one embedded Checkout at a time
     renderHead();
-    document.querySelector('.switch').hidden = state.step !== 1;
+    document.querySelector('.switch').hidden = state.step !== 1 || !!MOVE;   // a move keeps the booking's format
     document.getElementById('bar').hidden = state.step !== 1;
     document.querySelector('.bk-exit').hidden = state.step !== 1;
     document.getElementById('ttl').classList.toggle('quiet', state.step === 3);
     document.getElementById('ttl').classList.toggle('noexit', state.step !== 1);
     // only step 1 keeps the hidden status line current; on the others an old "Načítám…" must not linger (16 Nov test run)
     if (state.step !== 1) say('');
-    if (state.step === 1) renderStep1(); else if (state.step === 2) renderStep2(); else if (state.step === 4) renderPay(); else renderStep3();
+    if (state.step === 1) renderStep1();
+    else if (state.step === 2) (MOVE ? renderMoveConfirm : renderStep2)();
+    else if (state.step === 4) renderPay();
+    else (MOVE ? renderMoved : renderStep3)();
     syncUrl();
   }
 
   // the back arrow: back to the page the visitor came from on this site, else the lab homepage
   document.querySelector('.bk-exit').onclick = function (e) {
+    if (MOVE) return;   // moving: its href is the booking's page (from her e-mail, history.back() would leave the site)
     if (history.length > 1 && document.referrer.indexOf(location.origin + '/') === 0 && !/rezervace-ukazka\.html/.test(document.referrer)) { e.preventDefault(); history.back(); }
   };
 
@@ -855,6 +920,19 @@ label { scroll-margin-top: 84px; }
 
   /* Real free times from the booking back end (lab ?stripe=1: ui-lab/booking-php, the owner's hours calendars). */
   function loadSlots() {
+    // moving: the booking first (its format and time, and whether it can still be moved), then its free times
+    if (MOVE) return moveApi(MOVE_API.view).then(function (d) {
+      MOVE.d = d;
+      var stop = d.cancelled ? 'Tahle rezervace je zrušená.' : d.started ? 'Sezení už začalo nebo proběhlo.'
+        : d.processing ? 'Rezervace se ještě zpracovává. Stačí to zkusit za pár minut.'
+        : !MOVE.owner && !d.can_move ? 'Přesunout termín lze nejpozději 36 hodin před sezením.' : '';
+      if (stop) { var e = new Error(stop); e.api = true; e.stop = true; throw e; }
+      return moveApi(MOVE_API.slots);
+    }).then(function (j) {
+      AV = { online: {}, osobne: {} }; AV[MOVE.d.forma === 'osobne' ? 'osobne' : 'online'] = j.slots || {};
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(j.to || '');
+      if (m) LAST = new Date(+m[1], m[2] - 1, +m[3]);
+    });
     return fetch('/api/slots', { cache: 'no-store' })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Chyba ' + r.status); return j; }); })
       .then(function (j) {
@@ -967,7 +1045,10 @@ label { scroll-margin-top: 84px; }
       if (!e.persisted) return;
       releaseHeld().then(loadSlots).then(render, render);
     });
-    released.then(loadSlots).then(function () { LOADING = ''; start(); }, function () {
+    if (MOVE) { document.getElementById('title').textContent = 'Přesunout termín'; document.title = 'Přesun termínu · KHG rezervace (lab)';
+      document.querySelector('.bk-exit').href = moveHome(); document.querySelector('.switch').hidden = true; }
+    released.then(loadSlots).then(function () { LOADING = ''; start(); }, function (err) {
+      if (MOVE && err && err.api) { LOADING = ''; renderHead(); document.getElementById('bar').hidden = true; renderMoveStop(err.message); return; }
       LOADING = 'Volné termíny se teď nepodařilo načíst. Stačí to zkusit za chvíli, nebo zavolat na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a>.';
       // back from Stripe: the payment is checked even without the free times (16 Nov review)
       var q = new URLSearchParams(location.search);
