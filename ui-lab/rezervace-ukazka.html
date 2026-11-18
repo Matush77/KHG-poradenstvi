@@ -363,6 +363,14 @@ label { scroll-margin-top: 84px; }
   .slots > .hint .link { justify-self: center; text-align: center; }
 }
 @media (min-width: 1000px) { .ttl { margin-left: -56px; } .bar { padding-left: 0; } }
+/* the therapist moving a session: every hour 7–20 is offered; her regular free times stay filled,
+   the others are outlined and say why they are not regular (body: above the variant classes) */
+body .day.free.extra { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tint-deep); font-weight: 500; }
+body .time.k-out, body .time.k-busy { background: transparent; border-color: var(--tint-deep); display: grid; place-content: center; line-height: 1.15; }
+.time small { font-size: 12px; font-weight: 500; color: var(--mute); }
+.time.k-busy small { color: var(--coral-ink); }
+.time[aria-pressed="true"] small { color: inherit; }
+.warn { background: var(--peach); border-radius: 12px; padding: 10px 14px; font-size: 15px; }
 </style>
 
 <script>(function(){var s=new URLSearchParams(location.search).get("sw");document.documentElement.classList.add("sw-"+(/^([1-9]|10)$/.test(s)?s:"8"));var d=new URLSearchParams(location.search).get("d");if(/^[1-3]$/.test(d))document.documentElement.classList.add("d-"+d);(new URLSearchParams(location.search).get("p")||"2,3,4,5").split(",").forEach(function(n){if(/^[1-7]$/.test(n))document.documentElement.classList.add("p-"+n);});var c=new URLSearchParams(location.search).get("c");document.documentElement.classList.add("c-"+(/^[1-6]$/.test(c)?c:"2"));})();</script>
@@ -452,6 +460,10 @@ label { scroll-margin-top: 84px; }
   }
   // the page the move started from: it shows the booking as it is now
   function moveHome() { return '/ui-lab/rezervace/' + (MOVE.owner ? 'sprava' : 'zruseni') + '.html?' + new URLSearchParams({ b: MOVE.b, t: MOVE.t }); }
+  // owner moves: what kind of time it is ('' = a regular free time, 'out' = outside her hours, 'busy' = another event in her calendar)
+  var KIND = { out: 'mimo hodiny', busy: 'jiná událost' };
+  function kind(d, t) { var k = MOVE && MOVE.kinds && (MOVE.kinds[key(d)] || {})[t]; return k && k !== 'free' ? k : ''; }
+  function regular(d) { var k = MOVE.kinds[key(d)] || {}; return Object.keys(k).some(function (t) { return k[t] === 'free'; }); }
   function moveWas() { var d = MOVE.d, p = d.den.split('-'), x = new Date(+p[0], p[1] - 1, +p[2]); return cap(long(x)) + ', ' + d.cas + '–' + endTime(d.cas); }
 
   // Swipe left / right on the calendar changes the month (same as the arrows, so it stops at the first and last month)
@@ -495,7 +507,7 @@ label { scroll-margin-top: 84px; }
     for (var i = 0; i < start; i++) cells.push('<span class="day out"></span>');
     for (var n = 1; n <= len; n++) {
       var d = new Date(y, mo, n), free = slotsFor(d).length > 0;
-      var cls = 'day' + (free ? ' free' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
+      var cls = 'day' + (free ? ' free' : '') + (free && MOVE && MOVE.kinds && !regular(d) ? ' extra' : '') + (state.date && key(d) === key(state.date) ? ' sel' : '');
       cells.push(free
         ? '<button class="' + cls + '" data-d="' + n + '" aria-label="' + long(d) + '" aria-pressed="' + (cls.indexOf(' sel') > 0) + '">' + n + '</button>'
         : '<span class="' + cls + '">' + n + '</span>');
@@ -504,8 +516,8 @@ label { scroll-margin-top: 84px; }
     var right = LOADING ? '<p class="hint" id="loading">' + LOADING + '</p>'
       : (state.date && slots.length)
       ? (state.f === 'online' && TZ.side ? '<div class="slots-head"><h2>' + cap(long(state.date)) + '</h2><span class="tz">' + TZ.side + '</span></div>' : '<h2>' + cap(long(state.date)) + '</h2>') + '<div class="times">' +
-        slots.map(function (t) { return '<button class="time" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + '</button>'; }).join('') + '</div>' +
-        (state.f === 'online' && TZ.under ? '<p class="tz">' + TZ.under + '</p>' : '')
+        slots.map(function (t) { var k = kind(state.date, t); return '<button class="time' + (k ? ' k-' + k : '') + '" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + (k ? '<small>' + KIND[k] + '</small>' : '') + '</button>'; }).join('') + '</div>' +
+        (MOVE && MOVE.kinds ? '<p class="tz">Plné = tvoje běžné volné časy. Ostatní jsou mimo ně, i ty můžeš vybrat.</p>' : state.f === 'online' && TZ.under ? '<p class="tz">' + TZ.under + '</p>' : '')
       : !state.date && hasFree(m) ? '<p class="hint">Vyberte den v kalendáři, nebo<br><button class="link" id="jump">nejbližší volný: ' + long(firstFree(TODAY)) + ' →</button></p>'
       : '<div class="empty">' + (state.date ? 'V tento den nejsou volné termíny.' : 'V ' + MONTHS_LOC[mo] + ' už nejsou volné termíny.') + '<button class="link" id="jump">Nejbližší volný termín</button></div>';
 
@@ -792,6 +804,7 @@ label { scroll-margin-top: 84px; }
   function renderMoveConfirm() {
     view.innerHTML = '<div class="step">' +
       '<button type="button" class="link" id="back">‹ Změnit termín</button>' + summary() +
+      (kind(state.date, state.time) === 'out' ? '<p class="warn">Tenhle čas je mimo tvoje běžné hodiny.</p>' : kind(state.date, state.time) === 'busy' ? '<p class="warn">V kalendáři máš v tu dobu jinou událost.</p>' : '') +
       '<p>Původní termín: <b>' + esc(moveWas()) + '</b>. ' + (MOVE.owner ? 'Klient dostane e-mail s novým termínem.' : 'Přesun je bez doplácení, potvrzení přijde e-mailem.') + '</p>' +
       '<div class="cta"><button class="btn" type="button" id="go">Přesunout</button></div>' +
       '<p class="err" id="go-err" role="alert"></p></div>';
@@ -930,6 +943,11 @@ label { scroll-margin-top: 84px; }
       return moveApi(MOVE_API.slots);
     }).then(function (j) {
       AV = { online: {}, osobne: {} }; AV[MOVE.d.forma === 'osobne' ? 'osobne' : 'online'] = j.slots || {};
+      if (MOVE.owner && j.times) {   // she may pick any hour 7–20, not only her free times
+        MOVE.kinds = j.times; var all = {};
+        Object.keys(j.times).forEach(function (d) { all[d] = Object.keys(j.times[d]).sort(function (x, y) { return parseInt(x, 10) - parseInt(y, 10); }); });   // '7:00' before '10:00'
+        AV[MOVE.d.forma === 'osobne' ? 'osobne' : 'online'] = all;
+      }
       var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(j.to || '');
       if (m) LAST = new Date(+m[1], m[2] - 1, +m[3]);
     });

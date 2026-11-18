@@ -12,7 +12,7 @@
      GET  /api/email?b=&t=&part=      lab only: preview of the confirmation e-mail (kind=owner: the owner's)
    The owner's links (from "Nová rezervace", signed with her own key):
      GET  /api/sprava?b=&t=           the booking with the client's details
-     GET  /api/sprava/terminy?b=&t=   free times of the booking's format, to move it
+     GET  /api/sprava/terminy?b=&t=   times to move it to: free ones (slots) and every hour 7–20 she may use (times)
      POST /api/sprava/presunout {b, t, date, time}
      POST /api/sprava/zrusit {b, t}   cancel with a full refund (or refund a late client cancellation)
    The owner's hours page (shared password, then a year-long cookie per device, src/owner.php):
@@ -202,7 +202,9 @@ try {
         if ($method === 'GET' && $route === 'sprava/terminy') {
             $b = booking_get($payId) ?? throw new ClientError('Rezervace nenalezena.', 404);
             [$from, $to] = slot_window();
-            out(200, ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d'), 'slots' => (object)(free_slots()[$b['forma']] ?? [])]);
+            // times: every time she may move it to, with free / out / busy (owner_move_times)
+            out(200, ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d'), 'slots' => (object)(free_slots()[$b['forma']] ?? []),
+                'times' => (object)array_map(fn($d) => (object)$d, owner_move_times($payId))]);
         }
         if ($method === 'POST' && $route === 'sprava/presunout') {
             out(200, owner_view(owner_move($payId, (string)($j['date'] ?? ''), (string)($j['time'] ?? ''))));
