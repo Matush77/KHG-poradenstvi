@@ -308,7 +308,7 @@ HEART_D = (here / "icons" / "heart.d").read_text().strip()
 HEART_VB = (here / "icons" / "heart.vb").read_text().strip()
 LOGO_IMG = '<img src="/images/logo.webp" width="381" height="96" alt="" class="logo-img">'
 BRAND_TEXT = '<span class="brand-text"><span class="brand-name">Kristýna Hriciková Glattová</span> <span class="brand-role">Psycholog a terapeut</span></span>'
-LOGO_F = ('<span class="brand brand-f"><svg class="brand-heart" viewBox="' + HEART_VB + '" width="24" height="24" aria-hidden="true" focusable="false"><path d="' + HEART_D + '"/></svg>' + BRAND_TEXT + '</span>')
+LOGO_F = ('<span class="brand brand-f"><svg class="brand-heart" viewBox="' + HEART_VB + '" width="24" height="24" overflow="visible" aria-hidden="true" focusable="false"><path d="' + HEART_D + '"/></svg>' + BRAND_TEXT + '</span>')
 BRAND_CSS = """
     <style id="brand">
     /* LAB logo as text: Fraunces name + Inter role; heart is the owner's own drawing, traced to a vector */
