@@ -838,6 +838,17 @@ html:has(.nav-menu.active) { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
 
+/* ==== 28. O mně facts (owner, 18 Nov): education, training, clinic, supervision in view again.
+   Typographic only: grey label, navy value, no lines, no icons. Label beside value from 600 px. ==== */
+.about-facts { margin: 24px 0 8px; display: grid; gap: 14px; }
+.about-facts > div { margin: 0; }
+.about-facts dt { margin: 0 0 2px; font-size: .9375rem; font-weight: 500; line-height: 1.4; color: var(--mute); }
+.about-facts dd { margin: 0; font-size: var(--fs-body, 1.0625rem); font-weight: 500; line-height: 1.5; color: var(--navy); }
+@media (min-width: 600px) {
+  .about-facts > div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); column-gap: 24px; align-items: baseline; }
+  .about-facts dt { margin: 0; }
+}
+
 /* LAB: parts shared by the blog and quiz pages in the 12 Nov theme. Layered after proposal.css (same tokens).
    Buttons: coral stays for booking only. Every other action is navy: solid for the step forward, outline for the rest. */
 

@@ -855,6 +855,17 @@ html:has(.nav-menu.active) { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
 
+/* ==== 28. O mně facts (owner, 18 Nov): education, training, clinic, supervision in view again.
+   Typographic only: grey label, navy value, no lines, no icons. Label beside value from 600 px. ==== */
+.about-facts { margin: 24px 0 8px; display: grid; gap: 14px; }
+.about-facts > div { margin: 0; }
+.about-facts dt { margin: 0 0 2px; font-size: .9375rem; font-weight: 500; line-height: 1.4; color: var(--mute); }
+.about-facts dd { margin: 0; font-size: var(--fs-body, 1.0625rem); font-weight: 500; line-height: 1.5; color: var(--navy); }
+@media (min-width: 600px) {
+  .about-facts > div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); column-gap: 24px; align-items: baseline; }
+  .about-facts dt { margin: 0; }
+}
+
     .rv-title { font-weight: 500 !important; }
     </style>
 
@@ -1213,12 +1224,13 @@ html:has(.nav-menu.active) { overflow: hidden; }
                         <p class="highlighted-text">
                             Skupina vznikla z potřeby nabídnout prostor sdílení, porozumění a podpory lidem, kteří se na cestě k rodičovství potýkají s náročnými emocemi, nejistotou i nadějí.
                         </p>
-
-                        <p>
-                            Terapeuticky pracuji pod supervizí (PhDr. Marek Hošek / individuál MUDr. Michal Kryl).
-                            V rámci specializačního vzdělávání v oboru klinické psychologie pracuji pod vedením
-                            Mgr. Marcely Kvardové.
-                        </p>
+                        <dl class="about-facts">
+                            <div><dt>Vzdělání</dt><dd>Mgr.&nbsp;psychologie, PVŠPS Praha</dd></div>
+                            <div><dt>Výcvik</dt><dd>Pětiletý výcvik v daseinsanalýze</dd></div>
+                            <div><dt>Praxe</dt><dd>Fakultní nemocnice Ostrava, Klinika dětského lékařství</dd></div>
+                            <div><dt>Specializace</dt><dd>Klinická psychologie, pod vedením Mgr.&nbsp;Marcely Kvardové</dd></div>
+                            <div><dt>Supervize</dt><dd>PhDr.&nbsp;Marek Hošek, MUDr.&nbsp;Michal Kryl (individuální)</dd></div>
+                        </dl>
                         </details>
                         <div class="about-personal-note">
                             <img src="ui-lab/proposal/img/portrait-avatar-192.webp" srcset="ui-lab/proposal/img/portrait-avatar-192.webp 192w, ui-lab/proposal/img/portrait-avatar-384.webp 384w" sizes="130px" alt="Mgr. Kristýna Hriciková Glattová" width="130" height="130" loading="lazy" decoding="async">
