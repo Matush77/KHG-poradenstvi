@@ -88,6 +88,9 @@ function gcal_create(DateTimeImmutable $start, string $summary, string $descript
         'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 10]]],
         // the payment, for looking it up; not shown (it used to stand in the description)
         'extendedProperties' => ['private' => ['platba' => $payId]]];
+    // her calendar tells the formats apart by colour, as with Google's booking pages (owner, 18 Nov): the API offers
+    // only the 11 classic event colours; 7 Peacock (blue) online, 4 Flamingo (peach) in person
+    $ev['colorId'] = $online ? '7' : '4';
     if (!$online) $ev['location'] = PLACE;
     if ($guest) {   // in person too, as Google's booking page does (sendUpdates=none: no Google invitation e-mail)
         $ev['attendees'] = [['email' => $guest, 'responseStatus' => 'accepted']];   // booked and paid: coming (as Google's booking page marks it)
