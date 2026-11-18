@@ -47,14 +47,6 @@ a[href^="tel:"] { white-space: nowrap; }   /* the number never breaks in the mid
 .btn.ghost { background: var(--card); border: 1.5px solid var(--line); }
 .link { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 44px; font-weight: 500; justify-self: start; }
 h2 { font-size: 17px; font-weight: 600; margin: 0; }
-.panel { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 14px; }
-.day { display: grid; gap: 8px; }
-.day h3 { margin: 0; font-size: 15px; font-weight: 600; }
-.times { display: flex; flex-wrap: wrap; gap: 8px; }
-.time { min-height: 48px; min-width: 84px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
-.time[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
-.confirm { position: sticky; bottom: 12px; background: var(--card); border: 1.5px solid var(--navy); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; box-shadow: 0 8px 24px rgba(22,58,85,.12); }
-.confirm p { color: var(--navy) !important; }
 </style>
 <body>
 <script src="site-header.js"></script>
@@ -64,7 +56,6 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
 <script>
 (function () {
   var DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
-  var DAYS_ON = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu']; // after "na" (přesunout na pátek)
   var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
   var REACH = '<a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>, <a href="tel:+420605990980">+420 605 990 980</a>.</p>';
   var CONTACT = '<p class="contact">V případě potíží: ' + REACH;
@@ -114,7 +105,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
       show('<h1>Přesun nebo zrušení termínu</h1>' + (flash ? '<p class="ok" role="status">' + flash + '</p>' : '') + summary(d) +
         '<p>Přesun na jiný volný čas je <b>bez doplácení</b>. Přesunout nebo zdarma zrušit lze nejpozději 36 hodin před sezením.</p>' +
         '<div class="actions"><button class="btn" id="move">Přesunout termín</button><button class="btn ghost" id="cancel">Zrušit termín</button>' +
-        '<a class="keep" href="/">Ponechat termín</a></div>' + CONTACT + '<div id="panel"></div>');   // last: the times load in without pushing anything
+        '<a class="keep" href="/">Ponechat termín</a></div>' + CONTACT);
       document.getElementById('move').onclick = openMove;
       document.getElementById('cancel').onclick = function () { cancelling = true; render(); };
       return;
@@ -130,57 +121,10 @@ h2 { font-size: 17px; font-weight: 600; margin: 0; }
     var back = document.getElementById('back'); if (back) back.onclick = function () { cancelling = false; render(); };
   }
 
-  var cancelling = false, SHOW_DAYS = 10;
-  function date(den) { var p = den.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
-  function longDay(den) { var x = date(den), s = DAYS[x.getDay()]; return s.charAt(0).toUpperCase() + s.slice(1) + ' ' + x.getDate() + '. ' + MONTHS[x.getMonth()]; }
-  function onDay(den, cas) { var x = date(den); return DAYS_ON[x.getDay()] + ' ' + x.getDate() + '. ' + MONTHS[x.getMonth()] + ' v ' + cas; }
+  var cancelling = false;
+  // the same calendar as for booking (owner, 18 Nov), in the booking's format; it comes back here when done
   function openMove() {
-    var p = document.getElementById('panel');
-    p.className = 'panel';
-    p.innerHTML = '<h2>Nový termín</h2><p>Načítání volných termínů…</p>';
-    fetch('/api/terminy?' + new URLSearchParams({ b: b, t: t }))
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) { var x = new Error(j.error || ''); x.api = true; throw x; } return j; }); })
-      .then(function (j) {
-        var days = Object.keys(j.slots).sort(), shown = Math.min(SHOW_DAYS, days.length), chosen = null;
-        function draw() {
-          var list = days.slice(0, shown).map(function (den) {
-            return '<div class="day"><h3>' + longDay(den) + '</h3><div class="times">' + j.slots[den].map(function (c) {
-              var on = chosen && chosen.den === den && chosen.cas === c;
-              return '<button class="time" data-d="' + den + '" data-c="' + c + '" aria-pressed="' + !!on + '">' + c + '</button>';
-            }).join('') + '</div></div>';
-          }).join('');
-          p.innerHTML = '<h2>Nový termín</h2>' +
-            (days.length ? '<p>' + (data.forma === 'osobne' ? 'Volné časy pro osobní sezení.' : 'Volné časy pro online sezení.') + '</p>' + list
-              : '<p>V příštích týdnech teď není nic volného. Termín je možné domluvit po telefonu: <a href="tel:+420605990980">+420 605 990 980</a>.</p>') +
-            (shown < days.length ? '<button class="link" id="more">Další termíny</button>' : '') +
-            '<button class="link" id="back">Zpět</button>' +
-            (chosen ? '<div class="confirm"><p>Přesunout na <b>' + onDay(chosen.den, chosen.cas) + '</b>?</p>' +
-              '<p class="err" id="err" role="alert" hidden></p><button class="btn" id="go">Přesunout</button></div>' : '');
-          p.querySelectorAll('.time').forEach(function (x) { x.onclick = function () { chosen = { den: x.dataset.d, cas: x.dataset.c }; draw(); document.getElementById('go').focus({ preventScroll: true }); }; });
-          var more = document.getElementById('more'); if (more) more.onclick = function () { shown = Math.min(shown + SHOW_DAYS, days.length); draw(); };
-          document.getElementById('back').onclick = render;
-          var go = document.getElementById('go');
-          if (go) go.onclick = function () {
-            var err = document.getElementById('err');
-            go.setAttribute('aria-busy', 'true'); go.disabled = true; go.textContent = 'Přesouvání…'; err.hidden = true;
-            fetch('/api/presunout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ b: b, t: t, date: chosen.den, time: chosen.cas }) })
-              .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Přesun se nepovedl.'); return j; }); })
-              .then(function (j) {
-                data = j; flash = j.mailed === false ? 'Hotovo. Potvrzení s novým časem pošlu e-mailem, jakmile to půjde (teď se odeslat nepovedlo).' : 'Hotovo. Potvrzení s novým časem bylo odesláno e-mailem.';
-                show('<h1>Termín přesunut</h1><p class="ok" role="status">' + flash + '</p>' + summary(data) +
-                  '<p>Přesunout znovu nebo zdarma zrušit lze nejpozději 36 hodin před sezením, přes stejný odkaz z e-mailu.</p>' + CONTACT);
-                var h = card.querySelector('h1'); h.setAttribute('tabindex', '-1'); h.focus();
-              })
-              .catch(function (e) { go.removeAttribute('aria-busy'); go.disabled = false; go.textContent = 'Přesunout'; err.textContent = e.message; err.hidden = false; });
-          };
-        }
-        draw();
-        p.querySelector('h2').scrollIntoView({ block: 'nearest' });
-      })
-      .catch(function (e) {
-        p.innerHTML = '<h2>Nový termín</h2><p class="err">' + esc(e.api && e.message ? e.message : 'Volné termíny se teď nepodařilo načíst.') + ' Stačí to zkusit za chvíli, případně zavolat na <a href="tel:+420605990980">+420 605 990 980</a>.</p><button class="link" id="back">Zpět</button>';
-        document.getElementById('back').onclick = render;
-      });
+    location.href = '/rezervace.html?' + new URLSearchParams(Object.assign({ presun: b, t: t }, data.forma === 'osobne' ? { forma: 'osobne' } : {}));
   }
 
   function cancel() {

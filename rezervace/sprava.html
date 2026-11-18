@@ -49,13 +49,6 @@ a { color: var(--blue); text-underline-offset: 3px; }
 .warn { color: var(--coral-ink) !important; font-weight: 500; }
 .err { color: var(--coral-ink) !important; }
 .panel { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 14px; }
-.day { display: grid; gap: 8px; }
-.day h3 { margin: 0; font-size: 15px; font-weight: 600; }
-.times { display: flex; flex-wrap: wrap; gap: 8px; }
-.time { min-height: 48px; min-width: 84px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
-.time[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
-.confirm { position: sticky; bottom: 12px; background: var(--card); border: 1.5px solid var(--navy); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; box-shadow: 0 8px 24px rgba(22,58,85,.12); }
-.confirm p { color: var(--navy) !important; }
 .skel { height: 1.2em; border-radius: 8px; background: #EFE9E1; }
 .skel.h { height: 34px; width: 50%; } .skel.s { height: 74px; border-radius: 16px; }
 </style>
@@ -67,7 +60,6 @@ a { color: var(--blue); text-underline-offset: 3px; }
 <script>
 (function () {
   var DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
-  var DAYS_ON = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu']; // after "na" (přesunout na pátek)
   var MONTHS = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
   var card = document.getElementById('card');
   var q = new URLSearchParams(location.search), b = q.get('b') || '', t = q.get('t') || q.get('amp;t') || '';   // amp;t: a link whose & arrived escaped as &amp; (seen once from a phone)
@@ -78,7 +70,6 @@ a { color: var(--blue); text-underline-offset: 3px; }
   function date(den) { var p = den.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
   function endOf(cas) { var h = cas.split(':'), m = +h[0] * 60 + +h[1] + 50; return Math.floor(m / 60) + ':' + ('0' + m % 60).slice(-2); }
   function longDay(den) { var x = date(den), s = DAYS[x.getDay()]; return s.charAt(0).toUpperCase() + s.slice(1) + ' ' + x.getDate() + '. ' + MONTHS[x.getMonth()]; }
-  function onDay(den, cas) { var x = date(den); return DAYS_ON[x.getDay()] + ' ' + x.getDate() + '. ' + MONTHS[x.getMonth()] + ' v ' + cas; }
   function api(path, body) {
     var opt = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ b: b, t: t }, body)) } : {};
     return fetch('/api/' + path + (body ? '' : '?' + new URLSearchParams({ b: b, t: t })), opt)
@@ -165,47 +156,15 @@ a { color: var(--blue); text-underline-offset: 3px; }
     p.querySelector('h2').scrollIntoView({ block: 'nearest' });
   }
 
-  var SHOW_DAYS = 10; // days with free times shown at first; more on request
-  function openMove() {
-    var p = document.getElementById('panel');
-    p.className = 'panel';
-    p.innerHTML = '<h2>Vyber nový termín</h2><p>' + (d.forma === 'osobne' ? 'Volné časy pro osobní sezení.' : 'Volné časy pro online sezení.') + '</p><p id="load">Načítám volné termíny…</p>';
-    api('sprava/terminy').then(function (j) {
-      var days = Object.keys(j.slots).sort(), shown = Math.min(SHOW_DAYS, days.length), chosen = null;
-      function draw() {
-        var list = days.slice(0, shown).map(function (den) {
-          return '<div class="day"><h3>' + longDay(den) + '</h3><div class="times">' + j.slots[den].map(function (c) {
-            var on = chosen && chosen.den === den && chosen.cas === c;
-            return '<button class="time" data-d="' + den + '" data-c="' + c + '" aria-pressed="' + !!on + '">' + c + '</button>';
-          }).join('') + '</div></div>';
-        }).join('');
-        p.innerHTML = '<h2>Vyber nový termín</h2>' +
-          (days.length ? list : '<p>V příštích týdnech není nic volného. Zkontroluj svoje <a href="/rezervace/hodiny.html">hodiny</a>.</p>') +
-          (shown < days.length ? '<button class="link" id="more">Další termíny</button>' : '') +
-          '<button class="link" id="back">Zpět</button>' +
-          (chosen ? '<div class="confirm"><p>Přesunout na <b>' + onDay(chosen.den, chosen.cas) + '</b>? Klient dostane e-mail s novým termínem.</p>' +
-            '<p class="err" id="err" role="alert" hidden></p><button class="btn" id="go">Přesunout</button></div>' : '');
-        p.querySelectorAll('.time').forEach(function (x) { x.onclick = function () { chosen = { den: x.dataset.d, cas: x.dataset.c }; draw(); document.getElementById('go').focus({ preventScroll: true }); }; });
-        var more = document.getElementById('more'); if (more) more.onclick = function () { shown = Math.min(shown + SHOW_DAYS, days.length); draw(); };
-        document.getElementById('back').onclick = render;
-        var go = document.getElementById('go');
-        if (go) go.onclick = function () {
-          var err = document.getElementById('err');
-          busy(go, 'Přesouvám…'); err.hidden = true;
-          api('sprava/presunout', { date: chosen.den, time: chosen.cas }).then(function (r) {
-            d = r; akce = null;
-            flash = 'Přesunuto, událost v kalendáři se posunula. ' + (!r.email ? 'Klient e-mail nemá, dej mu vědět sám.' : r.mailed === false ? 'E-mail klientovi se teď odeslat nepovedl, odejde sám o něco později.' : 'Klient dostal e-mail s novým termínem.');
-            render(); focusH1();
-          }).catch(function (e) { idle(go, 'Přesunout'); err.textContent = e.message; err.hidden = false; });
-        };
-      }
-      draw();
-    }).catch(function (e) { p.innerHTML = '<h2>Vyber nový termín</h2><p class="err">Volné termíny se teď nepodařilo načíst. Zkus to prosím za chvíli. Pokud to nepomůže, zkontroluj svoje <a href="/rezervace/hodiny.html">hodiny</a>.</p><button class="link" id="back">Zpět</button>'; document.getElementById('back').onclick = render; });
+  // the same calendar as clients book in (owner, 18 Nov), in the booking's format; its "Zpět na rezervaci" comes back here
+  function moveUrl() {
+    return '/rezervace.html?' + new URLSearchParams(Object.assign({ presun: b, t: t, kdo: 'k' }, d.forma === 'osobne' ? { forma: 'osobne' } : {}));
   }
+  function openMove() { location.href = moveUrl(); }
 
   api('sprava').then(function (j) {
     d = j; render();
-    if (akce === 'presunout' && document.getElementById('move')) openMove();
+    if (akce === 'presunout' && document.getElementById('move')) location.replace(moveUrl());   // from her e-mail: straight to the calendar, back returns to the e-mail
     if (akce === 'zrusit' && document.getElementById('cancel')) openCancel();
   }).catch(function (e) { show('<h1>Odkaz nefunguje</h1><p>' + esc(e.message) + '</p>'); });
 })();
