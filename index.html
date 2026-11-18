@@ -820,17 +820,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
-    /* ==== 28. O mně facts (owner, 18 Nov): education, training, clinic, supervision in view again.
-   Typographic only: grey label, navy value, no lines, no icons. Label beside value from 600 px. ==== */
-.about-facts { margin: 24px 0 8px; display: grid; gap: 14px; }
-.about-facts > div { margin: 0; }
-.about-facts dt { margin: 0 0 2px; font-size: .9375rem; font-weight: 500; line-height: 1.4; color: var(--mute); }
-.about-facts dd { margin: 0; font-size: var(--fs-body, 1.0625rem); font-weight: 500; line-height: 1.5; color: var(--navy); }
-@media (min-width: 600px) {
-  .about-facts > div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); column-gap: 24px; align-items: baseline; }
-  .about-facts dt { margin: 0; }
-}
-</style>
+    </style>
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
@@ -1187,13 +1177,16 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
                         <p>
                             Volný čas trávím nejraději v přírodě s našimi koňmi a psem, kteří mi připomínají jednoduchost přítomného okamžiku. Jsem také manželkou a mámou, a právě mateřství pro mě představuje nejhlubší zkušenost s opravdovou blízkostí a trpělivostí.
                         </p>
-                        <dl class="about-facts">
-                            <div><dt>Vzdělání</dt><dd>Mgr.&nbsp;psychologie, PVŠPS Praha</dd></div>
-                            <div><dt>Výcvik</dt><dd>Pětiletý výcvik v daseinsanalýze</dd></div>
-                            <div><dt>Praxe</dt><dd>Fakultní nemocnice Ostrava, Klinika dětského lékařství</dd></div>
-                            <div><dt>Specializace</dt><dd>Klinická psychologie, pod vedením Mgr.&nbsp;Marcely Kvardové</dd></div>
-                            <div><dt>Supervize</dt><dd>PhDr.&nbsp;Marek Hošek, MUDr.&nbsp;Michal Kryl (individuální)</dd></div>
-                        </dl>
+
+                        <p>
+                            Vystudovala jsem psychologii na Pražské vysoké škole psychosociálních studií (PVŠPS) a absolvovala pětiletý psychoterapeutický výcvik v daseinsanalýze. Ve Fakultní nemocnici Ostrava pracuji na Klinice dětského lékařství.
+                        </p>
+
+                        <p>
+                            Terapeuticky pracuji pod supervizí (PhDr. Marek Hošek / individuál MUDr. Michal Kryl).
+                            V rámci specializačního vzdělávání v oboru klinické psychologie pracuji pod vedením
+                            Mgr. Marcely Kvardové.
+                        </p>
                         </details>
                         <div class="about-personal-note">
                             <img src="images/portrait-avatar-192.webp" srcset="images/portrait-avatar-192.webp 192w, images/portrait-avatar-384.webp 384w" sizes="130px" alt="Mgr. Kristýna Hriciková Glattová" width="130" height="130" loading="lazy" decoding="async">
