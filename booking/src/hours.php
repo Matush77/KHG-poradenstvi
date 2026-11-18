@@ -12,6 +12,18 @@ declare(strict_types=1);
 
 const OWNER_FIRST_HOUR = 8;    // the hours page offers 8:00 ... 17:00 (owner, 14 Nov: nothing after 18:00)
 const OWNER_LAST_HOUR = 17;
+// how soon and how far ahead clients can book: set on the hours page (owner, 18 Nov: 4 hours, as on her Google
+// in-person page), stored in state; booking.env's MIN_NOTICE_HOURS / BOOK_AHEAD_DAYS only until she first saves them
+const NOTICE_CHOICES = [1, 2, 4, 8, 12, 24, 48];
+const AHEAD_CHOICES = [28, 42, 56, 70, 84, 112, 182];
+
+function booking_rules(): array
+{
+    $c = cfg();
+    $n = state_get('min_notice_hours');
+    $a = state_get('book_ahead_days');
+    return ['notice' => $n === null ? $c['min_notice_hours'] : (int)$n, 'ahead' => $a === null ? $c['book_ahead_days'] : (int)$a];
+}
 
 function hours_clean($list): array
 {
@@ -76,12 +88,18 @@ function hours_open(DateTimeImmutable $from, DateTimeImmutable $to): array
 }
 
 /* Saves the page's draft. $week: [forma => [wd => [h...]]] (whole week of each format sent);
-   $days: [forma => ['Y-m-d' => [h...] | null]] (null = back to the regular week). Returns the new version. */
-function hours_save(array $week, array $days, int $base, string $who, ?DateTimeImmutable $now = null): int
+   $days: [forma => ['Y-m-d' => [h...] | null]] (null = back to the regular week);
+   $rules: ['notice' => hours, 'ahead' => days], only what she changed. Returns the new version. */
+function hours_save(array $week, array $days, int $base, string $who, ?DateTimeImmutable $now = null, array $rules = []): int
 {
     $now = ($now ?? new DateTimeImmutable())->setTimezone(new DateTimeZone('Europe/Prague'));
+    foreach ($rules as $k => $v) {
+        if (!in_array($k, ['notice', 'ahead'], true) || !in_array($v, $k === 'notice' ? NOTICE_CHOICES : AHEAD_CHOICES, true)) {
+            throw new ClientError('Neplatné nastavení.', 400);
+        }
+    }
     $first = $now->format('Y-m-d');
-    $last = $now->modify('+' . (cfg()['book_ahead_days'] + 31) . ' days')->format('Y-m-d');
+    $last = $now->modify('+' . (max(booking_rules()['ahead'], $rules['ahead'] ?? 0) + 31) . ' days')->format('Y-m-d');
     $rowsW = [];
     foreach ($week as $f => $wds) {
         if (!in_array($f, FORMATS, true) || !is_array($wds)) throw new ClientError('Neplatná forma.', 400);
@@ -101,7 +119,7 @@ function hours_save(array $week, array $days, int $base, string $who, ?DateTimeI
         }
     }
     if (count($rowsD) > 1000) throw new ClientError('Příliš mnoho změn najednou.', 400);
-    return db_tx(function (PDO $pdo) use ($rowsW, $rowsD, $base, $who, $first) {
+    return db_tx(function (PDO $pdo) use ($rowsW, $rowsD, $base, $who, $first, $rules) {
         $v = hours_version();
         if ($base !== $v) throw new ClientError('Mezitím hodiny změnil někdo jiný. Načti stránku znovu.', 409);
         $w = $pdo->prepare('INSERT OR REPLACE INTO hours_week (forma, wd, hours) VALUES (?, ?, ?)');
@@ -110,8 +128,10 @@ function hours_save(array $week, array $days, int $base, string $who, ?DateTimeI
         $del = $pdo->prepare('DELETE FROM hours_day WHERE forma = ? AND day = ?');
         foreach ($rowsD as [$f, $k, $l]) $l === null ? $del->execute([$f, $k]) : $set->execute([$f, $k, json_encode($l)]);
         $pdo->prepare('DELETE FROM hours_day WHERE day < ?')->execute([$first]);   // days gone by
+        if (isset($rules['notice'])) state_set('min_notice_hours', (string)$rules['notice']);
+        if (isset($rules['ahead'])) state_set('book_ahead_days', (string)$rules['ahead']);
         state_set('hours_version', (string)($v + 1));
-        log_line('HOURS_SAVED', ['by' => $who, 'week' => count($rowsW), 'days' => array_map(fn($r) => $r[0] . ' ' . $r[1] . ' ' . ($r[2] === null ? 'týden' : implode(',', $r[2])), $rowsD)]);
+        log_line('HOURS_SAVED', ['by' => $who, 'week' => count($rowsW), 'days' => array_map(fn($r) => $r[0] . ' ' . $r[1] . ' ' . ($r[2] === null ? 'týden' : implode(',', $r[2])), $rowsD)] + ($rules ? ['rules' => $rules] : []));
         return $v + 1;
     });
 }
@@ -141,7 +161,7 @@ function hours_busy(?DateTimeImmutable $now = null): ?array
     $tz = new DateTimeZone('Europe/Prague');
     $now = ($now ?? new DateTimeImmutable())->setTimezone($tz);
     $from = $now->setTime(0, 0);
-    $to = $from->modify('+' . cfg()['book_ahead_days'] . ' days')->setTime(23, 59, 59);
+    $to = $from->modify('+' . booking_rules()['ahead'] . ' days')->setTime(23, 59, 59);
     try {
         $c = cfg();
         $busy = array_merge(...array_values(gcal_freebusy(array_merge($c['busy_calendars'], [$c['calendar']]), $from, $to)));
@@ -157,7 +177,8 @@ function hours_view(?DateTimeImmutable $now = null): array
 {
     $tz = new DateTimeZone('Europe/Prague');
     $now = ($now ?? new DateTimeImmutable())->setTimezone($tz);
-    $to = $now->setTime(0, 0)->modify('+' . cfg()['book_ahead_days'] . ' days');
+    $rules = booking_rules();
+    $to = $now->setTime(0, 0)->modify('+' . $rules['ahead'] . ' days');
     $booked = [];
     $s = db()->prepare("SELECT pay_id, slot, forma, name, email FROM bookings WHERE status IN ('pending','booked','failed') AND slot >= ? ORDER BY slot");
     $s->execute([$now->setTime(0, 0)->format(DATE_ATOM)]);
@@ -168,7 +189,8 @@ function hours_view(?DateTimeImmutable $now = null): array
             'cas' => $t->format('G:i'), 'e' => (bool)$r['email'], 'url' => substr(owner_url($r['pay_id']), strlen(site()))];
     }
     return ['version' => hours_version(), 'today' => $now->format('Y-m-d'), 'now' => $now->format(DATE_ATOM), 'to' => $to->format('Y-m-d'),
-        'first_hour' => OWNER_FIRST_HOUR, 'last_hour' => OWNER_LAST_HOUR, 'min_notice_hours' => cfg()['min_notice_hours'],
+        'first_hour' => OWNER_FIRST_HOUR, 'last_hour' => OWNER_LAST_HOUR, 'min_notice_hours' => $rules['notice'],
+        'book_ahead_days' => $rules['ahead'], 'notice_choices' => NOTICE_CHOICES, 'ahead_choices' => AHEAD_CHOICES,
         // objects, not lists, so the page can add keys and send them back as they are
         'week' => array_map(fn($x) => (object)$x, hours_week()),
         'days' => array_map(fn($x) => (object)$x, hours_days($now->format('Y-m-d'), $to->format('Y-m-d'))),

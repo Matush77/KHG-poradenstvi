@@ -191,7 +191,7 @@ ok($r['online'] === ['2027-03-28' => ['8:00', '9:00', '10:00']], 'summer time da
 $r = compute_slots(['online' => [[$ts('2026-12-21T08:00'), $ts('2026-12-21T12:00')], [$ts('2026-12-21T08:00'), $ts('2026-12-21T10:00')]]], [], $from, $to, true);
 ok($r['online']['2026-12-21'] === ['8:00', '9:00', '10:00', '11:00'], 'overlapping hours blocks give each time once');
 [$wf, $wt] = slot_window(prague('2026-12-21T10:15'));
-ok($wf->format('Y-m-d H:i') === '2026-12-22 10:15' && $wt->format('Y-m-d H:i') === '2027-03-01 23:59', 'window: 24 hours notice, 70 days ahead to the end of the day');
+ok($wf->format('Y-m-d H:i') === '2026-12-21 14:15' && $wt->format('Y-m-d H:i') === '2027-03-01 23:59', 'window: 4 hours notice, 70 days ahead to the end of the day');
 
 // --- the owner's links and e-mails
 $ot = owner_token('cs_test_abc');
@@ -372,6 +372,16 @@ hours_save(['online' => [1 => [9, 10], 2 => [17, 8]], 'osobne' => [4 => [13]]], 
 ok(hours_week()['online'][2] === [8, 17], 'hours are sorted and kept');
 throws(fn() => hours_save(['online' => [1 => [18]]], [], hours_version(), 'test', $nowH), 400, 'an hour after 17:00 refused');
 throws(fn() => hours_save(['online' => [1 => ['9']]], [], hours_version(), 'test', $nowH), 400, 'an hour as text refused');
+// notice and window, set on the hours page (owner, 18 Nov)
+ok(booking_rules() === ['notice' => 4, 'ahead' => 70], 'rules: 4 hours and 70 days until she sets them');
+hours_save([], [], hours_version(), 'test', $nowH, ['notice' => 12, 'ahead' => 28]);
+[$wf, $wt] = slot_window(prague('2026-12-21T10:15'));
+ok($wf->format('Y-m-d H:i') === '2026-12-21 22:15' && $wt->format('Y-m-d H:i') === '2027-01-18 23:59', 'rules: the window follows what she saved');
+ok(hours_view($nowH)['min_notice_hours'] === 12 && hours_view($nowH)['book_ahead_days'] === 28, 'rules: the hours page shows them');
+throws(fn() => hours_save([], [], hours_version(), 'test', $nowH, ['notice' => 5]), 400, 'rules: a notice not offered refused');
+throws(fn() => hours_save([], [], hours_version(), 'test', $nowH, ['ahead' => '70']), 400, 'rules: a window as text refused');
+throws(fn() => hours_save([], [], hours_version(), 'test', $nowH, ['other' => 4]), 400, 'rules: an unknown setting refused');
+hours_save([], [], hours_version(), 'test', $nowH, ['notice' => 4, 'ahead' => 70]);
 throws(fn() => hours_save(['hack' => [1 => [9]]], [], hours_version(), 'test', $nowH), 400, 'unknown format refused');
 throws(fn() => hours_save([], ['online' => ['2026-11-13' => [9]]], hours_version(), 'test', $nowH), 400, 'a day gone by refused');
 throws(fn() => hours_save([], ['online' => ['2026-02-30' => [9]]], hours_version(), 'test', $nowH), 400, 'an impossible date refused');

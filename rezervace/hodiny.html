@@ -127,6 +127,13 @@ h1 { white-space: nowrap; }
 .link { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 40px; font-weight: 500; font-size: 15px; text-align: left; }
 .foot { margin: 24px 0 0; padding-top: 8px; border-top: 1px solid var(--line); display: grid; justify-items: start; }
 .foot[hidden] { display: none; }
+/* how soon and how far ahead clients can book (owner, 18 Nov): part of the draft, saved with Uložit */
+.rules { width: 100%; margin: 0 0 8px; padding: 0 0 12px; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+.rules h2 { margin: 6px 0 2px; font-size: 16px; font-weight: 600; }
+.rules label { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; font-size: 15px; color: var(--slate); }
+.rules select { min-height: 44px; min-width: 168px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; color: var(--navy); font: inherit; font-weight: 600; padding: 0 10px; }
+.rules select.pend { border-color: var(--coral); box-shadow: 0 0 0 1px var(--coral) inset; }
+.rules p { margin: 0; font-size: 13px; color: var(--mute); }
 .devices summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 500; color: var(--slate); }
 .devices ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .devices li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
@@ -211,6 +218,10 @@ h1 { white-space: nowrap; }
   </header>
   <main id="list" aria-live="off"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
   <div class="foot" id="foot" hidden>
+    <div class="rules"><h2>Kdy se klienti můžou objednat</h2>
+      <label for="notice">Nejpozději<select id="notice"></select></label>
+      <label for="ahead">Nejdál<select id="ahead"></select></label>
+      <p>Platí pro online i osobně. Ty sama můžeš přesouvat kdykoli.</p></div>
     <button class="link" id="regular">Běžný týden: hodiny, ze kterých dny vycházejí</button>
     <details class="devices" id="devices" hidden><summary>Přihlášená zařízení</summary><ul id="devList"></ul></details>
   </div>
@@ -238,7 +249,8 @@ h1 { white-space: nowrap; }
   var MONTHS_1 = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
   var F = ['online', 'osobne'], FN = { online: 'Online', osobne: 'Osobně' };
   var MOVE_FIRST = 7, MOVE_LAST = 20;   // booking.php OWNER_MOVE_FIRST / LAST
-  var HOURS = [], HOLIDAYS = {}, MIN_NOTICE_H = 24;
+  var HOURS = [], HOLIDAYS = {};
+  var rules = null, savedRules = null;   // {notice: hours, ahead: days}
   var week = { online: {}, osobne: {} }, over = { online: {}, osobne: {} }, booked = {};
   var cal = {}, calOk = true;   // hours busy in her Google calendar ('Y-m-d' -> {hour: 1}); calOk false: Google not read
   var savedWeek, savedOver, version = 0, now, today0, last, saving = false;
@@ -273,8 +285,9 @@ h1 { white-space: nowrap; }
   function savedFor(f, k) { return savedOver[f][k] || base(f, k, savedWeek); }
   function same(a, b) { a = a || []; b = b || []; return a.length === b.length && a.every(function (h) { return b.indexOf(h) > -1; }); }
   function diff(a, b) { return a.filter(function (h) { return b.indexOf(h) < 0; }).length + b.filter(function (h) { return a.indexOf(h) < 0; }).length; }
+  function rulesPend() { return rules ? (rules.notice !== savedRules.notice) + (rules.ahead !== savedRules.ahead) : 0; }
   function changes() {
-    var n = 0;
+    var n = rulesPend();
     F.forEach(function (f) {
       for (var wd = 0; wd < 7; wd++) n += diff(week[f][wd] || [], savedWeek[f][wd] || []);
       Object.keys(Object.assign({}, over[f], savedOver[f])).forEach(function (k) { n += diff(hoursFor(f, k), savedFor(f, k)); });
@@ -460,7 +473,7 @@ h1 { white-space: nowrap; }
       over[f][k] = toggle(cur, h);
       if (sameAsWeek(f, k)) delete over[f][k];
       render();
-      if (on && (at(k, h) - now) / 36e5 < MIN_NOTICE_H) toast('Méně než ' + MIN_NOTICE_H + ' h předem si tuto hodinu nikdo nezarezervuje.', true);
+      if (on && (at(k, h) - now) / 36e5 < savedRules.notice) toast('Méně než ' + savedRules.notice + ' h předem si tuto hodinu nikdo nezarezervuje.', true);
     }
   });
 
@@ -475,25 +488,42 @@ h1 { white-space: nowrap; }
         else if (a !== undefined && (b === undefined || !same(a, b))) days[f][k] = a;
       });
     });
-    return { version: version, week: week, days: days };
+    var p = { version: version, week: week, days: days, rules: {} };
+    ['notice', 'ahead'].forEach(function (x) { if (rules[x] !== savedRules[x]) p.rules[x] = rules[x]; });
+    return p;
   }
 
   bar.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t || saving) return;
-    if (t.id === 'discard') { week = clone(savedWeek); over = clone(savedOver); render(); toast('Změny zahozeny'); return; }
+    if (t.id === 'discard') { week = clone(savedWeek); over = clone(savedOver); rules = clone(savedRules); renderRules(); render(); toast('Změny zahozeny'); return; }
     saving = true; t.setAttribute('aria-busy', 'true'); t.textContent = 'Ukládám…';
     // what this request sends: taps made while it runs are not in it, so they stay unsaved (16 Nov review: they were
     // marked saved and lost)
-    var sentWeek = clone(week), sentOver = clone(over);
+    var sentWeek = clone(week), sentOver = clone(over), sentRules = clone(rules), aheadChanged = rules.ahead !== savedRules.ahead;
     api('/ulozit', payload()).then(function (j) {
       if (j._status === 401) { showLogin('Přihlášení vypršelo. Po přihlášení ulož znovu.'); return; }
-      version = j.version; savedWeek = sentWeek; savedOver = sentOver;
+      version = j.version; savedWeek = sentWeek; savedOver = sentOver; savedRules = sentRules; renderRules();
+      if (aheadChanged) load(true);   // the page's own range follows the new window
       Object.keys(over).forEach(function (f) { Object.keys(over[f]).forEach(function (k) { if (sameAsWeek(f, k)) { delete over[f][k]; delete savedOver[f][k]; } }); });
       render(); toast(changes() ? 'Uloženo. Pozdější změny ještě ulož.' : 'Uloženo');
     }).catch(function (err) {
       if (err.status === 409) { load(true); toast('Mezitím ukládalo jiné zařízení. Jeho změny jsou načtené, tvoje zůstaly: ulož je ještě jednou.', true); return; }
       toast('Uložit se nepovedlo: ' + err.message + ' Změny zůstávají, zkus to znovu.', true);
     }).then(function () { saving = false; t.removeAttribute('aria-busy'); t.textContent = 'Uložit'; });
+  });
+  // the two booking rules: plain selects, part of the draft like the hours
+  function hoursText(n) { return n === 1 ? '1 hodinu předem' : n < 5 ? n + ' hodiny předem' : n + ' hodin předem'; }
+  function weeksText(d) { var w = d / 7; return (w < 5 ? w + ' týdny' : w + ' týdnů') + ' dopředu'; }
+  function fillRules(nc, ac) {
+    $('notice').innerHTML = nc.map(function (n) { return '<option value="' + n + '">' + hoursText(n) + '</option>'; }).join('');
+    $('ahead').innerHTML = ac.map(function (d) { return '<option value="' + d + '">' + weeksText(d) + '</option>'; }).join('');
+    renderRules();
+  }
+  function renderRules() {
+    ['notice', 'ahead'].forEach(function (x) { var el = $(x); el.value = String(rules[x]); el.classList.toggle('pend', rules[x] !== savedRules[x]); });
+  }
+  ['notice', 'ahead'].forEach(function (x) {
+    $(x).addEventListener('change', function () { rules[x] = +this.value; renderRules(); render(); });
   });
   // closing the tab with unsaved taps asks first
   addEventListener('beforeunload', function (e) { if (savedWeek && changes()) { e.preventDefault(); e.returnValue = ''; } });
@@ -624,7 +654,12 @@ h1 { white-space: nowrap; }
     api('').then(function (j) {
       if (j._status === 401) { showLogin(); return; }
       HOURS = []; for (var h = j.first_hour; h <= j.last_hour; h++) HOURS.push(h);
-      HOLIDAYS = j.holidays || {}; MIN_NOTICE_H = j.min_notice_hours; booked = j.booked || {};
+      HOLIDAYS = j.holidays || {}; booked = j.booked || {};
+      // keepDraft: a setting this device changed and didn't save stays changed
+      var mineRules = keepDraft && rules ? { notice: rules.notice !== savedRules.notice ? rules.notice : null, ahead: rules.ahead !== savedRules.ahead ? rules.ahead : null } : {};
+      savedRules = { notice: j.min_notice_hours, ahead: j.book_ahead_days };
+      rules = { notice: mineRules.notice != null ? mineRules.notice : savedRules.notice, ahead: mineRules.ahead != null ? mineRules.ahead : savedRules.ahead };
+      fillRules(j.notice_choices, j.ahead_choices);
       calOk = !!j.cal; cal = j.cal || {};
       version = j.version;
       // keepDraft: only this device's own unsaved changes go on top of what the server has now, hour by hour, so the

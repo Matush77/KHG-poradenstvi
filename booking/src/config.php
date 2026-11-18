@@ -62,7 +62,7 @@ function cfg(): array
             'online' => $env['HOURS_ONLINE'] ?? ($json('google-hours-calendars.json')['online'] ?? ''),
             'osobne' => $env['HOURS_OSOBNE'] ?? ($json('google-hours-calendars.json')['osobne'] ?? ''),
         ],
-        'min_notice_hours' => (int)($env['MIN_NOTICE_HOURS'] ?? 24),   // nothing bookable sooner than this
+        'min_notice_hours' => (int)($env['MIN_NOTICE_HOURS'] ?? 4),    // nothing bookable sooner; the hours page overrides both
         'book_ahead_days' => (int)($env['BOOK_AHEAD_DAYS'] ?? 70),     // owner, 13 Nov
         'skip_public_holidays' => ($env['SKIP_PUBLIC_HOLIDAYS'] ?? '1') === '1',
         'secret' => is_file("$dir/booking-secret") ? trim((string)file_get_contents("$dir/booking-secret")) : '',

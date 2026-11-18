@@ -18,7 +18,7 @@
    The owner's hours page (shared password, then a year-long cookie per device, src/owner.php):
      GET  /api/hodiny                 hours, holidays, bookings, signed-in devices (401 = sign in)
      POST /api/hodiny/prihlasit {heslo}
-     POST /api/hodiny/ulozit {version, week, days}   saves the page's draft (409 when another device saved meanwhile)
+     POST /api/hodiny/ulozit {version, week, days, rules?}   saves the page's draft (409 when another device saved meanwhile)
      POST /api/hodiny/odhlasit {id}   signs a device out (no id: this one) */
 declare(strict_types=1);
 
@@ -241,7 +241,7 @@ try {
         }
         if ($method === 'POST' && $route === 'hodiny/ulozit') {
             $v = hours_save(is_array($j['week'] ?? null) ? $j['week'] : [], is_array($j['days'] ?? null) ? $j['days'] : [],
-                (int)($j['version'] ?? -1), $dev['label'] . ' ' . $dev['id']);
+                (int)($j['version'] ?? -1), $dev['label'] . ' ' . $dev['id'], null, is_array($j['rules'] ?? null) ? $j['rules'] : []);
             out(200, ['version' => $v]);
         }
         if ($method === 'POST' && $route === 'hodiny/odhlasit') {
