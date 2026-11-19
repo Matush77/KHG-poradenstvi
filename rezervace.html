@@ -1170,8 +1170,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
       function plural(n) { return n === 1 ? '1 volný čas' : n < 5 ? n + ' volné časy' : n + ' volných časů'; }
       function say(t) { var s = document.getElementById('status'); if (s.textContent !== t) s.textContent = t; }
       // every month gets six week rows (empty ones invisible), so the times under the calendar never move when the month changes
-      // only the weeks the month needs (owner, 19 Nov: a 5-week month left an empty row between the calendar and the times)
-      function pad(n) { var a = []; for (var i = n; i % 7; i++) a.push('<span class="day out"></span>'); return a; }
+      function pad(n) { var a = []; for (var i = n; i < 7 + 42; i++) a.push('<span class="day out"></span>'); return a; }
 
       function renderStep1() {
         var fk = focusKey();
