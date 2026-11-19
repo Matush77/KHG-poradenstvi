@@ -907,15 +907,15 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     .rez .bk-btn[aria-busy="true"] { opacity: .75; cursor: progress; }
     .rez .bk-cta { display: grid; gap: 8px; justify-items: start; }
     /* phones: the pay button stays at the bottom of the screen while the details are filled in (owner, 19 Nov: in person,
-       with the phone field and the address, it was below the screen even on a tall phone). In person only: the online
-       form is shorter and its button is on screen (owner, 19 Nov). Sticky keeps its place in the
+       with the phone field and the address, it was below the screen even on a tall phone). Online too: on a small
+       phone (iPhone SE) its button was below the screen as well. Sticky keeps its place in the
        flow, so nothing moves. It stays pinned while typing too (owner: after autofill the button must still be there);
        the scroll padding keeps the field being typed in above it, not under it. */
     @media (max-width: 719px) {
-      .rez.f-osobne form .bk-cta { position: sticky; bottom: 0; z-index: 2; margin: -16px -16px 0; padding: 16px 16px calc(12px + env(safe-area-inset-bottom));
+      .rez form .bk-cta { position: sticky; bottom: 0; z-index: 2; margin: -16px -16px 0; padding: 16px 16px calc(12px + env(safe-area-inset-bottom));
         background: linear-gradient(rgba(251, 248, 243, 0), var(--paper) 16px); }
-      html:has(.rez.f-osobne form .bk-cta) { scroll-padding-bottom: 96px; }
-      .rez.f-osobne form label { scroll-margin-bottom: 96px; }
+      html:has(.rez form .bk-cta) { scroll-padding-bottom: 96px; }
+      .rez form label { scroll-margin-bottom: 96px; }
     }
     .rez .bk-terms { background: var(--peach); border-radius: 12px; padding: 10px 14px; font-size: 13px; line-height: 1.45; color: var(--slate); }
     .rez .bk-terms p { margin: 0; font-size: inherit; line-height: inherit; }
@@ -1259,7 +1259,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
         // back from Stripe's page: what the client typed comes back (kept for this tab only, removed once paid)
         var kept = null; try { kept = JSON.parse(sessionStorage.getItem('khg-form') || 'null'); } catch (x) {}
         if (kept) Object.keys(kept).forEach(function (id) { var el = document.getElementById(id); if (el && kept[id]) el.value = kept[id]; });
-        // phones, in person: the pay button is pinned to the bottom; the field being typed in is kept above it
+        // phones: the pay button is pinned to the bottom; the field being typed in is kept above it
         // (on focus, and again when the keyboard has opened and the visible area got smaller)
         function clearCta() {
           var el = document.activeElement, cta = view.querySelector('form .bk-cta');
