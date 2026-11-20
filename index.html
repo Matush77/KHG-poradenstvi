@@ -1068,6 +1068,150 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     @media (max-width:400px){.nav{padding-left:16px!important;padding-right:16px!important}}
     @media (hover:hover){.nav-logo a:hover .brand-name{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}}
     </style>
+    <style id="visual">
+    /* ==================================================================
+       VISUAL LAYER (2026-11-20). Design only, no copy changes.
+       V1 type scale, V2 blob motif, V3 hero, V4 trust strip,
+       V5 who-for cards, V6 services, V7 how-it-works band,
+       V8 formats, V9 scroll reveal. Loaded last, so it wins.
+       ================================================================== */
+
+    /* [V1] Bigger jump between headings and body */
+    :root {
+      --fs-h1: clamp(2.75rem, 1.4rem + 5.2vw, 5rem);       /* 44 -> 80 */
+      --fs-h2: clamp(2.125rem, 1.4rem + 2.6vw, 3.5rem);    /* 34 -> 56 */
+      --blob: 42% 58% 63% 37% / 41% 44% 56% 59%;
+      --coral-soft: #F7E4DC;
+    }
+    .hero-title, .section-title, .rv-title { letter-spacing: -0.025em !important; text-wrap: balance; }
+    .section-title, .rv-title { font-size: var(--fs-h2) !important; line-height: 1.05 !important; }
+
+    /* [V2] The portrait's blob becomes the brand mark: a small coral blob before every section title */
+    .section-title, .rv-title { display: flex; align-items: flex-start; gap: .4em; }
+    .section-title::before, .rv-title::before {
+      content: ''; flex: none; width: .5em; height: .5em; border-radius: var(--blob);
+      background: var(--accent); margin-top: .32em; transform: rotate(-12deg);
+    }
+    @media (max-width: 768px) { .section-header .section-title { justify-content: flex-start; } .section-header { text-align: left !important; } }
+
+    /* [V3] Hero: big headline, coral underline swash, stats as numbers, layered blobs */
+    .hero { position: relative; overflow: clip; }
+    .hero-container { grid-template-columns: 1.15fr 1fr !important; }
+    .hero-title { font-size: var(--fs-h1) !important; line-height: 1.02 !important; margin-bottom: 28px !important; }
+    .hero-title-accent { position: relative; display: inline-block; white-space: nowrap; isolation: isolate; }
+    .hero-title-accent::after {
+      content: ''; position: absolute; left: 0; right: 4%; bottom: -.12em; height: .2em; z-index: -1;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 20' preserveAspectRatio='none'%3E%3Cpath d='M3 14C60 5 140 3 297 9' fill='none' stroke='%23E8927C' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    }
+    .hero-stats { margin: 36px 0 40px !important; }
+    .hero-stats-line { display: flex !important; align-items: stretch; gap: 32px; font-size: var(--fs-small) !important; color: var(--mute) !important; }
+    .hero-stat { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+    .hero-stat strong { font: 500 clamp(2rem, 1.5rem + 1.6vw, 2.75rem)/1 Fraunces, "Fraunces Fallback", "Fraunces Fallback Android", Georgia, serif; letter-spacing: -.02em; color: var(--navy) !important; font-synthesis: none; }
+    .hero-stats-line .stats-dot { width: 1px; background: var(--line); color: transparent; overflow: hidden; }
+    .hero-image { position: relative; isolation: isolate; }
+    .hero-image::before, .hero-image::after { content: ''; position: absolute; z-index: -1; border-radius: var(--blob); }
+    .hero-image::before { width: 62%; aspect-ratio: 1; right: -6%; top: -7%; background: var(--coral-soft); transform: rotate(24deg); }
+    .hero-image::after { width: 34%; aspect-ratio: 1; left: 2%; bottom: -6%; background: var(--sky); transform: rotate(-30deg); }
+    .blob-shape { box-shadow: 0 30px 60px -20px hsl(205 50% 25% / .28) !important; }
+    @media (max-width: 968px) {
+      .hero-container { grid-template-columns: 1fr !important; }
+      .hero-stats-line { justify-content: flex-start; }
+    }
+    @media (max-width: 768px) {
+      .hero-content { text-align: left !important; }
+      .hero-image::before { right: 4%; }
+    }
+
+    /* [V4] Trust strip: proof straight under the hero */
+    .trust-strip { background: var(--paper); border-block: 1px solid var(--line); }
+    .trust-list { list-style: none; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px 32px; padding-block: 28px !important; margin-block: 0 !important; }
+    .trust-list li { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--navy); font-size: var(--fs-small); }
+    .trust-list cite { font-style: normal; }
+    .trust-list img { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; }
+    .trust-list img.trust-book { width: 28px; border-radius: 3px; }
+    @media (max-width: 640px) { .trust-list { display: grid; grid-template-columns: 1fr 1fr; } }
+
+    /* [V5] Who it's for: four cards with numbered blobs instead of a ruled list */
+    .who-for .target-groups { counter-reset: tg; grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; border: 0 !important; }
+    .who-for .target-group {
+      counter-increment: tg; display: block !important; position: relative; overflow: hidden;
+      background: #fff !important; border: 0 !important; border-radius: var(--r-lg) !important;
+      padding: 32px 32px 32px 104px !important; box-shadow: 0 1px 2px hsl(205 40% 25% / .04), 0 12px 32px -12px hsl(205 40% 25% / .14) !important;
+      transition: transform .3s var(--ease-out, ease), box-shadow .3s;
+    }
+    .who-for .target-group::before {
+      content: counter(tg, decimal-leading-zero) !important; display: grid !important; place-items: center;
+      position: absolute; left: 28px; top: 28px; width: 52px; height: 52px; border-radius: var(--blob);
+      background: var(--coral-soft); color: var(--coral-ink);
+      font: 500 1.125rem/1 Fraunces, "Fraunces Fallback", Georgia, serif; font-synthesis: none;
+    }
+    .who-for .target-group:nth-child(even)::before { background: var(--sky); color: var(--navy); }
+    .who-for .target-group h3 { margin: 0 0 8px !important; }
+    @media (hover: hover) { .who-for .target-group:hover { transform: translateY(-4px) !important; box-shadow: 0 2px 4px hsl(205 40% 25% / .05), 0 22px 44px -14px hsl(205 40% 25% / .22) !important; } }
+    .who-for .common-issues li { position: relative; background: #fff; border-radius: var(--r-pill); padding: 10px 18px 10px 36px !important; }
+    .who-for .common-issues li::before { left: 18px !important; top: 50% !important; transform: translateY(-50%) !important; margin: 0 !important; background: var(--accent) !important; }
+    .who-for .common-issues ul { gap: 10px !important; }
+    @media (max-width: 768px) {
+      .who-for .target-groups { grid-template-columns: 1fr !important; }
+      .who-for .target-group { padding: 88px 24px 24px !important; }
+      .who-for .target-group::before { left: 24px; top: 24px; }
+    }
+
+    /* [V6] Services: price as a display number, softer CTA panel (navy is kept for the timeline band) */
+    .service-main { background: #fff !important; border: 0 !important; border-radius: var(--r-lg) !important; box-shadow: 0 1px 2px hsl(205 40% 25% / .04), 0 18px 44px -16px hsl(205 40% 25% / .16) !important; }
+    .service-fact dd:not(.service-fact-detail) { font: 500 clamp(2rem, 1.6rem + 1.4vw, 2.75rem)/1.05 Fraunces, "Fraunces Fallback", Georgia, serif !important; letter-spacing: -.02em; color: var(--navy); font-synthesis: none; white-space: nowrap; }
+    .cta-section { position: relative; overflow: hidden; background: var(--coral-soft) !important; }
+    .cta-section .cta-heading { color: var(--navy) !important; font-size: var(--fs-h2) !important; letter-spacing: -.02em; }
+    .cta-section::after { content: ''; position: absolute; right: -60px; bottom: -90px; width: 260px; aspect-ratio: 1; border-radius: var(--blob); background: var(--accent); opacity: .22; transform: rotate(18deg); pointer-events: none; }
+    .cta-section .btn { position: relative; z-index: 1; }
+
+    /* [V7] How therapy works: the page's one dark band, steps as a connected timeline */
+    .how-it-works { background: var(--navy) !important; color: #D5E1EA; }
+    .how-it-works .section-title { color: #fff !important; }
+    .how-it-works .process-steps { position: relative; border: 0 !important; padding-top: 0 !important; }
+    .how-it-works .step { position: relative; display: block !important; padding-top: 88px !important; }
+    .how-it-works .step-number {
+      position: absolute !important; top: 0; left: 0; width: 64px !important; height: 64px !important; display: grid !important; place-items: center;
+      border-radius: var(--blob) !important; background: var(--accent) !important; color: var(--navy) !important; justify-content: center !important; align-content: center !important; text-align: center !important;
+      font: 500 1.75rem/1 Fraunces, "Fraunces Fallback", Georgia, serif !important; margin: 0 !important;
+    }
+    .how-it-works .step:nth-child(even) .step-number { background: #fff !important; border-radius: 58% 42% 37% 63% / 59% 56% 44% 41% !important; }
+    .how-it-works .step-number::after { content: '' !important; }
+    .how-it-works .step::before { content: ''; position: absolute; top: 32px; left: 80px; right: -8px; border-top: 2px dashed hsl(205 30% 70% / .35); }
+    .how-it-works .step:last-child::before { display: none; }
+    .how-it-works .step h3 { color: #fff !important; }
+    .how-it-works .step p { color: #C9D8E3 !important; }
+    .how-it-works .technical-info { background: hsl(205 45% 26%) !important; border: 0 !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad, 40px) !important; }
+    .how-it-works .technical-info h3, .how-it-works .info-row h4 { color: #fff !important; }
+    .how-it-works .info-row p { color: #C9D8E3 !important; }
+    .how-it-works .info-row { border-color: hsl(205 30% 70% / .2) !important; }
+    .how-it-works figcaption { color: #A9BCCB !important; }
+    .how-it-works .office-gallery-image { border: 0 !important; box-shadow: 0 20px 40px -18px rgba(0,0,0,.5) !important; }
+    @media (max-width: 1023px) { .how-it-works .step::before { display: none; } }
+    @media (max-width: 768px) {
+      .how-it-works .step { padding-top: 0 !important; padding-left: 84px !important; min-height: 64px; }
+      .how-it-works .step-number { width: 56px !important; height: 56px !important; font-size: 1.5rem !important; }
+      .how-it-works .step::before { display: block; top: 64px; bottom: -16px; left: 27px; right: auto; border-top: 0; border-left: 2px dashed hsl(205 30% 70% / .35); }
+    }
+
+    /* [V8] Online / in person: bigger cards with a blob in the corner */
+    .format-card { position: relative; overflow: hidden; border-radius: var(--r-lg) !important; padding: clamp(28px, 2vw + 20px, 44px) !important; }
+    .format-card h3 { font-size: var(--fs-h3) !important; position: relative; }
+    .format-card::after { content: ''; position: absolute; right: -40px; top: -50px; width: 150px; aspect-ratio: 1; border-radius: var(--blob); opacity: .5; pointer-events: none; }
+    .format-card--online::after { background: #fff; }
+    .format-card--osobne::after { background: var(--accent); opacity: .25; transform: rotate(40deg); }
+    .format-card > * { position: relative; z-index: 1; }
+
+    /* [V9] Gentle reveal on scroll, CSS only; off for "reduce motion" and in browsers without scroll timelines */
+    @media (prefers-reduced-motion: no-preference) {
+      @supports (animation-timeline: view()) {
+        .who-for .target-group, .how-it-works .step, .format-card, .service-main, .trust-list li {
+          animation: khg-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%;
+        }
+      }
+    }
+    @keyframes khg-rise { from { opacity: 0; translate: 0 28px; } to { opacity: 1; translate: 0 0; } }
+    </style>
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -1103,13 +1247,13 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     <section class="hero">
         <div class="container hero-container">
             <div class="hero-content">
-                <h1 class="hero-title">Terapie<br>pro děti a dospělé</h1>
+                <h1 class="hero-title">Terapie<br><span class="hero-title-accent">pro děti a dospělé</span></h1>
                 <p class="hero-subtitle">
                     Individuální psychoterapie <strong>online</strong> nebo osobně v <strong>Ostravě</strong>. Pro děti, dospívající i dospělé. Pracuji s tématy jako rodičovství, vztahy, úzkost, deprese a osobní růst.
                 </p>
 
                 <div class="hero-stats">
-                    <p class="hero-stats-line"><strong>4&nbsp;000+</strong>&nbsp;hodin praxe<span class="stats-dot" aria-hidden="true">·</span><strong>100+</strong>&nbsp;doporučení</p>
+                    <p class="hero-stats-line"><span class="hero-stat"><strong>4&nbsp;000+</strong> <span>hodin praxe</span></span><span class="stats-dot" aria-hidden="true">·</span><span class="hero-stat"><strong>100+</strong> <span>doporučení</span></span></p>
                 </div>
 
                 <a href="/rezervace.html" class="btn btn-hero">
@@ -1143,6 +1287,16 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
             </div>
         </div>
     </section>
+
+    <!-- Trust strip: the credentials from "Profesní členství a reference", shown as logos right under the hero -->
+    <div class="trust-strip">
+        <ul class="container trust-list">
+            <li><img src="images/ceska-asociace-pro-psychoterapii-240.webp" alt="" width="40" height="39" loading="lazy" decoding="async"><span>ČAP</span></li>
+            <li><img src="images/znamy-lekar-logo-96.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><span>ZnámýLékař.cz</span></li>
+            <li><img src="images/terapie-cz-logo-96.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><span>Terapie.cz</span></li>
+            <li><img src="images/terapie-do-kapsy-240.webp" alt="" width="28" height="40" loading="lazy" decoding="async" class="trust-book"><span><cite>Terapie do kapsy</cite></span></li>
+        </ul>
+    </div>
 
     <!-- About Section -->
     <section id="o-mne" class="about">
