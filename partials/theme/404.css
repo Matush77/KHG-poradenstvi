@@ -1,6 +1,5 @@
-}
 
-.error-content { text-align: left !important; align-items: flex-start !important; }
-.error-content > * { margin-left: 0 !important; margin-right: 0 !important; }
-.error-code { text-transform: none !important; letter-spacing: 0 !important; font-size: .9375rem !important; font-weight: 500 !important; color: var(--coral-ink) !important; }
-.error-actions { justify-content: flex-start !important; }
+.error-content { text-align: left; align-items: flex-start; }
+.error-content > * { margin-left: 0; margin-right: 0; }
+.error-code { text-transform: none; letter-spacing: 0; font-size: .9375rem; font-weight: 500; color: var(--coral-ink); }
+.error-actions { justify-content: flex-start; }

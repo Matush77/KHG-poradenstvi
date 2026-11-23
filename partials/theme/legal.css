@@ -1,5 +1,4 @@
-}
 
-.legal-section { background: none !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; margin: 0 0 var(--block-gap) !important; }
-.legal-section h2 { font-size: var(--fs-h3) !important; }
+.legal-section { background: none; box-shadow: none; border: 0; border-radius: 0; padding: 0; margin: 0 0 var(--block-gap); }
+.legal-section h2 { font-size: var(--fs-h3); }
 .legal-header, .legal-content { max-width: 66ch !important; margin-left: 0 !important; margin-right: auto !important; }

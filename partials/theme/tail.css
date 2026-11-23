@@ -7,20 +7,20 @@
    (3) Blog: the lead article stays stacked up to 959 px (side by side it squeezed the title into 4 lines).
    (4) O mně on desktop: text left, the quote card in a right column that stays in view. */
 @media (max-width: 768px) {
-  .section-header { text-align: left !important; }
-  .rv-head { align-items: flex-start !important; text-align: left !important; }
+  .section-header { text-align: left; }
+  .rv-head { align-items: flex-start !important; text-align: left; }
 }
 @media (max-width: 968px) {
-  .hero-container { max-width: none !important; margin: 0 !important; }
-  .hero-content { text-align: left !important; }
-  .hero-subtitle { margin-inline: 0 !important; }
-  .hero-stats { justify-content: flex-start !important; }
+  .hero-container { max-width: none; margin: 0; }
+  .hero-content { text-align: left; }
+  .hero-subtitle { margin-inline: 0; }
+  .hero-stats { justify-content: flex-start; }
 }
-.pricing-hero, .blog-hero { text-align: left !important; }
-.pricing-intro, .blog-hero-subtitle { margin-inline: 0 !important; }
+.pricing-hero, .blog-hero { text-align: left; }
+.pricing-intro, .blog-hero-subtitle { margin-inline: 0; }
 
 @media (min-width: 600px) and (max-width: 768px) {
-  .container { padding-left: 32px !important; padding-right: 32px !important; }
+  .container { padding-left: 32px; padding-right: 32px; }
 }
 @media (min-width: 600px) {
   .contact-row { display: grid; grid-template-columns: 11rem minmax(0, 1fr); column-gap: var(--block-gap, 32px); align-items: baseline; }
@@ -28,16 +28,16 @@
 }
 
 @media (min-width: 640px) and (max-width: 959px) {
-  #blogGrid .blog-card:first-child { display: block !important; }
-  #blogGrid .blog-card:first-child .blog-card-image { height: auto !important; aspect-ratio: 40 / 21; }
-  #blogGrid .blog-card:first-child .blog-card-content { padding: 28px 32px 32px !important; }
+  #blogGrid .blog-card:first-child { display: block; }
+  #blogGrid .blog-card:first-child .blog-card-image { height: auto; aspect-ratio: 40 / 21; }
+  #blogGrid .blog-card:first-child .blog-card-content { padding: 28px 32px 32px; }
 }
 
 /* the IVF text is now two paragraphs; the second one follows at normal paragraph spacing */
-.about-description > .highlighted-text + .highlighted-text { margin-top: 12px !important; }
+.about-description > .highlighted-text + .highlighted-text { margin-top: 12px; }
 
 @media (min-width: 1024px) {
-  .about-text { max-width: none !important; display: grid; grid-template-columns: minmax(0, 40rem) minmax(260px, 340px); column-gap: clamp(48px, 6vw, 96px); align-items: start; }
+  .about-text { max-width: none; display: grid; grid-template-columns: minmax(0, 40rem) minmax(260px, 340px); column-gap: clamp(48px, 6vw, 96px); align-items: start; }
   .about-text > *, .about-description > * { grid-column: 1; }
   .about-description { display: contents; }
   .about-description > .about-personal-note { grid-column: 2; grid-row: 1 / span 6; align-self: start; position: sticky; top: 112px;
@@ -52,20 +52,20 @@
    600–768 px: text lines stay under about 75 characters. Ceník: section title left like the rest,
    booking buttons on one line at 320 px. Blog: a date never breaks across two lines. */
 @media (min-width: 720px) and (max-width: 968px) {
-  .hero-container { grid-template-columns: minmax(0, 1fr) minmax(0, 300px) !important; gap: 40px !important; align-items: center !important; }
-  .hero-image { justify-content: flex-end !important; }
-  .blob-shape { max-width: 300px !important; margin: 0 !important; }
+  .hero-container { grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 40px; align-items: center; }
+  .hero-image { justify-content: flex-end; }
+  .blob-shape { max-width: 300px; margin: 0; }
 }
 @media (min-width: 600px) and (max-width: 768px) {
   main p, main li { max-width: 38rem; }
 }
-.pricing-information > h2 { text-align: left !important; }
-@media (max-width: 374px) { .btn-hero { padding-left: 16px !important; padding-right: 16px !important; } }
+.pricing-information > h2 { text-align: left; }
+@media (max-width: 374px) { .btn-hero { padding-left: 16px; padding-right: 16px; } }
 .blog-meta time { white-space: nowrap; }
 /* Footer on tablets (owner, 16 Nov): from 600 px the name sits on top and Navigace | Kontakt side by side
    (it was one long column up to 968 px; three columns only fit from about 1000 px). */
 @media (min-width: 600px) and (max-width: 968px) {
-  .footer-content { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; column-gap: var(--block-gap, 32px) !important; }
+  .footer-content { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--block-gap, 32px); }
   .footer-brand { grid-column: 1 / -1; }
 }
 
@@ -77,28 +77,28 @@
    (8) Visitors who turn off animations get instant scrolling. */
 @media (max-width: 480px) {
   .blog-post-byline > span[aria-hidden="true"] { display: none; }
-  .blog-post-byline .blog-post-date { display: block !important; margin-top: 2px !important; }
+  .blog-post-byline .blog-post-date { display: block; margin-top: 2px; }
 }
 
 .quiz-intro .container { display: flex; flex-direction: column; }
 .quiz-intro-content, .quiz-intro-text { display: contents; }
 .quiz-intro .quiz-info-boxes { order: 1; }
-.quiz-intro .quiz-start-section { order: 2; margin: 0 0 var(--block-gap) !important; }
+.quiz-intro .quiz-start-section { order: 2; margin: 0 0 var(--block-gap); }
 .quiz-intro-text > p { order: 3; }
-.quiz-intro-text > p:last-of-type { margin-bottom: 0 !important; }
+.quiz-intro-text > p:last-of-type { margin-bottom: 0; }
 
-.quiz-navigation { flex-direction: row !important; align-items: center !important; }
-.quiz-navigation .btn.quiz-btn-prev { order: 0; flex: 0 0 auto !important; width: auto !important; min-height: 48px; margin-left: -12px;
-  padding: 0 12px !important; background: none !important; box-shadow: none !important; color: var(--navy) !important;
-  -webkit-text-fill-color: var(--navy) !important; font-size: 1rem !important; font-weight: 500 !important; }
-@media (hover: hover) { .quiz-navigation .btn.quiz-btn-prev:hover { background: none !important; text-decoration: underline; text-underline-offset: 3px; } }
-.quiz-navigation .btn.quiz-btn-next { order: 1; margin-left: auto !important; }
-@media (max-width: 768px) { .quiz-navigation .btn.quiz-btn-next { flex: 1 1 auto !important; width: auto !important; } }
+.quiz-navigation { flex-direction: row; align-items: center; }
+.quiz-navigation .btn.quiz-btn-prev { order: 0; flex: 0 0 auto; width: auto; min-height: 48px; margin-left: -12px;
+  padding: 0 12px; background: none; box-shadow: none; color: var(--navy);
+  -webkit-text-fill-color: var(--navy); font-size: 1rem; font-weight: 500; }
+@media (hover: hover) { .quiz-navigation .btn.quiz-btn-prev:hover { background: none; text-decoration: underline; text-underline-offset: 3px; } }
+.quiz-navigation .btn.quiz-btn-next { order: 1; margin-left: auto; }
+@media (max-width: 768px) { .quiz-navigation .btn.quiz-btn-next { flex: 1 1 auto; width: auto; } }
 
 @media (min-width: 969px) {
-  .nav-menu .nav-link { display: block; padding: 12px 0 !important; margin: -12px 0; }
+  .nav-menu .nav-link { display: block; padding: 12px 0; margin: -12px 0; }
   .nav-menu .nav-link::after { bottom: 7px; }
 }
 
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     
