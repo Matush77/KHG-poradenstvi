@@ -472,6 +472,7 @@ html { scrollbar-gutter: stable; }
 .about-more > summary { list-style: none; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer;
   font-size: 1.0625rem; font-weight: 600; color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
 .about-more > summary::-webkit-details-marker { display: none; }
+.about-more > summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; border-radius: 2px; }
 .about-more > summary::after { content: '\2193'; margin-left: 8px; text-decoration: none; display: inline-block; }
 .about-more[open] > summary::after { content: '\2191'; }
 .about-more-close, .about-more[open] .about-more-open { display: none; }
@@ -554,6 +555,8 @@ html { scrollbar-gutter: stable; }
   .contact-row { display: grid; grid-template-columns: 14rem minmax(0, 1fr); column-gap: var(--block-gap); align-items: baseline; }
   .contact-row dt { margin: 0; }
 }
+.contact-book { margin-top: var(--block-gap); }
+.contact-book p { margin: 0 0 16px; color: var(--slate); }
 
 
 

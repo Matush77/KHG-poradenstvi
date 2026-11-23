@@ -1,0 +1,42 @@
+
+
+
+:root { --page-top: 140px; --doc-w: 43rem; 
+        --fs-doc-title: clamp(2rem, 1.55rem + 1.9vw, 2.75rem);  }
+@media (max-width: 768px) { :root { --page-top: 100px; } }
+
+
+.back-link { display: inline-flex !important; align-items: center; min-height: 44px; margin: 0 0 8px !important;
+  font-size: .9375rem !important; font-weight: 500 !important; color: var(--primary) !important; opacity: 1 !important; transform: none !important; }
+@media (hover: hover) { .back-link:hover { color: var(--navy) !important; text-decoration: underline; text-underline-offset: 3px; } }
+
+
+.btn.btn-secondary, .btn.btn-navy {
+  display: inline-flex !important; align-items: center; justify-content: center; min-height: 56px; padding: 0 32px !important;
+  border: 0 !important; border-radius: 999px !important; transform: none !important;
+  font-family: var(--font-ui) !important; font-size: 1.125rem !important; font-weight: 600 !important; line-height: 1.2 !important;
+  transition: background-color .15s ease !important; cursor: pointer;
+}
+.btn.btn-secondary { background: transparent !important; color: var(--navy) !important; -webkit-text-fill-color: var(--navy) !important; box-shadow: inset 0 0 0 1px var(--navy) !important; }
+.btn.btn-navy { background: var(--navy) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; box-shadow: none !important; }
+.btn.btn-navy:disabled { opacity: .4; cursor: not-allowed; }
+@media (hover: hover) {
+  .btn.btn-secondary:hover { background: var(--sky) !important; }
+  .btn.btn-navy:not(:disabled):hover { background: var(--primary) !important; }
+}
+@media (max-width: 480px) { .btn.btn-secondary, .btn.btn-navy { width: 100% !important; max-width: none !important; } }
+
+
+.doc a:not(.btn):not(.back-link) { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+@media (hover: hover) { .doc a:not(.btn):not(.back-link):hover { color: var(--navy); } }
+
+
+.nav-link.active { color: var(--navy) !important; }
+
+
+.related-resource .btn.btn-secondary:hover, .quiz-related-article .btn.btn-secondary:hover { background: #fff !important; }
+
+
+@media (min-width: 969px) {
+  .nav-link.active { font-weight: 600 !important; }
+  .nav-link.active::after { transform: scaleX(1) !important; width: 100% !important; opacity: 1 !important; }

@@ -1,0 +1,9 @@
+.about-personal-note { display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 18px 20px; border-radius: var(--r-lg); background: var(--peach); }
+.about-personal-note img { width: 130px; height: 130px; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; object-fit: cover; flex: none; box-shadow: 0 8px 20px rgba(181, 87, 63, .18); }
+.about-personal-quote { margin: 0; font-size: 15px; line-height: 1.5; color: var(--navy); font-style: italic; }
+.about-personal-quote cite { display: block; margin-top: 6px; font-size: 13px; font-style: normal; color: #A34B35; }
+@media (max-width: 480px) {
+  .about-personal-note { flex-direction: column; text-align: center; gap: 12px; }
+}
+
+    .rv-title { font-weight: 500 !important; }

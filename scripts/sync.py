@@ -9,6 +9,9 @@
 3. Version stamps: every local .css / .js a page (or rezervace/*.js) links to gets ?v=<first 8 hex of its SHA-256>.
    A changed file gets a new address, so browsers can keep CSS and JS for a year (.htaccess) and still never see an
    old copy. Never edit ?v= by hand: run this script after changing a CSS or JS file.
+4. Theme: the inline <style id="proposal"> of every top-level page, built from partials/theme/ (23 Nov; before, seven
+   hand-kept copies). It stays inline on purpose (no extra request, no render-blocking CSS). Every page gets
+   core.css + its page part(s) + tail.css, see theme_for(); edit those files, never the block in a page.
 """
 import hashlib, pathlib, re, sys
 
@@ -16,6 +19,7 @@ root = pathlib.Path(__file__).resolve().parent.parent
 CHECK = "--check" in sys.argv[1:]
 
 HEADER_RE = re.compile(r'<header\b[^>]*class="header"[^>]*>[\s\S]*?</header>', re.I)
+THEME_RE = re.compile(r'(<style id="proposal">)([\s\S]*?)(</style>)')
 FOOTER_RE = re.compile(r'<footer\b[^>]*>[\s\S]*?</footer>', re.I)
 # a quoted local path to a .css or .js file, with or without its stamp
 ASSET_RE = re.compile(r'(?P<q>["\'])(?P<path>(?:\.\./|/)?(?:[\w-]+/)*[\w.-]+\.(?:css|js))(?:\?v=[\w-]*)?(?P=q)')
@@ -59,6 +63,32 @@ def header_for(name):
     if re.search(r"{{[A-Z_]+}}", out):
         raise SystemExit(f"unresolved header placeholder for {name}")
     return out
+
+
+def theme_part(name):
+    text = read(root / "partials" / "theme" / f"{name}.css")
+    return text[:-1] if text.endswith("\n") else text
+
+
+def theme_for(name):
+    """The theme parts of a page, in cascade order: core, the page's own, tail. None = the page has no theme block."""
+    if name == "index.html":
+        own = ["home"]
+    elif name == "cenik.html":
+        own = ["cenik"]
+    elif name in ("blog.html", "kviz.html"):
+        own = ["subpage", "blog-list"]
+    elif name.startswith("blog-"):
+        own = ["subpage", "blog-post"]
+    elif name.startswith("quiz-"):
+        own = ["subpage", "quiz"]
+    elif name == "404.html":
+        own = ["subpage", "404"]
+    elif name in ("obchodni-podminky.html", "ochrana-osobnich-udaju.html", "rezervace.html"):
+        own = ["subpage", "legal"]
+    else:
+        return None
+    return "\n".join(theme_part(p) for p in ["core", *own, "tail"])
 
 
 def replace_one(rx, content, template, name, what):
@@ -116,6 +146,13 @@ for page in pages:
         if HEADER_RE.search(new):
             new = replace_one(HEADER_RE, new, header_for(page.name), page.name, "header")
         new = replace_one(FOOTER_RE, new, partial("footer.html"), page.name, "footer")
+        theme = theme_for(page.name)
+        found = len(THEME_RE.findall(new))
+        if found != (0 if theme is None else 1):
+            raise SystemExit(f"{page.name}: expected {0 if theme is None else 1} theme block, found {found} "
+                             "(a new page needs an entry in theme_for())")
+        if theme is not None:
+            new = THEME_RE.sub(lambda m: m[1] + theme + m[3], new)
     new = stamp_assets(page, new)
     save(page, old, new)
 
@@ -123,6 +160,6 @@ if CHECK:
     if changed:
         print("  FAIL  out of step (run python3 scripts/sync.py): " + ", ".join(changed))
         sys.exit(1)
-    print(f"  ok    header, footer and version stamps in step ({len(pages)} pages)")
+    print(f"  ok    header, footer, theme and version stamps in step ({len(pages)} pages)")
 else:
     print(f"updated {len(changed)} file(s)" + (": " + ", ".join(changed) if changed else ""))
