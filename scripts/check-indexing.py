@@ -91,7 +91,7 @@ else:
     status, _, _ = fetch(SITE + "/ui-lab/proposal/")
     ok("ui-lab/ not on the server") if status == 404 else bad(f"{SITE}/ui-lab/proposal/ answers HTTP {status} (lab is deployed)")
     # code and working files are deployed with the repo but must stay hidden (.htaccess); secrets live outside the site
-    for path in ("/booking/src/config.php", "/booking/cron.php", "/partials/footer.html", "/scripts/check-indexing.py", "/docs/", "/README.md"):
+    for path in ("/booking/src/config.php", "/booking/cron.php", "/partials/footer.html", "/scripts/check-indexing.py", "/docs/", "/README.md", "/.github/workflows/ci.yml"):
         status, _, _ = fetch(SITE + path)
         ok(f"{path} hidden") if status == 404 else bad(f"{SITE}{path} answers HTTP {status} (should be 404, check .htaccess)")
 

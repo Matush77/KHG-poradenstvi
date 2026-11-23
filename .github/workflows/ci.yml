@@ -1,0 +1,110 @@
+# CI: runs on every push to main and on pull requests. It never deploys: going live stays the manual
+# Deploy button in the hosting panel (see .claude/CLAUDE.md, section 0). Explained in docs/VISUAL-PROOF.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Site checks and booking tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sqlite3, pdo_sqlite, curl, mbstring, openssl
+          coverage: none
+
+      - name: Pages in step and indexable (check-indexing.py)
+        run: python3 scripts/check-indexing.py
+
+      - name: Booking tests (offline, dummy keys)
+        run: |
+          set +e
+          php booking/tests/run.php > booking-tests.log 2>&1
+          status=$?
+          grep -E '^FAIL|checks, ' booking-tests.log
+          exit $status
+
+      - name: Keep the booking test log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: booking-tests-log
+          path: booking-tests.log
+          retention-days: 14
+
+  visual:
+    name: Visual proof (screenshots vs the previous commit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sqlite3, pdo_sqlite, curl, mbstring, openssl
+          coverage: none
+
+      - name: Install Playwright and its Chromium
+        run: |
+          pip install playwright==1.65.2 pillow==13.0.0
+          python -m playwright install --with-deps chromium
+
+      - name: Pick the commit to compare with
+        id: base
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then ref="$PR_BASE"
+          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != 0000000000000000000000000000000000000000 ] \
+               && git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then ref="$PUSH_BEFORE"
+          else ref=HEAD~1; fi
+          echo "Comparing with $(git log --oneline -1 "$ref")"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      # A difference is reported, not a failure (a design change is meant to differ); the job fails only if a
+      # page does not load or throws a JavaScript error. The report is on the run's summary page.
+      - name: Screenshots before vs after
+        env:
+          WORKERS: '4'
+          BEFORE: ${{ steps.base.outputs.ref }}
+        run: python scripts/visual/proof.py --before "$BEFORE"
+
+      - name: Keep the diff pictures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff
+          path: |
+            scripts/visual/shots/diff/
+            scripts/visual/shots/report.md
+          if-no-files-found: ignore
+          retention-days: 14

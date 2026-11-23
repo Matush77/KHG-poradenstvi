@@ -40,7 +40,8 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 ├── blog-*.html, quiz-*.html                          articles and quizzes
 ├── js/  fonts/  images/                              assets (deployed; all CSS is inline, from partials/theme/)
 ├── partials/                                         shared header, footer
-├── scripts/                                          header/footer sync scripts (PowerShell)
+├── scripts/                                          sync.py, check-indexing.py, visual/ (screenshot proof)
+├── .github/workflows/ci.yml                          CI: checks, booking tests, visual proof (docs/VISUAL-PROOF.md)
 └── docs/                                             developer notes
 ```
 

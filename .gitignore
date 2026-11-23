@@ -20,3 +20,7 @@ desktop.ini
 # Temporary files
 *.tmp
 *.log
+
+# Visual proof output (scripts/visual/proof.py)
+scripts/visual/shots/
+__pycache__/
