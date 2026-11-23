@@ -230,7 +230,7 @@ cite { font-weight: 600; }
 @media (max-width: 968px) and (prefers-reduced-motion: reduce) { .nav-menu, .nav-menu.active { transition: none !important; } }
 
 
-.credential-card::before, .cta-section::before, .blob-shape::before { display: none; }
+.credential-card::before, .cta-section::before { display: none; }
 .office-gallery-open::after { background: rgba(22, 58, 85, .88); }
 
 

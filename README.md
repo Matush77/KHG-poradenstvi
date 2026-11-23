@@ -38,7 +38,7 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 ```
 ├── index.html, blog.html, cenik.html, kviz.html, …   pages (deployed)
 ├── blog-*.html, quiz-*.html                          articles and quizzes
-├── css/  js/  fonts/  images/                        assets (deployed)
+├── js/  fonts/  images/                              assets (deployed; all CSS is inline, from partials/theme/)
 ├── partials/                                         shared header, footer
 ├── scripts/                                          header/footer sync scripts (PowerShell)
 └── docs/                                             developer notes

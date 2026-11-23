@@ -353,40 +353,11 @@ a:hover {
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
 }
 
-.blob-shape::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-    border-radius: inherit;
-    z-index: -1;
-    opacity: 0.5;
-    filter: blur(20px);
-}
-
 .profile-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
-}
-
-@keyframes blobMorph {
-    0%, 100% {
-        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    }
-    25% {
-        border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
-    }
-    50% {
-        border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
-    }
-    75% {
-        border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
-    }
 }
 
 @keyframes fadeInLeft {
@@ -1540,7 +1511,7 @@ html.nav-open { overflow: hidden; }
    P1 tokens, P2 type, P3 line length, P4 rhythm, P5 backgrounds, P6 cards,
    P7 radius, P8 buttons, P9 details, P10 articles, P12 blog/quiz index,
    P13 quiz pages, P14 pricing, P15-P16 typographic replacements for icons,
-   P17 reviews/FAQ/tap flash, P18 review dots + swipe, P19 hero blob.
+   P17 reviews/FAQ/tap flash, P18 review dots + swipe.
    ========================================================================== */
 /* [P1] Design tokens ------------------------------------------------------ */
 :root {
@@ -1718,11 +1689,6 @@ button,
 [role="button"],
 label,
 summary { -webkit-tap-highlight-color: transparent; }
-/* ==================================================================
-   [P19] Hero blob loops on phones too (was 2 rounds), but pauses while the
-   portrait is off-screen (js/script.js adds .is-offscreen) so it doesn't
-   redraw for nothing. "Reduce motion" still gets a still shape.
-   ================================================================== */
 /* ==================================================================
    [P20] Anchor jumps land below the fixed header (89 px), matching the
    100 px offset the in-page smooth scroll in js/script.js uses.

@@ -15,17 +15,14 @@
   fetch('/cenik.html').then(function (r) { return r.text(); }).then(function (html) {
     var doc = new DOMParser().parseFromString(html, 'text/html');
     var header = doc.querySelector('header.header');
+    // all of the site's CSS is inline in the page's head (scripts/sync.py)
     var inline = Array.prototype.map.call(doc.querySelectorAll('head style'), function (s) { return s.textContent; }).join('\n');
-    return Promise.all(['/css/styles.css?v=bb616935'].map(function (u) {
-      return fetch(u).then(function (r) { return r.ok ? r.text() : ''; });
-    })).then(function (sheets) {
-      var style = document.createElement('style');
-      style.textContent = scope(sheets.join('\n') + '\n' + inline) +
-        '\n:host { display: block; padding: 0 !important; margin: 0 !important; min-height: 0 !important; background: none !important; }';
-      root.appendChild(style);
-      root.appendChild(document.importNode(header, true));
-      wireMenu();
-    });
+    var style = document.createElement('style');
+    style.textContent = scope(inline) +
+      '\n:host { display: block; padding: 0 !important; margin: 0 !important; min-height: 0 !important; background: none !important; }';
+    root.appendChild(style);
+    root.appendChild(document.importNode(header, true));
+    wireMenu();
   }).catch(function () { host.remove(); document.body.classList.add('no-site-header'); });
 
   // same behaviour as the site's js/script.js

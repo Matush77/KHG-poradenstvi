@@ -6,12 +6,16 @@
 1. Header: partials/header.html into every top-level page that has <header class="header">, with the menu link of
    the page's section marked active (Ceník, Blog, Kvízy).
 2. Footer: partials/footer.html into every top-level page.
-3. Version stamps: every local .css / .js a page (or rezervace/*.js) links to gets ?v=<first 8 hex of its SHA-256>.
-   A changed file gets a new address, so browsers can keep CSS and JS for a year (.htaccess) and still never see an
-   old copy. Never edit ?v= by hand: run this script after changing a CSS or JS file.
-4. Theme: the inline <style id="proposal"> of every top-level page, built from partials/theme/ (23 Nov; before, seven
-   hand-kept copies). It stays inline on purpose (no extra request, no render-blocking CSS). Every page gets
-   core.css + its page part(s) + tail.css, see theme_for(); edit those files, never the block in a page.
+3. Version stamps: every local .js a page (or rezervace/*.js) links to gets ?v=<first 8 hex of its SHA-256>.
+   A changed file gets a new address, so browsers can keep JS for a year (.htaccess) and still never see an
+   old copy. Never edit ?v= by hand: run this script after changing a JS file.
+4. CSS: all of a page's CSS is the one inline <style id="proposal">, built from partials/theme/ (23 Nov; before,
+   css/*.css files overridden by hand-kept inline copies). Inline on purpose: no extra request, nothing
+   render-blocking. Every page gets base.css (the homepage home-first.css before it) (+ its base-* part) + core.css + its page part(s) + tail.css, see
+   theme_for(); edit those files, never the block in a page. A page may not link a stylesheet (check fails).
+5. LCP preload: a page with an <img fetchpriority="high"> (not inside <picture>) gets a matching
+   <link rel="preload" as="image" data-sync="lcp"> just before its CSS, so the browser starts that image before it
+   has read the inline CSS. The homepage keeps its hand-written preload (its portrait is a <picture>).
 """
 import hashlib, pathlib, re, sys
 
@@ -19,6 +23,9 @@ root = pathlib.Path(__file__).resolve().parent.parent
 CHECK = "--check" in sys.argv[1:]
 
 HEADER_RE = re.compile(r'<header\b[^>]*class="header"[^>]*>[\s\S]*?</header>', re.I)
+STYLESHEET_RE = re.compile(r'<link\b[^>]*rel="(?:stylesheet|preload)"[^>]*as="style"|<link\b[^>]*rel="stylesheet"', re.I)
+LCP_LINK_RE = re.compile(r'\n[ \t]*<link rel="preload" as="image"[^>]*data-sync="lcp">')
+LCP_IMG_RE = re.compile(r'<img\b[^>]*\bfetchpriority="high"[^>]*>')
 THEME_RE = re.compile(r'(<style id="proposal">)([\s\S]*?)(</style>)')
 FOOTER_RE = re.compile(r'<footer\b[^>]*>[\s\S]*?</footer>', re.I)
 # a quoted local path to a .css or .js file, with or without its stamp
@@ -71,24 +78,43 @@ def theme_part(name):
 
 
 def theme_for(name):
-    """The theme parts of a page, in cascade order: core, the page's own, tail. None = the page has no theme block."""
+    """All CSS of a page, in cascade order: base (+ its base-* part), core, the page's own part(s), tail.
+    None = the page has no CSS block (the booking admin pages under rezervace/ carry their own)."""
     if name == "index.html":
-        own = ["home"]
+        base, own = [], ["home"]
     elif name == "cenik.html":
-        own = ["cenik"]
+        base, own = ["base-cenik"], ["cenik"]
     elif name in ("blog.html", "kviz.html"):
-        own = ["subpage", "blog-list"]
+        base, own = ["base-blog-list"], ["subpage", "blog-list"]
     elif name.startswith("blog-"):
-        own = ["subpage", "blog-post"]
+        base, own = ["base-blog-list", "base-blog-post"], ["subpage", "blog-post"]
     elif name.startswith("quiz-"):
-        own = ["subpage", "quiz"]
+        base, own = ["base-quiz"], ["subpage", "quiz"]
     elif name == "404.html":
-        own = ["subpage", "404"]
+        base, own = [], ["subpage", "404"]
     elif name in ("obchodni-podminky.html", "ochrana-osobnich-udaju.html", "rezervace.html"):
-        own = ["subpage", "legal"]
+        base, own = [], ["subpage", "legal"]
     else:
         return None
-    return "\n".join(theme_part(p) for p in ["core", *own, "tail"])
+    first = ["home-first"] if name == "index.html" else []
+    return "\n".join(theme_part(p) for p in [*first, "base", *base, "core", *own, "tail"])
+
+
+def lcp_preload(content):
+    """Drop the generated preload, then add it again from the page's high-priority image (if any)."""
+    content = LCP_LINK_RE.sub("", content)
+    m = LCP_IMG_RE.search(content)
+    if not m or "<picture" in content[max(0, m.start() - 600):m.start()]:
+        return content
+    attr = lambda n: (re.search(rf'\s{n}="([^"]*)"', m[0]) or [None, None])[1]
+    link = f'<link rel="preload" as="image" href="{attr("src")}"'
+    if attr("srcset"):
+        link += f' imagesrcset="{attr("srcset")}" imagesizes="{attr("sizes")}"'
+    link += ' fetchpriority="high" data-sync="lcp">'
+    at = content.index('<style id="proposal">')
+    line_start = content.rindex("\n", 0, at)
+    indent = content[line_start + 1:at]
+    return content[:line_start] + "\n" + indent + link + content[line_start:]
 
 
 def replace_one(rx, content, template, name, what):
@@ -153,6 +179,10 @@ for page in pages:
                              "(a new page needs an entry in theme_for())")
         if theme is not None:
             new = THEME_RE.sub(lambda m: m[1] + theme + m[3], new)
+            if page.name != "index.html":
+                new = lcp_preload(new)
+        if STYLESHEET_RE.search(new):
+            raise SystemExit(f"{page.name}: links a stylesheet; all CSS belongs in partials/theme/ (see theme_for())")
     new = stamp_assets(page, new)
     save(page, old, new)
 

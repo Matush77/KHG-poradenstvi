@@ -1,0 +1,48 @@
+/* Homepage only, first in its cascade: the former "critical CSS" block of index.html (inline before
+   23 Nov). Besides repeating base rules, it sets things nothing else does (box-sizing on ::before/::after,
+   img max-width, display:block on the portrait); removing it changes the homepage. */
+*,*::before,*::after{box-sizing:border-box}
+*{margin:0;padding:0}
+@font-face{font-family:'Inter';src:url('fonts/Inter/Inter-LatinExt-var.woff2') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}
+@font-face{font-family:'Fraunces';src:url('/fonts/Fraunces/Fraunces-500-Soft-cs.woff2') format('woff2');font-weight:400 700;font-style:normal;font-display:swap}@font-face{font-family:'Fraunces Fallback';src:local('Georgia Bold'),local('Georgia-Bold');font-weight:400 700;size-adjust:91.58%;ascent-override:106.79%;descent-override:27.84%;line-gap-override:0%}@font-face{font-family:'Fraunces Fallback Android';src:local('Noto Serif Bold'),local('NotoSerif-Bold');font-weight:400 700;size-adjust:92.44%;ascent-override:105.80%;descent-override:27.59%;line-gap-override:0%}@font-face{font-family:'Inter Fallback';src:local('Arial'),local('ArialMT');font-weight:300 500;size-adjust:106.44%;ascent-override:91.01%;descent-override:22.66%;line-gap-override:0%}
+@font-face{font-family:'Inter Fallback';src:local('Arial Bold'),local('Arial-BoldMT');font-weight:600 700;size-adjust:106.44%;ascent-override:91.01%;descent-override:22.66%;line-gap-override:0%}
+@font-face{font-family:'Inter Fallback Android';src:local('Roboto'),local('Roboto-Regular');font-weight:300 500;size-adjust:107.27%;ascent-override:90.31%;descent-override:22.49%;line-gap-override:0%}
+@font-face{font-family:'Inter Fallback Android';src:local('Roboto Bold'),local('Roboto-Bold');font-weight:600 700;size-adjust:107.27%;ascent-override:90.31%;descent-override:22.49%;line-gap-override:0%}
+:root{--primary:#2D5A7B;--primary-dark:#1e3d52;--primary-light:#4A7B9D;--accent:#E8927C;--accent-light:#F5B5A5;--text-dark:#2C3E50;--text-medium:#5A6C7D;--bg-cream:#FAF8F5;--bg-light:#fff;--space-xs:.5rem;--space-sm:1rem;--space-md:1.5rem;--space-lg:2rem;--space-xl:3rem;--space-2xl:4rem;--space-3xl:6rem;--transition:all .3s cubic-bezier(.4,0,.2,1)}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:Inter,"Inter Fallback","Inter Fallback Android",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:400;color:var(--text-dark);background:var(--bg-light);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.container{max-width:1200px;margin:0 auto;padding:0 var(--space-lg)}
+a{color:var(--primary);text-decoration:none}
+p{margin-bottom:var(--space-md);color:var(--text-medium);font-size:1.0625rem;font-weight:400;line-height:1.7}
+.btn{display:inline-block;padding:.875rem 2rem;font-family:Inter,"Inter Fallback","Inter Fallback Android",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:1rem;font-weight:600;text-align:center;border-radius:50px;cursor:pointer;border:0;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--accent);color:var(--bg-light)}
+.btn-hero{background:var(--primary);color:var(--bg-light)!important;padding:1.125rem 2.5rem;font-size:1.125rem;-webkit-text-fill-color:var(--bg-light)}
+.header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.98);box-shadow:0 2px 20px rgba(0,0,0,.05);z-index:1000}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:.75rem var(--space-lg)}
+.nav-logo{flex-shrink:0}.nav-logo a{display:block;line-height:0}.logo-img{height:65px;width:auto;display:block}
+.nav-menu{display:flex;list-style:none;align-items:center;gap:clamp(var(--space-sm),2.5vw,var(--space-xl))}
+.nav-link{font-size:1rem;font-weight:500;color:var(--text-dark);position:relative}
+img{max-width:100%;height:auto}.office-gallery-open{display:block;width:100%}
+.nav-toggle{display:none;flex-direction:column;align-items:center;justify-content:center;min-width:44px;min-height:44px;background:transparent;border:0;cursor:pointer;padding:0;gap:5px}
+.nav-toggle span{width:25px;height:3px;background:var(--text-dark);border-radius:3px}
+.hero{padding:140px 0 var(--space-3xl);background:linear-gradient(135deg,var(--bg-cream) 0%,var(--bg-light) 100%);overflow:hidden}
+.hero-container{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3xl);align-items:center}
+.hero-title{font-family:Fraunces,"Fraunces Fallback","Fraunces Fallback Android",Georgia,serif;font-weight:500!important;font-synthesis:none;letter-spacing:-.01em;font-size:clamp(2.5rem,5vw,4rem);font-weight:700;color:var(--text-dark);margin-bottom:var(--space-lg);line-height:1.1}
+.hero-subtitle{font-size:clamp(1.125rem,2vw,1.375rem);color:var(--text-medium);margin-bottom:var(--space-xl);line-height:1.6}
+.hero-stats{display:flex;gap:var(--space-lg);margin-bottom:var(--space-xl)}
+.hero-stat{display:flex;align-items:center;gap:var(--space-sm)}
+.hero-stat-icon{flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.hero-stat-text{font-size:.9375rem;font-weight:600;color:var(--primary)}
+.hero-image{position:relative;display:flex;justify-content:center;align-items:center}
+.blob-shape{position:relative;width:100%;max-width:500px;aspect-ratio:1;overflow:hidden;border-radius:30% 70% 70% 30%/30% 30% 70% 70%;background:linear-gradient(135deg,var(--primary-light) 0%,var(--accent-light) 100%);box-shadow:0 20px 60px rgba(45,90,123,.2)}
+.profile-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+@media (max-width:968px){.nav-toggle{display:flex}.nav-menu{position:fixed;top:80px;left:-100%;flex-direction:column;background:var(--bg-light);width:100%;max-height:calc(100dvh - 80px);padding:var(--space-xl) var(--space-lg);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 10px 30px rgba(0,0,0,.1);gap:var(--space-lg);align-items:flex-start}.nav-menu.active{left:0}.hero{padding:100px 0 var(--space-2xl)}.hero-container{grid-template-columns:1fr;gap:var(--space-xl);max-width:600px;margin:0 auto}.hero-content{text-align:center}.hero-stats{flex-direction:row;justify-content:center;flex-wrap:nowrap;gap:var(--space-md)}.blob-shape{max-width:350px;margin:0 auto}}
+@media (max-width:768px){.container{padding:0 var(--space-sm)}.nav{padding:.75rem var(--space-lg)}}
+:root{--text-light:#66727F;--fs-small:.9375rem;--fs-lead:clamp(1.0625rem,1rem + .35vw,1.25rem);--fs-h1:clamp(2.5rem,1.8rem + 2.9vw,4rem);--lh-body:1.65;--section-y:clamp(3.5rem,2.4rem + 4.4vw,6rem)}
+body{line-height:var(--lh-body)}p{line-height:var(--lh-body);text-wrap:pretty}
+h1,.hero-title{text-wrap:balance;line-height:1.08;letter-spacing:-.02em}
+.hero-title{font-size:var(--fs-h1)}.hero-subtitle{font-size:var(--fs-lead);max-width:34rem}
+.hero-stats{display:block}.hero-stats-line{margin:0;font-size:var(--fs-small);line-height:1.5;color:var(--text-medium)}.hero-stats-line strong{color:var(--primary);font-weight:700}.stats-dot{color:var(--accent);margin:0 .625rem;font-weight:700}
+.btn{padding:.8125rem 1.75rem;font-size:1rem;line-height:1.375;letter-spacing:.005em;border-radius:999px}.btn-hero{padding:1rem 2.125rem;font-size:1.0625rem}
+.header{box-shadow:0 1px 0 #E9E4DD,0 6px 20px hsl(205 40% 25% / .04)}
+@media (max-width:968px){.hero-subtitle{margin-inline:auto}.hero{padding-bottom:var(--section-y)}}

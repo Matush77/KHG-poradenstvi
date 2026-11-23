@@ -454,13 +454,3 @@ if (isHomepage) {
     window.addEventListener('scroll', updateActiveNavLink, { passive: true });
     updateActiveNavLink();
 }
-
-// Hero blob: its shape animation loops (css/styles.css, polish part); pause it while the
-// portrait is off-screen so phones don't redraw it for nothing.
-document.addEventListener('DOMContentLoaded', () => {
-    const blob = document.querySelector('.blob-shape');
-    if (!blob || !('IntersectionObserver' in window)) return;
-    new IntersectionObserver(([entry]) => {
-        blob.classList.toggle('is-offscreen', !entry.isIntersecting);
-    }).observe(blob);
-});

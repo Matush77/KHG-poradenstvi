@@ -59,8 +59,8 @@ if "--live" not in sys.argv:
             bad(f"{f}: in sitemap but missing")
             continue
         check_html(f, p.read_text(encoding="utf-8"), u)
-    hits = [str(p.relative_to(root)) for p in [*root.glob("css/*.css"), *root.glob("js/*.js")] if "ui-lab" in p.read_text(encoding="utf-8")]
-    bad(f"ui-lab referenced in {hits}") if hits else ok("css/ and js/ free of ui-lab")
+    hits = [str(p.relative_to(root)) for p in [*root.glob("partials/theme/*.css"), *root.glob("js/*.js")] if "ui-lab" in p.read_text(encoding="utf-8")]
+    bad(f"ui-lab referenced in {hits}") if hits else ok("partials/theme/ and js/ free of ui-lab")
     robots = (root / "robots.txt").read_text(encoding="utf-8")
     bad("robots.txt disallows the whole site") if re.search(r"^\s*Disallow:\s*/\s*$", robots, re.M) else ok("robots.txt allows the site")
     bad(".htaccess sets X-Robots-Tag, check it") if "x-robots-tag" in (root / ".htaccess").read_text(encoding="utf-8").lower() else ok(".htaccess sends no X-Robots-Tag")
