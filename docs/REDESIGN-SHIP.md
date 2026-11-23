@@ -1,5 +1,10 @@
 # Shipping the redesign
 
+**Done: shipped 18 Nov 2026. Kept for reference only.** Since 23 Nov 2026 there is one branch,
+`main`; the `redesign` lab and `redesign-ship` branches are gone (the lab is kept as the tag
+`archive/redesign-lab`), and the test subdomain runs `main`. The current workflow is in the
+project rules: change on `main` → push → `git pull` on the test site → owner checks → deploy live.
+
 **Status, 15 Nov 2026:** the port is done on the branch `redesign-ship` (from `main`, not merged),
 together with the own booking (section 4). It passes the gate below and runs on the test subdomain.
 Checked in the browser at 375 px, 320 px and desktop: all 21 pages (the 20 from `main` plus
@@ -122,8 +127,9 @@ Hosting facts (14 Nov): PHP 8.4 for the site (panel: Change PHP Version); on SSH
 so commands and Scheduled Tasks use `/usr/bin/php84`. SSH: `khgporadenstvi.cz@ssh.gb.stackcp.com`, key only;
 the host drops connections opened too often, so reuse one (ControlMaster).
 
-Test copy: `test.khgporadenstvi.cz` serves `~/test_html`, a plain `git clone -b redesign-ship` (not the
-panel's Git deployment; update with `git pull` over SSH). Its config is `~/.config/khg-test` (Stripe test
+Test copy: `test.khgporadenstvi.cz` serves `~/test_html`, a plain clone on `main` (not the
+panel's Git deployment; update with `git pull` over SSH, keeping its local password block in
+`.htaccess`). Its config is `~/.config/khg-test` (Stripe test
 keys, `BOOKING_MODE=lab`, e-mail only to the lab test addresses, bookings in the "KHG test rezervace"
 calendar). Scheduled Task: `/usr/bin/php84 -f /home/sites/23b/3/364baa5c02/test_html/booking/cron.php`,
 every 5 minutes. For the live site the same task points to `public_html`. Each copy books only its own

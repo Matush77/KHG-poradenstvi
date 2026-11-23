@@ -15,7 +15,7 @@ Mark each line ✅ / ❌ with the date. A ❌ is fixed and the line is run again
 
 | # | Check | ✅ |
 |---|---|---|
-| 0.1 | Test site is on the latest `redesign-ship` commit (`git pull` in `~/test_html`), and `php84 booking/tests/run.php` there passes. | |
+| 0.1 | Test site is on the latest `main` commit (`git pull` in `~/test_html`), and `php84 booking/tests/run.php` there passes. | |
 | 0.2 | E-mail works: one test e-mail reaches Gmail, Seznam.cz and Outlook, **not in spam**. In Gmail, "Zobrazit originál" shows SPF, DKIM and DMARC all **PASS**. (mail-tester.com score 9/10 or better.) | |
 | 0.3 | `LAB_MAIL_TO` in `~/.config/khg-test/booking.env` lists every inbox used below (the test site sends real e-mail only to these). `LAB_OWNER_TO` is an inbox the therapist reads during the test. | |
 | 0.4 | Stripe dashboard (test mode) → Webhooks → the test site's endpoint listens to: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.expired`, `refund.created`, `refund.updated`, `refund.failed`, `charge.refund.updated`, `charge.refunded`. | |
