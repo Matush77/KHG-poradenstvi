@@ -1,7 +1,7 @@
 <?php
 /* A small SMTP client: TLS (465) or STARTTLS (587), AUTH LOGIN, one message per connection.
-   The hosting's mail server (smtp.stackmail.com, in the domain's SPF record) with the send-only
-   address rezervace@khgporadenstvi.cz. No library: openssl and streams only. */
+   Google Workspace's SMTP relay (smtp-relay.gmail.com, since 17 Nov), sending as rezervace@khgporadenstvi.cz,
+   an alias of her Workspace account. No library: openssl and streams only. */
 declare(strict_types=1);
 
 /* The server refused this message for good (5xx to the address or the message). */

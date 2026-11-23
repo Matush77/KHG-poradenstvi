@@ -72,9 +72,12 @@ function cfg(): array
         'booking_page' => $env['BOOKING_PAGE'] ?? '/rezervace.html',
         'cancel_page' => $env['CANCEL_PAGE'] ?? '/rezervace/zruseni.html',
         'owner_page' => $env['OWNER_PAGE'] ?? '/rezervace/sprava.html',   // the owner's links in "Nová rezervace"
-        // sending: the hosting's SMTP with the send-only address; the password only in smtp.env (chmod 600)
-        'smtp' => ['host' => $env['SMTP_HOST'] ?? 'smtp.stackmail.com', 'port' => (int)($env['SMTP_PORT'] ?? 587),
-            'user' => $env['SMTP_USER'] ?? 'rezervace@khgporadenstvi.cz', 'pass' => $env['SMTP_PASS'] ?? ''],
+        // sending: Google Workspace's SMTP relay (since 17 Nov; before: the hosting's mailbox, smtp.stackmail.com),
+        // signed in as her account, sent from its alias rezervace@; the app password only in smtp.env (chmod 600)
+        'smtp' => ['host' => $env['SMTP_HOST'] ?? 'smtp-relay.gmail.com', 'port' => (int)($env['SMTP_PORT'] ?? 587),
+            'user' => $env['SMTP_USER'] ?? 'kristyna@khgporadenstvi.cz', 'pass' => $env['SMTP_PASS'] ?? ''],
+        // the cron's heartbeat (Healthchecks.io ping URL): it e-mails the owner when the pings stop. '' = no pings
+        'heartbeat' => preg_match('#^https://[^\s]+$#', $env['HEARTBEAT_URL'] ?? '') ? rtrim($env['HEARTBEAT_URL'], '/') : '',
         // lab only: real e-mails go just to these addresses; the owner's e-mails are redirected to LAB_OWNER_TO
         'lab_mail_to' => array_values(array_filter(array_map('strtolower', array_map('trim', explode(',', $env['LAB_MAIL_TO'] ?? ''))))),
         'lab_owner_to' => strtolower(trim($env['LAB_OWNER_TO'] ?? '')),
@@ -118,6 +121,36 @@ function log_line(string $what, array $data = []): void
     $line = date('c') . ' ' . $what . ($data ? ' ' . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '') . "\n";
     file_put_contents(cfg()['dir'] . '/booking.log', $line, FILE_APPEND | LOCK_EX);
     if (PHP_SAPI === 'cli-server' || PHP_SAPI === 'cli') file_put_contents('php://stderr', $line);
+}
+
+/* Drops the log's lines older than $keepDays (the privacy page's promise covers the log too, not only the database).
+   Lines start with date('c') in Prague time, so they compare as text; a line without a date belongs to the one above.
+   Under the same lock log_line() appends with, so no line written meanwhile is lost. Returns how many lines went. */
+function log_trim(int $keepDays, ?int $now = null): int
+{
+    $path = cfg()['dir'] . '/booking.log';
+    if (!is_file($path) || !($f = fopen($path, 'r+'))) return 0;
+    try {
+        if (!flock($f, LOCK_EX)) return 0;
+        $cut = date('c', ($now ?? time()) - $keepDays * 86400);
+        $keep = '';
+        $dropped = 0;
+        $old = false;
+        while (($line = fgets($f)) !== false) {
+            if (preg_match('/^\d{4}-\d\d-\d\dT/', $line)) $old = strcmp(substr($line, 0, 25), $cut) < 0;
+            if ($old) $dropped++; else $keep .= $line;
+        }
+        if ($dropped) {
+            ftruncate($f, 0);
+            rewind($f);
+            fwrite($f, $keep);
+            fflush($f);
+        }
+        return $dropped;
+    } finally {
+        flock($f, LOCK_UN);
+        fclose($f);
+    }
 }
 
 /* One small HTTP client for Stripe and Google. Returns [status, decoded body]. */

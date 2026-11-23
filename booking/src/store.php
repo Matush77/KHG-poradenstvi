@@ -119,6 +119,35 @@ function state_set(string $k, string $v): void
     db()->prepare('INSERT OR REPLACE INTO state (k, v) VALUES (?, ?)')->execute([$k, $v]);
 }
 
+const BACKUP_KEEP_DAYS = 14;
+
+/* A copy of the database for $day (Y-m-d) in backups/ next to it, checked before it counts; copies older than
+   BACKUP_KEEP_DAYS go. After 18 Nov (the test database corrupted on network storage) this is what is left to go back to:
+   Stripe and Google keep the payments and events, but not her hours, the notes or the e-mail queue.
+   VACUUM INTO reads the database like any reader (no lock held against the site) and writes a whole, compact copy. */
+function db_backup(string $day): string
+{
+    $dir = dirname(cfg()['db']) . '/backups';
+    if (!is_dir($dir) && !@mkdir($dir, 0700) && !is_dir($dir)) throw new RuntimeException("Cannot create $dir");
+    $file = "$dir/booking-$day.sqlite";
+    if (!is_file($file)) {
+        $part = "$file.part";
+        if (is_file($part)) unlink($part);
+        db()->exec('VACUUM INTO ' . db()->quote($part));
+        @chmod($part, 0600);
+        $copy = new PDO('sqlite:' . $part, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $check = (string)$copy->query('PRAGMA quick_check')->fetchColumn();
+        $copy = null;
+        if ($check !== 'ok') { unlink($part); throw new RuntimeException("Backup copy failed its check: $check"); }
+        if (!rename($part, $file)) throw new RuntimeException("Cannot rename $part");
+    }
+    $cut = (new DateTimeImmutable($day))->modify('-' . (BACKUP_KEEP_DAYS - 1) . ' days')->format('Y-m-d');
+    foreach (glob("$dir/booking-*.sqlite") ?: [] as $f) {
+        if (preg_match('/^booking-(\d{4}-\d\d-\d\d)\.sqlite$/', basename($f), $m) && $m[1] < $cut) unlink($f);
+    }
+    return $file;
+}
+
 /* BEGIN IMMEDIATE takes the write lock at once, so two requests for the same slot run one after the other. */
 function db_tx(callable $fn)
 {

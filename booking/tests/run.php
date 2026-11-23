@@ -1364,6 +1364,57 @@ ok(!array_filter($omt, fn($k, $t) => ($k === 'free') !== in_array($t, $freeO, tr
 db()->exec("DELETE FROM bookings WHERE pay_id IN ('cs_omt', 'cs_omt_other')");
 db()->exec("DELETE FROM holds WHERE who = 'whoO'");
 
+// --- daily upkeep: database backup, log trim, heartbeat (23 Nov architecture review)
+$bdir = dirname(cfg()['db']) . '/backups';
+$dayAt = fn(string $d) => (new DateTimeImmutable("$d 00:10", new DateTimeZone('Europe/Prague')))->getTimestamp();
+$today = (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('Y-m-d');
+$prev = fn(int $n) => (new DateTimeImmutable($today))->modify("-$n days")->format('Y-m-d');
+@mkdir($bdir, 0700);
+foreach ([$prev(13), $prev(14), '2000-01-01'] as $d) file_put_contents("$bdir/booking-$d.sqlite", 'old');
+file_put_contents("$bdir/notes.txt", 'not ours');
+@unlink("$bdir/booking-$today.sqlite");   // the test run's earlier sweeps made one already
+state_set('upkeep_day', '');
+$logPath = cfg()['dir'] . '/booking.log';
+file_put_contents($logPath, date('c', time() - 100 * 86400) . " OLD {\"a\":1}\ncontinued old line\n"
+    . date('c', time() - 89 * 86400) . " KEEP_89\n" . date('c') . " KEEP_NOW\n");
+$up = daily_upkeep($dayAt($today));
+$bfile = "$bdir/booking-$today.sqlite";
+ok(($up['backup'] ?? '') === $today && is_file($bfile) && !is_file("$bfile.part"), 'upkeep: today\'s backup written');
+ok((fileperms($bfile) & 0777) === 0600, 'upkeep: backup readable by the owner only (600)');
+$bpdo = new PDO('sqlite:' . $bfile);
+ok((int)$bpdo->query('SELECT COUNT(*) FROM bookings')->fetchColumn() === (int)db()->query('SELECT COUNT(*) FROM bookings')->fetchColumn(), 'upkeep: backup holds the same bookings');
+$bpdo = null;
+ok(is_file("$bdir/booking-{$prev(13)}.sqlite") && !is_file("$bdir/booking-{$prev(14)}.sqlite") && !is_file("$bdir/booking-2000-01-01.sqlite"),
+    'upkeep: 14 days of backups kept, older ones deleted');
+ok(is_file("$bdir/notes.txt"), 'upkeep: other files in backups/ left alone');
+$log = (string)file_get_contents($logPath);
+ok(!str_contains($log, 'OLD') && !str_contains($log, 'continued old line') && str_contains($log, 'KEEP_89') && str_contains($log, 'KEEP_NOW'),
+    'upkeep: log lines older than 90 days (and their continuation) dropped, newer kept');
+ok(($up['log_lines_trimmed'] ?? 0) === 2, 'upkeep: reports how many log lines went');
+ok(daily_upkeep($dayAt($today) + 3600) === [], 'upkeep: once a day only');
+// a backup that fails: not marked done, so the next run tries again
+state_set('upkeep_day', '');
+unlink($bfile);
+chmod($bdir, 0500);
+$upF = daily_upkeep($dayAt($today));
+chmod($bdir, 0700);
+ok(($upF['backup_failed'] ?? false) === true && state_get('upkeep_day') === '', 'upkeep: a failed backup is reported and tried again next run');
+ok(str_contains((string)file_get_contents($logPath), 'BACKUP_ERROR'), 'upkeep: a failed backup is logged');
+ok((daily_upkeep($dayAt($today))['backup'] ?? '') === $today && is_file($bfile), 'upkeep: the next run makes it');
+// heartbeat: only the ping, "/fail" when something needs a look, never stops the run
+$hb = [];
+$FAKE = ['#POST https://hc-ping\.com/#' => function ($m, $u, $b) use (&$hb) { $hb[] = [$u, $b]; return [200, ['raw' => 'OK']]; }];
+heartbeat(true, 'https://hc-ping.com/abc');
+heartbeat(false, 'https://hc-ping.com/abc');
+ok(($hb[0][0] ?? '') === 'https://hc-ping.com/abc' && ($hb[0][1] ?? 'x') === '' && ($hb[1][0] ?? '') === 'https://hc-ping.com/abc/fail',
+    'heartbeat: ping when alive, /fail when the backup failed, no booking data sent');
+$FAKE = [];
+heartbeat(true, 'https://hc-ping.com/abc');
+ok(str_contains((string)file_get_contents($logPath), 'HEARTBEAT_ERROR'), 'heartbeat: an unreachable service is logged, the run goes on');
+$hbCalls = count($CALLS);
+heartbeat(true);
+ok(count($CALLS) === $hbCalls, 'heartbeat: no HEARTBEAT_URL, no ping (lab, tests)');
+
 unset($GLOBALS['SMTP_FAKE']);
 
 unset($GLOBALS['HTTP_FAKE']);

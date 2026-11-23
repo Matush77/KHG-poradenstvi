@@ -1413,6 +1413,7 @@ function sweep(): array
 {
     $done = ['booked' => [], 'retried' => [], 'mailed' => []];
     db()->prepare('DELETE FROM holds WHERE expires_at < ?')->execute([time()]);
+    $done += daily_upkeep();
     $done += forget_old();
     // first her calendar edits (a session she just moved gets its reminders at the new time), then the reminders:
     // neither needs Stripe, so a Stripe outage below doesn't hold them back
@@ -1493,8 +1494,50 @@ function sweep(): array
         else $done['mail_failed'][] = $row['pay_id'];   // stays unsent: the next run tries again
     }
     if (array_filter(array_diff_key($done, ['mail_waiting' => 1]))) log_line('SWEEP', $done);
+    // the run got to the end (a Stripe outage included: it is retried and logged), so the heartbeat says "alive";
+    // a failed backup says "fail" at once. A run that crashed earlier sends nothing, and the silence is the alarm.
+    heartbeat(!isset($done['backup_failed']));
     if ($stripeError) throw $stripeError;   // the rest is done; the cron's output still shows the failure
     return $done;
+}
+
+const LOG_KEEP_DAYS = 90;
+
+/* Once a day (the first cron run after midnight, Prague time): a backup of the database, then the log trimmed.
+   A failed backup is not marked done, so the next run tries again (and the heartbeat reports it, see sweep). */
+function daily_upkeep(?int $now = null): array
+{
+    $now ??= time();
+    $day = (new DateTimeImmutable('@' . $now))->setTimezone(new DateTimeZone('Europe/Prague'))->format('Y-m-d');
+    if (state_get('upkeep_day') === $day) return [];
+    try {
+        db_backup($day);
+    } catch (Throwable $e) {
+        log_line('BACKUP_ERROR', ['error' => $e->getMessage()]);
+        return ['backup_failed' => true];
+    }
+    try {
+        $trimmed = log_trim(LOG_KEEP_DAYS, $now);
+    } catch (Throwable $e) {
+        log_line('LOG_TRIM_ERROR', ['error' => $e->getMessage()]);
+        $trimmed = 0;
+    }
+    state_set('upkeep_day', $day);
+    return array_filter(['backup' => $day, 'log_lines_trimmed' => $trimmed]);
+}
+
+/* Tells Healthchecks.io the cron is alive (or, $ok false, that something needs a look); it e-mails the owner when the
+   pings stop. Sends nothing but the ping itself: no booking data leaves for a third party. Never stops the run. */
+function heartbeat(bool $ok, ?string $url = null): void
+{
+    $url ??= cfg()['heartbeat'];
+    if ($url === '') return;
+    try {
+        [$code] = http('POST', $url . ($ok ? '' : '/fail'), ['Content-Type: text/plain'], $ok ? '' : 'backup failed, see booking.log');
+        if ($code !== 200) log_line('HEARTBEAT_ERROR', ['status' => $code]);
+    } catch (Throwable $e) {
+        log_line('HEARTBEAT_ERROR', ['error' => $e->getMessage()]);
+    }
 }
 
 /* Bookings with a refund Stripe has not finished (pending, or waiting for an action): the oldest check first. */
