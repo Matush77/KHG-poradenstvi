@@ -85,16 +85,17 @@ function ics_text(string $s): string
    site's booking panel (sky for online, peach for in person, radius 24) holding the Fraunces heading and the
    session, so it fills a phone's width like the site's panels do. Fonts are the site's own files: Apple Mail
    and iOS load them, Gmail and Outlook use the metric-matched fallbacks (Georgia, the system sans).
-   The brand is the coral heart as a small PNG (assets/heart.png, cut from brand.png) sent inside the e-mail (cid), and
-   the name and role as real text: Gmail's dark mode lightens text but not images, so a name drawn into the image
-   went navy on black (owner's phone, 14 Nov).
+   The brand is the coral heart, loaded from the site (BRAND_IMG, like Stripe's or Google's e-mails do), and the name
+   and role as real text: Gmail's dark mode lightens text but not images, so a name drawn into the image went navy
+   on black (owner's phone, 14 Nov). Until 23 Nov the heart travelled inside the e-mail (cid); Gmail then listed it
+   as an attachment "srdce.png", also in the calendar event it makes from the .ics. A client that blocks web images
+   (Outlook) shows the text brand without the heart; nothing else depends on it.
    No greetings or sign-offs; the footer carries her name and contacts. */
-const BRAND_CID = 'brand@khgporadenstvi.cz';
+// sent e-mails point here for good: keep this file at this address (a new heart gets a new file name)
+const BRAND_IMG = 'https://khgporadenstvi.cz/images/heart-96.png';
 const MAIL_FONTS = 'https://khgporadenstvi.cz/fonts/';   // Fraunces is there once the redesign ships
 const MAIL_FONT = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 const MAIL_SERIF = "Fraunces,Georgia,'Times New Roman',serif";
-
-function brand_png(): string { return (string)file_get_contents(__DIR__ . '/../assets/heart.png'); }
 
 function mail_tint(array $b): string { return ($b['forma'] ?? '') === 'osobne' ? '#F6E6DC' : '#E8EFF4'; }
 
@@ -140,7 +141,7 @@ function mail_page(string $subject, string $title, string $panel, array $blocks,
         . '<div class="wrap" style="max-width:600px;margin:0 auto;padding:16px 12px 32px">'
         // the site header's brand: heart, then the name (Fraunces 500 19) over the role (Inter 500 10.5, caps, tracked)
         . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 4px;border-collapse:collapse"><tr>'
-        . '<td style="padding:0 10px 0 0;vertical-align:middle"><img src="cid:' . BRAND_CID . '" width="26" height="26" alt="" style="display:block;border:0;width:26px;height:26px"></td>'
+        . '<td style="padding:0 10px 0 0;vertical-align:middle"><img src="' . BRAND_IMG . '" width="26" height="26" alt="" style="display:block;border:0;width:26px;height:26px"></td>'
         . '<td style="vertical-align:middle"><a href="https://khgporadenstvi.cz" style="text-decoration:none;color:#163A55">'
         . '<span style="display:block;font:500 19px/1.15 ' . MAIL_SERIF . ';letter-spacing:-.005em;color:#163A55;white-space:nowrap">' . SENDER . '</span>'
         . '<span style="display:block;margin-top:4px;font:500 10.5px/1 ' . MAIL_FONT . ';letter-spacing:.14em;text-transform:uppercase;color:#5E6E7C">Psycholog a terapeut</span>'
@@ -595,9 +596,7 @@ function mail_eml(array $m): string
     $b64 = fn(string $s) => rtrim(chunk_split(base64_encode($s), 76, "\r\n"));
     $outer = 'mix-' . bin2hex(random_bytes(8));
     $alt = 'alt-' . bin2hex(random_bytes(8));
-    $rel = 'rel-' . bin2hex(random_bytes(8));
     $domain = substr(FROM_MAIL, strpos(FROM_MAIL, '@') + 1);
-    $brand = str_contains($m['html'], 'cid:' . BRAND_CID);   // her own e-mails have no image
     return implode("\r\n", [
         'From: ' . mime_header(SENDER) . ' <' . FROM_MAIL . '>',
         'To: <' . $m['to'] . '>',
@@ -609,7 +608,6 @@ function mail_eml(array $m): string
         'Content-Type: multipart/mixed; boundary="' . $outer . '"',
         '',
         '--' . $outer,
-        ...($brand ? ['Content-Type: multipart/related; boundary="' . $rel . '"', '', '--' . $rel] : []),
         'Content-Type: multipart/alternative; boundary="' . $alt . '"',
         '',
         '--' . $alt,
@@ -622,14 +620,6 @@ function mail_eml(array $m): string
         '', $b64($m['html']),
         '--' . $alt . '--',
         '',
-        ...($brand ? ['--' . $rel,
-        'Content-Type: image/png; name="srdce.png"',
-        'Content-ID: <' . BRAND_CID . '>',
-        'Content-Disposition: inline; filename="srdce.png"',
-        'Content-Transfer-Encoding: base64',
-        '', $b64(brand_png()),
-        '--' . $rel . '--',
-        ''] : []),
         ...(empty($m['ics']) ? [] : [
             '--' . $outer,
             'Content-Type: text/calendar; charset=utf-8; method=' . ($m['ics_method'] ?? 'PUBLISH') . '; name="sezeni.ics"',

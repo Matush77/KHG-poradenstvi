@@ -161,9 +161,9 @@ try {
         $part = (string)($_GET['part'] ?? 'html');
         header('Cache-Control: no-store');
         header('Content-Type: ' . ($part === 'ics' ? 'text/calendar' : ($part === 'txt' ? 'text/plain' : 'text/html')) . '; charset=utf-8');
-        // the brand image travels inside the real e-mail (cid); the browser preview gets it inline
-        $html = str_replace(['cid:' . BRAND_CID, MAIL_FONTS . 'Fraunces/', MAIL_FONTS],
-            ['data:image/png;base64,' . base64_encode(brand_png()), '/fonts/Fraunces/', '/fonts/'], $m['html']);
+        // the preview takes the heart and the fonts from this server, like the real e-mail takes them from the site
+        $html = str_replace([BRAND_IMG, MAIL_FONTS . 'Fraunces/', MAIL_FONTS],
+            ['/images/' . basename(BRAND_IMG), '/fonts/Fraunces/', '/fonts/'], $m['html']);
         echo $part === 'ics' ? (string)$m['ics'] : ($part === 'txt' ? $m['text'] : $html);
         exit;
     }

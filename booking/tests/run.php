@@ -109,9 +109,9 @@ ok($m['subject'] === 'Potvrzení: sezení v úterý 22. prosince v 13:00', 'subj
 ok(str_contains($m['text'], 'zrušit lze nejpozději 36 hodin před sezením. Později se platba nevrací.') && !str_contains($m['text'], 'prosince 1:00'), 'text: 36 hours, no computed date');
 ok(!preg_match('/Kdybyste|Těším se|Dobrý den/u', $m['text'] . $m['html']), 'no greetings or filler lines');
 foreach ([$m, mail_client_cancelled($b, $w, false), mail_client_cancelled($b, $w, true)] as $x) ok(!preg_match('/vracím|musím|omlouvám|můžete|jste |Vracím/u', $x['text'] . $x['html']), 'passive wording: ' . $x['subject']);
-ok(str_contains($m['html'], 'cid:' . BRAND_CID) && str_contains($m['html'], '#E8EFF4'), 'html: brand image and the online (sky) panel');
+ok(str_contains($m['html'], '<img src="' . BRAND_IMG . '" width="26" height="26"') && str_contains($m['html'], '#E8EFF4'), 'html: brand heart from the site and the online (sky) panel');
 $eml = mail_eml($m);
-ok(str_contains($eml, 'multipart/related') && str_contains($eml, 'Content-ID: <' . BRAND_CID . '>') && strlen(brand_png()) > 1000, 'the brand image travels inside the e-mail');
+ok(!str_contains($eml, 'multipart/related') && !str_contains($eml, 'Content-ID:') && !str_contains($eml, 'image/png') && str_starts_with(BRAND_IMG, 'https://khgporadenstvi.cz/images/') && is_file(__DIR__ . '/../../images/' . basename(BRAND_IMG)), 'no image inside the e-mail (no srdce.png attachment); the heart file exists on the site');
 ok(str_contains($m['html'], 'Připojit se k videohovoru') && str_contains($m['html'], 'white-space:nowrap">13:00–13:50'), 'html: Meet button, times kept together');
 ok(str_contains($m['html'], 'background:#E8927C;border:1.5px solid #E8927C;color:#163A55">Připojit se k videohovoru'), 'html: the Meet button is coral');
 ok(str_contains($m['text'], "Platba 1\u{a0}100\u{a0}Kč byla přijata.") && str_contains($m['html'], "Platba <b style=\"font-weight:600\">1\u{a0}100\u{a0}Kč</b> byla přijata.") && !str_contains($m['text'] . $m['html'], 'Googlu'), 'confirmation: price paid, no Google sign-in line');
