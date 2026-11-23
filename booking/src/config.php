@@ -109,6 +109,12 @@ function lab(): bool
     return cfg()['mode'] !== 'live';
 }
 
+/* Whether our cookies get the Secure flag: on HTTPS, and always live (even if a proxy hides HTTPS from PHP). */
+function secure_cookies(): bool
+{
+    return ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off' || !lab();
+}
+
 function site(): string
 {
     if (cfg()['site'] !== '') return rtrim(cfg()['site'], '/');

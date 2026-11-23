@@ -39,8 +39,8 @@
     <link rel="preload" href="fonts/Fraunces/Fraunces-500-Soft-cs.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=66f43334">
-    <link rel="stylesheet" href="css/quiz-styles.css?v=39fae13d">
+    <link rel="stylesheet" href="css/styles.css?v=d661c8a2">
+    <link rel="stylesheet" href="css/quiz-styles.css?v=6f954c50">
 
     <!-- Structured Data - Quiz Schema -->
     <script type="application/ld+json">
@@ -792,7 +792,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
 .quiz-results-card { max-width: none !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
 .quiz-results-header { text-align: left !important; padding: 0 0 24px !important; margin: 0 0 24px !important; border-bottom: 1px solid var(--line) !important; }
-.quiz-results-label { margin: 0 0 8px !important; font-size: .9375rem !important; font-weight: 500 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--mute) !important; }
 .quiz-results-title { font-size: var(--fs-h2) !important; line-height: 1.15 !important; color: var(--navy) !important; margin: 0 !important; text-wrap: balance; }
 .quiz-results-content { max-width: none !important; margin: 0 !important; }
 .quiz-results-description { max-width: none !important; margin: 0 0 var(--block-gap) !important; text-align: left !important; font-size: 1.0625rem !important; line-height: 1.7 !important; color: var(--slate) !important; }
@@ -838,7 +837,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
 
 .quiz-results-header { background: var(--peach) !important; border: 0 !important; border-radius: var(--r-lg) !important; padding: var(--panel-pad) !important; margin: 0 0 var(--block-gap) !important; }
-.quiz-results-label { color: var(--coral-ink) !important; font-weight: 600 !important; }
 .quiz-results-title { margin: 0 0 16px !important; }
 .quiz-results-header .quiz-results-description { margin: 0 !important; color: var(--slate) !important; }
 .quiz-option.selected { background: var(--peach) !important; }
@@ -856,7 +854,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 .quiz-results-recommendations li::marker { color: var(--primary); }
 
 
-.quiz-results-header { border-bottom: 0 !important; padding-bottom: 0 !important; }
+.quiz-results-header { border-bottom: 0 !important; }
 .quiz-social-share { border-top: 0 !important; padding-top: 0 !important; }
 
     
@@ -1092,7 +1090,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
             <div class="container">
                 <div class="quiz-results-card">
                     <div class="quiz-results-header">
-                        <p class="quiz-results-label">Váš výsledek</p>
                         <h2 class="quiz-results-title" id="resultsTitle">Výsledek kvízu</h2>
                         <div class="quiz-results-description" id="resultsDescription"></div>
                     </div>
@@ -1202,7 +1199,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
 
     <script src="js/privacy-consent.js?v=f33eced6"></script>
-    <script src="js/script.js?v=1af74392"></script>
+    <script src="js/script.js?v=87e742b1"></script>
     <!-- the questions and results of this quiz; js/quiz-engine.js runs them -->
     <script>
     const quizConfig = {

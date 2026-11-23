@@ -99,11 +99,11 @@
     <!-- The full stylesheet is loaded asynchronously after matching critical CSS.
          It switches on in one go, so the page restyles once (after two frames on mobile). -->
     <script>document.documentElement.classList.add('css-wait');setTimeout(function(){document.documentElement.classList.remove('css-wait')},3000);window.khgCss=function(l){var q=window.khgCssQ=window.khgCssQ||[];q.push(l);var go=function(){q.forEach(function(x){x.rel='stylesheet'});document.documentElement.classList.remove('css-wait')};var mobile=navigator.userAgentData?navigator.userAgentData.mobile:/Mobi|Android/i.test(navigator.userAgent);if(mobile){requestAnimationFrame(function(){requestAnimationFrame(go)})}else{go()}}</script>
-    <link rel="preload" href="css/styles.css?v=66f43334" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
+    <link rel="preload" href="css/styles.css?v=d661c8a2" as="style" onload="this.onload=null;khgCss(this)" onerror="this.onerror=null;khgCss(this)">
     <!-- Reload or back/forward: the browser restores a deep scroll position on the first frame, so the
          (already cached) full CSS must apply before that frame or everything below the hero shifts. -->
     <script>(function(){var n=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0],t=n?n.type:({1:'reload',2:'back_forward'})[performance.navigation&&performance.navigation.type];if(t!=='reload'&&t!=='back_forward')return;document.querySelectorAll('link[rel=preload][as=style]').forEach(function(l){l.onload=l.onerror=null;l.setAttribute('blocking','render');l.rel='stylesheet'});document.documentElement.classList.remove('css-wait')})()</script>
-    <noscript><link rel="stylesheet" href="css/styles.css?v=66f43334"></noscript>
+    <noscript><link rel="stylesheet" href="css/styles.css?v=d661c8a2"></noscript>
     <style id="proposal">
 
 
@@ -1852,6 +1852,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     </div>
 
 <script src="js/privacy-consent.js?v=f33eced6"></script>
-<script src="js/script.js?v=1af74392"></script>
+<script src="js/script.js?v=87e742b1"></script>
 </body>
 </html>

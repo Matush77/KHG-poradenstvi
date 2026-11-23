@@ -121,7 +121,7 @@ function browser_id(bool $create = false): ?string
         if (!$create) return null;
         $t = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
         $_COOKIE[HOLD_COOKIE] = $t;
-        $https = ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off' || !lab();
+        $https = secure_cookies();
         if (PHP_SAPI !== 'cli' && !headers_sent()) {
             setcookie(HOLD_COOKIE, $t, ['expires' => time() + 86400, 'path' => '/api', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
         }

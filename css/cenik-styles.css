@@ -45,15 +45,6 @@
     box-shadow: 0 12px 36px rgba(45, 90, 123, 0.08);
 }
 
-.pricing-card-label {
-    margin-bottom: var(--space-xs);
-    color: var(--accent);
-    font-size: 0.875rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
 .pricing-card h2 {
     margin-bottom: var(--space-sm);
     color: var(--primary);
@@ -256,7 +247,6 @@
 .pricing-main { padding-bottom: var(--section-y); }
 .pricing-grid { gap: var(--grid-gap); }
 .pricing-card { padding: var(--card-pad); box-shadow: var(--shadow-md); }
-.pricing-card-label { font-size: var(--fs-label); letter-spacing: 0.1em; }
 .pricing-facts li { font-size: 1rem; }
 .pricing-information { padding: var(--card-pad); }
 .pricing-info-grid { gap: var(--grid-gap); }

@@ -320,14 +320,6 @@
     margin-bottom: var(--space-xl);
 }
 
-.quiz-results-icon {
-    font-size: 4rem;
-    margin-bottom: var(--space-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .quiz-results-title {
     font-family: var(--font-heading);
     font-size: clamp(2rem, 4vw, 2.5rem);
@@ -697,10 +689,6 @@
     .quiz-results-card {
         padding: var(--space-xl) var(--space-md);
         border-radius: 16px;
-    }
-
-    .quiz-results-icon {
-        font-size: 3rem;
     }
 
     .quiz-results-title {

@@ -41,12 +41,6 @@ function cz_until(DateTimeImmutable $d): string
     return CZ_DAYS_UNTIL[(int)$d->format('w')] . ' ' . $d->format('j') . '. ' . CZ_MONTHS[(int)$d->format('n') - 1] . ' ' . hm($d);
 }
 
-/* 'Úterý 22. prosince 2026' */
-function cz_day(DateTimeImmutable $d): string
-{
-    return ucfirst_utf8(CZ_DAYS[(int)$d->format('w')]) . ' ' . $d->format('j') . '. ' . CZ_MONTHS[(int)$d->format('n') - 1] . ' ' . $d->format('Y');
-}
-
 /* Line item on Stripe's page: 'Sezení online · úterý 22. prosince · 13:00–13:50' */
 function cz_label(string $forma, DateTimeImmutable $start): string
 {
@@ -706,7 +700,6 @@ function smtp_backoff(string $error): int
     if (preg_match('/got (421|454)\b|\b4\.7\.\d+|try again later/i', $error)) return MAIL_BACKOFF_MINUTES;
     return 0;
 }
-function smtp_over_limit(string $error): bool { return smtp_backoff($error) === MAIL_PAUSE_MINUTES; }
 function mail_paused(): int
 {
     $until = (int)(state_get('mail_paused_until') ?? 0);

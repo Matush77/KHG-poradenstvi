@@ -92,7 +92,7 @@ function owner_logout(string $id, string $by): void
 /* A year-long cookie only for the hours API, never sent to other sites or readable by scripts. */
 function owner_cookie(string $value, int $days): void
 {
-    $https = ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off' || !lab();
+    $https = secure_cookies();
     setcookie(OWNER_COOKIE, $value, ['expires' => $days ? time() + $days * 86400 : 1, 'path' => '/api/hodiny',
         'secure' => $https, 'httponly' => true, 'samesite' => 'Strict']);
 }

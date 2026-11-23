@@ -99,7 +99,7 @@ ok(!stripe_signature_ok($payload, $sig, '', 300, $now), 'webhook: no secret conf
 ok(cz_at($w) === 'v úterý 22. prosince v 13:00', 'cz_at');
 ok(cz_until($w->modify('-36 hours')) === 'pondělí 21. prosince 1:00', 'cz_until (genitive day, no "v")');
 ok(cz_until(slot_start('2027-07-15', '9:00')->modify('-36 hours')) === 'úterý 13. července 21:00', 'cz_until summer');
-ok(cz_day(slot_start('2026-12-24', '9:00')) === 'Čtvrtek 24. prosince 2026', 'cz_day capitalises Č');
+ok(ucfirst_utf8('čtvrtek') === 'Čtvrtek', 'ucfirst_utf8 capitalises Č');
 ok(cz_label('online', $w) === 'Sezení online · úterý 22. prosince · 13:00–13:50', 'Stripe line item');
 
 // --- e-mail
@@ -443,8 +443,8 @@ owner_logout($d2['id'], $d1['id']);
 ok(owner_device($d2['token']) === null && owner_device($d1['token']) !== null, 'signing out one device leaves the others');
 
 // --- 16 Nov bug hunt
-ok(smtp_over_limit("SMTP: expected 250, got 550-You have reached your daily limit for sending email. Please try again\r\n550 later."), 'the mailbox limit error is recognised');
-ok(!smtp_over_limit('SMTP: expected 235, got 535 Authentication failed'), 'a wrong password is not a limit');
+ok(smtp_backoff("SMTP: expected 250, got 550-You have reached your daily limit for sending email. Please try again\r\n550 later.") === MAIL_PAUSE_MINUTES, 'the mailbox limit error is recognised');
+ok(smtp_backoff('SMTP: expected 235, got 535 Authentication failed') !== MAIL_PAUSE_MINUTES, 'a wrong password is not a limit');
 ok(mail_paused() === 0, 'mail not paused at first');
 state_set('mail_paused_until', (string)(time() + 600));
 ok(mail_paused() > time(), 'mail paused after a limit error');

@@ -265,12 +265,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Arriving at /#section from another page: the browser jumps to the section
-// right after the first paint, but on phones the full stylesheets switch on a
-// moment later (see the loader in index.html) and the page grows by several
-// screens, so the section slid away (e.g. "Kontakt" landed on "Profesní
-// členství"). Keep the target aligned while the layout settles, and stop as
-// soon as the visitor scrolls or touches the page.
 // Address links: computers open Google Maps directions in a new tab (the href).
 // Android gets a geo: link, which opens the visitor's default maps app (or asks
 // which one: Google Maps, Mapy.cz, Waze...). iPhones and iPads get Apple Maps,
@@ -293,6 +287,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 })();
 
+// Arriving at /#section from another page: the browser jumps to the section
+// right after the first paint, but on phones the full stylesheets switch on a
+// moment later (see the loader in index.html) and the page grows by several
+// screens, so the section slid away (e.g. "Kontakt" landed on "Profesní
+// členství"). Keep the target aligned while the layout settles, and stop as
+// soon as the visitor scrolls or touches the page.
 (function keepHashTargetInView() {
     const id = decodeURIComponent(window.location.hash.slice(1));
     const target = id ? document.getElementById(id) : null;
@@ -345,22 +345,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Header Shadow on Scroll
-let lastScroll = 0;
-const header = document.querySelector('.header');
-
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-
-    if (currentScroll > 50) {
-        header.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.1)';
-    } else {
-        header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.05)';
-    }
-
-    lastScroll = currentScroll;
-});
-
 // Intersection Observer for Fade-in Animations (disabled on mobile)
 const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
@@ -381,17 +365,10 @@ if (!isMobile) {
 
     // Observe elements for animation
     document.addEventListener('DOMContentLoaded', () => {
-        const animateElements = document.querySelectorAll('.service-card, .credential-card, .contact-item, .featured-link, .benefit-item, .step, .target-group, .faq-item');
+        const animateElements = document.querySelectorAll('.featured-link, .step, .target-group, .faq-item');
         animateElements.forEach(el => observer.observe(el));
     });
 }
-
-// External Links - Open in New Tab with Security
-document.querySelectorAll('a[target="_blank"]').forEach(link => {
-    if (!link.getAttribute('rel')) {
-        link.setAttribute('rel', 'noopener noreferrer');
-    }
-});
 
 // Fix for bfcache (back-forward cache) issues on mobile
 // When returning from external pages, force a style recalculation
@@ -477,96 +454,6 @@ if (isHomepage) {
     window.addEventListener('scroll', updateActiveNavLink, { passive: true });
     updateActiveNavLink();
 }
-
-// Testimonials Carousel
-// All cards sit in one CSS grid cell (css/styles.css, polish part), so the track is as tall as
-// the longest review and nothing below it moves. Auto-advance runs every 7 s
-// until the visitor swipes, taps a dot or uses the arrow keys, then stops for
-// good; with "reduce motion" it never starts.
-document.addEventListener('DOMContentLoaded', () => {
-    const track = document.querySelector('.testimonials-track');
-    if (!track) return; // Exit if testimonials section doesn't exist
-
-    const cards = document.querySelectorAll('.testimonial-card');
-    const dots = document.querySelectorAll('.carousel-dot');
-    const totalCards = cards.length;
-    let currentIndex = 0;
-    let autoAdvance = null;
-    let userTookOver = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function updateCarousel(index) {
-        currentIndex = (index + totalCards) % totalCards;
-        cards.forEach((card, i) => card.classList.toggle('active', i === currentIndex));
-        dots.forEach((dot, i) => {
-            const isActive = i === currentIndex;
-            dot.classList.toggle('active', isActive);
-            if (isActive) {
-                dot.setAttribute('aria-current', 'true');
-            } else {
-                dot.removeAttribute('aria-current');
-            }
-        });
-    }
-
-    function stopAutoAdvance() {
-        clearInterval(autoAdvance);
-        autoAdvance = null;
-    }
-
-    // Always clear first so repeated calls never stack timers.
-    function startAutoAdvance() {
-        stopAutoAdvance();
-        if (userTookOver) return;
-        autoAdvance = setInterval(() => updateCarousel(currentIndex + 1), 7000);
-    }
-
-    function takeOver() {
-        userTookOver = true;
-        stopAutoAdvance();
-    }
-
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            takeOver();
-            updateCarousel(index);
-        });
-    });
-
-    // Pause while a mouse is over the review; resume only if nobody took over.
-    track.addEventListener('mouseenter', stopAutoAdvance);
-    track.addEventListener('mouseleave', startAutoAdvance);
-
-    // Keyboard navigation, only while focus is inside the carousel.
-    const carousel = track.closest('.testimonials-carousel') || track.parentElement;
-    carousel.addEventListener('keydown', (e) => {
-        if (e.defaultPrevented) return;
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            takeOver();
-            updateCarousel(currentIndex + (e.key === 'ArrowRight' ? 1 : -1));
-        }
-    });
-
-    // Swipe on touch screens. Mostly-horizontal swipes of 40 px or more change
-    // the review; vertical ones keep scrolling the page (touch-action: pan-y).
-    let touchX = null;
-    let touchY = 0;
-    track.addEventListener('touchstart', (e) => {
-        touchX = e.touches[0].clientX;
-        touchY = e.touches[0].clientY;
-    }, { passive: true });
-    track.addEventListener('touchend', (e) => {
-        if (touchX === null) return;
-        const dx = e.changedTouches[0].clientX - touchX;
-        const dy = e.changedTouches[0].clientY - touchY;
-        touchX = null;
-        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-        takeOver();
-        updateCarousel(currentIndex + (dx < 0 ? 1 : -1));
-    }, { passive: true });
-
-    updateCarousel(0);
-    startAutoAdvance();
-});
 
 // Hero blob: its shape animation loops (css/styles.css, polish part); pause it while the
 // portrait is off-screen so phones don't redraw it for nothing.
