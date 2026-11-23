@@ -468,3 +468,51 @@
 .nav-link.active::after {
     width: 100%;
 }
+
+/* ==========================================================================
+   Polish layer, merged from css/polish.css on 23 Nov (was a separate file loaded last).
+   Page-specific part: it overrides the rules above.
+   ========================================================================== */
+
+.blog-card {
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+.blog-card { border-radius: var(--r-md); }
+.quiz-overview-note { border-radius: var(--r-sm); }
+.category-btn, .blog-category-tag, .quiz-card-meta-item { border-radius: var(--r-pill); }
+/* [P12] Blog index + quiz overview (blog.html, kviz.html) ---------------- */
+.blog-hero-title { font-size: var(--fs-h1); line-height: 1.08; letter-spacing: -0.02em; }
+.blog-hero-subtitle { font-size: var(--fs-lead); line-height: 1.6; max-width: 38rem; }
+.blog-hero { padding-bottom: clamp(2.5rem, 2rem + 2vw, 3.5rem); }
+.blog-section { padding: clamp(2rem, 1.6rem + 1.6vw, 3rem) 0 var(--section-y); }
+.blog-categories { gap: 0.5rem; margin-bottom: clamp(1.5rem, 1.2rem + 1.2vw, 2.5rem); }
+.category-btn { border-width: 1px; padding: 0.625rem 1.25rem; min-height: 44px; font-size: var(--fs-small); }
+@media (hover: hover) {
+    .category-btn:hover { transform: none; }
+}
+.blog-grid { gap: var(--grid-gap); }
+.blog-card-content { padding: var(--card-pad-sm); }
+.blog-date { font-size: var(--fs-label); letter-spacing: 0.02em; color: var(--text-light); margin-bottom: 0.375rem; }
+.blog-card-title { font-size: clamp(1.1875rem, 1.1rem + 0.3vw, 1.3125rem); line-height: 1.25; margin-bottom: 0.625rem; text-wrap: balance; }
+.blog-card-excerpt { font-size: 1rem; line-height: 1.6; margin-bottom: 1.25rem; }
+.blog-card-image { background: var(--bg-sand); }
+@media (hover: hover) {
+    .blog-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .blog-card:hover .blog-card-image img { transform: scale(1.03); }
+    .blog-read-more:hover { transform: translateX(3px); }
+}
+.quiz-card-meta-item { font-size: var(--fs-label); background: var(--bg-sand); }
+.quiz-overview-note { padding: var(--card-pad-sm); border-radius: var(--r-md); box-shadow: var(--shadow-sm); }
+.quiz-overview-note p, .quiz-overview-list { font-size: 1rem; }
+.blog-cta { padding: var(--section-y) 0; }
+.blog-cta h2 { font-size: var(--fs-h2); line-height: 1.15; text-wrap: balance; }
+.blog-cta p { font-size: var(--fs-lead); max-width: 38rem; margin-inline: auto; margin-bottom: 2rem; }
+/* G2 empty blog category: no emoji, add a way back */
+.blog-empty { padding: var(--section-head-gap) var(--space-sm, 1rem); }
+.blog-empty h3 { font-size: var(--fs-h3); text-wrap: balance; }
+.blog-empty p { font-size: var(--fs-body); }
+.quiz-overview-list li::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    font-size: inherit; line-height: inherit; top: calc(0.75em - 3px); left: 0.25rem;
+}

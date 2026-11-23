@@ -16,7 +16,7 @@ The site is in Czech and built with plain HTML, CSS and JavaScript: no framework
 
 ## Technical highlights
 
-**Shared header and footer without a build step.** A static site has no templating, so the shared parts live in `partials/`. Two PowerShell scripts (`scripts/sync-header.ps1` and `scripts/sync-footer.ps1`) insert them into every page. Each script has a `-Check` mode that reports any page that is out of sync. Pages stay fully static and load no extra requests at runtime. See [`docs/FOOTER-WORKFLOW.md`](docs/FOOTER-WORKFLOW.md).
+**Shared header and footer without a build step.** A static site has no templating, so the shared parts live in `partials/`. `python3 scripts/sync.py` inserts them into every page and stamps every CSS/JS link with `?v=<hash of the file>`, so CSS and JS can be cached for a year. Its `--check` mode (also run by `scripts/check-indexing.py`) reports any page that is out of step. Pages stay fully static and load no extra requests at runtime. See [`docs/FOOTER-WORKFLOW.md`](docs/FOOTER-WORKFLOW.md).
 
 **SEO and structured data.** Every content page has its own meta description, canonical URL and Open Graph tags. The homepage has JSON-LD markup (`LocalBusiness`, `Person`, `Service`, `OfferCatalog`, `FAQPage`), and the site has a hand-maintained `sitemap.xml` and `robots.txt`.
 

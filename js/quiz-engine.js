@@ -1,209 +1,11 @@
 /* ==========================================
-   QUIZ JAVASCRIPT - TOXICKÝ VZTAH
+   QUIZ ENGINE - shared by quiz-overthinking, quiz-prokrastinace and quiz-toxicky-vztah (23 Nov: was copied into
+   each quiz's own file). The page defines, in an inline script before this file:
+     quizConfig              { storageKey, shareText, redFlagResult?, questions: [{ id, text, options: [{ text, score, redFlag? }] }] }
+     resultInterpretations   { key: { range: [min, max], title, color, description, recommendations, cta, showCta?, showCrisis? } }
+                             in order; the first one is also the result when no range matches
+   quiz-zdrave-hranice keeps its own script: a 5-point scale and a different result model.
    ========================================== */
-
-// Quiz Configuration
-const quizConfig = {
-    questions: [
-        {
-            id: 1,
-            text: "Jak často váš partner respektuje vaše osobní hranice?",
-            options: [
-                { text: "Vždy", score: 0 },
-                { text: "Většinou", score: 2 },
-                { text: "Občas", score: 4 },
-                { text: "Zřídka", score: 6 },
-                { text: "Nikdy", score: 8 }
-            ]
-        },
-        {
-            id: 2,
-            text: "Cítíte se svobodně vyjádřit svůj názor, i když se neshodujete?",
-            options: [
-                { text: "Určitě ano", score: 0 },
-                { text: "Spíše ano", score: 2 },
-                { text: "Někdy ano, někdy ne", score: 4 },
-                { text: "Spíše ne", score: 6 },
-                { text: "Určitě ne", score: 8 }
-            ]
-        },
-        {
-            id: 3,
-            text: "Jak reaguje váš partner, když řeknete \"ne\"?",
-            options: [
-                { text: "Respektuje to bez problémů", score: 0 },
-                { text: "Většinou to akceptuje", score: 2 },
-                { text: "Někdy se zlobí, ale přijme to", score: 4 },
-                { text: "Často se naštve nebo mě přesvědčuje", score: 6 },
-                { text: "Nikdy to nepřijme, trvá na svém", score: 8 }
-            ]
-        },
-        {
-            id: 4,
-            text: "Jak často vás partner kritizuje nebo snižuje?",
-            options: [
-                { text: "Nikdy", score: 0 },
-                { text: "Zřídka", score: 2 },
-                { text: "Občas", score: 4 },
-                { text: "Často", score: 6 },
-                { text: "Neustále", score: 8 }
-            ]
-        },
-        {
-            id: 5,
-            text: "Cítíte se ve vztahu bezpečně a respektovaně?",
-            options: [
-                { text: "Vždy", score: 0 },
-                { text: "Většinou", score: 2 },
-                { text: "Někdy ano, někdy ne", score: 5 },
-                { text: "Spíše ne", score: 7, redFlag: true },
-                { text: "Určitě ne", score: 9, redFlag: true }
-            ]
-        },
-        {
-            id: 6,
-            text: "Máte pocit, že chodíte \"po špičkách\", abyste partnera nenaštvali?",
-            options: [
-                { text: "Nikdy", score: 0 },
-                { text: "Zřídka", score: 3 },
-                { text: "Občas", score: 5 },
-                { text: "Často", score: 7 },
-                { text: "Neustále", score: 9, redFlag: true }
-            ]
-        },
-        {
-            id: 7,
-            text: "Snaží se váš partner kontrolovat, kam chodíte nebo s kým trávíte čas?",
-            options: [
-                { text: "Vůbec ne", score: 0 },
-                { text: "Pouze se zajímá", score: 1 },
-                { text: "Někdy je přehnaně zvědavý/á", score: 4 },
-                { text: "Často chce vědět všechno", score: 7 },
-                { text: "Neustále mě kontroluje", score: 9, redFlag: true }
-            ]
-        },
-        {
-            id: 8,
-            text: "Jak se váš partner staví k vašim přátelům a rodině?",
-            options: [
-                { text: "Podporuje mé vztahy", score: 0 },
-                { text: "Je neutrální", score: 2 },
-                { text: "Někdy je kritický/á", score: 4 },
-                { text: "Často kritizuje nebo odrazuje od setkání", score: 7 },
-                { text: "Izoluje mě od blízkých", score: 9, redFlag: true }
-            ]
-        },
-        {
-            id: 9,
-            text: "Jak váš partner řeší konflikty?",
-            options: [
-                { text: "Klidně a konstruktivně diskutujeme", score: 0 },
-                { text: "Většinou dobře, občas se pohádáme", score: 2 },
-                { text: "Často se vyhýbá nebo přehání", score: 5 },
-                { text: "Křičí, obviňuje nebo manipuluje", score: 7 },
-                { text: "Používá agresivní chování", score: 9, redFlag: true }
-            ]
-        },
-        {
-            id: 10,
-            text: "Přijímá váš partner zodpovědnost za své chování?",
-            options: [
-                { text: "Vždy", score: 0 },
-                { text: "Většinou", score: 2 },
-                { text: "Někdy", score: 4 },
-                { text: "Zřídka, často viní mě", score: 7 },
-                { text: "Nikdy, vždy jsem já ten špatný/á", score: 9 }
-            ]
-        }
-    ]
-};
-
-// Result Interpretations
-const resultInterpretations = {
-    healthy: {
-        range: [0, 20],
-        title: "Převažují znaky respektu a bezpečí",
-        icon: "✓",
-        color: "#3F7652",
-        description: "Ve vašich odpovědích převažují znaky respektu, důvěry a bezpečí. Test však nemůže posoudit celý vztah ani vyloučit konkrétní problematické chování.",
-        recommendations: [
-            "Pokračujte v otevřené komunikaci a vzájemném respektu",
-            "Věnujte čas společným aktivitám i individuálním zájmům",
-            "Pravidelně si říkejte, co v vztahu funguje dobře",
-            "Buďte pozorní k potřebám partnera i svým vlastním"
-        ],
-        cta: {
-            heading: "",
-            description: "",
-            button: ""
-        },
-        showCta: false,
-        showCrisis: false
-    },
-    warning: {
-        range: [21, 45],
-        title: "Některé varovné signály",
-        icon: "⚠",
-        color: "#9A712B",
-        description: "Některé odpovědi poukazují na chování, kterému je vhodné věnovat pozornost. Závažnost situace nelze určit pouze podle celkového skóre – důležitý je konkrétní kontext, zejména přítomnost strachu, nátlaku, kontroly, vyhrožování nebo násilí.",
-        recommendations: [
-            "O tom, co vás trápí, mluvte s partnerem pouze tehdy, pokud je to pro vás bezpečné",
-            "Pokud se obáváte partnerovy reakce, svěřte se nejprve důvěryhodné osobě nebo odborné službě",
-            "Zvažte individuální odbornou konzultaci pro ujasnění situace",
-            "Nevzdávejte se svých přátel a osobních zájmů",
-            "Sledujte, zda se situace zlepšuje nebo zhoršuje"
-        ],
-        cta: {
-            heading: "Chcete si situaci bezpečně ujasnit?",
-            description: "Při individuální konzultaci můžete popsat konkrétní situaci a promyslet další kroky s ohledem na své potřeby a bezpečí.",
-            button: "Promluvit si o tom"
-        },
-        showCrisis: false
-    },
-    concerning: {
-        range: [46, 65],
-        title: "Výrazné znaky nezdravého vztahu",
-        icon: "!",
-        color: "#A65F55",
-        description: "Některé vaše odpovědi mohou ukazovat na opakované nerespektování hranic, kontrolu nebo manipulaci. Test nemůže určit povahu celého vztahu, ale tyto konkrétní projevy je vhodné brát vážně.",
-        recommendations: [
-            "Vaše pocity jsou platné a důležité - věřte jim",
-            "Promluvte si s důvěryhodnou osobou o vaší situaci",
-            "Zvažte individuální odbornou konzultaci pro podporu a ujasnění situace",
-            "Vytvořte si bezpečnostní plán, pokud se cítíte ohroženi",
-            "Pamatujte: máte právo na bezpečný a respektující vztah",
-            "Informujte se o možnostech pomoci a podpory"
-        ],
-        cta: {
-            heading: "Nejste na to sami",
-            description: "Individuální konzultace může nabídnout prostor pro zmapování situace a hledání bezpečných dalších kroků.",
-            button: "Objednat konzultaci"
-        },
-        showCrisis: false
-    },
-    toxic: {
-        range: [66, 86],
-        title: "Vážné znaky toxického vztahu",
-        icon: "⚠",
-        color: "#A65F55",
-        description: "Některé z vašich odpovědí popisují závažné varovné signály. Test nemůže určit povahu celého vztahu, ale pokud zažíváte strach, nátlak, kontrolu, vyhrožování nebo násilí, je důležité vyhledat bezpečnou podporu.",
-        recommendations: [
-            "Vaše bezpečnost je absolutní prioritou",
-            "Obraťte se na odbornou pomoc - psychologa nebo centrum pomoci",
-            "Svěřte se někomu, komu důvěřujete",
-            "Vytvořte si bezpečnostní plán pro případ eskalace",
-            "Nejste zodpovědní za chování druhého člověka",
-            "Odchod z toxického vztahu je proces - buďte trpěliví a laskavý/á k sobě",
-            "Zdokumentujte případné incidenty (pro vlastní potřebu nebo právní ochranu)"
-        ],
-        cta: {
-            heading: "Podpora je dostupná",
-            description: "Individuální konzultace může nabídnout prostor pro zmapování situace a hledání bezpečných dalších kroků.",
-            button: "Vyhledat pomoc"
-        },
-        showCrisis: true
-    }
-};
 
 // Quiz State
 class QuizState {
@@ -258,7 +60,7 @@ class QuizState {
             timestamp: Date.now()
         };
         try {
-            localStorage.setItem('quiz-toxicky-vztah-progress', JSON.stringify(progress));
+            localStorage.setItem(quizConfig.storageKey, JSON.stringify(progress));
         } catch (e) {
             // The quiz keeps working in memory when storage is unavailable.
         }
@@ -266,7 +68,7 @@ class QuizState {
 
     loadProgress() {
         try {
-            const saved = localStorage.getItem('quiz-toxicky-vztah-progress');
+            const saved = localStorage.getItem(quizConfig.storageKey);
             if (saved) {
                 const data = JSON.parse(saved);
                 // Only load if less than 24 hours old
@@ -291,7 +93,7 @@ class QuizState {
 
     clearProgress() {
         try {
-            localStorage.removeItem('quiz-toxicky-vztah-progress');
+            localStorage.removeItem(quizConfig.storageKey);
         } catch (e) {
             // Nothing to remove without storage.
         }
@@ -306,24 +108,25 @@ class QuizState {
     }
 
     getResult() {
-        let result = { type: 'healthy', ...resultInterpretations.healthy };
-        for (const key in resultInterpretations) {
+        const keys = Object.keys(resultInterpretations);
+        let result = null;
+        for (const key of keys) {
             const band = resultInterpretations[key];
             if (this.score >= band.range[0] && this.score <= band.range[1]) {
                 result = { type: key, ...band };
                 break;
             }
         }
+        if (!result) result = { type: keys[0], ...resultInterpretations[keys[0]] };
 
-        // A single answer describing fear, aggression, control or isolation
-        // must never get the reassuring result, whatever the total score.
+        // A single answer marked redFlag (fear, aggression, control, isolation) must never get the reassuring
+        // first result, whatever the total score, and always shows the crisis help.
         if (this.hasRedFlag()) {
-            if (result.type === 'healthy') {
-                result = { type: 'warning', ...resultInterpretations.warning };
+            if (result.type === keys[0] && quizConfig.redFlagResult) {
+                result = { type: quizConfig.redFlagResult, ...resultInterpretations[quizConfig.redFlagResult] };
             }
             result.showCrisis = true;
         }
-
         return result;
     }
 }
@@ -363,11 +166,11 @@ class QuizController {
         this.resultsTitle = document.getElementById('resultsTitle');
         this.resultsDescription = document.getElementById('resultsDescription');
         this.recommendationsList = document.getElementById('recommendationsList');
-        this.crisisHelp = document.getElementById('crisisHelp');
         this.resultsCta = document.getElementById('resultsCta');
         this.ctaHeading = document.getElementById('ctaHeading');
         this.ctaDescription = document.getElementById('ctaDescription');
         this.ctaButton = document.getElementById('ctaButton');
+        this.crisisHelp = document.getElementById('crisisHelp');
 
         // Set total questions
         if (this.totalQuestionsEl) {
@@ -395,7 +198,7 @@ class QuizController {
 
     checkResumeQuiz() {
         try {
-            const saved = localStorage.getItem('quiz-toxicky-vztah-progress');
+            const saved = localStorage.getItem(quizConfig.storageKey);
             if (!saved) return;
             const data = JSON.parse(saved);
             if (Date.now() - data.timestamp < 86400000 && data.currentQuestion > 0) {
@@ -417,7 +220,7 @@ class QuizController {
         this.renderQuestion();
     }
 
-    renderQuestion() {
+    renderQuestion(shouldScroll = true) {
         const questionIndex = this.state.currentQuestion;
         const question = quizConfig.questions[questionIndex];
 
@@ -475,14 +278,15 @@ class QuizController {
         // Announce to screen readers
         this.announceToScreenReader(`Otázka ${questionIndex + 1} z ${quizConfig.questions.length}: ${question.text}`);
 
-        // Scroll to top of quiz section (only on desktop or when changing questions)
-        // Avoid scrolling on mobile after selecting an option
-        const isMobile = window.innerWidth <= 768;
-        if (!isMobile) {
-            window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-        } else {
-            // On mobile, scroll to keep question in view
-            this.quizSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+        // Only scroll when moving between questions
+        if (shouldScroll) {
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                window.scrollTo({ top: this.quizSection.offsetTop - 100, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+            } else {
+                // On mobile, scroll to keep question in view
+                this.quizSection.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+            }
         }
     }
 
@@ -619,7 +423,7 @@ class QuizController {
 // Social Sharing Functions
 function shareQuiz(platform) {
     const url = window.location.href;
-    const text = encodeURIComponent('Test toxického vztahu - Může vám pomoci získat jasno ve vašem vztahu');
+    const text = encodeURIComponent(quizConfig.shareText);
 
     let shareUrl = '';
 
@@ -683,7 +487,7 @@ function restartQuiz() {
     if (confirm('Opravdu chcete začít test znovu? Vaše současné výsledky budou ztraceny.')) {
         // Clear state
         try {
-            localStorage.removeItem('quiz-toxicky-vztah-progress');
+            localStorage.removeItem(quizConfig.storageKey);
         } catch (e) {
             // The quiz can restart even when storage is unavailable.
         }

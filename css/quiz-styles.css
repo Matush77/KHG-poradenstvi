@@ -773,3 +773,62 @@
         background: white;
     }
 }
+
+/* ==========================================================================
+   Polish layer, merged from css/polish.css on 23 Nov (was a separate file loaded last).
+   Page-specific part: it overrides the rules above.
+   ========================================================================== */
+
+.quiz-intro-image { border-radius: var(--r-md); }
+/* [P13] Quiz pages: intro, questions, results ------------------------------ */
+.quiz-intro { padding-bottom: var(--section-y); }
+.quiz-intro-title { font-size: clamp(2rem, 1.5rem + 2.4vw, 3.25rem); line-height: 1.1; letter-spacing: -0.015em; text-wrap: balance; }
+.quiz-intro-subtitle { font-size: var(--fs-lead); text-wrap: balance; }
+.quiz-intro-image { border-radius: var(--r-lg); box-shadow: var(--shadow-md); }
+@media (max-width: 768px) {
+    .quiz-intro-image { border-radius: var(--r-md); }
+}
+.quiz-intro-text { max-width: var(--measure); margin-inline: auto; }
+.quiz-intro-text p { font-size: var(--fs-body); line-height: var(--lh-body); }
+.quiz-info-box { border-width: 1px; }
+.quiz-start-btn { font-size: 1.0625rem; padding: 1rem 2.5rem; }
+/* Bug fix: after "Začít test" the intro hides and the quiz starts at the very
+   top, so on phones the progress bar sat under the 89 px fixed header. */
+.quiz-section, .quiz-results-section {
+    padding-top: calc(89px + clamp(1rem, 0.6rem + 1.6vw, 2.5rem));
+    padding-bottom: var(--section-y);
+}
+.quiz-progress-wrapper { box-shadow: none; }
+.quiz-progress-text, .quiz-progress-percent { font-size: var(--fs-small); font-weight: 600; color: var(--text-medium); }
+.quiz-progress-bar { height: 8px; background: #EAE5DE; box-shadow: none; border-radius: var(--r-pill); }
+.quiz-progress-fill { background: var(--primary); box-shadow: none; border-radius: var(--r-pill); }
+@media (max-width: 768px) {
+    .quiz-progress-wrapper { border: 1px solid var(--border-light); border-radius: var(--r-md); }
+}
+.quiz-card { padding: var(--card-pad); border: 1px solid var(--border-light); border-radius: var(--r-lg); box-shadow: var(--shadow-md); }
+.quiz-question { line-height: 1.25; text-wrap: balance; }
+.quiz-options { gap: 0.625rem; }
+.quiz-option { border-width: 1px; border-radius: var(--r-sm); padding: 0.875rem 1rem; min-height: 52px; }
+.quiz-option.selected { box-shadow: inset 0 0 0 1px var(--primary); }
+/* 2px look without layout shift */
+@media (hover: hover) {
+    .quiz-option:hover { transform: none; border-color: var(--primary-light); }
+}
+.quiz-option-label { font-size: 1rem; line-height: 1.4; }
+.quiz-results-card { padding: calc(var(--card-pad) * 1.4) var(--card-pad); border: 1px solid var(--border-light); border-radius: var(--r-lg); box-shadow: var(--shadow-md); }
+.quiz-results-header { border-bottom-width: 1px; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+.quiz-results-title { line-height: 1.15; text-wrap: balance; }
+.quiz-results-description { text-align: left; font-size: var(--fs-body); line-height: var(--lh-body); max-width: var(--measure); margin-inline: auto; }
+.quiz-results-recommendations { padding: var(--card-pad-sm); border-radius: var(--r-md); }
+.quiz-results-recommendations h3 { font-size: var(--fs-h4); line-height: 1.3; }
+.quiz-results-recommendations li { padding-block: 0.5rem; font-size: 1rem; }
+.quiz-related-article { background: var(--bg-cream); border: 1px solid var(--border-light); border-radius: var(--r-md); padding: var(--card-pad-sm); }
+.quiz-result-disclaimer { border-radius: var(--r-sm); font-size: var(--fs-small); }
+.quiz-social-share { border-top-width: 1px; }
+.share-btn { border-width: 1px; }
+.quiz-crisis-help { border-radius: var(--r-md); }
+/* E1 quiz start: pill with clipboard icon -> one quiet line */
+.quiz-info-boxes { margin: var(--space-lg, 1.5rem) 0; }
+.quiz-info-box { background: none; border: 0; padding: 0; border-radius: 0;
+    font-size: var(--fs-small); font-weight: 400; color: var(--text-medium); }
+.quiz-info-box strong { color: var(--primary); font-weight: 700; }

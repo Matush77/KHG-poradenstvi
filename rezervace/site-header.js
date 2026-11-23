@@ -16,7 +16,7 @@
     var doc = new DOMParser().parseFromString(html, 'text/html');
     var header = doc.querySelector('header.header');
     var inline = Array.prototype.map.call(doc.querySelectorAll('head style'), function (s) { return s.textContent; }).join('\n');
-    return Promise.all(['/css/styles.css?v=20261115-2', '/css/polish.css?v=20261115-1'].map(function (u) {
+    return Promise.all(['/css/styles.css?v=66f43334'].map(function (u) {
       return fetch(u).then(function (r) { return r.ok ? r.text() : ''; });
     })).then(function (sheets) {
       var style = document.createElement('style');

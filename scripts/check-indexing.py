@@ -64,6 +64,11 @@ if "--live" not in sys.argv:
     robots = (root / "robots.txt").read_text(encoding="utf-8")
     bad("robots.txt disallows the whole site") if re.search(r"^\s*Disallow:\s*/\s*$", robots, re.M) else ok("robots.txt allows the site")
     bad(".htaccess sets X-Robots-Tag, check it") if "x-robots-tag" in (root / ".htaccess").read_text(encoding="utf-8").lower() else ok(".htaccess sends no X-Robots-Tag")
+    # header, footer and ?v= stamps copied into every page (scripts/sync.py)
+    sync = subprocess.run([sys.executable, str(root / "scripts" / "sync.py"), "--check"], capture_output=True, text=True)
+    print(sync.stdout.rstrip() or sync.stderr.rstrip())
+    if sync.returncode:
+        failed = True
     git = lambda *a: subprocess.run(["git", *a], cwd=root, capture_output=True, text=True).stdout.strip()
     n, branch = len(git("ls-files", "ui-lab").splitlines()), git("branch", "--show-current")
     if n == 0:

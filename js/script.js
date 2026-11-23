@@ -479,7 +479,7 @@ if (isHomepage) {
 }
 
 // Testimonials Carousel
-// All cards sit in one CSS grid cell (css/polish.css), so the track is as tall as
+// All cards sit in one CSS grid cell (css/styles.css, polish part), so the track is as tall as
 // the longest review and nothing below it moves. Auto-advance runs every 7 s
 // until the visitor swipes, taps a dot or uses the arrow keys, then stops for
 // good; with "reduce motion" it never starts.
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     startAutoAdvance();
 });
 
-// Hero blob: its shape animation loops (css/polish.css); pause it while the
+// Hero blob: its shape animation loops (css/styles.css, polish part); pause it while the
 // portrait is off-screen so phones don't redraw it for nothing.
 document.addEventListener('DOMContentLoaded', () => {
     const blob = document.querySelector('.blob-shape');

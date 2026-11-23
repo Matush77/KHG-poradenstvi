@@ -61,3 +61,12 @@ ExpiresByType "text/css" "A86400"
 ExpiresByType "text/javascript" "A86400"
 ExpiresByType "application/javascript" "A86400"
 #-StackCache
+
+# CSS and JS carry ?v=<hash of the file> on every link (scripts/sync.py), so a changed file gets a new address:
+# browsers may keep them a year. Fonts never change under the same name (a new font = a new file name).
+# Images keep the day above: they have no stamp. Set after the hosting panel's block above, which it may rewrite.
+<IfModule mod_headers.c>
+<FilesMatch "\.(css|js|woff2)$">
+Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+</IfModule>

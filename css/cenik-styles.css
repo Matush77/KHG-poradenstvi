@@ -237,3 +237,29 @@
         margin-top: var(--space-xl);
     }
 }
+
+/* ==========================================================================
+   Polish layer, merged from css/polish.css on 23 Nov (was a separate file loaded last).
+   Page-specific part: it overrides the rules above.
+   ========================================================================== */
+
+.pricing-card, .pricing-info-item {
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+.pricing-info-item { border-radius: var(--r-md); }
+.pricing-card, .pricing-information { border-radius: var(--r-lg); }
+/* Result colours: set directly in the quiz scripts (muted sage / blue / ochre / rose). */
+/* [P14] Pricing (cenik.html) ----------------------------------------------- */
+.pricing-hero { padding-bottom: clamp(1.5rem, 1rem + 2vw, 3rem); }
+.pricing-intro { font-size: var(--fs-lead); line-height: 1.6; }
+.pricing-main { padding-bottom: var(--section-y); }
+.pricing-grid { gap: var(--grid-gap); }
+.pricing-card { padding: var(--card-pad); box-shadow: var(--shadow-md); }
+.pricing-card-label { font-size: var(--fs-label); letter-spacing: 0.1em; }
+.pricing-facts li { font-size: 1rem; }
+.pricing-information { padding: var(--card-pad); }
+.pricing-info-grid { gap: var(--grid-gap); }
+.pricing-info-item { padding: var(--card-pad-sm); border: 1px solid var(--border-light); box-shadow: none; }
+.pricing-information > h2, .pricing-first-session h2 { font-size: var(--fs-h3); line-height: 1.2; }
+.pricing-first-session p { max-width: var(--measure); margin-inline: auto; }

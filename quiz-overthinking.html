@@ -39,9 +39,8 @@
     <link rel="preload" href="fonts/Fraunces/Fraunces-500-Soft-cs.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=20261115-2">
-    <link rel="stylesheet" href="css/quiz-styles.css?v=20261110-3">
-    <link rel="stylesheet" href="css/polish.css?v=20261115-1">
+    <link rel="stylesheet" href="css/styles.css?v=66f43334">
+    <link rel="stylesheet" href="css/quiz-styles.css?v=39fae13d">
 
     <!-- Structured Data - Quiz Schema -->
     <script type="application/ld+json">
@@ -981,7 +980,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 <body>
     <!-- Header -->
     <header class="header">
-        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
+        <!-- Generated from partials/header.html by scripts/sync.py. -->
         <nav class="nav container" aria-label="Hlavní navigace">
             <div class="nav-logo">
                 <a href="/" aria-label="KHG Poradenství – úvodní stránka">
@@ -1155,7 +1154,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
     <!-- Footer -->
     <footer class="footer">
-        <!-- Generated from partials/footer.html by scripts/sync-footer.ps1. -->
+        <!-- Generated from partials/footer.html by scripts/sync.py. -->
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
@@ -1203,8 +1202,204 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     </footer>
 
 
-    <script src="js/privacy-consent.js?v=20261016-2"></script>
-    <script src="js/script.js?v=20261116-1"></script>
-    <script src="js/quiz-overthinking.js?v=20261116-1"></script>
+    <script src="js/privacy-consent.js?v=f33eced6"></script>
+    <script src="js/script.js?v=1af74392"></script>
+    <!-- the questions and results of this quiz; js/quiz-engine.js runs them -->
+    <script>
+    const quizConfig = {
+        storageKey: 'quiz-overthinking-progress',
+        shareText: 'Test overthinkingu - Může vám pomoci zjistit, jak moc vás ovlivňuje přemýšlení',
+        questions: [
+            {
+                id: 1,
+                text: "Jak často se vracíte k situacím, které už skončily?",
+                options: [
+                    { text: "Zřídka", score: 0 },
+                    { text: "Občas", score: 1 },
+                    { text: "Často", score: 2 },
+                    { text: "Neustále", score: 3 }
+                ]
+            },
+            {
+                id: 2,
+                text: "Máte problém vypnout myšlenky před spaním?",
+                options: [
+                    { text: "Ne, usínám snadno", score: 0 },
+                    { text: "Občas to trvá déle", score: 1 },
+                    { text: "Často mi to trvá dlouho", score: 2 },
+                    { text: "Téměř vždy se nemůžu uklidnit", score: 3 }
+                ]
+            },
+            {
+                id: 3,
+                text: "Analyzujete detaily konverzací i po jejich skončení?",
+                options: [
+                    { text: "Málokdy", score: 0 },
+                    { text: "Někdy, když byla důležitá", score: 1 },
+                    { text: "Často, zejména když bylo něco nejasné", score: 2 },
+                    { text: "Vždy, znovu a znovu si přehrávám každé slovo", score: 3 }
+                ]
+            },
+            {
+                id: 4,
+                text: "Vytváříte si v hlavě nejhorší možné scénáře?",
+                options: [
+                    { text: "Ne, obvykle jsem optimista", score: 0 },
+                    { text: "Občas mě napadnou", score: 1 },
+                    { text: "Často si představuji, co všechno může jít špatně", score: 2 },
+                    { text: "Neustále, nemůžu se od toho odpoutat", score: 3 }
+                ]
+            },
+            {
+                id: 5,
+                text: "Máte pocit, že vám myšlenky běží i ve chvíli, kdy chcete odpočívat?",
+                options: [
+                    { text: "Ne, dokážu se dobře uvolnit", score: 0 },
+                    { text: "Občas mi myšlenky bloudí", score: 1 },
+                    { text: "Často se nemůžu odpojit", score: 2 },
+                    { text: "Téměř nikdy nejsem v klidu", score: 3 }
+                ]
+            },
+            {
+                id: 6,
+                text: "Jak moc vás paralyzuje rozhodování?",
+                options: [
+                    { text: "Rozhoduji se poměrně snadno", score: 0 },
+                    { text: "Občas zvažuji dlouho", score: 1 },
+                    { text: "Často se nemůžu rozhodnout", score: 2 },
+                    { text: "Skoro vždy mě to blokuje", score: 3 }
+                ]
+            },
+            {
+                id: 7,
+                text: "Bojíte se, co si o vás druzí pomyslí?",
+                options: [
+                    { text: "Málokdy mě to trápí", score: 0 },
+                    { text: "Občas si tím dělám hlavu", score: 1 },
+                    { text: "Často o tom přemýšlím", score: 2 },
+                    { text: "Neustále analyzuji reakce druhých", score: 3 }
+                ]
+            },
+            {
+                id: 8,
+                text: "Máte pocit, že musíte mít všechno pod kontrolou?",
+                options: [
+                    { text: "Ne, jsem v pohodě s nejistotou", score: 0 },
+                    { text: "Občas se cítím nekomfortně", score: 1 },
+                    { text: "Často potřebuji vědět, co bude", score: 2 },
+                    { text: "Neustále, nejistota mě velmi stresuje", score: 3 }
+                ]
+            },
+            {
+                id: 9,
+                text: "Jak často se cítíte duševně vyčerpaní?",
+                options: [
+                    { text: "Zřídka", score: 0 },
+                    { text: "Občas", score: 1 },
+                    { text: "Často", score: 2 },
+                    { text: "Téměř pořád", score: 3 }
+                ]
+            },
+            {
+                id: 10,
+                text: "Dokážete být přítomní v momentě?",
+                options: [
+                    { text: "Ano, snadno se soustředím na přítomnost", score: 0 },
+                    { text: "Občas mi myšlenky utíkají jinam", score: 1 },
+                    { text: "Často jsem myšlenkami jinde", score: 2 },
+                    { text: "Téměř nikdy nejsem plně v přítomném okamžiku", score: 3 }
+                ]
+            }
+        ]
+    };
+
+    // Result Interpretations
+    const resultInterpretations = {
+        minimal: {
+            range: [0, 7],
+            title: "Málo známek nadměrného přemýšlení",
+            icon: "✓",
+            color: "#3F7652",
+            description: "Ve vašich odpovědích se objevilo jen málo situací spojených s nadměrným přemýšlením. Výsledek ale nepředstavuje celkové hodnocení vašeho duševního zdraví.",
+            recommendations: [
+                "Pokračujte ve svých osvědčených strategiích",
+                "Všímejte si, které postupy vám pomáhají vracet pozornost k přítomnosti",
+                "Nezapomínejte na preventivní péči o duševní zdraví",
+                "Buďte k sobě laskaví i v případech, kdy se přece jen přistíhnete při přemýšlení"
+            ],
+            cta: {
+                heading: "",
+                description: "",
+                button: ""
+            },
+            showCta: false,
+            showCrisis: false
+        },
+        mild: {
+            range: [8, 15],
+            title: "Občasné nadměrné přemýšlení",
+            icon: "○",
+            color: "#2D5A7B",
+            description: "Ve vašich odpovědích se objevují některé situace, ve kterých přemýšlíte déle nebo intenzivněji, než byste chtěli. Můžete vyzkoušet několik postupů a sledovat, co vám pomáhá.",
+            recommendations: [
+                "Zjistěte, zda nejste vyčerpaní – můžete potřebovat odpočinek, ne disciplínu",
+                "Vytvořte si podporu – mluvte o tom s důvěryhodnými lidmi",
+                "Omezte multitasking a zaměřte se na jednu věc",
+                "Zkuste techniku \"5-4-3-2-1\" pro návrat do přítomnosti",
+                "Zapište si myšlenky na papír místo jejich opakování v hlavě",
+                "Nastavte si \"čas na přemýšlení\" – 15 minut denně"
+            ],
+            cta: {
+                heading: "Chcete tématu lépe porozumět?",
+                description: "Pokud vás opakované přemýšlení zatěžuje, můžete v terapii prozkoumat situace, ve kterých se objevuje, a hledat vhodné způsoby práce s ním.",
+                button: "Promluvit si o tom"
+            },
+            showCrisis: false
+        },
+        moderate: {
+            range: [16, 23],
+            title: "Častější nadměrné přemýšlení",
+            icon: "!",
+            color: "#9A712B",
+            description: "Vaše odpovědi naznačují častější výskyt nadměrného přemýšlení. Pokud vám zasahuje do odpočinku, rozhodování nebo každodenního fungování, může být užitečné začít s ním cíleně pracovat.",
+            recommendations: [
+                "Uvědomte si, že myšlenky nejsou fakta",
+                "Pojmenujte si, že se znovu vracíte ke stejné obavě, a zaměřte pozornost na konkrétní činnost nebo na své okolí",
+                "Praktikujte mindfulness nebo meditaci",
+                "Omezte kofein, který může zhoršovat úzkostné myšlenky",
+                "Pohybujte se – fyzická aktivita pomáhá snížit přemýšlení",
+                "Zvažte práci s terapeutem pro hlubší pochopení vzorců"
+            ],
+            cta: {
+                heading: "Je čas aktivně pracovat s overthinkingem",
+                description: "V terapii můžete prozkoumat souvislosti nadměrného přemýšlení a hledat způsoby, které budou odpovídat vaší situaci.",
+                button: "Objednat konzultaci"
+            },
+            showCrisis: false
+        },
+        high: {
+            range: [24, 30],
+            title: "Výrazné nadměrné přemýšlení",
+            icon: "⚠",
+            color: "#A65F55",
+            description: "Ve vašich odpovědích se objevují výrazné projevy nadměrného přemýšlení. Pokud vám narušují spánek, vztahy nebo každodenní fungování, může být užitečné probrat obtíže s psychologem nebo psychoterapeutem.",
+            recommendations: [
+                "Zvažte odbornou konzultaci, při které můžete prozkoumat souvislosti obtíží ve vaší konkrétní situaci",
+                "Začněte s malými kroky – zlepšení je proces",
+                "Buďte k sobě laskaví – overthinking není vaše chyba",
+                "Omezte stresory tam, kde to je možné",
+                "Vytvořte si večerní rutinu pro uklidnění mysli",
+                "Zvažte mindfulness nebo jógu jako doplňkovou podporu"
+            ],
+            cta: {
+                heading: "Nadměrné přemýšlení nemusíte řešit sami",
+                description: "V terapii můžete hledat souvislosti svých obtíží a postupy, které vám pomohou lépe zvládat zatěžující myšlenky.",
+                button: "Vyhledat pomoc"
+            },
+            showCrisis: false
+        }
+    };
+    </script>
+    <script src="js/quiz-engine.js?v=d3a816af"></script>
 </body>
 </html>

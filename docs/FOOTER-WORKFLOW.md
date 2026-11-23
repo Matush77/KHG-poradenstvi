@@ -1,19 +1,29 @@
-# Jednotný footer
+# Hlavička, patička a verze CSS/JS
 
-Soubor `partials/footer.html` je zdrojový fragment, nikoli samostatná webová stránka. Neupravujte footer přímo v jednotlivých HTML souborech.
+Hlavička (`partials/header.html`) a patička (`partials/footer.html`) jsou zdrojové fragmenty, nikoli samostatné
+stránky. Neupravujte je přímo v jednotlivých HTML souborech: skript je do každé stránky vkládá sám.
 
-Po změně footeru spusťte z kořene projektu:
+Po změně hlavičky, patičky nebo jakéhokoli souboru v `css/` či `js/` spusťte z kořene projektu:
 
-```powershell
-.\scripts\sync-footer.ps1
+```bash
+python3 scripts/sync.py
 ```
 
-Kontrola, zda mají všechny stránky aktuální footer:
+Skript:
 
-```powershell
-.\scripts\sync-footer.ps1 -Check
+1. vloží hlavičku do každé stránky v kořeni projektu a označí aktivní položku menu (Ceník, Blog, Kvízy),
+2. vloží patičku do každé stránky v kořeni projektu,
+3. ke každému odkazu na místní `.css` a `.js` (i v `rezervace/`) dopíše `?v=` podle obsahu souboru. Změněný soubor
+   tak dostane novou adresu a prohlížeče mohou CSS a JS držet rok (`.htaccess`), aniž by viděly starou verzi.
+   `?v=` nikdy neupravujte ručně.
+
+Kontrola bez zápisu (spouští ji i `python3 scripts/check-indexing.py` před každým pushem):
+
+```bash
+python3 scripts/sync.py --check
 ```
 
-Skript vkládá kompletní footer přímo do všech HTML souborů v kořeni projektu. Web proto zůstává statický a při načítání stránky nestahuje partial ani synchronizační skript.
+Web zůstává statický: stránka nestahuje partial ani skript. Složky `partials`, `scripts` a `docs` se nasazují
+s repozitářem, ale `.htaccess` je skrývá (404).
 
-Na hosting nahrajte změněné HTML soubory. Složky `partials`, `scripts` a `docs` jsou pouze vývojové a na hosting se nahrávat nemusí.
+Písma (`fonts/`) se také ukládají na rok, ale bez `?v=`: nové písmo vždy jako nový název souboru.

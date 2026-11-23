@@ -42,9 +42,8 @@
     <link rel="preload" href="fonts/Fraunces/Fraunces-500-Soft-cs.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css?v=20261115-2">
-    <link rel="stylesheet" href="css/quiz-styles.css?v=20261110-3">
-    <link rel="stylesheet" href="css/polish.css?v=20261115-1">
+    <link rel="stylesheet" href="css/styles.css?v=66f43334">
+    <link rel="stylesheet" href="css/quiz-styles.css?v=39fae13d">
 
     <!-- Structured Data (Schema.org) - Quiz -->
     <script type="application/ld+json">
@@ -984,7 +983,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 <body>
     <!-- Header & Navigation -->
     <header class="header">
-        <!-- Generated from partials/header.html by scripts/sync-header.ps1. -->
+        <!-- Generated from partials/header.html by scripts/sync.py. -->
         <nav class="nav container" aria-label="Hlavní navigace">
             <div class="nav-logo">
                 <a href="/" aria-label="KHG Poradenství – úvodní stránka">
@@ -1165,7 +1164,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
 
     <!-- Footer -->
     <footer class="footer">
-        <!-- Generated from partials/footer.html by scripts/sync-footer.ps1. -->
+        <!-- Generated from partials/footer.html by scripts/sync.py. -->
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
@@ -1213,8 +1212,215 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy) !important; font-weight:
     </footer>
 
 
-    <script src="js/privacy-consent.js?v=20261016-2"></script>
-    <script src="js/script.js?v=20261116-1"></script>
-    <script src="js/quiz-toxicky-vztah.js?v=20261116-1"></script>
+    <script src="js/privacy-consent.js?v=f33eced6"></script>
+    <script src="js/script.js?v=1af74392"></script>
+    <!-- the questions and results of this quiz; js/quiz-engine.js runs them -->
+    <script>
+    const quizConfig = {
+        storageKey: 'quiz-toxicky-vztah-progress',
+        shareText: 'Test toxického vztahu - Může vám pomoci získat jasno ve vašem vztahu',
+        redFlagResult: 'warning',   // a red-flag answer never gets the reassuring result
+        questions: [
+            {
+                id: 1,
+                text: "Jak často váš partner respektuje vaše osobní hranice?",
+                options: [
+                    { text: "Vždy", score: 0 },
+                    { text: "Většinou", score: 2 },
+                    { text: "Občas", score: 4 },
+                    { text: "Zřídka", score: 6 },
+                    { text: "Nikdy", score: 8 }
+                ]
+            },
+            {
+                id: 2,
+                text: "Cítíte se svobodně vyjádřit svůj názor, i když se neshodujete?",
+                options: [
+                    { text: "Určitě ano", score: 0 },
+                    { text: "Spíše ano", score: 2 },
+                    { text: "Někdy ano, někdy ne", score: 4 },
+                    { text: "Spíše ne", score: 6 },
+                    { text: "Určitě ne", score: 8 }
+                ]
+            },
+            {
+                id: 3,
+                text: "Jak reaguje váš partner, když řeknete \"ne\"?",
+                options: [
+                    { text: "Respektuje to bez problémů", score: 0 },
+                    { text: "Většinou to akceptuje", score: 2 },
+                    { text: "Někdy se zlobí, ale přijme to", score: 4 },
+                    { text: "Často se naštve nebo mě přesvědčuje", score: 6 },
+                    { text: "Nikdy to nepřijme, trvá na svém", score: 8 }
+                ]
+            },
+            {
+                id: 4,
+                text: "Jak často vás partner kritizuje nebo snižuje?",
+                options: [
+                    { text: "Nikdy", score: 0 },
+                    { text: "Zřídka", score: 2 },
+                    { text: "Občas", score: 4 },
+                    { text: "Často", score: 6 },
+                    { text: "Neustále", score: 8 }
+                ]
+            },
+            {
+                id: 5,
+                text: "Cítíte se ve vztahu bezpečně a respektovaně?",
+                options: [
+                    { text: "Vždy", score: 0 },
+                    { text: "Většinou", score: 2 },
+                    { text: "Někdy ano, někdy ne", score: 5 },
+                    { text: "Spíše ne", score: 7, redFlag: true },
+                    { text: "Určitě ne", score: 9, redFlag: true }
+                ]
+            },
+            {
+                id: 6,
+                text: "Máte pocit, že chodíte \"po špičkách\", abyste partnera nenaštvali?",
+                options: [
+                    { text: "Nikdy", score: 0 },
+                    { text: "Zřídka", score: 3 },
+                    { text: "Občas", score: 5 },
+                    { text: "Často", score: 7 },
+                    { text: "Neustále", score: 9, redFlag: true }
+                ]
+            },
+            {
+                id: 7,
+                text: "Snaží se váš partner kontrolovat, kam chodíte nebo s kým trávíte čas?",
+                options: [
+                    { text: "Vůbec ne", score: 0 },
+                    { text: "Pouze se zajímá", score: 1 },
+                    { text: "Někdy je přehnaně zvědavý/á", score: 4 },
+                    { text: "Často chce vědět všechno", score: 7 },
+                    { text: "Neustále mě kontroluje", score: 9, redFlag: true }
+                ]
+            },
+            {
+                id: 8,
+                text: "Jak se váš partner staví k vašim přátelům a rodině?",
+                options: [
+                    { text: "Podporuje mé vztahy", score: 0 },
+                    { text: "Je neutrální", score: 2 },
+                    { text: "Někdy je kritický/á", score: 4 },
+                    { text: "Často kritizuje nebo odrazuje od setkání", score: 7 },
+                    { text: "Izoluje mě od blízkých", score: 9, redFlag: true }
+                ]
+            },
+            {
+                id: 9,
+                text: "Jak váš partner řeší konflikty?",
+                options: [
+                    { text: "Klidně a konstruktivně diskutujeme", score: 0 },
+                    { text: "Většinou dobře, občas se pohádáme", score: 2 },
+                    { text: "Často se vyhýbá nebo přehání", score: 5 },
+                    { text: "Křičí, obviňuje nebo manipuluje", score: 7 },
+                    { text: "Používá agresivní chování", score: 9, redFlag: true }
+                ]
+            },
+            {
+                id: 10,
+                text: "Přijímá váš partner zodpovědnost za své chování?",
+                options: [
+                    { text: "Vždy", score: 0 },
+                    { text: "Většinou", score: 2 },
+                    { text: "Někdy", score: 4 },
+                    { text: "Zřídka, často viní mě", score: 7 },
+                    { text: "Nikdy, vždy jsem já ten špatný/á", score: 9 }
+                ]
+            }
+        ]
+    };
+
+    // Result Interpretations
+    const resultInterpretations = {
+        healthy: {
+            range: [0, 20],
+            title: "Převažují znaky respektu a bezpečí",
+            icon: "✓",
+            color: "#3F7652",
+            description: "Ve vašich odpovědích převažují znaky respektu, důvěry a bezpečí. Test však nemůže posoudit celý vztah ani vyloučit konkrétní problematické chování.",
+            recommendations: [
+                "Pokračujte v otevřené komunikaci a vzájemném respektu",
+                "Věnujte čas společným aktivitám i individuálním zájmům",
+                "Pravidelně si říkejte, co v vztahu funguje dobře",
+                "Buďte pozorní k potřebám partnera i svým vlastním"
+            ],
+            cta: {
+                heading: "",
+                description: "",
+                button: ""
+            },
+            showCta: false,
+            showCrisis: false
+        },
+        warning: {
+            range: [21, 45],
+            title: "Některé varovné signály",
+            icon: "⚠",
+            color: "#9A712B",
+            description: "Některé odpovědi poukazují na chování, kterému je vhodné věnovat pozornost. Závažnost situace nelze určit pouze podle celkového skóre – důležitý je konkrétní kontext, zejména přítomnost strachu, nátlaku, kontroly, vyhrožování nebo násilí.",
+            recommendations: [
+                "O tom, co vás trápí, mluvte s partnerem pouze tehdy, pokud je to pro vás bezpečné",
+                "Pokud se obáváte partnerovy reakce, svěřte se nejprve důvěryhodné osobě nebo odborné službě",
+                "Zvažte individuální odbornou konzultaci pro ujasnění situace",
+                "Nevzdávejte se svých přátel a osobních zájmů",
+                "Sledujte, zda se situace zlepšuje nebo zhoršuje"
+            ],
+            cta: {
+                heading: "Chcete si situaci bezpečně ujasnit?",
+                description: "Při individuální konzultaci můžete popsat konkrétní situaci a promyslet další kroky s ohledem na své potřeby a bezpečí.",
+                button: "Promluvit si o tom"
+            },
+            showCrisis: false
+        },
+        concerning: {
+            range: [46, 65],
+            title: "Výrazné znaky nezdravého vztahu",
+            icon: "!",
+            color: "#A65F55",
+            description: "Některé vaše odpovědi mohou ukazovat na opakované nerespektování hranic, kontrolu nebo manipulaci. Test nemůže určit povahu celého vztahu, ale tyto konkrétní projevy je vhodné brát vážně.",
+            recommendations: [
+                "Vaše pocity jsou platné a důležité - věřte jim",
+                "Promluvte si s důvěryhodnou osobou o vaší situaci",
+                "Zvažte individuální odbornou konzultaci pro podporu a ujasnění situace",
+                "Vytvořte si bezpečnostní plán, pokud se cítíte ohroženi",
+                "Pamatujte: máte právo na bezpečný a respektující vztah",
+                "Informujte se o možnostech pomoci a podpory"
+            ],
+            cta: {
+                heading: "Nejste na to sami",
+                description: "Individuální konzultace může nabídnout prostor pro zmapování situace a hledání bezpečných dalších kroků.",
+                button: "Objednat konzultaci"
+            },
+            showCrisis: false
+        },
+        toxic: {
+            range: [66, 86],
+            title: "Vážné znaky toxického vztahu",
+            icon: "⚠",
+            color: "#A65F55",
+            description: "Některé z vašich odpovědí popisují závažné varovné signály. Test nemůže určit povahu celého vztahu, ale pokud zažíváte strach, nátlak, kontrolu, vyhrožování nebo násilí, je důležité vyhledat bezpečnou podporu.",
+            recommendations: [
+                "Vaše bezpečnost je absolutní prioritou",
+                "Obraťte se na odbornou pomoc - psychologa nebo centrum pomoci",
+                "Svěřte se někomu, komu důvěřujete",
+                "Vytvořte si bezpečnostní plán pro případ eskalace",
+                "Nejste zodpovědní za chování druhého člověka",
+                "Odchod z toxického vztahu je proces - buďte trpěliví a laskavý/á k sobě",
+                "Zdokumentujte případné incidenty (pro vlastní potřebu nebo právní ochranu)"
+            ],
+            cta: {
+                heading: "Podpora je dostupná",
+                description: "Individuální konzultace může nabídnout prostor pro zmapování situace a hledání bezpečných dalších kroků.",
+                button: "Vyhledat pomoc"
+            },
+            showCrisis: true
+        }
+    };
+    </script>
+    <script src="js/quiz-engine.js?v=d3a816af"></script>
 </body>
 </html>

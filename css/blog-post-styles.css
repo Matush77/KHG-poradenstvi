@@ -431,3 +431,33 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   Polish layer, merged from css/polish.css on 23 Nov (was a separate file loaded last).
+   Page-specific part: it overrides the rules above.
+   ========================================================================== */
+
+.article-summary,
+.article-safety-note,
+.article-callout,
+.related-resource,
+.article-author-box,
+.related-articles,
+.blog-post-image { border-radius: var(--r-md); }
+.blog-post-cta { border-radius: var(--r-lg); }
+.related-articles-list a, .article-examples p { border-radius: var(--r-sm); }
+.blog-post-category { border-radius: var(--r-pill); }
+/* [P10] Blog article: readable measure & size ---------------------------- */
+.blog-post .container { max-width: 52rem; }
+.blog-post-content { padding: var(--card-pad); }
+@media (max-width: 768px) {
+    .blog-post-content { padding: var(--space-md) var(--space-xs); }
+}
+.blog-post-content p, .blog-post-content li {
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);   /* 17 -> 18, li matched to p */
+    line-height: 1.7;
+}
+.blog-post-content > * { max-width: 68ch; }
+.blog-post-content h2 { font-size: var(--fs-h3); line-height: 1.2; margin-top: 2.5rem; }
+.blog-post-content h3 { font-size: var(--fs-h4); margin-top: 1.75rem; }
+.article-summary h2, .article-author-box h2, .related-articles h2 { font-size: 1.375rem; margin-top: 0; }
