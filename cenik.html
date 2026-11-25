@@ -2538,6 +2538,38 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
 .pricing-info-item { border-bottom: 0; }
 .pricing-info-item:first-child { padding-top: 0; }
 
+
+/* Extra sessions outside the regular schedule (25 Nov, Kristýna's text): a white card under the price cards, in the
+   same family (radius, padding, peach). Text and contact on the left, the two prices as peach tiles on the right. */
+.pricing-extra { scroll-margin-top: 96px; margin: var(--card-gap) 0 0; padding: var(--card-pad); background: var(--white, #fff); border: 1px solid var(--peach-line); border-radius: var(--r); display: grid; gap: 24px; }
+@media (min-width: 900px) { .pricing-extra { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px 48px; } .pricing-extra-crisis { grid-column: 1 / -1; } }
+.pricing-extra .pricing-extra-kicker { font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--coral-ink); margin: 0 0 8px; }
+.pricing-extra h2 { font-size: var(--fs-h3); line-height: 1.3; letter-spacing: -0.01em; color: var(--navy); margin: 0 0 12px; }
+.pricing-extra p { color: var(--slate); margin: 0 0 12px; }
+.pricing-extra .pricing-extra-contact { margin-bottom: 20px; }
+/* below 900 px one column, and the prices come right after the intro (the order a visitor needs them) */
+@media (max-width: 899px) {
+  .pricing-extra { gap: 0; }
+  .pricing-extra-main { display: contents; }
+  .pricing-extra-kicker, .pricing-extra h2, .pricing-extra-intro { order: 1; }
+  .pricing-extra-side { order: 2; margin: 8px 0 24px; }
+  .pricing-extra-contact, .pricing-extra-actions { order: 3; }
+  .pricing-extra .pricing-extra-crisis { order: 4; margin-top: 24px; }
+}
+.pricing-extra-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 360px; }
+.pricing-extra-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 999px; background: var(--peach); color: var(--navy); text-decoration: none; font-weight: 600; font-size: .9375rem; }
+.pricing-extra-actions a svg { color: var(--coral-ink); flex: none; }
+@media (hover: hover) { .pricing-extra-actions a:hover { background: var(--peach-hover); } }
+/* SMS only where it sends: a phone. Tablets and computers get e-mail in its place */
+.pricing-extra-actions .x-sms { display: none; }
+@media (pointer: coarse) and (max-width: 719px) { .pricing-extra-actions .x-sms { display: inline-flex; } .pricing-extra-actions .x-mail { display: none; } }
+.pricing-extra-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+@media (min-width: 600px) and (max-width: 899px) { .pricing-extra-list { grid-template-columns: 1fr 1fr; } }
+.pricing-extra-list li { display: grid; gap: 4px; padding: 16px 20px; border-radius: var(--r); background: var(--peach); color: var(--slate); font-size: .9375rem; line-height: 1.4; }
+.pricing-extra-list li::before { display: none; }
+.pricing-extra-list strong { font-family: var(--font-heading); font-size: var(--fs-h3); font-weight: 500; font-synthesis: none; letter-spacing: -0.01em; line-height: 1.2; color: var(--navy); white-space: nowrap; }
+.pricing-extra .pricing-extra-note { font-size: .875rem; color: var(--mute); margin: 0; }
+.pricing-extra .pricing-extra-crisis { font-size: .9375rem; color: var(--mute); margin: 0; padding-top: 20px; border-top: 1px solid var(--line); }
     
 /* ---- UI audit 16 Nov (owner asked for fixes 2, 3, 4, 7) ----
    (7) One text axis: section titles, page intros and the hero are left-aligned at every width
@@ -2715,6 +2747,28 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
                         <a href="/rezervace.html?forma=osobne" class="btn btn-hero">Objednat osobní terapii</a>
                     </article>
                 </div>
+
+                <section class="pricing-extra" id="mimoradny-termin" aria-labelledby="mimoradny-termin-title">
+                    <div class="pricing-extra-main">
+                        <p class="pricing-extra-kicker">Mimořádný termín</p>
+                        <h2 id="mimoradny-termin-title">Když potřebujete terapeutické setkání dříve</h2>
+                        <p class="pricing-extra-intro">Ne vždy je možné nebo snadné čekat na nejbližší volný termín. Proto nabízím také možnost mimořádného terapeutického setkání mimo běžné objednací termíny.</p>
+                        <p class="pricing-extra-contact">V případě zájmu mě prosím kontaktujte přímo na <a href="tel:+420605990980">605&nbsp;990&nbsp;980</a> nebo <a href="mailto:kristyna@khgporadenstvi.cz">kristyna@khgporadenstvi.cz</a>. Dostupnost mimořádných termínů závisí na mých aktuálních časových možnostech a termín je závazný až po vzájemném potvrzení.</p>
+                        <div class="pricing-extra-actions">
+                            <a href="https://wa.me/420605990980?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20Hodilo%20by%20se%20mi%3A%20" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.2 18.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.3 9.2c.2 1.9 1.6 3.4 3.5 3.9l.9-.8 1.6.7-.2 1.2c-2.8 0-5.6-2.6-5.9-5.4l1.1-.4.8 1.5z" fill="currentColor"/></svg>WhatsApp</a>
+                            <a class="x-sms" href="sms:+420605990980?&amp;body=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20Hodilo%20by%20se%20mi%3A%20"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>SMS</a>
+                            <a class="x-mail" href="mailto:kristyna@khgporadenstvi.cz?subject=Mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn&amp;body=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20Hodilo%20by%20se%20mi%3A%20"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>E-mail</a>
+                        </div>
+                    </div>
+                    <div class="pricing-extra-side">
+                        <ul class="pricing-extra-list">
+                            <li><span>Setkání do 24 hodin v pracovní den</span> <strong>1&nbsp;800&nbsp;Kč</strong></li>
+                            <li><span>Setkání o víkendu nebo státním svátku</span> <strong>2&nbsp;200&nbsp;Kč</strong></li>
+                        </ul>
+                        <p class="pricing-extra-note">Vyšší cena zohledňuje individuální organizaci termínu nad rámec běžného pracovního rozvrhu.</p>
+                    </div>
+                    <p class="pricing-extra-crisis">Nejedná se o krizovou ani pohotovostní službu. V případě akutní psychické krize je možné využít Linku první psychické pomoci <a href="tel:116123">116&nbsp;123</a>.</p>
+                </section>
             </div>
         </section>
 

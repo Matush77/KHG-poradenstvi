@@ -60,3 +60,35 @@
 .pricing-info-item { border-bottom: 0; }
 .pricing-info-item:first-child { padding-top: 0; }
 
+
+/* Extra sessions outside the regular schedule (25 Nov, Kristýna's text): a white card under the price cards, in the
+   same family (radius, padding, peach). Text and contact on the left, the two prices as peach tiles on the right. */
+.pricing-extra { scroll-margin-top: 96px; margin: var(--card-gap) 0 0; padding: var(--card-pad); background: var(--white, #fff); border: 1px solid var(--peach-line); border-radius: var(--r); display: grid; gap: 24px; }
+@media (min-width: 900px) { .pricing-extra { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px 48px; } .pricing-extra-crisis { grid-column: 1 / -1; } }
+.pricing-extra .pricing-extra-kicker { font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--coral-ink); margin: 0 0 8px; }
+.pricing-extra h2 { font-size: var(--fs-h3); line-height: 1.3; letter-spacing: -0.01em; color: var(--navy); margin: 0 0 12px; }
+.pricing-extra p { color: var(--slate); margin: 0 0 12px; }
+.pricing-extra .pricing-extra-contact { margin-bottom: 20px; }
+/* below 900 px one column, and the prices come right after the intro (the order a visitor needs them) */
+@media (max-width: 899px) {
+  .pricing-extra { gap: 0; }
+  .pricing-extra-main { display: contents; }
+  .pricing-extra-kicker, .pricing-extra h2, .pricing-extra-intro { order: 1; }
+  .pricing-extra-side { order: 2; margin: 8px 0 24px; }
+  .pricing-extra-contact, .pricing-extra-actions { order: 3; }
+  .pricing-extra .pricing-extra-crisis { order: 4; margin-top: 24px; }
+}
+.pricing-extra-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 360px; }
+.pricing-extra-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 999px; background: var(--peach); color: var(--navy); text-decoration: none; font-weight: 600; font-size: .9375rem; }
+.pricing-extra-actions a svg { color: var(--coral-ink); flex: none; }
+@media (hover: hover) { .pricing-extra-actions a:hover { background: var(--peach-hover); } }
+/* SMS only where it sends: a phone. Tablets and computers get e-mail in its place */
+.pricing-extra-actions .x-sms { display: none; }
+@media (pointer: coarse) and (max-width: 719px) { .pricing-extra-actions .x-sms { display: inline-flex; } .pricing-extra-actions .x-mail { display: none; } }
+.pricing-extra-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+@media (min-width: 600px) and (max-width: 899px) { .pricing-extra-list { grid-template-columns: 1fr 1fr; } }
+.pricing-extra-list li { display: grid; gap: 4px; padding: 16px 20px; border-radius: var(--r); background: var(--peach); color: var(--slate); font-size: .9375rem; line-height: 1.4; }
+.pricing-extra-list li::before { display: none; }
+.pricing-extra-list strong { font-family: var(--font-heading); font-size: var(--fs-h3); font-weight: 500; font-synthesis: none; letter-spacing: -0.01em; line-height: 1.2; color: var(--navy); white-space: nowrap; }
+.pricing-extra .pricing-extra-note { font-size: .875rem; color: var(--mute); margin: 0; }
+.pricing-extra .pricing-extra-crisis { font-size: .9375rem; color: var(--mute); margin: 0; padding-top: 20px; border-top: 1px solid var(--line); }
