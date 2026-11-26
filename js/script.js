@@ -454,3 +454,38 @@ if (isHomepage) {
     window.addEventListener('scroll', updateActiveNavLink, { passive: true });
     updateActiveNavLink();
 }
+
+// Extra session (homepage Služby): the same message panel as on the booking page.
+// The link goes to the Ceník card without JS; with JS it opens the panel (WhatsApp + SMS on phones, WhatsApp + e-mail elsewhere).
+document.addEventListener('DOMContentLoaded', function() {
+    const triggers = document.querySelectorAll('[data-x24]');
+    if (!triggers.length || typeof HTMLDialogElement !== 'function') return;
+    const msg = encodeURIComponent('Dobrý den, mám zájem o mimořádný termín. Hodilo by se mi: ');
+    const icon = function(path) { return '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">' + path + '</svg>'; };
+    let dialog = null;
+    const open = function() {
+        if (!dialog) {
+            dialog = document.createElement('dialog');
+            dialog.className = 'xs';
+            dialog.setAttribute('aria-labelledby', 'xs-h');
+            dialog.innerHTML = '<button type="button" class="xs-x" aria-label="Zavřít">×</button><h2 id="xs-h">Mimořádný termín</h2>' +
+                '<p>Do 24 hodin v pracovní den za 1&nbsp;800&nbsp;Kč, o víkendu a ve svátek za 2&nbsp;200&nbsp;Kč. Když to půjde, pošlu potvrzení a odkaz k platbě.</p>' +
+                '<div class="xs-b"><a href="https://wa.me/420605990980?text=' + msg + '" target="_blank" rel="noopener">' +
+                icon('<path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.2 18.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.3 9.2c.2 1.9 1.6 3.4 3.5 3.9l.9-.8 1.6.7-.2 1.2c-2.8 0-5.6-2.6-5.9-5.4l1.1-.4.8 1.5z" fill="currentColor"/>') + 'WhatsApp</a>' +
+                '<a class="x-sms" href="sms:+420605990980?&amp;body=' + msg + '">' +
+                icon('<path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>') + 'SMS</a>' +
+                '<a class="x-mail" href="mailto:kristyna@khgporadenstvi.cz?subject=' + encodeURIComponent('Mimořádný termín') + '&amp;body=' + msg + '">' +
+                icon('<rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>') + 'E-mail</a></div>' +
+                '<a class="xs-l" href="/cenik.html#mimoradny-termin">Cena a podmínky</a>';
+            dialog.addEventListener('click', function(e) {
+                if (e.target === dialog || e.target.closest('.xs-x')) dialog.close();
+            });
+            document.body.appendChild(dialog);
+        }
+        dialog.showModal();
+        dialog.querySelector('.xs-b a').focus();
+    };
+    triggers.forEach(function(t) {
+        t.addEventListener('click', function(e) { e.preventDefault(); open(); });
+    });
+});

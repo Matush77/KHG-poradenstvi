@@ -61,34 +61,41 @@
 .pricing-info-item:first-child { padding-top: 0; }
 
 
-/* Extra sessions outside the regular schedule (25 Nov, Kristýna's text): a white card under the price cards, in the
-   same family (radius, padding, peach). Text and contact on the left, the two prices as peach tiles on the right. */
-.pricing-extra { scroll-margin-top: 96px; margin: var(--card-gap) 0 0; padding: var(--card-pad); background: var(--white, #fff); border: 1px solid var(--peach-line); border-radius: var(--r); display: grid; gap: 24px; }
-@media (min-width: 900px) { .pricing-extra { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px 48px; } .pricing-extra-crisis { grid-column: 1 / -1; } }
-.pricing-extra .pricing-extra-kicker { font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--coral-ink); margin: 0 0 8px; }
-.pricing-extra h2 { font-size: var(--fs-h3); line-height: 1.3; letter-spacing: -0.01em; color: var(--navy); margin: 0 0 12px; }
-.pricing-extra p { color: var(--slate); margin: 0 0 12px; }
-.pricing-extra .pricing-extra-contact { margin-bottom: 20px; }
-/* below 900 px one column, and the prices come right after the intro (the order a visitor needs them) */
-@media (max-width: 899px) {
-  .pricing-extra { gap: 0; }
-  .pricing-extra-main { display: contents; }
-  .pricing-extra-kicker, .pricing-extra h2, .pricing-extra-intro { order: 1; }
-  .pricing-extra-side { order: 2; margin: 8px 0 24px; }
-  .pricing-extra-contact, .pricing-extra-actions { order: 3; }
-  .pricing-extra .pricing-extra-crisis { order: 4; margin-top: 24px; }
+/* Extra sessions outside the regular schedule (26 Nov, layout "A"): a third price card with the same anatomy as the
+   two above (name, price, rows, action), white with a peach edge; Kristýna's text sits under the cards as a note.
+   Three cards in a row from 1200 px (narrower, the prices wrap); 821–1199 px: two cards, the third full width with its rows beside the price. */
+/* Three in a row: the cards share their rows (name, price, facts, button), so the lines and buttons sit level */
+@media (min-width: 1200px) {
+  .pricing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, auto); }
+  .pricing-grid > .pricing-card { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
+  .pricing-grid > .pricing-card > .btn, .pricing-extra-act { align-self: start; margin-top: 0; }
 }
-.pricing-extra-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 360px; }
-.pricing-extra-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 999px; background: var(--peach); color: var(--navy); text-decoration: none; font-weight: 600; font-size: .9375rem; }
-.pricing-extra-actions a svg { color: var(--coral-ink); flex: none; }
-@media (hover: hover) { .pricing-extra-actions a:hover { background: var(--peach-hover); } }
-/* SMS only where it sends: a phone. Tablets and computers get e-mail in its place */
-.pricing-extra-actions .x-sms { display: none; }
-@media (pointer: coarse) and (max-width: 719px) { .pricing-extra-actions .x-sms { display: inline-flex; } .pricing-extra-actions .x-mail { display: none; } }
-.pricing-extra-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
-@media (min-width: 600px) and (max-width: 899px) { .pricing-extra-list { grid-template-columns: 1fr 1fr; } }
-.pricing-extra-list li { display: grid; gap: 4px; padding: 16px 20px; border-radius: var(--r); background: var(--peach); color: var(--slate); font-size: .9375rem; line-height: 1.4; }
-.pricing-extra-list li::before { display: none; }
-.pricing-extra-list strong { font-family: var(--font-heading); font-size: var(--fs-h3); font-weight: 500; font-synthesis: none; letter-spacing: -0.01em; line-height: 1.2; color: var(--navy); white-space: nowrap; }
-.pricing-extra .pricing-extra-note { font-size: .875rem; color: var(--mute); margin: 0; }
-.pricing-extra .pricing-extra-crisis { font-size: .9375rem; color: var(--mute); margin: 0; padding-top: 20px; border-top: 1px solid var(--line); }
+.pricing-card-extra { background: var(--white, #fff); border-color: var(--peach-line); scroll-margin-top: 96px; }
+.pricing-card-extra .pricing-price strong { white-space: nowrap; }
+.pricing-extra-rows { list-style: none; margin: 0 0 var(--card-pad); padding: 0; display: grid; gap: 4px; }
+.pricing-extra-rows li { max-width: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 4px 0; color: var(--navy); font-weight: 500; font-size: var(--fs-body, 1.0625rem); }
+.pricing-extra-rows li::before { display: none; }
+.pricing-extra-rows b { font-weight: 600; white-space: nowrap; }
+.pricing-extra-rows .pricing-extra-cap { color: var(--coral-ink); font-weight: 600; font-size: .9375rem; }
+@media (max-width: 360px) { .pricing-extra-rows li { font-size: .9375rem; gap: 8px; } .pricing-extra-rows .pricing-extra-cap { font-size: .875rem; } }
+.pricing-extra-act { margin-top: auto; display: grid; gap: 10px; justify-items: center; }
+.pricing-extra-wa { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; border-radius: 999px; background: var(--white, #fff); color: var(--navy); font-weight: 600; text-decoration: none; box-shadow: inset 0 0 0 1.5px var(--accent, #E8927C); transition: background-color .15s; }
+.pricing-extra-wa svg { color: var(--coral-ink); flex: none; }
+@media (hover: hover) { .pricing-extra-wa:hover { background: var(--peach); } }
+.pricing-extra-wa:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+.pricing-extra-alt { margin: 0; font-size: .9375rem; color: var(--mute); }
+.pricing-extra-alt a { color: var(--primary); }
+/* SMS only on phones (it does nothing on a computer); computers and tablets get e-mail instead */
+.pricing-sms { display: none; }
+@media (pointer: coarse) and (max-width: 719px) { .pricing-sms { display: inline; } .pricing-mail { display: none; } }
+.pricing-extra-note { margin: var(--card-gap) 0 0; display: grid; gap: 12px; max-width: 75ch; }
+.pricing-extra-note p { margin: 0; color: var(--slate); font-size: .9375rem; }
+.pricing-extra-note b { color: var(--navy); font-weight: 600; }
+.pricing-extra-note .pricing-extra-crisis { color: var(--mute); }
+@media (min-width: 821px) and (max-width: 1199px) {
+  .pricing-card-extra { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; }
+  .pricing-card-extra h2, .pricing-card-extra .pricing-price { grid-column: 1; }
+  .pricing-extra-rows { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; }
+  .pricing-extra-act { grid-column: 1 / -1; justify-items: start; justify-content: start; grid-template-columns: auto auto; align-items: center; gap: 20px; margin-top: 8px; }
+  .pricing-extra-wa { width: auto; padding: 0 28px; }
+}

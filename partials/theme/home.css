@@ -6,3 +6,36 @@
   .about-personal-note { flex-direction: column; text-align: center; gap: 12px; }
 }
 
+/* Služby: the extra-session card sits right under the main one, with the Ceník card's peach edge */
+.service-main:has(+ .service-main) { margin-bottom: var(--card-gap); }
+.service-main--extra { border-color: var(--peach-line); scroll-margin-top: 96px; }
+.service-main--extra .service-description { margin-bottom: 0; }
+
+/* the narrowest phones: big fact values stay on one line (50 minut, 1 100 Kč, 1 800 Kč) */
+@media (max-width: 360px) { .service-main .service-fact dd:not(.service-fact-detail) { font-size: 1.625rem; } .service-main .service-facts { column-gap: 16px; } }
+
+/* Extra-session message panel (opened by js/script.js); the same look as on the booking page:
+   a sheet from the bottom on phones, a centred card from 720 px */
+.xs { border: 0; padding: 28px 20px calc(20px + env(safe-area-inset-bottom)); margin: auto 0 0; width: 100%; max-width: 100%; border-radius: 24px 24px 0 0;
+  background: var(--peach); color: var(--slate); font-size: 15px; line-height: 1.5; gap: 12px; animation: xs-up .22s ease-out; }
+.xs[open] { display: grid; }
+.xs::backdrop { background: rgba(22, 58, 85, .32); }
+.xs h2 { margin: 0; font-size: 24px; line-height: 1.2; color: var(--navy); }
+.xs p { margin: 0; font-size: 15px; }
+.xs-b { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.xs-b a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 999px; background: var(--white, #fff);
+  color: var(--navy) !important; text-decoration: none !important; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(22, 58, 85, .14); }
+.xs-b svg { color: var(--coral-ink); }
+.xs-b .x-sms { display: none; }
+@media (pointer: coarse) and (max-width: 719px) { .xs-b .x-sms { display: inline-flex; } .xs-b .x-mail { display: none; } }
+@media (hover: hover) { .xs-b a:hover { box-shadow: inset 0 0 0 1.5px var(--accent); } }
+.xs-l { justify-self: start; font-size: 14px; font-weight: 500; color: #2D5A7B; text-decoration: underline; text-underline-offset: 3px; }
+.xs-x { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; font-size: 26px; line-height: 1; color: var(--navy); cursor: pointer; }
+@media (min-width: 720px) { .xs { margin: auto; max-width: 420px; border-radius: 24px; padding: 28px 28px 24px; animation-name: xs-in; } }
+@keyframes xs-up { from { transform: translateY(24px); opacity: 0; } }
+@keyframes xs-in { from { transform: scale(.97); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .xs { animation: none; } }
+
+/* The office photos close the Služby section, under "První setkání" (moved from "Jak probíhá terapie") */
+.services .office-gallery { margin: var(--block-gap) 0 0; max-width: none; width: auto; }
+

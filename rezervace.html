@@ -2553,24 +2553,34 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
     .rez .hint a { color: var(--blue); }
     /* Short-notice sessions (25 Nov): not bookable here. When nothing is free today or tomorrow, a quiet bar at the
        bottom says the nearest free day and opens a panel with the price and WhatsApp/SMS. Both are fixed: nothing moves. */
-    .rez .xbar { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(251, 248, 243, .96); box-shadow: 0 -1px 0 var(--bk-line); font-size: 14px; line-height: 1.35; animation: xbar-up .25s ease-out; }
+    /* Phone: one slim line fixed at the bottom. Tablet and computer: the same pill, in the page right under the calendar */
+    .rez .xbar { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; padding: 7px 16px calc(7px + env(safe-area-inset-bottom)); background: var(--peach); box-shadow: 0 -1px 0 var(--peach-strong); font-size: 14px; line-height: 1.35; animation: xbar-up .25s ease-out; }
     .rez .xbar[hidden] { display: none; }
     .rez .xbar-in { max-width: 560px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .rez .xbar p { display: grid; color: var(--mute); }
-    .rez .xbar b { color: var(--navy); font-weight: 600; }
-    .rez .xbar-q { color: var(--coral-ink); font-weight: 600; }
-    .rez .xbar button { flex: none; min-height: 44px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--peach); color: var(--navy); font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--coral); }
-    @media (hover: hover) { .rez .xbar button:hover { background: var(--peach-deep); } }
-    body.has-xbar { padding-bottom: 80px; }
+    .rez .xbar p { color: var(--mute); min-width: 0; }
+    .rez .xbar b { display: block; color: var(--navy); font-weight: 600; }
+    .rez .xbar button { flex: none; min-height: 40px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--card); color: var(--navy); font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--coral); }
+    @media (hover: hover) { .rez .xbar button:hover { background: var(--peach-strong); } }
+    @media (max-width: 359px) { .rez .xbar .xb-d { display: none; } }
+    
+    @media (max-width: 719px) {
+      body.has-xbar { padding-bottom: 72px; }
+      body.has-xbar .rez .slots { scroll-margin-bottom: calc(88px + env(safe-area-inset-bottom)); }   /* picking a day scrolls all times above the bar */
+      .rez .hint-t { display: none; }        /* the bar carries the other option; the link alone is enough here */
+      .rez .slots:has(> p.hint) { min-height: 0; }
+    }
     @media (min-width: 720px) {
-      .rez .xbar { left: 50%; right: auto; bottom: 20px; transform: translateX(-50%); width: 540px; border-radius: 999px; padding: 8px 8px 8px 24px; background: var(--card); box-shadow: 0 8px 28px rgba(22, 58, 85, .12), inset 0 0 0 1px var(--bk-line); animation: none; }
+      .rez .xbar { position: static; width: 540px; max-width: 100%; margin: 32px auto 0; border-radius: 999px; padding: 8px 8px 8px 24px; background: var(--peach); box-shadow: none; animation: none; }
+      .rez .xbar p { white-space: normal; }
+      .rez .xbar b, .rez .xbar .xb-d { display: inline; }
+      .rez .xbar b { display: block; }
+      .rez .xbar button { min-height: 44px; padding: 0 22px; }
     }
     @keyframes xbar-up { from { transform: translateY(100%); } }
     .rez .xs { border: 0; padding: 28px 20px calc(20px + env(safe-area-inset-bottom)); margin: auto 0 0; width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; background: var(--peach); color: var(--slate); font-size: 15px; line-height: 1.5; gap: 12px; animation: xs-up .22s ease-out; }
     .rez .xs[open] { display: grid; }
     .rez .xs::backdrop { background: rgba(22, 58, 85, .32); }
     .rez .xs h2 { font-size: 24px; line-height: 1.2; }
-    .rez .xs-k { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--coral-ink); margin-bottom: -6px !important; }
     .rez .xs-b { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .rez .xs-b a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 999px; background: var(--card); color: var(--navy); text-decoration: none; font-weight: 600; box-shadow: inset 0 0 0 1px var(--bk-line); }
     .rez .xs-b svg { color: var(--coral-ink); }
@@ -2755,7 +2765,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
     </footer>
 
     <script src="js/privacy-consent.js?v=f33eced6"></script>
-    <script src="js/script.js?v=4422b6de"></script>
+    <script src="js/script.js?v=e862f395"></script>
     <script>
     /* The booking: free times from /api/slots (booking/), the client's details, then Stripe's own payment page.
        Stripe comes back with ?paid=cs_... and the page shows the confirmation. Nothing is loaded from Stripe here. */
@@ -2865,12 +2875,12 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
         var b = document.getElementById('xbar'), on = !!ff && n >= 2;
         if (!b) {
           if (!on) return;
-          b = document.createElement('div'); b.id = 'xbar'; b.className = 'xbar'; document.querySelector('.rez').appendChild(b);
+          b = document.createElement('div'); b.id = 'xbar'; b.className = 'xbar'; document.getElementById('view').after(b);
           b.addEventListener('click', function (e) { if (e.target.closest('button')) xSheet(); });
         }
         document.body.classList.toggle('has-xbar', on);
         b.hidden = !on;
-        if (on) b.innerHTML = '<div class="xbar-in"><p><span>Nejbližší volný: <b>' + DAYS[ff.getDay()].slice(0, 2) + ' ' + ff.getDate() + '. ' + (ff.getMonth() + 1) + '.</b></span><span class="xbar-q">Potřebujete dříve?</span></p><button type="button" aria-haspopup="dialog">Napsat</button></div>';
+        if (on) b.innerHTML = '<div class="xbar-in"><p><b>Termín do 24 hodin</b> <span class="xb-w">nebo o víkendu</span><span class="xb-d">, po domluvě</span></p><button type="button" aria-haspopup="dialog">Napsat</button></div>';
       }
       function xSheet() {
         var d = document.getElementById('xs');
@@ -2879,8 +2889,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
           d.addEventListener('click', function (e) { if (e.target === d || e.target.closest('.xs-x')) d.close(); });
         }
         var m = encodeURIComponent('Dobrý den, mám zájem o mimořádný termín (' + (state.f === 'osobne' ? 'osobně v Ostravě' : 'online') + '). Hodilo by se mi: ');
-        d.innerHTML = '<button type="button" class="xs-x" aria-label="Zavřít">×</button><p class="xs-k">Mimořádný termín</p><h2 id="xs-h">Potřebujete dříve?</h2>' +
-          '<p>Do 24 hodin v pracovní den za 1&nbsp;800&nbsp;Kč, o víkendu a ve svátek za 2&nbsp;200&nbsp;Kč. Napište mi, kdy by se vám hodilo. Když to půjde, pošlu potvrzení a odkaz k platbě.</p>' +
+        d.innerHTML = '<button type="button" class="xs-x" aria-label="Zavřít">×</button><h2 id="xs-h">Mimořádný termín</h2>' +
+          '<p>Do 24 hodin v pracovní den za 1&nbsp;800&nbsp;Kč, o víkendu a ve svátek za 2&nbsp;200&nbsp;Kč. Když to půjde, pošlu potvrzení a odkaz k platbě.</p>' +
           '<div class="xs-b"><a href="https://wa.me/420605990980?text=' + m + '" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.2 18.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.3 9.2c.2 1.9 1.6 3.4 3.5 3.9l.9-.8 1.6.7-.2 1.2c-2.8 0-5.6-2.6-5.9-5.4l1.1-.4.8 1.5z" fill="currentColor"/></svg>WhatsApp</a><a class="x-sms" href="sms:+420605990980?&amp;body=' + m + '"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>SMS</a><a class="x-mail" href="mailto:kristyna@khgporadenstvi.cz?subject=' + encodeURIComponent('Mimořádný termín') + '&amp;body=' + m + '"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>E-mail</a></div>' +
           '<a class="xs-l" href="/cenik.html#mimoradny-termin">Cena a podmínky</a>';
         d.showModal(); d.querySelector('.xs-b a').focus();
@@ -2905,7 +2915,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
           ? '<h2>' + cap(long(state.date)) + '</h2><div class="times">' +
             slots.map(function (t) { var k = kind(state.date, t); return '<button type="button" class="time' + (k ? ' k-' + k : '') + '" data-t="' + t + '" aria-pressed="' + (t === state.time) + '">' + t + (k ? '<small>' + KIND[k] + '</small>' : '') + '</button>'; }).join('') + '</div>' +
             (MOVE && MOVE.kinds ? '<p class="tz">Plné = tvoje běžné volné časy. Ostatní jsou mimo ně, i ty můžeš vybrat.</p>' : state.f === 'online' ? '<p class="tz">' + TZ + '</p>' : '')
-          : !state.date && hasFree(m) ? '<p class="hint">Vyberte den v kalendáři, nebo<br><button type="button" class="link" id="jump">nejbližší volný: ' + long(firstFree(TODAY)) + ' →</button></p>'
+          : !state.date && hasFree(m) ? '<p class="hint"><span class="hint-t">Vyberte den v kalendáři, nebo<br></span><button type="button" class="link" id="jump">nejbližší volný: ' + long(firstFree(TODAY)) + ' →</button></p>'
           : '<div class="empty">' + (state.date ? 'V tento den nejsou volné termíny.' : 'V ' + MONTHS_LOC[mo] + ' už nejsou volné termíny.') + (firstFree(TODAY) ? '<button type="button" class="link" id="jump">Nejbližší volný termín</button>' : '') + '</div>';
 
         view.innerHTML =
