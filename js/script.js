@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dialog.className = 'xs';
             dialog.setAttribute('aria-labelledby', 'xs-h');
             dialog.innerHTML = '<button type="button" class="xs-x" aria-label="Zavřít">×</button><h2 id="xs-h">Mimořádný termín</h2>' +
-                '<p>Do 24 hodin v pracovní den za 1&nbsp;800&nbsp;Kč, o víkendu a ve svátek za 2&nbsp;200&nbsp;Kč. Když to půjde, pošlu potvrzení a odkaz k platbě.</p>' +
+                '<p>Dřív, než je volno v kalendáři: v pracovní den za 1&nbsp;800&nbsp;Kč, o víkendu a ve svátek za 2&nbsp;200&nbsp;Kč. Když to půjde, pošlu potvrzení a odkaz k platbě.</p>' +
                 '<div class="xs-b"><a href="https://wa.me/420605990980?text=' + msg + '" target="_blank" rel="noopener">' +
                 icon('<path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.2 18.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.3 9.2c.2 1.9 1.6 3.4 3.5 3.9l.9-.8 1.6.7-.2 1.2c-2.8 0-5.6-2.6-5.9-5.4l1.1-.4.8 1.5z" fill="currentColor"/>') + 'WhatsApp</a>' +
                 '<a class="x-sms" href="sms:+420605990980?&amp;body=' + msg + '">' +

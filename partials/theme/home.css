@@ -36,6 +36,6 @@
 @keyframes xs-in { from { transform: scale(.97); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .xs { animation: none; } }
 
-/* The office photos close the Služby section, under "První setkání" (moved from "Jak probíhá terapie") */
-.services .office-gallery { margin: var(--block-gap) 0 0; max-width: none; width: auto; }
-
+/* Kontakt: a quiet second door under "Objednat se" to the extra-session panel */
+.contact-book .contact-x { margin: 16px 0 0; font-size: 15px; }
+.contact-book .contact-x a { color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
