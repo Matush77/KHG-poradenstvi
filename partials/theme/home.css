@@ -8,8 +8,19 @@
 
 /* Služby: the extra-session card sits right under the main one, with the Ceník card's peach edge */
 .service-main:has(+ .service-main) { margin-bottom: var(--card-gap); }
-.service-main--extra { border-color: var(--peach-line); scroll-margin-top: 96px; }
+.service-main--extra { border-color: var(--peach-line); scroll-margin-top: 90px; }
 .service-main--extra .service-description { margin-bottom: 0; }
+
+/* The Termín cell: the value "po domluvě" itself is the link to the message panel, in the site's link colour with
+   an underline (no second "Jak se domluvit" line and no arrow, which did not fit on phones up to 375 px; owner 27 Nov). The link stretches over the whole cell, so the
+   label is a tap target too and screen readers still hear one link. */
+.service-fact--tap dd a { color: var(--primary); text-decoration: underline; text-decoration-thickness: 2px;
+  text-underline-offset: .14em; text-decoration-color: rgba(45, 90, 123, .4); }
+@media (hover: hover) { .service-fact--tap dd a:hover { color: var(--navy); text-decoration-color: currentColor; } }
+.service-fact--tap { position: relative; }
+.service-fact--tap a::after { content: ""; position: absolute; inset: 0; }
+.service-fact--tap a:focus-visible { outline: none; }
+.service-fact--tap a:focus-visible::after { outline: 2px solid var(--navy); outline-offset: 4px; border-radius: 8px; }
 
 /* the narrowest phones: big fact values stay on one line (50 minut, 1 100 Kč, 1 800 Kč) */
 @media (max-width: 360px) { .service-main .service-fact dd:not(.service-fact-detail) { font-size: 1.625rem; } .service-main .service-facts { column-gap: 16px; } }

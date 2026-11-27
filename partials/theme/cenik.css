@@ -70,7 +70,7 @@
   .pricing-grid > .pricing-card { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
   .pricing-grid > .pricing-card > .btn, .pricing-extra-act { align-self: start; margin-top: 0; }
 }
-.pricing-card-extra { background: var(--white, #fff); border-color: var(--peach-line); scroll-margin-top: 96px; }
+.pricing-card-extra { background: var(--white, #fff); border-color: var(--peach-line); scroll-margin-top: 90px; }
 .pricing-card-extra .pricing-price strong { white-space: nowrap; }
 .pricing-extra-rows { list-style: none; margin: 0 0 var(--card-pad); padding: 0; display: grid; gap: 4px; }
 .pricing-extra-rows li { max-width: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 4px 0; color: var(--navy); font-weight: 500; font-size: var(--fs-body, 1.0625rem); }

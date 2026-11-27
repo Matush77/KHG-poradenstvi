@@ -3,7 +3,7 @@
    ========================================== */
 
 .pricing-hero {
-    padding: 140px 0 var(--space-2xl);
+    padding: 134px 0 var(--space-2xl);
 }
 
 
@@ -74,7 +74,7 @@
 
 @media (max-width: 540px) {
     .pricing-hero {
-        padding: 100px 0 var(--space-lg);
+        padding: 94px 0 var(--space-lg);
     }
 
 

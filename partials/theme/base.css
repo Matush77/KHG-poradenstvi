@@ -210,7 +210,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem var(--space-lg);
+    padding: 9px var(--space-lg);   /* 62 px header: 9 + 44 + 9 (was 68, 27 Nov) */
 }
 
 .nav-logo {
@@ -303,7 +303,7 @@ a:hover {
    ========================================== */
 
 .hero {
-    padding: 140px 0 var(--space-3xl);
+    padding: 134px 0 var(--space-3xl);   /* 62 px header + 72 (27 Nov) */
     overflow: hidden;
 }
 
@@ -384,7 +384,7 @@ a:hover {
 
 @media (max-width: 968px) {
     .hero {
-        padding: 100px 0 var(--space-2xl);
+        padding: 94px 0 var(--space-2xl);   /* 62 px header + 32 */
     }
 
     .hero-container {
@@ -1388,7 +1388,7 @@ html.nav-open { overflow: hidden; }
 
 .legal-page,
 .error-page {
-    padding: 140px 0 var(--space-3xl);
+    padding: 134px 0 var(--space-3xl);
     background: linear-gradient(180deg, var(--bg-cream) 0, #ffffff 340px);
 }
 
@@ -1495,7 +1495,7 @@ html.nav-open { overflow: hidden; }
 
     .legal-page,
     .error-page {
-        padding-top: 115px;
+        padding-top: 109px;   /* 62 px header + 47 (was 115 with the 68 px header) */
     }
 
 }
@@ -1693,7 +1693,7 @@ summary { -webkit-tap-highlight-color: transparent; }
    [P20] Anchor jumps land below the fixed header (89 px), matching the
    100 px offset the in-page smooth scroll in js/script.js uses.
    ================================================================== */
-main section[id], main [id].section { scroll-margin-top: 100px; }
+main section[id], main [id].section { scroll-margin-top: 94px; }
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .btn, .featured-link { transition: none; }

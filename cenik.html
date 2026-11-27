@@ -325,7 +325,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem var(--space-lg);
+    padding: 9px var(--space-lg);   /* 62 px header: 9 + 44 + 9 (was 68, 27 Nov) */
 }
 
 .nav-logo {
@@ -418,7 +418,7 @@ a:hover {
    ========================================== */
 
 .hero {
-    padding: 140px 0 var(--space-3xl);
+    padding: 134px 0 var(--space-3xl);   /* 62 px header + 72 (27 Nov) */
     overflow: hidden;
 }
 
@@ -499,7 +499,7 @@ a:hover {
 
 @media (max-width: 968px) {
     .hero {
-        padding: 100px 0 var(--space-2xl);
+        padding: 94px 0 var(--space-2xl);   /* 62 px header + 32 */
     }
 
     .hero-container {
@@ -1503,7 +1503,7 @@ html.nav-open { overflow: hidden; }
 
 .legal-page,
 .error-page {
-    padding: 140px 0 var(--space-3xl);
+    padding: 134px 0 var(--space-3xl);
     background: linear-gradient(180deg, var(--bg-cream) 0, #ffffff 340px);
 }
 
@@ -1610,7 +1610,7 @@ html.nav-open { overflow: hidden; }
 
     .legal-page,
     .error-page {
-        padding-top: 115px;
+        padding-top: 109px;   /* 62 px header + 47 (was 115 with the 68 px header) */
     }
 
 }
@@ -1808,7 +1808,7 @@ summary { -webkit-tap-highlight-color: transparent; }
    [P20] Anchor jumps land below the fixed header (89 px), matching the
    100 px offset the in-page smooth scroll in js/script.js uses.
    ================================================================== */
-main section[id], main [id].section { scroll-margin-top: 100px; }
+main section[id], main [id].section { scroll-margin-top: 94px; }
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .btn, .featured-link { transition: none; }
@@ -1818,7 +1818,7 @@ main section[id], main [id].section { scroll-margin-top: 100px; }
    ========================================== */
 
 .pricing-hero {
-    padding: 140px 0 var(--space-2xl);
+    padding: 134px 0 var(--space-2xl);
 }
 
 
@@ -1889,7 +1889,7 @@ main section[id], main [id].section { scroll-margin-top: 100px; }
 
 @media (max-width: 540px) {
     .pricing-hero {
-        padding: 100px 0 var(--space-lg);
+        padding: 94px 0 var(--space-lg);
     }
 
 
@@ -1971,7 +1971,14 @@ strong, b { font-weight: 600; }
 .section-header .section-subtitle { display: none; }
 
 
-.header { background: rgba(251, 248, 243, .97); box-shadow: 0 1px 0 var(--line); }
+.header { background: rgba(251, 248, 243, .97); box-shadow: none; }
+/* The line under the header shows only once the page is scrolled (js/script.js sets .is-scrolled) and while the
+   phone menu is open: clean at the top, a clear edge when text slides under it (owner, 27 Nov). It fades with
+   opacity and takes no space, so nothing moves. */
+.header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--line);
+  opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+.header.is-scrolled::after, html.nav-open .header::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .header::after { transition: none; } }
 .footer { background: var(--navy); }
 .cta-section { border-radius: var(--r-lg); box-shadow: none; }
 .publication-feature { box-shadow: none; }
@@ -2140,7 +2147,7 @@ cite { font-weight: 600; }
 
 @media (max-width: 968px) {
   
-  .nav-menu { top: 68px; left: 0 !important; height: calc(100dvh - 68px); max-height: none; background: var(--paper); box-shadow: none; border-top: 0;
+  .nav-menu { top: 62px; left: 0 !important; height: calc(100dvh - 62px); max-height: none; background: var(--paper); box-shadow: none; border-top: 0;
     gap: 0; align-items: stretch; padding: 8px var(--space-lg) var(--panel-pad);
     transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility 0s linear .2s; }
   .nav-menu.active { transform: none; visibility: visible; transition: transform .2s ease; }
@@ -2548,7 +2555,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
   .pricing-grid > .pricing-card { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
   .pricing-grid > .pricing-card > .btn, .pricing-extra-act { align-self: start; margin-top: 0; }
 }
-.pricing-card-extra { background: var(--white, #fff); border-color: var(--peach-line); scroll-margin-top: 96px; }
+.pricing-card-extra { background: var(--white, #fff); border-color: var(--peach-line); scroll-margin-top: 90px; }
 .pricing-card-extra .pricing-price strong { white-space: nowrap; }
 .pricing-extra-rows { list-style: none; margin: 0 0 var(--card-pad); padding: 0; display: grid; gap: 4px; }
 .pricing-extra-rows li { max-width: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 4px 0; color: var(--navy); font-weight: 500; font-size: var(--fs-body, 1.0625rem); }
@@ -2763,8 +2770,8 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
                             <li><span>Víkend a státní svátek</span><b>2&nbsp;200&nbsp;Kč</b></li>
                         </ul>
                         <div class="pricing-extra-act">
-                            <a class="pricing-extra-wa" href="https://wa.me/420605990980?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20M%C5%AF%C5%BEete%20" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.2 18.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.3 9.2c.2 1.9 1.6 3.4 3.5 3.9l.9-.8 1.6.7-.2 1.2c-2.8 0-5.6-2.6-5.9-5.4l1.1-.4.8 1.5z" fill="currentColor"/></svg>Napsat přes WhatsApp</a>
-                            <p class="pricing-extra-alt">nebo <a class="pricing-sms" href="sms:+420605990980?&amp;body=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20M%C5%AF%C5%BEete%20">SMS</a><a class="pricing-mail" href="mailto:kristyna@khgporadenstvi.cz?subject=Mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn&amp;body=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20M%C5%AF%C5%BEete%20">e-mail</a></p>
+                            <a class="pricing-extra-wa" href="https://wa.me/420605990980?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20Mohu%20v%20tyto%20dny%20a%20%C4%8Dasy%3A%20" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.2 18.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.3 9.2c.2 1.9 1.6 3.4 3.5 3.9l.9-.8 1.6.7-.2 1.2c-2.8 0-5.6-2.6-5.9-5.4l1.1-.4.8 1.5z" fill="currentColor"/></svg>Napsat přes WhatsApp</a>
+                            <p class="pricing-extra-alt">nebo <a class="pricing-sms" href="sms:+420605990980?&amp;body=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20Mohu%20v%20tyto%20dny%20a%20%C4%8Dasy%3A%20">SMS</a><a class="pricing-mail" href="mailto:kristyna@khgporadenstvi.cz?subject=Mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn&amp;body=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20mimo%C5%99%C3%A1dn%C3%BD%20term%C3%ADn.%20Mohu%20v%20tyto%20dny%20a%20%C4%8Dasy%3A%20">e-mail</a></p>
                         </div>
                     </article>
                 </div>
@@ -2863,6 +2870,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
 
 
     <script src="js/privacy-consent.js?v=f33eced6"></script>
-    <script src="js/script.js?v=f582ebb6"></script>
+    <script src="js/script.js?v=484cd372"></script>
 </body>
 </html>

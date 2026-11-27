@@ -319,7 +319,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem var(--space-lg);
+    padding: 9px var(--space-lg);   /* 62 px header: 9 + 44 + 9 (was 68, 27 Nov) */
 }
 
 .nav-logo {
@@ -412,7 +412,7 @@ a:hover {
    ========================================== */
 
 .hero {
-    padding: 140px 0 var(--space-3xl);
+    padding: 134px 0 var(--space-3xl);   /* 62 px header + 72 (27 Nov) */
     overflow: hidden;
 }
 
@@ -493,7 +493,7 @@ a:hover {
 
 @media (max-width: 968px) {
     .hero {
-        padding: 100px 0 var(--space-2xl);
+        padding: 94px 0 var(--space-2xl);   /* 62 px header + 32 */
     }
 
     .hero-container {
@@ -1497,7 +1497,7 @@ html.nav-open { overflow: hidden; }
 
 .legal-page,
 .error-page {
-    padding: 140px 0 var(--space-3xl);
+    padding: 134px 0 var(--space-3xl);
     background: linear-gradient(180deg, var(--bg-cream) 0, #ffffff 340px);
 }
 
@@ -1604,7 +1604,7 @@ html.nav-open { overflow: hidden; }
 
     .legal-page,
     .error-page {
-        padding-top: 115px;
+        padding-top: 109px;   /* 62 px header + 47 (was 115 with the 68 px header) */
     }
 
 }
@@ -1802,7 +1802,7 @@ summary { -webkit-tap-highlight-color: transparent; }
    [P20] Anchor jumps land below the fixed header (89 px), matching the
    100 px offset the in-page smooth scroll in js/script.js uses.
    ================================================================== */
-main section[id], main [id].section { scroll-margin-top: 100px; }
+main section[id], main [id].section { scroll-margin-top: 94px; }
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .btn, .featured-link { transition: none; }
@@ -2168,7 +2168,14 @@ strong, b { font-weight: 600; }
 .section-header .section-subtitle { display: none; }
 
 
-.header { background: rgba(251, 248, 243, .97); box-shadow: 0 1px 0 var(--line); }
+.header { background: rgba(251, 248, 243, .97); box-shadow: none; }
+/* The line under the header shows only once the page is scrolled (js/script.js sets .is-scrolled) and while the
+   phone menu is open: clean at the top, a clear edge when text slides under it (owner, 27 Nov). It fades with
+   opacity and takes no space, so nothing moves. */
+.header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--line);
+  opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+.header.is-scrolled::after, html.nav-open .header::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .header::after { transition: none; } }
 .footer { background: var(--navy); }
 .cta-section { border-radius: var(--r-lg); box-shadow: none; }
 .publication-feature { box-shadow: none; }
@@ -2337,7 +2344,7 @@ cite { font-weight: 600; }
 
 @media (max-width: 968px) {
   
-  .nav-menu { top: 68px; left: 0 !important; height: calc(100dvh - 68px); max-height: none; background: var(--paper); box-shadow: none; border-top: 0;
+  .nav-menu { top: 62px; left: 0 !important; height: calc(100dvh - 62px); max-height: none; background: var(--paper); box-shadow: none; border-top: 0;
     gap: 0; align-items: stretch; padding: 8px var(--space-lg) var(--panel-pad);
     transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility 0s linear .2s; }
   .nav-menu.active { transform: none; visibility: visible; transition: transform .2s ease; }
@@ -2676,9 +2683,9 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
 
 
 
-:root { --page-top: 140px; --doc-w: 43rem; 
+:root { --page-top: 134px; --doc-w: 43rem; 
         --fs-doc-title: clamp(2rem, 1.55rem + 1.9vw, 2.75rem);  }
-@media (max-width: 768px) { :root { --page-top: 100px; } }
+@media (max-width: 768px) { :root { --page-top: 94px; } }   /* 62 px header + 32 (was 100 with the 68 px header) */
 
 
 .back-link { display: inline-flex; align-items: center; min-height: 44px; margin: 0 0 8px;
@@ -3213,6 +3220,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
 
 
     <script src="js/privacy-consent.js?v=f33eced6"></script>
-    <script src="js/script.js?v=f582ebb6"></script>
+    <script src="js/script.js?v=484cd372"></script>
 </body>
 </html>

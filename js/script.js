@@ -10,6 +10,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Header: show the line under it once the page is scrolled (css: .header.is-scrolled::after).
+// Also checked on load, so a reload halfway down or an anchor link shows it straight away.
+(function() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    let scrolled = null;
+    const update = () => {
+        const now = window.scrollY > 0;
+        if (now !== scrolled) {
+            scrolled = now;
+            header.classList.toggle('is-scrolled', now);
+        }
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+})();
+
 // Enlarge office photos without loading the large version until it is requested.
 document.addEventListener('DOMContentLoaded', function() {
     const gallery = document.querySelector('.office-gallery');
@@ -333,7 +350,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         const target = document.querySelector(href);
 
         if (target) {
-            const headerOffset = 100;
+            const headerOffset = 94;   // 62 px header + 32
             const elementPosition = target.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -460,7 +477,7 @@ if (isHomepage) {
 document.addEventListener('DOMContentLoaded', function() {
     const triggers = document.querySelectorAll('[data-x24]');
     if (!triggers.length || typeof HTMLDialogElement !== 'function') return;
-    const msg = encodeURIComponent('Dobrý den, mám zájem o mimořádný termín. Můžete ');
+    const msg = encodeURIComponent('Dobrý den, mám zájem o mimořádný termín. Mohu v tyto dny a časy: ');
     const icon = function(path) { return '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">' + path + '</svg>'; };
     let dialog = null;
     const open = function() {

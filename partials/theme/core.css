@@ -49,7 +49,14 @@ strong, b { font-weight: 600; }
 .section-header .section-subtitle { display: none; }
 
 
-.header { background: rgba(251, 248, 243, .97); box-shadow: 0 1px 0 var(--line); }
+.header { background: rgba(251, 248, 243, .97); box-shadow: none; }
+/* The line under the header shows only once the page is scrolled (js/script.js sets .is-scrolled) and while the
+   phone menu is open: clean at the top, a clear edge when text slides under it (owner, 27 Nov). It fades with
+   opacity and takes no space, so nothing moves. */
+.header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--line);
+  opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+.header.is-scrolled::after, html.nav-open .header::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .header::after { transition: none; } }
 .footer { background: var(--navy); }
 .cta-section { border-radius: var(--r-lg); box-shadow: none; }
 .publication-feature { box-shadow: none; }
@@ -218,7 +225,7 @@ cite { font-weight: 600; }
 
 @media (max-width: 968px) {
   
-  .nav-menu { top: 68px; left: 0 !important; height: calc(100dvh - 68px); max-height: none; background: var(--paper); box-shadow: none; border-top: 0;
+  .nav-menu { top: 62px; left: 0 !important; height: calc(100dvh - 62px); max-height: none; background: var(--paper); box-shadow: none; border-top: 0;
     gap: 0; align-items: stretch; padding: 8px var(--space-lg) var(--panel-pad);
     transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility 0s linear .2s; }
   .nav-menu.active { transform: none; visibility: visible; transition: transform .2s ease; }
