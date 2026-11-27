@@ -36,6 +36,7 @@
 @keyframes xs-in { from { transform: scale(.97); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .xs { animation: none; } }
 
-/* Kontakt: a quiet second door under "Objednat se" to the extra-session panel */
-.contact-book .contact-x { margin: 16px 0 0; font-size: 15px; }
-.contact-book .contact-x a { color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
+/* Kontakt: a quiet second door under "Objednat se" to the extra-session panel. One line on phones: a muted
+   question, then a short link in the site's usual link style (like "Jak se domluvit →"), with a 44 px tap height. */
+.contact-book .contact-x { margin: 20px 0 0; font-size: 15px; color: var(--slate); }
+.contact-book .contact-x a { display: inline-block; padding: 12px 0; margin: -12px 0; white-space: nowrap; }

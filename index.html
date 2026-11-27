@@ -2387,9 +2387,10 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
 @keyframes xs-in { from { transform: scale(.97); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .xs { animation: none; } }
 
-/* Kontakt: a quiet second door under "Objednat se" to the extra-session panel */
-.contact-book .contact-x { margin: 16px 0 0; font-size: 15px; }
-.contact-book .contact-x a { color: var(--blue, #2D5A7B); text-decoration: underline; text-underline-offset: 3px; }
+/* Kontakt: a quiet second door under "Objednat se" to the extra-session panel. One line on phones: a muted
+   question, then a short link in the site's usual link style (like "Jak se domluvit →"), with a 44 px tap height. */
+.contact-book .contact-x { margin: 20px 0 0; font-size: 15px; color: var(--slate); }
+.contact-book .contact-x a { display: inline-block; padding: 12px 0; margin: -12px 0; white-space: nowrap; }
     
 /* ---- UI audit 16 Nov (owner asked for fixes 2, 3, 4, 7) ----
    (7) One text axis: section titles, page intros and the hero are left-aligned at every width
@@ -3478,7 +3479,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
             <div class="contact-book">
                 <p>Volné termíny najdete v rezervaci.</p>
                 <a href="/rezervace.html" class="btn btn-large">Objednat se</a>
-                <p class="contact-x"><a href="/cenik.html#mimoradny-termin" data-x24 aria-haspopup="dialog">Dřív než v kalendáři: mimořádný termín po domluvě</a></p>
+                <p class="contact-x">Potřebujete dřív? <a href="/cenik.html#mimoradny-termin" data-x24 aria-haspopup="dialog">Mimořádný termín <span aria-hidden="true">→</span></a></p>
             </div>
         </div>
     </section>
@@ -3565,6 +3566,6 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
     </div>
 
 <script src="js/privacy-consent.js?v=f33eced6"></script>
-<script src="js/script.js?v=4c57e820"></script>
+<script src="js/script.js?v=f582ebb6"></script>
 </body>
 </html>

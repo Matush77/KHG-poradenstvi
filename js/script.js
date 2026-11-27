@@ -460,7 +460,7 @@ if (isHomepage) {
 document.addEventListener('DOMContentLoaded', function() {
     const triggers = document.querySelectorAll('[data-x24]');
     if (!triggers.length || typeof HTMLDialogElement !== 'function') return;
-    const msg = encodeURIComponent('Dobrý den, mám zájem o mimořádný termín. Hodilo by se mi: ');
+    const msg = encodeURIComponent('Dobrý den, mám zájem o mimořádný termín. Můžete ');
     const icon = function(path) { return '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">' + path + '</svg>'; };
     let dialog = null;
     const open = function() {
