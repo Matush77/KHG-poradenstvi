@@ -2529,6 +2529,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
         "value": "11702711"
       },
       "image": "https://khgporadenstvi.cz/images/photo.webp",
+      "logo": "https://khgporadenstvi.cz/images/heart-180.png",
       "description": "Individuální psychoterapie pro děti, dospívající i dospělé, osobně v Ostravě nebo online. Psycholožka ve zdravotnictví ve FN Ostrava a psychoterapeutka, členka AKP a kandidátní členka ČAP. Úzkost, deprese, vztahy, rodičovství, vyhoření, osobní krize. KHG Poradenství.",
       "url": "https://khgporadenstvi.cz",
       "telephone": "+420605990980",
@@ -2549,7 +2550,7 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
         "longitude": "18.2799"
       },
       "hasMap": "https://maps.google.com/?cid=17834043374417315194",
-      "priceRange": "1 100 Kč",
+      "priceRange": "1 100–2 200 Kč",
       "openingHoursSpecification": [
         {
           "@type": "OpeningHoursSpecification",
@@ -2608,6 +2609,22 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
             },
             "price": "1100",
             "priceCurrency": "CZK"
+          },
+          {
+            "@type": "Offer",
+            "url": "https://khgporadenstvi.cz/cenik.html#mimoradny-termin",
+            "priceCurrency": "CZK",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1800",
+              "maxPrice": "2200",
+              "priceCurrency": "CZK"
+            },
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Mimořádný termín",
+              "description": "Individuální terapeutické setkání v délce 50 minut po domluvě, dřív než je volno v kalendáři. Pracovní den 1 800 Kč, víkend a státní svátek 2 200 Kč."
+            }
           }
         ]
       }
@@ -2638,25 +2655,58 @@ main :is(p, li, dd) :is(strong, b) { color: var(--navy); font-weight: 600 !impor
       ],
       "memberOf": [
         {
-          "@type": "Organization",
-          "name": "Česká asociace pro psychoterapii (ČAP)"
+          "@type": "OrganizationRole",
+          "roleName": "Kandidátní členka",
+          "memberOf": {
+            "@type": "Organization",
+            "name": "Česká asociace pro psychoterapii",
+            "alternateName": "ČAP",
+            "url": "https://czap.cz"
+          }
         },
         {
           "@type": "Organization",
-          "name": "Asociace klinických psychologů (AKP)"
+          "name": "Asociace klinických psychologů",
+          "alternateName": "AKP"
         }
       ],
       "alumniOf": {
-        "@type": "EducationalOrganization",
-        "name": "PVŠPS Praha"
+        "@type": "CollegeOrUniversity",
+        "name": "Pražská vysoká škola psychosociálních studií",
+        "alternateName": "PVŠPS"
       },
+      "hasCredential": [
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "degree",
+          "name": "Mgr. – psychologie",
+          "recognizedBy": {
+            "@type": "CollegeOrUniversity",
+            "name": "Pražská vysoká škola psychosociálních studií"
+          }
+        },
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "certificate",
+          "name": "Pětiletý psychoterapeutický výcvik v daseinsanalýze"
+        }
+      ],
       "knowsAbout": [
         "Psychologie",
         "Psychoterapie",
         "Klinická psychologie",
         "Daseinsanalýza",
         "Dětská psychologie",
-        "Online terapie"
+        "Online terapie",
+        "Úzkostné a depresivní stavy",
+        "Rodičovství a mateřství",
+        "Vztahové problémy a partnerské krize",
+        "Hledání smyslu a existenciální otázky",
+        "Psychosomatické obtíže",
+        "Poruchy příjmu potravy",
+        "Životní přechody a změny",
+        "Ztráta a zármutek",
+        "Psychická podpora při IVF"
       ],
       "sameAs": [
         "https://czap.cz/Sys/PublicProfile/78959097",
